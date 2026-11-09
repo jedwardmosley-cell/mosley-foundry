@@ -45,3 +45,8 @@ A one-page, high-level map of a process, organized in five columns:
 - Stage 2: 5 Whys root cause analysis (done)
 - Stage 3: Automation opportunities and impact-versus-effort prioritization with action plan (done)
 - Stage 4: "Ask Claude" buttons on the private page for bottleneck ideas, 5 Whys answers and automation ideas (uses the existing Claude account; no API key) (done)
+
+## Version 3: Sync across devices
+
+- SIPOCs sync through private per-user storage on the Claude page; each device still saves locally first (done)
+- Backup button: copy all data as text, or restore it, to move work between the downloaded file and the private page (done)

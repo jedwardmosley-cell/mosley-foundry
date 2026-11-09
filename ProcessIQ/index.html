@@ -192,6 +192,11 @@
   .add button { background: var(--accent); color: #fff; padding: 7px 11px; }
   .empty { color: var(--muted); font-size: 13px; font-style: italic; padding: 6px 4px; }
   .status { font-size: 12px; opacity: 0.85; }
+  .sync { font-size: 12px; padding: 3px 9px; border-radius: 999px; background: rgba(255,255,255,0.14); white-space: nowrap; }
+  .sync::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; background: #9aa8b8; vertical-align: 1px; }
+  .sync[data-state="ok"]::before { background: #5fd08f; }
+  .sync[data-state="busy"]::before { background: #8cc4ff; }
+  .sync[data-state="warn"]::before { background: #f4c46b; }
   .print-only, .print-text { display: none; }
 
   /* ---------- Tabs ---------- */
@@ -544,8 +549,10 @@
     <button id="copyBtn" class="ghost">Copy for Excel</button>
     <button id="csvBtn" class="ghost file-only">Export CSV</button>
     <button id="printBtn" class="ghost file-only">Print / PDF</button>
+    <button id="backupBtn" class="ghost">Backup</button>
     <button id="deleteBtn" class="ghost">Delete</button>
     <span class="status" id="status"></span>
+    <span class="sync" id="sync" role="status" hidden></span>
   </div>
 </header>
 
@@ -699,6 +706,7 @@
     <input id="dlg-input" autocomplete="off">
     <textarea id="dlg-area" readonly></textarea>
     <div class="actions">
+      <button type="button" class="plain" id="dlg-extra" hidden></button>
       <button type="button" class="plain" id="dlg-cancel">Cancel</button>
       <button type="submit" class="primary" id="dlg-ok">OK</button>
     </div>
@@ -820,6 +828,7 @@
     } catch (e) {
       setStatus("Could not save in this browser");
     }
+    pushChanges();
   }
   function saveSoon() {
     setStatus("Saving...");
@@ -1020,7 +1029,8 @@
     area: document.getElementById("dlg-area"),
     ok: document.getElementById("dlg-ok"),
     cancel: document.getElementById("dlg-cancel"),
-    onOk: null
+    extra: document.getElementById("dlg-extra"),
+    onOk: null, onExtra: null
   };
   function openDialog(opts) {
     dlg.title.textContent = opts.title;
@@ -1030,7 +1040,12 @@
     dlg.input.value = "";
     dlg.input.placeholder = opts.placeholder || "";
     dlg.area.hidden = !opts.area;
-    dlg.area.value = opts.area || "";
+    dlg.area.readOnly = !opts.areaEditable;
+    dlg.area.value = opts.areaEditable ? "" : (opts.area || "");
+    dlg.area.placeholder = opts.areaEditable ? "Paste here" : "";
+    dlg.extra.hidden = !opts.extraLabel;
+    dlg.extra.textContent = opts.extraLabel || "";
+    dlg.onExtra = opts.onExtra || null;
     dlg.ok.textContent = opts.okLabel || "OK";
     dlg.ok.className = opts.danger ? "danger" : "primary";
     dlg.cancel.hidden = !!opts.noCancel;
@@ -1038,7 +1053,7 @@
     dlg.overlay.hidden = false;
     setTimeout(function () {
       if (opts.input) dlg.input.focus();
-      else if (opts.area) { dlg.area.focus(); dlg.area.select(); }
+      else if (opts.area) { dlg.area.focus(); if (!opts.areaEditable) dlg.area.select(); }
       else dlg.ok.focus();
     }, 0);
   }
@@ -1046,11 +1061,12 @@
   dlg.form.addEventListener("submit", function (e) {
     e.preventDefault();
     var fn = dlg.onOk;
-    var value = dlg.input.value;
+    var value = dlg.input.value, areaValue = dlg.area.value;
     closeDialog();
-    if (fn) fn(value);
+    if (fn) fn(value, areaValue);
   });
   dlg.cancel.addEventListener("click", closeDialog);
+  dlg.extra.addEventListener("click", function () { var fn = dlg.onExtra; closeDialog(); if (fn) fn(); });
   dlg.overlay.addEventListener("click", function (e) { if (e.target === dlg.overlay) closeDialog(); });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !dlg.overlay.hidden) closeDialog(); });
 
@@ -1081,6 +1097,8 @@
       danger: true,
       onOk: function () {
         state.sipocs = state.sipocs.filter(function (x) { return x.id !== s.id; });
+        if (!state.deleted) state.deleted = {};
+        state.deleted[s.id] = Date.now();
         if (!state.sipocs.length) state.sipocs.push(ensureShape(blankSipoc()));
         state.currentId = state.sipocs[0].id;
         save();
@@ -2711,6 +2729,294 @@
   }
 
   showAiControls();
+
+  // =====================================================================
+  //  SYNC ACROSS DEVICES (private Claude page only)
+  //  Each SIPOC is one document in the viewer's own private storage.
+  //  The device keeps saving locally first; changes upload when possible.
+  //  For each SIPOC the most recent save wins.
+  // =====================================================================
+  var syncCol = null, syncReady = false;
+  var lastSynced = {};     // id -> content last known to match the server ("deleted" for a deletion)
+  var remoteTs = {};       // id -> server's updatedAt
+  var writing = {};        // id -> true while a write is in flight
+  var pendingBody = {};    // id -> newest body waiting to be written
+  var retried = {};        // id -> true after one retry
+  var pendingRemote = {};  // id -> server document held back while you are typing in it
+
+  function bodyJson(s) {
+    var c = {};
+    Object.keys(s).forEach(function (k) { if (k !== "updatedAt") c[k] = s[k]; });
+    return JSON.stringify(c);
+  }
+  function setSync(kind, text) {
+    var e = document.getElementById("sync");
+    if (!e) return;
+    e.hidden = false;
+    e.dataset.state = kind;
+    e.textContent = text;
+  }
+  function persistLocal() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+  function findIndex(id) {
+    for (var i = 0; i < state.sipocs.length; i++) if (state.sipocs[i].id === id) return i;
+    return -1;
+  }
+  function editingSipoc(id) {
+    var a = document.activeElement;
+    return state.currentId === id && a && a !== document.body && a.closest && a.closest("main") &&
+      /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName);
+  }
+
+  // An example SIPOC nobody has changed: safe to drop when another copy exists
+  var EXAMPLE_NAME = "Customer Order Fulfillment (example)";
+  function stripIds(x) {
+    if (Array.isArray(x)) return x.map(stripIds);
+    if (x && typeof x === "object") { var o = {}; Object.keys(x).sort().forEach(function (k) { if (k !== "id" && k !== "stepId") o[k] = stripIds(x[k]); }); return o; }
+    return x;
+  }
+  function isPristineExample(s) {
+    if (!s || s.name !== EXAMPLE_NAME) return false;
+    var ex = ensureShape(exampleSipoc());
+    var core = ["owner", "start", "end", "suppliers", "inputs", "process", "outputs", "customers"];
+    for (var i = 0; i < core.length; i++) if (JSON.stringify(s[core[i]]) !== JSON.stringify(ex[core[i]])) return false;
+    var blankDetails = JSON.stringify(stripIds(s.process.map(function () { return blankDetail(); })));
+    var dets = JSON.stringify(stripIds(s.details));
+    if (dets !== blankDetails && dets !== JSON.stringify(stripIds(ex.details))) return false;
+    var whys = JSON.stringify(stripIds(s.analysis.whys));
+    if (whys !== "[]" && whys !== JSON.stringify(stripIds(ex.analysis.whys))) return false;
+    var reviewed = s.analysis.findings.concat(s.analysis.auto).some(function (f) { return f.status !== "proposed" || f.edited || f.source !== "rule"; });
+    return !reviewed && !s.analysis.improvements.length;
+  }
+  function dropSpareExamples() {
+    var examples = state.sipocs.filter(function (x) { return x.name === EXAMPLE_NAME; });
+    if (examples.length < 2) return;
+    var keep = examples.filter(function (x) { return !isPristineExample(x); });
+    var spare = examples.filter(isPristineExample);
+    // keep every changed example; of the untouched ones keep one only if no changed one exists,
+    // preferring one the server already has
+    if (!keep.length) {
+      spare.sort(function (a, b) { return (lastSynced[b.id] ? 1 : 0) - (lastSynced[a.id] ? 1 : 0); });
+      spare = spare.slice(1);
+    }
+    spare.forEach(function (x) {
+      var i = findIndex(x.id);
+      if (i < 0) return;
+      state.sipocs.splice(i, 1);
+      if (lastSynced[x.id]) { state.deleted = state.deleted || {}; state.deleted[x.id] = Date.now(); }  // remove the server copy too
+      if (state.currentId === x.id) state.currentId = state.sipocs[0].id;
+    });
+  }
+
+  // Apply one server document. Returns true if local data changed.
+  function applyRemote(id, d) {
+    if (!d || typeof d !== "object") return false;
+    var ts = +d.updatedAt || 0;
+    remoteTs[id] = Math.max(remoteTs[id] || 0, ts);
+    var idx = findIndex(id);
+    var local = idx >= 0 ? state.sipocs[idx] : null;
+    if (!state.deleted) state.deleted = {};
+
+    if (d.deleted) {
+      lastSynced[id] = "deleted";
+      if (local && (local.updatedAt || 0) <= ts) {
+        state.sipocs.splice(idx, 1);
+        state.deleted[id] = ts;
+        if (!state.sipocs.length) state.sipocs.push(ensureShape(blankSipoc()));
+        if (state.currentId === id) state.currentId = state.sipocs[0].id;
+        return true;
+      }
+      if (!local) state.deleted[id] = Math.max(state.deleted[id] || 0, ts);
+      return false;
+    }
+    if (!d.sipoc || typeof d.sipoc !== "object") return false;
+    if (state.deleted[id] && state.deleted[id] >= ts) return false;   // deleted here more recently
+    var incoming;
+    try { incoming = ensureShape(JSON.parse(JSON.stringify(d.sipoc))); } catch (e) { return false; }
+    incoming.id = id;
+    incoming.updatedAt = ts;
+
+    if (!local) {
+      state.sipocs.push(incoming);
+      lastSynced[id] = bodyJson(incoming);
+      return true;
+    }
+    if (ts > (local.updatedAt || 0)) {
+      if (editingSipoc(id)) { pendingRemote[id] = d; return false; }
+      state.sipocs[idx] = incoming;
+      lastSynced[id] = bodyJson(incoming);
+      return true;
+    }
+    if (ts === (local.updatedAt || 0)) lastSynced[id] = bodyJson(incoming);
+    return false;   // this device has the newer version; it will be uploaded
+  }
+
+  // Upload anything that differs from what the server has
+  function pushChanges() {
+    if (!syncReady || !syncCol) return;
+    var bumped = false;
+    state.sipocs.forEach(function (s) {
+      var j = bodyJson(s);
+      if (lastSynced[s.id] === j) return;
+      s.updatedAt = Math.max(Date.now(), (remoteTs[s.id] || 0) + 1);
+      remoteTs[s.id] = s.updatedAt;
+      lastSynced[s.id] = j;
+      bumped = true;
+      queueWrite(s.id, { sipoc: JSON.parse(JSON.stringify(s)), updatedAt: s.updatedAt, deleted: false });
+    });
+    Object.keys(state.deleted || {}).forEach(function (id) {
+      if (lastSynced[id] === "deleted") return;
+      lastSynced[id] = "deleted";
+      queueWrite(id, { deleted: true, updatedAt: state.deleted[id] });
+    });
+    if (bumped) persistLocal();
+  }
+
+  function anyWriting() { return Object.keys(writing).some(function (k) { return writing[k]; }); }
+  function queueWrite(id, body) {
+    pendingBody[id] = body;
+    if (writing[id]) return;          // one write at a time per SIPOC; the newest waits
+    run();
+    function run() {
+      var b = pendingBody[id];
+      delete pendingBody[id];
+      writing[id] = true;
+      setSync("busy", "Syncing...");
+      syncCol.doc(id).set(b).then(function () {
+        retried[id] = false;
+      }, function (e) {
+        var code = e && e.code;
+        if (code === "unavailable" && !retried[id]) {
+          retried[id] = true;
+          if (!pendingBody[id]) pendingBody[id] = b;
+          return new Promise(function (r) { setTimeout(r, 1500 + Math.random() * 1500); });
+        }
+        lastSynced[id] = undefined;     // try again with the next change
+        setSync("warn", code === "quota_exceeded"
+          ? "Sync storage is full. Delete SIPOCs you no longer need. Changes are saved on this device."
+          : "Some changes couldn't sync yet. They are saved on this device and will sync with your next change.");
+        return "failed";
+      }).then(function (r) {
+        writing[id] = false;
+        if (pendingBody[id]) { run(); return; }
+        if (r !== "failed" && !anyWriting()) setSync("ok", "Synced across your devices");
+      });
+    }
+  }
+
+  // Apply server changes that were held back while you were typing
+  document.addEventListener("focusout", function () {
+    setTimeout(function () {
+      var changed = false;
+      Object.keys(pendingRemote).forEach(function (id) {
+        if (editingSipoc(id)) return;
+        var d = pendingRemote[id]; delete pendingRemote[id];
+        if (applyRemote(id, d)) changed = true;
+      });
+      if (changed) { persistLocal(); renderAll(); }
+    }, 0);
+  });
+
+  function startSync() {
+    if (!window.claude || typeof window.claude.use !== "function") { setSync("off", "Saved on this device only"); return; }
+    setSync("busy", "Connecting to sync...");
+    Promise.all([window.claude.use("db"), window.claude.use("user")]).then(function (r) {
+      var db = r[0], user = r[1];
+      if (!db || !user) { setSync("off", "Saved on this device only"); return null; }
+      return user.id().then(function (uid) {
+        if (!uid) { setSync("off", "Sign in to Claude to sync across devices"); return; }
+        syncCol = db.doc("data/users/" + uid + "/processiq").collection("sipocs");
+        var timer = setTimeout(function () {
+          if (!syncReady) setSync("warn", "Can't reach sync yet. Changes are saved on this device and will sync when it connects.");
+        }, 10000);
+        syncCol.onSnapshot(function (snap) {
+          if (!syncReady) {
+            if (snap.metadata && snap.metadata.fromCache) return;   // wait for the server's answer
+            clearTimeout(timer);
+            snap.docs.forEach(function (doc) { if (doc.exists) applyRemote(doc.id, doc.data()); });
+            dropSpareExamples();
+            syncReady = true;
+            persistLocal();
+            renderAll();
+            pushChanges();
+            if (!anyWriting()) setSync("ok", "Synced across your devices");
+            return;
+          }
+          var changed = false;
+          snap.docChanges().forEach(function (ch) {
+            if (ch.type === "removed" || !ch.doc.exists) return;
+            if (applyRemote(ch.doc.id, ch.doc.data())) changed = true;
+          });
+          if (changed) { persistLocal(); renderAll(); setStatus("Updated from another device"); }
+        }, function (e) {
+          clearTimeout(timer);
+          syncReady = false;
+          setSync("warn", "Sync isn't available right now. Changes are saved on this device.");
+        });
+      });
+    }).catch(function () { setSync("off", "Saved on this device only"); });
+  }
+
+  // =====================================================================
+  //  BACKUP: copy all data as text, or restore it (works in both versions)
+  // =====================================================================
+  document.getElementById("backupBtn").addEventListener("click", function () {
+    openDialog({
+      title: "Backup",
+      text: "Copy a backup of all your SIPOCs, or restore one. Use this to move work between the downloaded file and the private Claude page.",
+      okLabel: "Copy backup",
+      extraLabel: "Restore from a backup",
+      onExtra: openRestore,
+      onOk: function () {
+        var text = JSON.stringify({ app: "ProcessIQ", version: 2, exported: new Date().toISOString(), sipocs: state.sipocs });
+        function fallback() {
+          openDialog({ title: "Copy your backup", text: "Select all of the text below and copy it. Then open the other version of ProcessIQ, choose Backup, then Restore from a backup, and paste it.", area: text, okLabel: "Done", noCancel: true });
+        }
+        try { navigator.clipboard.writeText(text).then(function () { setStatus("Backup copied. Paste it into Restore from a backup in the other version."); }, fallback); }
+        catch (e) { fallback(); }
+      }
+    });
+  });
+
+  function openRestore() {
+    openDialog({
+      title: "Restore from a backup",
+      text: "Paste a ProcessIQ backup below. Your current SIPOCs stay as they are: matching SIPOCs are skipped, and different versions are added as separate copies.",
+      area: " ", areaEditable: true, okLabel: "Restore",
+      onOk: function (value, areaValue) {
+        var data;
+        try { data = JSON.parse(String(areaValue || "").trim()); } catch (e) { data = null; }
+        var list = data && Array.isArray(data.sipocs) ? data.sipocs : null;
+        if (!list) {
+          openDialog({ title: "That doesn't look like a backup", text: "Copy the whole backup text from the other version (it starts with {\"app\":\"ProcessIQ\") and try again.", okLabel: "OK", noCancel: true });
+          return;
+        }
+        var added = 0, skipped = 0;
+        list.forEach(function (raw) {
+          if (!raw || typeof raw !== "object" || !Array.isArray(raw.process)) return;
+          var s = ensureShape(JSON.parse(JSON.stringify(raw)));
+          if (isPristineExample(s) && state.sipocs.some(function (x) { return x.name === EXAMPLE_NAME; })) { skipped++; return; }
+          var idx = findIndex(s.id);
+          if (idx >= 0) {
+            if (bodyJson(state.sipocs[idx]) === bodyJson(s)) { skipped++; return; }
+            s.id = newId();
+            s.name = (s.name || "Untitled process") + " (from backup)";
+          }
+          if (!s.id) s.id = newId();
+          delete s.updatedAt;
+          if (state.deleted) delete state.deleted[s.id];
+          state.sipocs.push(s);
+          added++;
+        });
+        save();
+        renderAll();
+        openDialog({ title: "Backup restored", text: added + " SIPOC" + (added === 1 ? "" : "s") + " added" + (skipped ? ", " + skipped + " already here and skipped" : "") + ".", okLabel: "OK", noCancel: true });
+      }
+    });
+  }
+
+  startSync();
 
   showTab(activeTab);
 
