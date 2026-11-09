@@ -100,7 +100,7 @@
   .items { list-style: none; margin: 0; padding: 10px; flex: 1; }
   .items li {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 6px;
     background: #f8fafc;
     border: 1px solid var(--border);
@@ -109,16 +109,23 @@
     padding: 4px 6px;
     margin-bottom: 7px;
   }
-  .items li .num { font-weight: 700; color: var(--accent); min-width: 18px; text-align: right; }
-  .items li input {
+  .items li .num { font-weight: 700; color: var(--accent); min-width: 18px; text-align: right; padding-top: 5px; line-height: 1.35; }
+  .items li textarea {
     flex: 1;
     border: none;
     background: transparent;
     padding: 5px 2px;
     min-width: 0;
+    resize: none;
+    overflow: hidden;
+    line-height: 1.35;
+    font-family: inherit;
+    color: inherit;
+    overflow-wrap: anywhere;
   }
-  .items li input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-radius: 3px; background: #fff; }
+  .items li textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-radius: 3px; background: #fff; }
   .icon {
+    margin-top: 3px;
     padding: 2px 6px;
     background: transparent;
     color: var(--muted);
@@ -138,7 +145,7 @@
   .add button { background: var(--accent); color: #fff; padding: 7px 11px; }
   .empty { color: var(--muted); font-size: 13px; font-style: italic; padding: 6px 4px; }
   .status { font-size: 12px; opacity: 0.85; }
-  .print-only { display: none; }
+  .print-only, .print-text { display: none; }
 
   @media (max-width: 1000px) {
     .grid { grid-template-columns: 1fr 1fr; }
@@ -157,6 +164,8 @@
     body { background: #fff; }
     header, .add, .icon, .no-print { display: none !important; }
     .print-only { display: block; }
+    .items li textarea { display: none; }
+    .print-text { display: block; flex: 1; padding: 5px 2px; line-height: 1.35; overflow-wrap: anywhere; }
     main { padding: 0; max-width: none; }
     .details { border: none; padding: 0 0 10px; grid-template-columns: 1fr 1fr 1fr; }
     .details input { border: none; padding: 0; }
@@ -341,14 +350,23 @@
         var li = el("li");
         if (col.key === "process") li.appendChild(el("span", "num", (idx + 1) + "."));
 
-        var input = el("input");
+        // A text box that wraps long text onto extra lines and grows to fit
+        var input = el("textarea");
+        input.rows = 1;
         input.value = text;
         input.setAttribute("aria-label", col.title + " item " + (idx + 1));
+        var printText = el("span", "print-text", text);
         input.addEventListener("input", function () {
-          list[idx] = input.value;
+          list[idx] = input.value.replace(/\n/g, " ");
+          printText.textContent = list[idx];
+          fit(input);
           saveSoon();
         });
+        input.addEventListener("keydown", function (e) {
+          if (e.key === "Enter") { e.preventDefault(); input.blur(); }
+        });
         li.appendChild(input);
+        li.appendChild(printText);
 
         var up = el("button", "icon", "↑");
         up.title = "Move up";
@@ -398,7 +416,17 @@
 
       grid.appendChild(card);
     });
+    fitAll();
   }
+
+  function fit(t) {
+    t.style.height = "auto";
+    t.style.height = t.scrollHeight + "px";
+  }
+  function fitAll() {
+    document.querySelectorAll(".items textarea").forEach(fit);
+  }
+  window.addEventListener("resize", fitAll);
 
   function move(list, idx, dir) {
     var j = idx + dir;
