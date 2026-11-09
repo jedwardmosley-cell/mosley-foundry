@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ProcessIQ</title>
+<style>
+  :root {
+    --bg: #f4f6f9;
+    --panel: #ffffff;
+    --text: #1f2933;
+    --muted: #616e7c;
+    --border: #d9e2ec;
+    --brand: #1f4e79;
+    --s: #2f80ed;
+    --i: #27ae60;
+    --p: #8e44ad;
+    --o: #e67e22;
+    --c: #c0392b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  header {
+    background: var(--brand);
+    color: #fff;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  header h1 { margin: 0; font-size: 22px; letter-spacing: 0.5px; }
+  header h1 span { font-weight: 400; opacity: 0.8; font-size: 15px; margin-left: 8px; }
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; align-items: center; }
+  select, button, input, textarea {
+    font: inherit;
+    font-size: 14px;
+  }
+  select {
+    padding: 7px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    min-width: 200px;
+  }
+  button {
+    padding: 7px 14px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background: #fff;
+    color: var(--brand);
+    cursor: pointer;
+    font-weight: 600;
+  }
+  button:hover { filter: brightness(0.95); }
+  button.ghost { background: transparent; color: #fff; border-color: rgba(255,255,255,0.5); }
+  button.danger { color: #b42318; }
+  main { padding: 24px; max-width: 1400px; margin: 0 auto; }
+  .details {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 14px 18px;
+    margin-bottom: 20px;
+  }
+  .details label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 5px; }
+  .details input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  .details .name input { font-size: 18px; font-weight: 600; }
+  .details .wide { grid-column: span 2; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+  }
+  .col {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 360px;
+  }
+  .col-head { color: #fff; padding: 12px 14px; }
+  .col-head .letter { font-size: 30px; font-weight: 800; line-height: 1; }
+  .col-head .title { font-size: 16px; font-weight: 700; margin-top: 2px; }
+  .col-head .hint { font-size: 12px; opacity: 0.9; margin-top: 4px; }
+  .items { list-style: none; margin: 0; padding: 10px; flex: 1; }
+  .items li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 6px;
+    padding: 4px 6px;
+    margin-bottom: 7px;
+  }
+  .items li .num { font-weight: 700; color: var(--accent); min-width: 18px; text-align: right; }
+  .items li input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 5px 2px;
+    min-width: 0;
+  }
+  .items li input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-radius: 3px; background: #fff; }
+  .icon {
+    padding: 2px 6px;
+    background: transparent;
+    color: var(--muted);
+    font-weight: 400;
+    font-size: 13px;
+    border: none;
+  }
+  .icon:hover { color: var(--text); background: #e4e7eb; }
+  .add { display: flex; gap: 6px; padding: 0 10px 12px; }
+  .add input {
+    flex: 1;
+    padding: 7px 9px;
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    min-width: 0;
+  }
+  .add button { background: var(--accent); color: #fff; padding: 7px 11px; }
+  .empty { color: var(--muted); font-size: 13px; font-style: italic; padding: 6px 4px; }
+  .status { font-size: 12px; opacity: 0.85; }
+  .print-only { display: none; }
+
+  @media (max-width: 1000px) {
+    .grid { grid-template-columns: 1fr 1fr; }
+    .details { grid-template-columns: 1fr 1fr; }
+    .details .wide { grid-column: span 2; }
+  }
+  @media (max-width: 600px) {
+    main { padding: 16px; }
+    .grid, .details { grid-template-columns: 1fr; }
+    .details .wide { grid-column: span 1; }
+    .toolbar { margin-left: 0; }
+  }
+
+  @media print {
+    @page { size: landscape; margin: 12mm; }
+    body { background: #fff; }
+    header, .add, .icon, .no-print { display: none !important; }
+    .print-only { display: block; }
+    main { padding: 0; max-width: none; }
+    .details { border: none; padding: 0 0 10px; grid-template-columns: 1fr 1fr 1fr; }
+    .details input { border: none; padding: 0; }
+    .grid { grid-template-columns: repeat(5, 1fr); gap: 8px; }
+    .col { min-height: 0; break-inside: avoid; }
+    .col-head, .items li { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>ProcessIQ <span>SIPOC Builder</span></h1>
+  <div class="toolbar">
+    <select id="picker" aria-label="Choose a SIPOC"></select>
+    <button id="newBtn">+ New SIPOC</button>
+    <button id="csvBtn" class="ghost">Export CSV</button>
+    <button id="printBtn" class="ghost">Print / PDF</button>
+    <button id="deleteBtn" class="ghost">Delete</button>
+    <span class="status" id="status"></span>
+  </div>
+</header>
+
+<main>
+  <h2 class="print-only" style="margin:0 0 8px">SIPOC</h2>
+  <section class="details">
+    <div class="name wide">
+      <label for="f-name">Process name</label>
+      <input id="f-name" placeholder="e.g. Customer Order Fulfillment">
+    </div>
+    <div>
+      <label for="f-owner">Process owner</label>
+      <input id="f-owner" placeholder="Who is responsible?">
+    </div>
+    <div>
+      <label for="f-date">Date</label>
+      <input id="f-date" type="date">
+    </div>
+    <div class="wide">
+      <label for="f-start">Process starts when...</label>
+      <input id="f-start" placeholder="e.g. Customer places an order">
+    </div>
+    <div class="wide">
+      <label for="f-end">Process ends when...</label>
+      <input id="f-end" placeholder="e.g. Customer receives the order">
+    </div>
+  </section>
+
+  <section class="grid" id="grid"></section>
+</main>
+
+<script>
+(function () {
+  var STORAGE_KEY = "processiq.sipocs.v1";
+
+  var COLUMNS = [
+    { key: "suppliers", letter: "S", title: "Suppliers", color: "var(--s)", hint: "Who provides what the process needs?", placeholder: "Add a supplier" },
+    { key: "inputs",    letter: "I", title: "Inputs",    color: "var(--i)", hint: "What goes into the process?",           placeholder: "Add an input" },
+    { key: "process",   letter: "P", title: "Process",   color: "var(--p)", hint: "What are the main steps? (4 to 7)",     placeholder: "Add a step" },
+    { key: "outputs",   letter: "O", title: "Outputs",   color: "var(--o)", hint: "What does the process produce?",        placeholder: "Add an output" },
+    { key: "customers", letter: "C", title: "Customers", color: "var(--c)", hint: "Who receives the outputs?",             placeholder: "Add a customer" }
+  ];
+
+  function today() {
+    var d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+
+  function newId() {
+    return "s" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  }
+
+  function blankSipoc(name) {
+    return {
+      id: newId(), name: name || "Untitled process", owner: "", date: today(), start: "", end: "",
+      suppliers: [], inputs: [], process: [], outputs: [], customers: []
+    };
+  }
+
+  function exampleSipoc() {
+    var s = blankSipoc("Customer Order Fulfillment (example)");
+    s.owner = "Operations Manager";
+    s.start = "Customer places an order";
+    s.end = "Customer receives the order and invoice";
+    s.suppliers = ["Customer", "Product vendors", "Shipping carrier"];
+    s.inputs = ["Order details", "Inventory", "Packaging materials", "Shipping labels"];
+    s.process = ["Receive order", "Check inventory", "Pick and pack items", "Ship order", "Send invoice"];
+    s.outputs = ["Shipped package", "Tracking number", "Invoice"];
+    s.customers = ["Customer", "Accounting team"];
+    return s;
+  }
+
+  // ---------- Saving and loading ----------
+  var state = load();
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        var data = JSON.parse(raw);
+        if (data && data.sipocs && data.sipocs.length) return data;
+      }
+    } catch (e) { /* storage unavailable: start fresh */ }
+    var ex = exampleSipoc();
+    return { currentId: ex.id, sipocs: [ex] };
+  }
+
+  var saveTimer = null;
+  function save() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      setStatus("All changes saved");
+    } catch (e) {
+      setStatus("Could not save in this browser");
+    }
+  }
+  function saveSoon() {
+    setStatus("Saving...");
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(save, 300);
+  }
+  function setStatus(msg) { document.getElementById("status").textContent = msg; }
+
+  function current() {
+    for (var i = 0; i < state.sipocs.length; i++) {
+      if (state.sipocs[i].id === state.currentId) return state.sipocs[i];
+    }
+    state.currentId = state.sipocs[0].id;
+    return state.sipocs[0];
+  }
+
+  // ---------- Drawing the page ----------
+  function renderPicker() {
+    var picker = document.getElementById("picker");
+    picker.innerHTML = "";
+    state.sipocs.forEach(function (s) {
+      var opt = document.createElement("option");
+      opt.value = s.id;
+      opt.textContent = s.name || "Untitled process";
+      if (s.id === state.currentId) opt.selected = true;
+      picker.appendChild(opt);
+    });
+  }
+
+  var FIELDS = { "f-name": "name", "f-owner": "owner", "f-date": "date", "f-start": "start", "f-end": "end" };
+
+  function renderDetails() {
+    var s = current();
+    Object.keys(FIELDS).forEach(function (id) {
+      document.getElementById(id).value = s[FIELDS[id]] || "";
+    });
+  }
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  function renderGrid() {
+    var s = current();
+    var grid = document.getElementById("grid");
+    grid.innerHTML = "";
+
+    COLUMNS.forEach(function (col) {
+      var list = s[col.key];
+      var card = el("div", "col");
+      card.style.setProperty("--accent", col.color);
+
+      var head = el("div", "col-head");
+      head.style.background = col.color;
+      head.appendChild(el("div", "letter", col.letter));
+      head.appendChild(el("div", "title", col.title));
+      head.appendChild(el("div", "hint", col.hint));
+      card.appendChild(head);
+
+      var ul = el("ul", "items");
+      if (!list.length) ul.appendChild(el("li", "empty no-print", "Nothing here yet"));
+
+      list.forEach(function (text, idx) {
+        var li = el("li");
+        if (col.key === "process") li.appendChild(el("span", "num", (idx + 1) + "."));
+
+        var input = el("input");
+        input.value = text;
+        input.setAttribute("aria-label", col.title + " item " + (idx + 1));
+        input.addEventListener("input", function () {
+          list[idx] = input.value;
+          saveSoon();
+        });
+        li.appendChild(input);
+
+        var up = el("button", "icon", "↑");
+        up.title = "Move up";
+        up.disabled = idx === 0;
+        up.addEventListener("click", function () { move(list, idx, -1); });
+
+        var down = el("button", "icon", "↓");
+        down.title = "Move down";
+        down.disabled = idx === list.length - 1;
+        down.addEventListener("click", function () { move(list, idx, 1); });
+
+        var del = el("button", "icon", "✕");
+        del.title = "Remove";
+        del.addEventListener("click", function () {
+          list.splice(idx, 1);
+          saveSoon();
+          renderGrid();
+        });
+
+        li.appendChild(up);
+        li.appendChild(down);
+        li.appendChild(del);
+        ul.appendChild(li);
+      });
+      card.appendChild(ul);
+
+      var add = el("form", "add");
+      var addInput = el("input");
+      addInput.placeholder = col.placeholder;
+      addInput.setAttribute("aria-label", col.placeholder);
+      var addBtn = el("button", null, "Add");
+      addBtn.type = "submit";
+      add.appendChild(addInput);
+      add.appendChild(addBtn);
+      add.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var v = addInput.value.trim();
+        if (!v) return;
+        list.push(v);
+        saveSoon();
+        renderGrid();
+        // keep typing in the same column
+        var again = document.querySelectorAll(".add input")[COLUMNS.indexOf(col)];
+        if (again) again.focus();
+      });
+      card.appendChild(add);
+
+      grid.appendChild(card);
+    });
+  }
+
+  function move(list, idx, dir) {
+    var j = idx + dir;
+    if (j < 0 || j >= list.length) return;
+    var tmp = list[idx]; list[idx] = list[j]; list[j] = tmp;
+    saveSoon();
+    renderGrid();
+  }
+
+  function renderAll() {
+    renderPicker();
+    renderDetails();
+    renderGrid();
+  }
+
+  // ---------- Buttons and fields ----------
+  Object.keys(FIELDS).forEach(function (id) {
+    document.getElementById(id).addEventListener("input", function (e) {
+      current()[FIELDS[id]] = e.target.value;
+      if (id === "f-name") renderPicker();
+      saveSoon();
+    });
+  });
+
+  document.getElementById("picker").addEventListener("change", function (e) {
+    state.currentId = e.target.value;
+    save();
+    renderAll();
+  });
+
+  document.getElementById("newBtn").addEventListener("click", function () {
+    var name = prompt("What is the name of the process?", "");
+    if (name === null) return;
+    var s = blankSipoc(name.trim() || "Untitled process");
+    state.sipocs.push(s);
+    state.currentId = s.id;
+    save();
+    renderAll();
+    document.getElementById("f-owner").focus();
+  });
+
+  document.getElementById("deleteBtn").addEventListener("click", function () {
+    var s = current();
+    if (!confirm('Delete "' + (s.name || "Untitled process") + '"? This cannot be undone.')) return;
+    state.sipocs = state.sipocs.filter(function (x) { return x.id !== s.id; });
+    if (!state.sipocs.length) state.sipocs.push(blankSipoc());
+    state.currentId = state.sipocs[0].id;
+    save();
+    renderAll();
+  });
+
+  document.getElementById("printBtn").addEventListener("click", function () { window.print(); });
+
+  document.getElementById("csvBtn").addEventListener("click", function () {
+    var s = current();
+    function q(v) { return '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"'; }
+    var rows = [];
+    rows.push([q("Process"), q(s.name)].join(","));
+    rows.push([q("Owner"), q(s.owner)].join(","));
+    rows.push([q("Date"), q(s.date)].join(","));
+    rows.push([q("Starts when"), q(s.start)].join(","));
+    rows.push([q("Ends when"), q(s.end)].join(","));
+    rows.push("");
+    rows.push(COLUMNS.map(function (c) { return q(c.title); }).join(","));
+    var max = Math.max.apply(null, COLUMNS.map(function (c) { return s[c.key].length; }));
+    for (var r = 0; r < max; r++) {
+      rows.push(COLUMNS.map(function (c) {
+        var v = s[c.key][r];
+        if (v != null && c.key === "process") v = (r + 1) + ". " + v;
+        return q(v);
+      }).join(","));
+    }
+    var blob = new Blob(["﻿" + rows.join("\r\n")], { type: "text/csv;charset=utf-8" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = (s.name || "sipoc").replace(/[^\w\- ]+/g, "").trim().replace(/\s+/g, "_") + "_SIPOC.csv";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  });
+
+  renderAll();
+  setStatus("All changes saved");
+})();
+</script>
+</body>
+</html>

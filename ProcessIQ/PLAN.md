@@ -34,7 +34,7 @@ A one-page, high-level map of a process, organized in five columns:
 ## Steps
 
 1. Create the folder and this plan (done)
-2. Build a basic working version and review a screenshot
+2. Build a basic working version and review a screenshot (done)
 3. Adjust based on feedback
 4. Save each finished step to GitHub
 5. Download to the Documents folder
