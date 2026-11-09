@@ -4,21 +4,40 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ProcessIQ</title>
+<meta name="claude:viewport-fit-sides" content="cover">
 <style>
   :root {
     --bg: #f4f6f9;
     --panel: #ffffff;
+    --item: #f8fafc;
+    --hover: #e4e7eb;
     --text: #1f2933;
     --muted: #616e7c;
     --border: #d9e2ec;
     --brand: #1f4e79;
+    --overlay: rgba(15, 23, 42, 0.45);
     --s: #2f80ed;
     --i: #27ae60;
     --p: #8e44ad;
     --o: #e67e22;
     --c: #c0392b;
   }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #10161f; --panel: #19212c; --item: #212b38; --hover: #2c3846;
+      --text: #e6ebf1; --muted: #9aa8b8; --border: #2f3b4a; --brand: #173b5c;
+      --overlay: rgba(0, 0, 0, 0.6);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #10161f; --panel: #19212c; --item: #212b38; --hover: #2c3846;
+    --text: #e6ebf1; --muted: #9aa8b8; --border: #2f3b4a; --brand: #173b5c;
+    --overlay: rgba(0, 0, 0, 0.6);
+    color-scheme: dark;
+  }
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
   body {
     margin: 0;
     font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
@@ -28,7 +47,9 @@
   header {
     background: var(--brand);
     color: #fff;
-    padding: 14px 24px;
+    padding-block: 14px;
+    padding-left: max(24px, env(safe-area-inset-left, 0px));
+    padding-right: max(24px, env(safe-area-inset-right, 0px));
     display: flex;
     align-items: center;
     gap: 16px;
@@ -46,7 +67,12 @@
     border-radius: 6px;
     border: 1px solid var(--border);
     min-width: 200px;
+    max-width: 100%;
+    background: var(--panel);
+    color: var(--text);
   }
+  input, textarea { color: var(--text); }
+  button:focus-visible, select:focus-visible { outline: 2px solid #8cc4ff; outline-offset: 2px; }
   button {
     padding: 7px 14px;
     border-radius: 6px;
@@ -58,8 +84,16 @@
   }
   button:hover { filter: brightness(0.95); }
   button.ghost { background: transparent; color: #fff; border-color: rgba(255,255,255,0.5); }
-  button.danger { color: #b42318; }
-  main { padding: 24px; max-width: 1400px; margin: 0 auto; }
+  button.danger { background: #c0392b; color: #fff; }
+  button.primary { background: var(--brand); color: #fff; }
+  button.plain { background: transparent; color: var(--text); border-color: var(--border); }
+  main {
+    padding-block: 24px;
+    padding-left: max(24px, env(safe-area-inset-left, 0px));
+    padding-right: max(24px, env(safe-area-inset-right, 0px));
+    max-width: 1400px;
+    margin: 0 auto;
+  }
   .details {
     background: var(--panel);
     border: 1px solid var(--border);
@@ -76,7 +110,9 @@
     padding: 8px 10px;
     border: 1px solid var(--border);
     border-radius: 6px;
+    background: var(--panel);
   }
+  .details > div { min-width: 0; }
   .details .name input { font-size: 18px; font-weight: 600; }
   .details .wide { grid-column: span 2; }
   .grid {
@@ -102,7 +138,7 @@
     display: flex;
     align-items: flex-start;
     gap: 6px;
-    background: #f8fafc;
+    background: var(--item);
     border: 1px solid var(--border);
     border-left: 4px solid var(--accent);
     border-radius: 6px;
@@ -123,7 +159,7 @@
     color: inherit;
     overflow-wrap: anywhere;
   }
-  .items li textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-radius: 3px; background: #fff; }
+  .items li textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-radius: 3px; background: var(--panel); }
   .icon {
     margin-top: 3px;
     padding: 2px 6px;
@@ -133,7 +169,8 @@
     font-size: 13px;
     border: none;
   }
-  .icon:hover { color: var(--text); background: #e4e7eb; }
+  .icon:hover { color: var(--text); background: var(--hover); }
+  .icon:disabled { opacity: 0.35; cursor: default; }
   .add { display: flex; gap: 6px; padding: 0 10px 12px; }
   .add input {
     flex: 1;
@@ -141,11 +178,35 @@
     border: 1px dashed var(--border);
     border-radius: 6px;
     min-width: 0;
+    background: var(--panel);
   }
   .add button { background: var(--accent); color: #fff; padding: 7px 11px; }
   .empty { color: var(--muted); font-size: 13px; font-style: italic; padding: 6px 4px; }
   .status { font-size: 12px; opacity: 0.85; }
   .print-only, .print-text { display: none; }
+
+  /* In-page box used for naming and confirming (instead of browser pop-ups) */
+  .overlay {
+    position: fixed; inset: 0; z-index: 50;
+    background: var(--overlay);
+    display: flex; align-items: center; justify-content: center;
+    padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  }
+  .dialog {
+    background: var(--panel); color: var(--text);
+    border-radius: 12px; padding: 20px;
+    width: 100%; max-width: 420px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+    display: grid; gap: 14px;
+  }
+  .dialog h3 { margin: 0; font-size: 18px; }
+  .dialog p { margin: 0; color: var(--muted); }
+  .dialog input, .dialog textarea {
+    width: 100%; padding: 9px 10px; border: 1px solid var(--border);
+    border-radius: 6px; background: var(--panel);
+  }
+  .dialog textarea { min-height: 140px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; }
+  .dialog .actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
 
   @media (max-width: 1000px) {
     .grid { grid-template-columns: 1fr 1fr; }
@@ -153,7 +214,16 @@
     .details .wide { grid-column: span 2; }
   }
   @media (max-width: 600px) {
-    main { padding: 16px; }
+    main {
+      padding-block: 16px;
+      padding-left: max(16px, env(safe-area-inset-left, 0px));
+      padding-right: max(16px, env(safe-area-inset-right, 0px));
+    }
+    header {
+      padding-left: max(16px, env(safe-area-inset-left, 0px));
+      padding-right: max(16px, env(safe-area-inset-right, 0px));
+    }
+    .toolbar select { flex: 1 1 100%; }
     .grid, .details { grid-template-columns: 1fr; }
     .details .wide { grid-column: span 1; }
     .toolbar { margin-left: 0; }
@@ -161,8 +231,9 @@
 
   @media print {
     @page { size: landscape; margin: 12mm; }
-    body { background: #fff; }
-    header, .add, .icon, .no-print { display: none !important; }
+    body { background: #fff; color: #1f2933; }
+    header, .add, .icon, .no-print, .overlay { display: none !important; }
+    .details input, .col, .items li { background: #fff; color: #1f2933; }
     .print-only { display: block; }
     .items li textarea { display: none; }
     .print-text { display: block; flex: 1; padding: 5px 2px; line-height: 1.35; overflow-wrap: anywhere; }
@@ -182,8 +253,9 @@
   <div class="toolbar">
     <select id="picker" aria-label="Choose a SIPOC"></select>
     <button id="newBtn">+ New SIPOC</button>
-    <button id="csvBtn" class="ghost">Export CSV</button>
-    <button id="printBtn" class="ghost">Print / PDF</button>
+    <button id="copyBtn" class="ghost">Copy for Excel</button>
+    <button id="csvBtn" class="ghost file-only">Export CSV</button>
+    <button id="printBtn" class="ghost file-only">Print / PDF</button>
     <button id="deleteBtn" class="ghost">Delete</button>
     <span class="status" id="status"></span>
   </div>
@@ -216,6 +288,19 @@
 
   <section class="grid" id="grid"></section>
 </main>
+
+<div class="overlay" id="overlay" hidden>
+  <form class="dialog" id="dialog" role="dialog" aria-modal="true" aria-labelledby="dlg-title">
+    <h3 id="dlg-title"></h3>
+    <p id="dlg-text"></p>
+    <input id="dlg-input" autocomplete="off">
+    <textarea id="dlg-area" readonly></textarea>
+    <div class="actions">
+      <button type="button" class="plain" id="dlg-cancel">Cancel</button>
+      <button type="submit" class="primary" id="dlg-ok">OK</button>
+    </div>
+  </form>
+</div>
 
 <script>
 (function () {
@@ -457,26 +542,128 @@
     renderAll();
   });
 
+  // ---------- In-page box (replaces browser pop-ups) ----------
+  var dlg = {
+    overlay: document.getElementById("overlay"),
+    form: document.getElementById("dialog"),
+    title: document.getElementById("dlg-title"),
+    text: document.getElementById("dlg-text"),
+    input: document.getElementById("dlg-input"),
+    area: document.getElementById("dlg-area"),
+    ok: document.getElementById("dlg-ok"),
+    cancel: document.getElementById("dlg-cancel"),
+    onOk: null
+  };
+  function openDialog(opts) {
+    dlg.title.textContent = opts.title;
+    dlg.text.textContent = opts.text || "";
+    dlg.text.hidden = !opts.text;
+    dlg.input.hidden = !opts.input;
+    dlg.input.value = "";
+    dlg.input.placeholder = opts.placeholder || "";
+    dlg.area.hidden = !opts.area;
+    dlg.area.value = opts.area || "";
+    dlg.ok.textContent = opts.okLabel || "OK";
+    dlg.ok.className = opts.danger ? "danger" : "primary";
+    dlg.cancel.hidden = !!opts.noCancel;
+    dlg.onOk = opts.onOk || null;
+    dlg.overlay.hidden = false;
+    setTimeout(function () {
+      if (opts.input) dlg.input.focus();
+      else if (opts.area) { dlg.area.focus(); dlg.area.select(); }
+      else dlg.ok.focus();
+    }, 0);
+  }
+  function closeDialog() { dlg.overlay.hidden = true; dlg.onOk = null; }
+  dlg.form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var fn = dlg.onOk;
+    var value = dlg.input.value;
+    closeDialog();
+    if (fn) fn(value);
+  });
+  dlg.cancel.addEventListener("click", closeDialog);
+  dlg.overlay.addEventListener("click", function (e) { if (e.target === dlg.overlay) closeDialog(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !dlg.overlay.hidden) closeDialog(); });
+
   document.getElementById("newBtn").addEventListener("click", function () {
-    var name = prompt("What is the name of the process?", "");
-    if (name === null) return;
-    var s = blankSipoc(name.trim() || "Untitled process");
-    state.sipocs.push(s);
-    state.currentId = s.id;
-    save();
-    renderAll();
-    document.getElementById("f-owner").focus();
+    openDialog({
+      title: "New SIPOC",
+      text: "What is the name of the process?",
+      input: true,
+      placeholder: "e.g. Employee Onboarding",
+      okLabel: "Create",
+      onOk: function (name) {
+        var s = blankSipoc(name.trim() || "Untitled process");
+        state.sipocs.push(s);
+        state.currentId = s.id;
+        save();
+        renderAll();
+        document.getElementById("f-owner").focus();
+      }
+    });
   });
 
   document.getElementById("deleteBtn").addEventListener("click", function () {
     var s = current();
-    if (!confirm('Delete "' + (s.name || "Untitled process") + '"? This cannot be undone.')) return;
-    state.sipocs = state.sipocs.filter(function (x) { return x.id !== s.id; });
-    if (!state.sipocs.length) state.sipocs.push(blankSipoc());
-    state.currentId = state.sipocs[0].id;
-    save();
-    renderAll();
+    openDialog({
+      title: "Delete this SIPOC?",
+      text: '"' + (s.name || "Untitled process") + '" will be removed. This cannot be undone.',
+      okLabel: "Delete",
+      danger: true,
+      onOk: function () {
+        state.sipocs = state.sipocs.filter(function (x) { return x.id !== s.id; });
+        if (!state.sipocs.length) state.sipocs.push(blankSipoc());
+        state.currentId = state.sipocs[0].id;
+        save();
+        renderAll();
+      }
+    });
   });
+
+  // ---------- Copy for Excel (tab-separated text pastes into columns) ----------
+  function tableText() {
+    var s = current();
+    var rows = [
+      ["Process", s.name], ["Owner", s.owner], ["Date", s.date],
+      ["Starts when", s.start], ["Ends when", s.end], [],
+      COLUMNS.map(function (c) { return c.title; })
+    ];
+    var max = Math.max.apply(null, COLUMNS.map(function (c) { return s[c.key].length; }));
+    for (var r = 0; r < max; r++) {
+      rows.push(COLUMNS.map(function (c) {
+        var v = s[c.key][r];
+        if (v == null) return "";
+        return c.key === "process" ? (r + 1) + ". " + v : v;
+      }));
+    }
+    return rows.map(function (row) {
+      return row.map(function (v) { return String(v == null ? "" : v).replace(/[\t\r\n]+/g, " "); }).join("\t");
+    }).join("\n");
+  }
+  document.getElementById("copyBtn").addEventListener("click", function () {
+    var text = tableText();
+    function fallback() {
+      openDialog({
+        title: "Copy your SIPOC",
+        text: "Select all of the text below, copy it, then paste it into Excel, Numbers or an email.",
+        area: text, okLabel: "Done", noCancel: true
+      });
+    }
+    try {
+      navigator.clipboard.writeText(text).then(function () {
+        setStatus("Copied. Paste into Excel, Numbers or an email.");
+      }, fallback);
+    } catch (e) { fallback(); }
+  });
+
+  // Print and file download only work when the app is opened as a file,
+  // so hide those buttons when it runs inside the private Claude page.
+  var embedded = true;
+  try { embedded = window.self !== window.top; } catch (e) { embedded = true; }
+  if (embedded) {
+    document.querySelectorAll(".file-only").forEach(function (b) { b.hidden = true; });
+  }
 
   document.getElementById("printBtn").addEventListener("click", function () { window.print(); });
 
