@@ -43,5 +43,5 @@ A one-page, high-level map of a process, organized in five columns:
 
 - Stage 1: Step details, fact/hypothesis/question findings with approval, and Bottleneck analysis (done)
 - Stage 2: 5 Whys root cause analysis (done)
-- Stage 3: Automation opportunities and impact-versus-effort prioritization
+- Stage 3: Automation opportunities and impact-versus-effort prioritization with action plan (done)
 - Stage 4: "Ask Claude" button on the private page (uses the existing Claude account; no API key)

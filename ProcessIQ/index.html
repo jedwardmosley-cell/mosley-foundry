@@ -344,10 +344,101 @@
   .root.approved .state { color: var(--ok); }
   .root.rejected .state { color: var(--no); }
   .form-error { color: #c0392b; font-size: 13px; margin: 4px 0 0; }
-  #why-editor p.lead { margin: 0 0 10px; color: var(--muted); font-size: 13px; max-width: 75ch; }
+  #why-editor p.lead, #matrix p.lead, #plan p.lead { margin: 10px 0; color: var(--muted); font-size: 13px; max-width: 75ch; }
   @media (max-width: 600px) {
     .seg { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
     .seg button { padding: 8px 6px; }
+  }
+
+  /* ---------- Automation ---------- */
+  .auto-head, .auto-row {
+    display: grid; grid-template-columns: minmax(150px, 1.3fr) 1fr 1fr 1fr 1.3fr;
+    gap: 10px; align-items: center;
+  }
+  .auto-head { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; padding: 0 0 6px; }
+  .auto-row { padding: 8px 0; border-top: 1px solid var(--border); }
+  .auto-row > div { min-width: 0; }
+  .auto-row label.m { display: none; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 3px; }
+  .auto-row select, .auto-row input {
+    width: 100%; padding: 7px 8px; border: 1px solid var(--border); border-radius: 6px;
+    background: var(--panel); color: var(--text); min-width: 0;
+  }
+  .auto-row .dur select { width: auto; }
+  .auto-row .missing { border-color: var(--q-fg); border-style: dashed; }
+  .chip.level.high { color: var(--ok); border-color: var(--ok); }
+  .chip.level.medium { color: var(--hyp-fg); border-color: var(--hyp-fg); }
+
+  /* ---------- Priorities ---------- */
+  .num-dot {
+    display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px;
+    border-radius: 999px; background: var(--brand); color: #fff; font-size: 12px; font-weight: 700; padding: 0 6px;
+    font-variant-numeric: tabular-nums;
+  }
+  .imp-fields { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  .imp-fields label.fl { margin-top: 0; margin-bottom: 3px; }
+  .imp-fields select, .imp-fields input, .add-imp input {
+    width: 100%; padding: 7px 8px; border: 1px solid var(--border); border-radius: 6px;
+    background: var(--panel); color: var(--text); min-width: 0;
+  }
+  .imp-fields .missing { border-color: var(--q-fg); border-style: dashed; }
+  .chip.quad.quick { color: var(--ok); border-color: var(--ok); }
+  .chip.quad.major { color: var(--fact-fg); border-color: var(--fact-fg); }
+  .chip.quad.reconsider { color: var(--no); }
+  .add-imp { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 14px; }
+  .add-imp button { background: var(--brand); color: #fff; }
+
+  .mx-wrap { display: grid; grid-template-columns: 22px 1fr; grid-template-rows: auto 22px; gap: 4px; max-width: 760px; }
+  .mx-ylab { writing-mode: vertical-rl; transform: rotate(180deg); text-align: center; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .mx-xlab { grid-column: 2; text-align: center; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .mx-plot {
+    position: relative; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+    aspect-ratio: 4 / 3; max-width: 100%; border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+  }
+  .mx-q { padding: 10px 12px; display: flex; flex-direction: column; min-height: 0; }
+  .mx-area { position: relative; flex: 1; min-height: 60px; }
+  .mx-q.tl, .mx-q.bl { border-right: 1px dashed var(--border); }
+  .mx-q.tl, .mx-q.tr { border-bottom: 1px dashed var(--border); }
+  .mx-q.quick { background: var(--ok-bg); }
+  .mx-q.major { background: var(--fact-bg); }
+  .mx-q.fill { background: var(--item); }
+  .mx-q.reconsider { background: var(--panel); }
+  .mx-name { font-weight: 700; font-size: 14px; }
+  .mx-note { font-size: 12px; color: var(--muted); margin-top: 2px; max-width: 26ch; }
+  .mx-dot {
+    position: absolute; transform: translate(-50%, -50%);
+    width: 26px; height: 26px; border-radius: 999px; display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; border: 2px solid var(--brand); background: var(--panel); color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+  .mx-dot.approved { background: var(--brand); color: #fff; }
+  :root[data-theme="dark"] .mx-dot { border-color: var(--fact-fg); }
+  :root[data-theme="dark"] .mx-dot.approved { background: var(--fact-fg); color: var(--bg); }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .mx-dot { border-color: var(--fact-fg); }
+    :root:not([data-theme="light"]) .mx-dot.approved { background: var(--fact-fg); color: var(--bg); }
+  }
+  @media (max-width: 600px) {
+    .mx-plot { aspect-ratio: 1 / 1; }
+    .mx-q { padding: 8px; }
+    .mx-note { display: none; }
+    .mx-name { font-size: 13px; }
+    .mx-dot { width: 22px; height: 22px; font-size: 11px; }
+  }
+  .table-wrap { overflow-x: auto; }
+  table.plan { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 620px; }
+  table.plan th { text-align: left; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; padding: 6px 8px; border-bottom: 2px solid var(--border); }
+  table.plan td { padding: 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  table.plan td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  table.plan .na { color: var(--q-fg); font-style: italic; }
+  .panel-head { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: space-between; }
+  .panel-head button { background: var(--brand); color: #fff; }
+
+  @media (max-width: 860px) {
+    .auto-head { display: none; }
+    .auto-row { grid-template-columns: 1fr 1fr; padding: 12px 0; }
+    .auto-row .step-name { grid-column: 1 / -1; }
+    .auto-row label.m { display: block; }
+    .imp-fields { grid-template-columns: 1fr 1fr; }
   }
 
   @media (max-width: 860px) {
@@ -359,7 +450,7 @@
     .add-finding input { grid-column: 1 / -1; }
   }
   @media (max-width: 420px) {
-    .step-row { grid-template-columns: 1fr; }
+    .step-row, .auto-row { grid-template-columns: 1fr; }
   }
 
   /* In-page box used for naming and confirming (instead of browser pop-ups) */
@@ -477,8 +568,8 @@
     <div class="subtabs" role="tablist" aria-label="Analysis tools">
       <button class="subtab" role="tab" id="st-bottleneck" aria-selected="true">Bottleneck analysis</button>
       <button class="subtab" role="tab" id="st-whys" aria-selected="false">5 Whys</button>
-      <button class="subtab" role="tab" disabled>Automation <small>coming next</small></button>
-      <button class="subtab" role="tab" disabled>Priorities <small>coming next</small></button>
+      <button class="subtab" role="tab" id="st-auto" aria-selected="false">Automation</button>
+      <button class="subtab" role="tab" id="st-prio" aria-selected="false">Priorities</button>
     </div>
 
     <div id="sub-bottleneck">
@@ -526,6 +617,43 @@
       </div>
       <div class="panel" id="why-editor"></div>
     </div>
+
+    <div id="sub-auto" hidden>
+      <div class="panel" id="auto-panel">
+        <h2>Automation questions</h2>
+        <p class="lead">Answer what you know about each step. "Not sure" is a fine answer. The app suggests where automation could help based on your answers and the step's wording, and asks about anything left blank.</p>
+        <div id="auto-steps"></div>
+      </div>
+      <div class="panel">
+        <h2>Automation opportunities</h2>
+        <p class="lead">Every opportunity is a hypothesis until you check it. Edit the wording, then approve the ones worth pursuing; approved ones move to Priorities.</p>
+        <p class="counts" id="auto-counts"></p>
+        <div id="auto-findings"></div>
+      </div>
+    </div>
+
+    <div id="sub-prio" hidden>
+      <div class="panel">
+        <h2>Improvements</h2>
+        <p class="lead">Approved hypotheses from Bottleneck analysis and Automation, and approved 5 Whys root causes, appear here automatically. Rate each one, then approve the ones you will act on.</p>
+        <div id="imp-list"></div>
+        <form class="add-imp" id="add-imp">
+          <input id="ai-text" placeholder="Add your own improvement idea" aria-label="Your improvement idea">
+          <button type="submit">Add</button>
+        </form>
+      </div>
+      <div class="panel">
+        <h2>Impact versus effort</h2>
+        <div id="matrix"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Recommended action plan</h2>
+          <button type="button" id="copyPlan">Copy action plan</button>
+        </div>
+        <div id="plan"></div>
+      </div>
+    </div>
   </section>
 </main>
 
@@ -567,13 +695,13 @@
     return {
       id: newId(), name: name || "Untitled process", owner: "", date: today(), start: "", end: "",
       suppliers: [], inputs: [], process: [], outputs: [], customers: [],
-      details: [], analysis: { findings: [], whys: [] }
+      details: [], analysis: { findings: [], whys: [], auto: [], improvements: [] }
     };
   }
 
   // Extra information about each process step, kept in the same order as the steps
   function blankDetail() {
-    return { id: newId(), role: "", work: "", workUnit: "min", wait: "", waitUnit: "hr", tool: "" };
+    return { id: newId(), role: "", work: "", workUnit: "min", wait: "", waitUnit: "hr", tool: "", auto: blankAuto() };
   }
 
   // Older saved SIPOCs have no step details or analysis yet: add empty ones.
@@ -586,6 +714,11 @@
     if (!s.analysis || typeof s.analysis !== "object") s.analysis = {};
     if (!Array.isArray(s.analysis.findings)) s.analysis.findings = [];
     if (!Array.isArray(s.analysis.whys)) s.analysis.whys = [];
+    if (!Array.isArray(s.analysis.auto)) s.analysis.auto = [];
+    if (!Array.isArray(s.analysis.improvements)) s.analysis.improvements = [];
+    s.details.forEach(function (d) {
+      if (!d.auto || typeof d.auto !== "object") d.auto = blankAuto();
+    });
     return s;
   }
 
@@ -611,6 +744,10 @@
       x.role = r[0]; x.work = String(r[1]); x.workUnit = r[2]; x.wait = String(r[3]); x.waitUnit = r[4]; x.tool = r[5];
       return x;
     });
+    // Example automation answers (step 4 left unanswered to show a question)
+    [["yes", "yes", "yes"], ["yes", "yes", "yes"], ["yes", "yes", "partly"], ["yes", "", ""], ["yes", "yes", "yes"]].forEach(function (a, i) {
+      var d2 = s.details[i].auto; d2.rep = a[0]; d2.rules = a[1]; d2.digital = a[2]; d2.vol = "40"; d2.volUnit = "week";
+    });
     s.analysis = { findings: [], whys: [{
       id: newId(), problem: "Orders wait 1 day before picking starts (example)", stepId: s.details[2].id, fromFinding: "",
       whys: [
@@ -618,7 +755,7 @@
         { id: newId(), answer: "The warehouse plans all picking as one daily batch.", confirmed: false, evidence: "" },
         { id: newId(), answer: "There is no standard for when new orders are released to the warehouse.", confirmed: false, evidence: "" }
       ],
-      rootCause: "", rootEdited: false, fix: "", status: "proposed" }] };
+      rootCause: "", rootEdited: false, fix: "", status: "proposed" }], auto: [], improvements: [] };
     return s;
   }
 
@@ -1040,6 +1177,12 @@
     var r = Math.round(p);
     return { text: "only " + r + "%", rest: (100 - r) + "%" };
   }
+  // Work time is always shown in minutes or hours, never "days"
+  // (a day of waiting is 24 hours, but nobody works 24 hours a day).
+  function fmtWork(mins) {
+    if (mins == null) return "";
+    return mins < 60 ? round1(mins) + " min" : round1(mins / 60) + " hr";
+  }
   function stepLabel(i, name) { return "Step " + (i + 1) + ' "' + name + '"'; }
   function listSteps(idxs) {
     var n = idxs.map(function (i) { return i + 1; });
@@ -1126,7 +1269,7 @@
     var sumWait = wait.reduce(function (a, b) { return a + (b || 0); }, 0);
 
     if (allWork) add("f-work-total", "fact", "Summary",
-      "Total hands-on work time is " + fmt(sumWork) + " across " + n + " steps.", "Sum of Work time for every step.");
+      "Total hands-on work time is " + fmtWork(sumWork) + " across " + n + " steps.", "Sum of Work time for every step.");
     if (allWait) add("f-wait-total", "fact", "Delay",
       "Work spends " + fmt(sumWait) + " waiting between steps.", "Sum of Wait before for every step.");
     if (allWork && allWait && sumWork + sumWait > 0) {
@@ -1242,17 +1385,18 @@
   }
 
   // ---------- Merge new results with the user's reviewed findings ----------
-  function runAnalysis(s) {
-    var cands = analyze(s);
+  function runAnalysis(s) { s.analysis.findings = mergeFindings(s.analysis.findings, analyze(s)); }
+
+  function mergeFindings(existing, cands) {
     var byKey = {};
     cands.forEach(function (c, i) { c.order = i; byKey[c.key] = c; });
     var kept = [];
-    s.analysis.findings.forEach(function (f) {
+    existing.forEach(function (f) {
       if (f.source !== "rule") { kept.push(f); return; }
       var c = byKey[f.key];
       if (c) {
         if (!f.edited) f.text = c.text;
-        f.evidence = c.evidence; f.kind = c.kind; f.category = c.category;
+        f.evidence = c.evidence; f.kind = c.kind; f.category = c.category; f.level = c.level || "";
         f.order = c.order; f.stale = false;
         delete byKey[f.key];
         kept.push(f);
@@ -1263,10 +1407,10 @@
     });
     Object.keys(byKey).forEach(function (key) {
       var c = byKey[key];
-      kept.push({ id: newId(), key: key, source: "rule", kind: c.kind, category: c.category,
+      kept.push({ id: newId(), key: key, source: "rule", kind: c.kind, category: c.category, level: c.level || "",
         text: c.text, evidence: c.evidence, status: "proposed", edited: false, stale: false, order: c.order });
     });
-    s.analysis.findings = kept;
+    return kept;
   }
 
   // ---------- Drawing the analysis tab ----------
@@ -1399,7 +1543,7 @@
       box.appendChild(c);
     }
     stat("Steps", String(n));
-    stat("Hands-on work", allWork ? fmt(sumWork) : null, kWork + " of " + n + " steps known");
+    stat("Hands-on work", allWork ? fmtWork(sumWork) : null, kWork + " of " + n + " steps known");
     stat("Waiting", allWait ? fmt(sumWait) : null, kWait + " of " + n + " steps known");
     stat("Start to finish", allWork && allWait ? fmt(sumWork + sumWait) : null, "Work plus waiting");
     stat("Time spent working", allWork && allWait && sumWork + sumWait > 0 ? (sumWork > 0 && sumWork / (sumWork + sumWait) < 0.01 ? "<1%" : Math.round(sumWork / (sumWork + sumWait) * 100) + "%") : null, "The rest is waiting");
@@ -1412,15 +1556,49 @@
     hypothesis: { title: "Hypotheses", sub: "Possible issues to confirm or rule out" }
   };
 
-  function renderFindings(s) {
-    var box = document.getElementById("findings");
+  // One finding list is drawn the same way wherever it appears
+  // (Bottleneck analysis and Automation). "ctx" says which list it is.
+  var CTX = {
+    bottleneck: {
+      arr: "findings", box: "findings", counts: "counts",
+      run: function (s) { runAnalysis(s); },
+      empty: { question: "Nothing missing right now.", fact: "Add step details to calculate facts.", hypothesis: "No possible issues detected yet." },
+      gotoLabel: "Go to step details",
+      go: function (f) {
+        var target = /SIPOC map|Process column|column is empty/.test(f.text) ? "grid" : (/starts|ends/.test(f.text) ? "f-start" : "steps-panel");
+        if (target === "grid") { showTab("sipoc"); return; }
+        var node = document.getElementById(target);
+        node.scrollIntoView({ behavior: "smooth", block: "start" });
+        var firstMissing = document.querySelector("#steps input.missing");
+        if (target === "steps-panel" && firstMissing) setTimeout(function () { firstMissing.focus(); }, 300);
+        if (target === "f-start") node.focus();
+      }
+    },
+    auto: {
+      arr: "auto", box: "auto-findings", counts: "auto-counts",
+      run: function (s) { runAutomation(s); },
+      empty: { question: "Nothing missing right now.", fact: "Add how often steps happen, plus work time, to calculate time at stake.", hypothesis: "Answer the questions above to see automation opportunities." },
+      gotoLabel: "Go to the questions",
+      go: function (f) {
+        if (/work time/i.test(f.text)) { showSub("bottleneck"); document.getElementById("steps-panel").scrollIntoView({ behavior: "smooth" }); return; }
+        document.getElementById("auto-panel").scrollIntoView({ behavior: "smooth", block: "start" });
+        var firstMissing = document.querySelector("#auto-steps .missing");
+        if (firstMissing) setTimeout(function () { firstMissing.focus(); }, 300);
+      }
+    }
+  };
+
+  function renderFindings(s) { renderFindingList(s, CTX.bottleneck); }
+
+  function renderFindingList(s, ctx) {
+    var box = document.getElementById(ctx.box);
     box.innerHTML = "";
-    var list = s.analysis.findings.slice().sort(function (a, b) {
+    var list = s.analysis[ctx.arr].slice().sort(function (a, b) {
       return (a.stale - b.stale) || ((a.order == null ? 9999 : a.order) - (b.order == null ? 9999 : b.order));
     });
     var c = { proposed: 0, approved: 0, rejected: 0 };
     list.forEach(function (f) { if (f.kind !== "question") c[f.status]++; });
-    document.getElementById("counts").textContent =
+    document.getElementById(ctx.counts).textContent =
       c.proposed + " to review · " + c.approved + " approved · " + c.rejected + " rejected";
 
     ["question", "fact", "hypothesis"].forEach(function (kind) {
@@ -1429,22 +1607,19 @@
       h.appendChild(el("span", "badge " + kind, KIND_INFO[kind].title));
       h.appendChild(el("span", "sub", KIND_INFO[kind].sub));
       box.appendChild(h);
-      if (!items.length) {
-        box.appendChild(el("p", "empty-group",
-          kind === "question" ? "Nothing missing right now." :
-          kind === "fact" ? "Add step details to calculate facts." : "No possible issues detected yet."));
-        return;
-      }
-      items.forEach(function (f) { box.appendChild(findingCard(s, f)); });
+      if (!items.length) { box.appendChild(el("p", "empty-group", ctx.empty[kind])); return; }
+      items.forEach(function (f) { box.appendChild(findingCard(s, f, ctx)); });
     });
     box.querySelectorAll("textarea").forEach(fit);
   }
 
-  function findingCard(s, f) {
+  function findingCard(s, f, ctx) {
+    var rerender = function () { renderFindingList(s, ctx); };
     var card = el("div", "finding " + f.status);
     var top = el("div", "top");
     top.appendChild(el("span", "badge " + f.kind, f.kind === "question" ? "Question" : f.kind === "fact" ? "Fact" : "Hypothesis"));
     if (f.kind !== "question") top.appendChild(el("span", "chip", f.category));
+    if (f.level) top.appendChild(el("span", "chip level " + f.level.toLowerCase(), f.level + " potential"));
     if (f.source === "user") top.appendChild(el("span", "chip", "Added by you"));
     if (f.edited) top.appendChild(el("span", "chip", "Edited"));
     if (f.status !== "proposed") top.appendChild(el("span", "state",
@@ -1462,7 +1637,6 @@
       fit(t);
       saveSoon();
     });
-    t.addEventListener("change", function () { renderFindings(s); });
     card.appendChild(t);
 
     if (f.evidence) card.appendChild(el("div", "why", "Based on: " + f.evidence));
@@ -1470,28 +1644,20 @@
 
     var acts = el("div", "acts");
     function btn(label, cls, fn) { var b = el("button", cls, label); b.type = "button"; b.addEventListener("click", fn); acts.appendChild(b); }
-    function setStatus2(st) { f.status = st; saveSoon(); renderFindings(s); }
+    function setStatus2(st) { f.status = st; saveSoon(); rerender(); }
     if (f.kind === "question") {
-      btn("Go to step details", null, function () {
-        var target = /SIPOC map|Process column|column is empty/.test(f.text) ? "grid" : (/starts|ends/.test(f.text) ? "f-start" : "steps-panel");
-        if (target === "grid") { showTab("sipoc"); return; }
-        var node = document.getElementById(target);
-        node.scrollIntoView({ behavior: "smooth", block: "start" });
-        var firstMissing = document.querySelector("#steps input.missing");
-        if (target === "steps-panel" && firstMissing) setTimeout(function () { firstMissing.focus(); }, 300);
-        if (target === "f-start") node.focus();
-      });
+      btn(ctx.gotoLabel, null, function () { ctx.go(f); });
       if (f.status === "proposed") btn("Not applicable", null, function () { setStatus2("rejected"); });
       else btn("Undo", null, function () { setStatus2("proposed"); });
     } else {
       if (f.status !== "approved") btn("Approve", "approve", function () { setStatus2("approved"); });
       if (f.status !== "rejected") btn("Reject", null, function () { setStatus2("rejected"); });
       if (f.status !== "proposed") btn("Undo", null, function () { setStatus2("proposed"); });
-      if (f.edited) btn("Restore suggested wording", null, function () { f.edited = false; runAnalysis(s); saveSoon(); renderFindings(s); });
+      if (f.edited) btn("Restore suggested wording", null, function () { f.edited = false; ctx.run(s); saveSoon(); rerender(); });
     }
     if (f.source === "user" || f.stale) btn("Delete", null, function () {
-      s.analysis.findings = s.analysis.findings.filter(function (x) { return x !== f; });
-      saveSoon(); renderFindings(s);
+      s.analysis[ctx.arr] = s.analysis[ctx.arr].filter(function (x) { return x !== f; });
+      saveSoon(); rerender();
     });
     card.appendChild(acts);
     return card;
@@ -1519,22 +1685,30 @@
   // =====================================================================
   var SUB_KEY = "processiq.subtab";
   var activeSub = "bottleneck";
-  try { if (localStorage.getItem(SUB_KEY) === "whys") activeSub = "whys"; } catch (e) {}
+  var SUBS = ["bottleneck", "whys", "auto", "prio"];
+  try { var savedSub = localStorage.getItem(SUB_KEY); if (SUBS.indexOf(savedSub) >= 0) activeSub = savedSub; } catch (e) {}
   var activeWhyId = null;     // which 5 Whys is open
   var creatingWhy = false;    // showing the "new" form
 
   function showSub(name) {
     activeSub = name;
     try { localStorage.setItem(SUB_KEY, name); } catch (e) {}
-    document.getElementById("st-bottleneck").setAttribute("aria-selected", String(name === "bottleneck"));
-    document.getElementById("st-whys").setAttribute("aria-selected", String(name === "whys"));
-    document.getElementById("sub-bottleneck").hidden = name !== "bottleneck";
-    document.getElementById("sub-whys").hidden = name !== "whys";
-    if (name === "whys") { runAnalysis(current()); renderWhys(current()); saveSoon(); }
+    var ids = { bottleneck: "bottleneck", whys: "whys", auto: "auto", prio: "prio" };
+    SUBS.forEach(function (k) {
+      document.getElementById("st-" + ids[k]).setAttribute("aria-selected", String(name === k));
+      document.getElementById("sub-" + ids[k]).hidden = name !== k;
+    });
+    var s = current();
+    // Keep every tool's results up to date, whichever one is open
+    runAnalysis(s); runAutomation(s);
+    if (name === "whys") { renderWhys(s); saveSoon(); }
+    else if (name === "auto") renderAutomation(s);
+    else if (name === "prio") renderPriorities(s);
     else renderAnalysis();
   }
-  document.getElementById("st-bottleneck").addEventListener("click", function () { showSub("bottleneck"); });
-  document.getElementById("st-whys").addEventListener("click", function () { showSub("whys"); });
+  SUBS.forEach(function (k) {
+    document.getElementById("st-" + k).addEventListener("click", function () { showSub(k); });
+  });
 
   function blankWhy(problem) {
     return { id: newId(), problem: problem || "", stepId: "", fromFinding: "",
@@ -1841,6 +2015,460 @@
     if (!w) return;
     coach(x, i, w.whys).forEach(function (t) { box.appendChild(el("div", "tip " + t.t, t.m)); });
   }
+
+  // =====================================================================
+  //  AUTOMATION OPPORTUNITIES
+  // =====================================================================
+  function blankAuto() { return { rep: "", rules: "", digital: "", vol: "", volUnit: "week" }; }
+  var PER_WEEK = { day: 5, week: 1, month: 12 / 52 };   // a working week has 5 days
+
+  // What kind of existing software or technique usually fits a step,
+  // judged only from its wording. Always a suggestion, never a fact.
+  var SOLUTIONS = [
+    { re: /\b(invoic\w*|bill\w*|payment\w*|pay|paid|receipt\w*|expense\w*)\b/i, kind: "Existing software",
+      say: "accounting software can often create, send and chase invoices or payments automatically (for example QuickBooks or Xero)" },
+    { re: /\b(schedul\w*|book\w*|appointment\w*|calendar\w*|meeting\w*)\b/i, kind: "Existing software",
+      say: "scheduling software can handle booking, reminders and rescheduling" },
+    { re: /\b(inventor\w*|stock\w*|reorder\w*)\b/i, kind: "Existing software",
+      say: "inventory software can track stock levels and flag shortages automatically" },
+    { re: /\b(approv\w*|sign[- ]?off|authori[sz]\w*)\b/i, kind: "Workflow automation",
+      say: "a digital approval workflow can route requests, remind approvers and record decisions (for example Microsoft Power Automate or the approval feature in your existing software)" },
+    { re: /\b(notif\w*|remind\w*|email\w*|send|sends|alert\w*|confirm\w*)\b/i, kind: "Workflow automation",
+      say: "workflow tools can send messages and reminders automatically when something happens (for example Zapier or Microsoft Power Automate)" },
+    { re: /\b(enter\w*|re-?enter\w*|re-?type\w*|copy\w*|transcrib\w*|record\w*|log\w*|data entry|update\w*)\b/i, kind: "Workflow automation",
+      say: "connecting the systems involved, or a single online form, could capture the information once instead of retyping it" },
+    { re: /\b(receiv\w*|read\w*|review\w* (documents?|emails?|forms?)|extract\w*|scan\w*|pdf|attachment\w*|intake)\b/i, kind: "AI",
+      say: "AI document reading can pull key details out of emails, PDFs or forms for a person to check" },
+    { re: /\b(report\w*|summar\w*|analy[sz]\w*)\b/i, kind: "AI",
+      say: "automatic reports or AI summaries could prepare this for a person to review" },
+    { re: /\b(answer\w*|respond\w*|repl(y|ies|ied)|enquir\w*|inquir\w*|question\w*)\b/i, kind: "AI",
+      say: "an AI assistant could draft replies for a person to approve" }
+  ];
+  var PHYSICAL = /\b(pick\w*|pack\w*|ship\w*|deliver\w*|load\w*|unload\w*|move\w*|carry\w*|install\w*|clean\w*|assembl\w*|repair\w*|lift\w*|drive\w*)\b/i;
+
+  function analyzeAutomation(s) {
+    var out = [];
+    function add(key, kind, category, text, evidence, level) {
+      out.push({ key: key, kind: kind, category: category, text: text, evidence: evidence, level: level || "" });
+    }
+    var n = s.process.length;
+    if (!n) {
+      add("aq-nosteps", "question", "Information needed", "Add the process steps on the SIPOC map first.", "The Process column is empty.");
+      return out;
+    }
+    var miss = { rep: [], rules: [], digital: [], vol: [] };
+    s.details.forEach(function (d, i) {
+      var a = d.auto;
+      if (!a.rep) miss.rep.push(i);
+      if (!a.rules) miss.rules.push(i);
+      if (!a.digital) miss.digital.push(i);
+      if (num(a.vol) == null) miss.vol.push(i);
+    });
+    if (miss.rep.length) add("aq-rep", "question", "Information needed", "Is the work done the same way each time for " + listSteps(miss.rep) + "?", "Unanswered in Automation questions.");
+    if (miss.rules.length) add("aq-rules", "question", "Information needed", "Does " + listSteps(miss.rules) + " follow clear rules, or need someone's judgment?", "Unanswered in Automation questions.");
+    if (miss.digital.length) add("aq-digital", "question", "Information needed", "Is the information for " + listSteps(miss.digital) + " already digital (in email, a system or a file), or on paper?", "Unanswered in Automation questions.");
+    if (miss.vol.length) add("aq-vol", "question", "Information needed", "How often does " + listSteps(miss.vol) + " happen? Needed to estimate the time at stake.", "Unanswered in Automation questions.");
+
+    var needWork = [];
+    var weekly = [];
+    s.details.forEach(function (d, i) {
+      var v = num(d.auto.vol), w = minutes(d.work, d.workUnit);
+      if (v != null && w == null) needWork.push(i);
+      if (v != null && w != null) weekly[i] = v * (PER_WEEK[d.auto.volUnit] || 1) * w;
+    });
+    if (needWork.length) add("aq-work", "question", "Information needed",
+      "What is the work time for " + listSteps(needWork) + "? Add it under Bottleneck analysis, step details, to calculate hours at stake.",
+      "How often is known but Work time is blank.");
+
+    var total = 0, counted = 0;
+    s.process.forEach(function (name, i) {
+      var d = s.details[i], a = d.auto;
+      var wk = weekly[i];
+      if (wk != null) {
+        total += wk; counted++;
+        var per = d.auto.volUnit === "day" ? "a day" : d.auto.volUnit === "month" ? "a month" : "a week";
+        add("af-time-" + d.id, "fact", "Time at stake",
+          stepLabel(i, name) + " takes about " + fmtWork(wk) + " of hands-on work per week (" + d.auto.vol + " times " + per + " × " + fmtWork(minutes(d.work, d.workUnit)) + ").",
+          "How often × Work time" + (d.auto.volUnit === "day" ? ", counting 5 working days a week." : d.auto.volUnit === "month" ? ", spread evenly over the weeks of a year." : "."));
+      }
+      if (!a.rep || !a.rules || !a.digital) return;   // ask first, don't guess
+
+      var answers = "same each time: " + a.rep + "; clear rules: " + (a.rules === "yes" ? "yes" : a.rules === "no" ? "needs judgment" : "not sure") + "; digital: " + a.digital;
+      var stake = wk != null ? " About " + fmtWork(wk) + " of work a week is at stake." : "";
+      var sol = null, solMatch = "";
+      for (var k = 0; k < SOLUTIONS.length; k++) {
+        var m = String(name).match(SOLUTIONS[k].re) || String(d.tool || "").match(SOLUTIONS[k].re);
+        if (m) { sol = SOLUTIONS[k]; solMatch = m[0]; break; }
+      }
+      var physical = PHYSICAL.test(name);
+      var level, category, text;
+      if (a.rep === "no") {
+        level = "Low"; category = "Low potential";
+        text = stepLabel(i, name) + " is done differently each time, so it is a poor candidate for automation for now. Standardizing how it is done would be the first step.";
+      } else if (physical) {
+        level = "Low"; category = "Physical work";
+        text = stepLabel(i, name) + " is mainly physical work, so software alone won't automate it. Supporting tools (for example barcode scanning or digital pick lists) could still cut time and errors.";
+      } else if (a.digital === "no") {
+        level = "Medium"; category = "Digitize first";
+        text = stepLabel(i, name) + " could potentially be automated once its information is digital. A first step could be an online form or scanning paper as it arrives.";
+      } else if (a.rules === "no") {
+        level = "Medium"; category = "AI";
+        text = stepLabel(i, name) + " needs judgment, so full automation is unlikely, but AI could potentially assist: suggesting decisions or drafting work for a person to check.";
+      } else if (a.rep === "yes" && a.rules === "yes" && a.digital === "yes") {
+        level = "High"; category = sol ? sol.kind : "Workflow automation";
+        text = stepLabel(i, name) + " is repetitive, rule-based and digital, so it could potentially be automated.";
+      } else {
+        level = "Medium"; category = sol ? sol.kind : "Workflow automation";
+        text = stepLabel(i, name) + " may be partly automatable. Confirm the \"not sure\" or \"partly\" answers to judge it properly.";
+      }
+      if (sol && level !== "Low") text += " Idea: " + sol.say + ".";
+      text += stake;
+      add("ah-" + d.id, "hypothesis", category, text,
+        "Your answers (" + answers + ")" + (sol && level !== "Low" ? '; the step name contains "' + solMatch + '"' : "") + (physical && a.rep !== "no" ? "; the step sounds physical" : "") + ".",
+        level);
+    });
+    if (counted >= 2) add("af-total", "fact", "Time at stake",
+      "Across the " + counted + " steps with known frequency and work time, the process uses about " + fmtWork(total) + " of hands-on work per week.",
+      "Sum of weekly work for those steps.");
+    return out;
+  }
+
+  function runAutomation(s) { s.analysis.auto = mergeFindings(s.analysis.auto, analyzeAutomation(s)); }
+
+  function renderAutomation(s) {
+    runAutomation(s);
+    var box = document.getElementById("auto-steps");
+    box.innerHTML = "";
+    if (!s.process.length) {
+      box.appendChild(el("p", "empty-group", "No steps yet. Add them in the Process column on the SIPOC map."));
+    } else {
+      var head = el("div", "auto-head");
+      ["Step", "Same way each time?", "Clear rules or judgment?", "Information digital?", "How often?"].forEach(function (t) { head.appendChild(el("div", null, t)); });
+      box.appendChild(head);
+      s.process.forEach(function (name, i) {
+        var d = s.details[i], a = d.auto;
+        var row = el("div", "auto-row");
+        var nm = el("div", "step-name");
+        nm.appendChild(el("span", "n", (i + 1) + "."));
+        nm.appendChild(document.createTextNode(name));
+        row.appendChild(nm);
+        function choice(key, label, opts) {
+          var sel = el("select");
+          sel.id = "a-" + key + "-" + d.id;
+          sel.dataset.k = key;
+          var o0 = el("option", null, "Choose..."); o0.value = ""; sel.appendChild(o0);
+          opts.forEach(function (o) { var op = el("option", null, o[1]); op.value = o[0]; if (a[key] === o[0]) op.selected = true; sel.appendChild(op); });
+          sel.classList.toggle("missing", !a[key]);
+          sel.addEventListener("change", function () { a[key] = sel.value; sel.classList.toggle("missing", !a[key]); autoRefreshSoon(); });
+          return field(label, sel);
+        }
+        row.appendChild(choice("rep", "Same way each time?", [["yes", "Yes"], ["no", "No, it varies"], ["not sure", "Not sure"]]));
+        row.appendChild(choice("rules", "Clear rules or judgment?", [["yes", "Clear rules"], ["no", "Needs judgment"], ["not sure", "Not sure"]]));
+        row.appendChild(choice("digital", "Information digital?", [["yes", "Yes, digital"], ["partly", "Partly"], ["no", "No, paper"], ["not sure", "Not sure"]]));
+        var w = el("div", "dur");
+        var inp = el("input"); inp.id = "a-vol-" + d.id; inp.inputMode = "decimal"; inp.placeholder = "?"; inp.value = a.vol;
+        inp.setAttribute("aria-label", "How often step " + (i + 1) + " happens");
+        inp.classList.toggle("missing", num(a.vol) == null);
+        inp.addEventListener("input", function () { a.vol = inp.value.trim(); inp.classList.toggle("missing", num(a.vol) == null); autoRefreshSoon(); });
+        var sel = el("select"); sel.setAttribute("aria-label", "Per");
+        [["day", "times a day"], ["week", "times a week"], ["month", "times a month"]].forEach(function (u) { var o = el("option", null, u[1]); o.value = u[0]; if (a.volUnit === u[0]) o.selected = true; sel.appendChild(o); });
+        sel.addEventListener("change", function () { a.volUnit = sel.value; autoRefreshSoon(); });
+        w.appendChild(inp); w.appendChild(sel);
+        var f = field("How often?", w); f.querySelector("label").htmlFor = inp.id;
+        row.appendChild(f);
+        box.appendChild(row);
+      });
+    }
+    renderFindingList(s, CTX.auto);
+    saveSoon();
+  }
+  var autoTimer = null;
+  function autoRefreshSoon() {
+    clearTimeout(autoTimer);
+    autoTimer = setTimeout(function () { var s = current(); runAutomation(s); renderFindingList(s, CTX.auto); saveSoon(); }, 350);
+  }
+
+  // =====================================================================
+  //  IMPROVEMENT PRIORITIZATION
+  // =====================================================================
+  var IMPACT = ["Not rated", "1: Very low", "2: Low", "3: Medium", "4: High", "5: Very high"];
+  var EFFORT = ["Not rated", "1: Very little", "2: Small", "3: Medium", "4: Large", "5: Very large"];
+  var QUADS = {
+    quick: { name: "Quick wins", note: "High impact, low effort. Do these first.", rank: 0 },
+    major: { name: "Major projects", note: "High impact, high effort. Plan these carefully.", rank: 1 },
+    fill: { name: "Fill-ins", note: "Low impact, low effort. Do when there is spare time.", rank: 2 },
+    reconsider: { name: "Reconsider", note: "Low impact, high effort. Usually not worth it.", rank: 3 }
+  };
+  function quadrant(m) {
+    if (!m.impact || !m.effort) return null;
+    var hi = m.impact >= 3, he = m.effort >= 3;
+    return hi && !he ? "quick" : hi && he ? "major" : !hi && !he ? "fill" : "reconsider";
+  }
+
+  // Turn a finding into a short action for the plan (the full finding is kept as "Based on")
+  var PATTERN_ACTION = {
+    approval: "Speed up or simplify the approval in ",
+    waiting: "Reduce the waiting in ",
+    check: "Decide whether the check in {S} is needed, or can catch errors earlier",
+    entry: "Remove re-typing of information in ",
+    transfer: "Simplify the hand-over in ",
+    rework: "Prevent the errors that cause rework in ",
+    paper: "Replace paper or manual handling in ",
+    manualtool: "Move {S} from {T} to a shared system",
+    bottleneck: "Reduce the queue before "
+  };
+  var AUTO_ACTION = {
+    "Workflow automation": "Automate {S} with a workflow tool",
+    "Existing software": "Automate {S} using existing business software",
+    "AI": "Pilot AI assistance for {S}",
+    "Digitize first": "Digitize the information used in {S}",
+    "Physical work": "Add digital support, such as scanning, to {S}",
+    "Low potential": "Standardize how {S} is done"
+  };
+  function labelForId(s, id) {
+    for (var i = 0; i < s.details.length; i++) if (s.details[i].id === id) return { label: stepLabel(i, s.process[i]), tool: s.details[i].tool };
+    return null;
+  }
+  function actionFor(s, f, auto) {
+    var key = String(f.key || "");
+    var id = key.split("-").pop();
+    var st = labelForId(s, id);
+    function fill(t) { return t.replace("{S}", st ? st.label : "this step").replace("{T}", st && st.tool ? st.tool.trim() : "a manual tool"); }
+    if (auto && /^ah-/.test(key) && AUTO_ACTION[f.category]) return fill(AUTO_ACTION[f.category]);
+    if (!auto && f.source === "rule") {
+      if (key === "h-mostly-waiting") return "Focus on cutting waiting time between steps";
+      if (key === "h-handoffs") return "Reduce the number of handoffs between teams";
+      if (key === "h-tools") return "Connect the tools so information is entered only once";
+      if (/^h-dup/.test(key)) return "Check for duplicated work between similar steps";
+      var kind = key.split("-")[1];
+      var a = PATTERN_ACTION[kind];
+      if (a && st) return a.indexOf("{S}") >= 0 ? fill(a) : a + st.label;
+    }
+    return (auto ? "Explore automating: " : "Address: ") + f.text;
+  }
+
+  // Approved items from the other tools become improvement candidates
+  function improvementSources(s) {
+    var src = [];
+    s.analysis.findings.forEach(function (f) {
+      if (f.status === "approved" && f.kind === "hypothesis") src.push({ key: "f:" + f.id, type: "Bottleneck", kind: "hypothesis",
+        text: f.text, title: actionFor(s, f, false) });
+    });
+    s.analysis.auto.forEach(function (f) {
+      if (f.status === "approved" && f.kind === "hypothesis") src.push({ key: "a:" + f.id, type: "Automation", kind: "hypothesis",
+        text: f.text, title: actionFor(s, f, true) });
+    });
+    s.analysis.whys.forEach(function (w) {
+      if (w.status !== "approved" || !String(w.rootCause || "").trim()) return;
+      var r = rootState(w);
+      src.push({ key: "w:" + w.id, type: "Root cause", kind: r.confirmed ? "fact" : "hypothesis",
+        text: "Root cause of \"" + w.problem + "\": " + w.rootCause,
+        title: String(w.fix || "").trim() || "Fix the root cause: " + w.rootCause });
+    });
+    return src;
+  }
+
+  function syncImprovements(s) {
+    var src = improvementSources(s), byKey = {};
+    src.forEach(function (x) { byKey[x.key] = x; });
+    s.analysis.improvements.forEach(function (m) {
+      if (m.sourceType === "You") return;
+      var x = byKey[m.sourceKey];
+      m.sourceMissing = !x;
+      if (x) { m.sourceText = x.text; m.sourceKind = x.kind; delete byKey[m.sourceKey]; }
+    });
+    src.forEach(function (x) {
+      if (!byKey[x.key]) return;
+      s.analysis.improvements.push({ id: newId(), sourceKey: x.key, sourceType: x.type, sourceKind: x.kind, sourceText: x.text,
+        title: x.title, impact: 0, effort: 0, owner: "", due: "", status: "proposed", sourceMissing: false });
+    });
+  }
+
+  function renderPriorities(s) {
+    syncImprovements(s);
+    var list = s.analysis.improvements;
+    var box = document.getElementById("imp-list");
+    box.innerHTML = "";
+    if (!list.length) box.appendChild(el("p", "empty-group",
+      "No improvements yet. Approve hypotheses in Bottleneck analysis or Automation, or approve a root cause in 5 Whys, and they will appear here. You can also add your own below."));
+    list.forEach(function (m, idx) { box.appendChild(improvementCard(s, m, idx)); });
+    box.querySelectorAll("textarea").forEach(fit);
+    renderMatrix(s);
+    renderPlan(s);
+    saveSoon();
+  }
+
+  function improvementCard(s, m, idx) {
+    var card = el("div", "finding imp " + m.status);
+    var top = el("div", "top");
+    top.appendChild(el("span", "num-dot", String(idx + 1)));
+    top.appendChild(el("span", "chip", m.sourceType === "You" ? "Added by you" : "From " + m.sourceType));
+    if (m.sourceType !== "You") top.appendChild(el("span", "badge " + m.sourceKind, m.sourceKind === "fact" ? "Fact" : "Hypothesis"));
+    var q = quadrant(m);
+    if (q) top.appendChild(el("span", "chip quad " + q, QUADS[q].name));
+    if (m.status !== "proposed") top.appendChild(el("span", "state", m.status === "approved" ? "In action plan" : "Rejected"));
+    card.appendChild(top);
+
+    var t = el("textarea"); t.rows = 1; t.value = m.title; t.setAttribute("aria-label", "Improvement");
+    t.addEventListener("input", function () { m.title = t.value; fit(t); saveSoon(); renderPlan(s); });
+    card.appendChild(t);
+    if (m.sourceText && m.sourceType !== "You") card.appendChild(el("div", "why", "Based on: " + m.sourceText));
+    if (m.sourceMissing) card.appendChild(el("div", "note", "The finding this came from is no longer approved. Kept so you don't lose your ratings."));
+
+    var g = el("div", "imp-fields");
+    function sel(label, key, opts) {
+      var sEl = el("select"); sEl.id = "i-" + key + "-" + m.id;
+      opts.forEach(function (o, v) { var op = el("option", null, o); op.value = v; if (+m[key] === v) op.selected = true; sEl.appendChild(op); });
+      sEl.classList.toggle("missing", !m[key]);
+      sEl.addEventListener("change", function () { m[key] = +sEl.value; saveSoon(); renderPriorities(s); });
+      var f = el("div"); var l = el("label", "fl", label); l.htmlFor = sEl.id; f.appendChild(l); f.appendChild(sEl); return f;
+    }
+    function txt(label, key, type, ph) {
+      var i = el("input"); i.id = "i-" + key + "-" + m.id; i.type = type; i.value = m[key] || ""; if (ph) i.placeholder = ph;
+      i.addEventListener("input", function () { m[key] = i.value; saveSoon(); renderPlan(s); });
+      var f = el("div"); var l = el("label", "fl", label); l.htmlFor = i.id; f.appendChild(l); f.appendChild(i); return f;
+    }
+    g.appendChild(sel("Impact", "impact", IMPACT));
+    g.appendChild(sel("Effort", "effort", EFFORT));
+    g.appendChild(txt("Owner", "owner", "text", "Who will do it?"));
+    g.appendChild(txt("Target date", "due", "date"));
+    card.appendChild(g);
+    if (!m.impact || !m.effort) {
+      var ql = el("div", "qline");
+      ql.appendChild(el("span", "badge question", "Question"));
+      ql.appendChild(el("span", null, "How much impact would this have, and how much effort would it take? Only you can judge this, so the app won't guess."));
+      card.appendChild(ql);
+    }
+    var acts = el("div", "acts");
+    function btn(label, cls, fn) { var b = el("button", cls, label); b.type = "button"; b.addEventListener("click", fn); acts.appendChild(b); }
+    function setSt(st) { m.status = st; saveSoon(); renderPriorities(s); }
+    if (m.status !== "approved") btn("Approve for action plan", "approve", function () { setSt("approved"); });
+    if (m.status !== "rejected") btn("Reject", null, function () { setSt("rejected"); });
+    if (m.status !== "proposed") btn("Undo", null, function () { setSt("proposed"); });
+    if (m.sourceType === "You" || m.sourceMissing) btn("Delete", null, function () {
+      s.analysis.improvements = s.analysis.improvements.filter(function (x) { return x !== m; }); saveSoon(); renderPriorities(s);
+    });
+    card.appendChild(acts);
+    return card;
+  }
+
+  function renderMatrix(s) {
+    var mx = document.getElementById("matrix");
+    mx.innerHTML = "";
+    var plot = el("div", "mx-plot");
+    var cells = {};
+    [["quick", "tl"], ["major", "tr"], ["fill", "bl"], ["reconsider", "br"]].forEach(function (q) {
+      var c = el("div", "mx-q " + q[0] + " " + q[1]);
+      c.appendChild(el("div", "mx-name", QUADS[q[0]].name));
+      c.appendChild(el("div", "mx-note", QUADS[q[0]].note));
+      var area = el("div", "mx-area");      // dots go here, below the label
+      c.appendChild(area);
+      cells[q[0]] = area;
+      plot.appendChild(c);
+    });
+    // Inside each quadrant, ratings get their own column (effort) and row (impact).
+    // High impact = 3, 4, 5 (top to bottom: 5, 4, 3); low = 2, 1. Low effort = 1, 2; high = 3, 4, 5.
+    function slot(m) {
+      var hiI = m.impact >= 3, hiE = m.effort >= 3;
+      var rows = hiI ? [5, 4, 3] : [2, 1], cols = hiE ? [3, 4, 5] : [1, 2];
+      return { r: rows.indexOf(m.impact), nr: rows.length, c: cols.indexOf(m.effort), nc: cols.length };
+    }
+    var spots = {};
+    var unrated = 0;
+    s.analysis.improvements.forEach(function (m, idx) {
+      if (m.status === "rejected") return;
+      if (!m.impact || !m.effort) { unrated++; return; }
+      var k = m.impact + "-" + m.effort;
+      var nth = spots[k] = (spots[k] || 0) + 1;
+      var dot = el("div", "mx-dot " + m.status, String(idx + 1));
+      var sl = slot(m);
+      var x = (sl.c + 0.5) / sl.nc * 100, y = (sl.r + 0.5) / sl.nr * 100;
+      dot.style.left = "calc(" + x + "% + " + ((nth - 1) % 3) * 28 + "px)";
+      dot.style.top = "calc(" + y + "% + " + Math.floor((nth - 1) / 3) * 28 + "px)";
+      dot.title = (idx + 1) + ". " + m.title + " (impact " + m.impact + ", effort " + m.effort + ")";
+      cells[quadrant(m)].appendChild(dot);
+    });
+    var wrap = el("div", "mx-wrap");
+    var yl = el("div", "mx-ylab", "Impact ↑");
+    wrap.appendChild(yl);
+    wrap.appendChild(plot);
+    wrap.appendChild(el("div", "mx-xlab", "Effort →"));
+    mx.appendChild(wrap);
+    var legend = el("p", "lead");
+    legend.textContent = "Numbers match the improvement list. Filled circles are approved for the action plan; outlined ones are still to review. A rating of 3 or more counts as high." +
+      (unrated ? " " + unrated + " improvement" + (unrated === 1 ? " is" : "s are") + " not shown until rated." : "");
+    mx.appendChild(legend);
+  }
+
+  function planItems(s) {
+    return s.analysis.improvements
+      .map(function (m, i) { return { m: m, n: i + 1, q: quadrant(m) }; })
+      .filter(function (x) { return x.m.status === "approved"; })
+      .sort(function (a, b) {
+        var ra = a.q ? QUADS[a.q].rank : 9, rb = b.q ? QUADS[b.q].rank : 9;
+        return (ra - rb) || ((b.m.impact || 0) - (a.m.impact || 0)) || ((a.m.effort || 9) - (b.m.effort || 9)) || (a.n - b.n);
+      });
+  }
+
+  function renderPlan(s) {
+    var box = document.getElementById("plan");
+    box.innerHTML = "";
+    var items = planItems(s);
+    document.getElementById("copyPlan").disabled = !items.length;
+    if (!items.length) { box.appendChild(el("p", "empty-group", "Approve improvements above to build the action plan.")); return; }
+    var tw = el("div", "table-wrap");
+    var tbl = el("table", "plan");
+    var thead = el("thead"), hr = el("tr");
+    ["Order", "Action", "Type", "Impact", "Effort", "Owner", "Target date"].forEach(function (h) { hr.appendChild(el("th", null, h)); });
+    thead.appendChild(hr); tbl.appendChild(thead);
+    var tb = el("tbody");
+    var qs = [];
+    items.forEach(function (x, i) {
+      var tr = el("tr");
+      tr.appendChild(el("td", "num", String(i + 1)));
+      var td = el("td"); td.appendChild(el("span", "num-dot", String(x.n))); td.appendChild(document.createTextNode(" " + x.m.title)); tr.appendChild(td);
+      var tq = el("td"); if (x.q) tq.appendChild(el("span", "chip quad " + x.q, QUADS[x.q].name)); else tq.appendChild(el("span", "na", "Not rated")); tr.appendChild(tq);
+      tr.appendChild(el("td", "num", x.m.impact ? String(x.m.impact) : "?"));
+      tr.appendChild(el("td", "num", x.m.effort ? String(x.m.effort) : "?"));
+      tr.appendChild(el("td", x.m.owner ? null : "na", x.m.owner || "Not set"));
+      tr.appendChild(el("td", x.m.due ? "num" : "na", x.m.due || "Not set"));
+      tb.appendChild(tr);
+      if (!x.q) qs.push("Rate impact and effort for improvement " + x.n + " so it can be placed in the plan.");
+      if (!String(x.m.owner || "").trim()) qs.push("Who owns improvement " + x.n + "?");
+      if (!x.m.due) qs.push("When should improvement " + x.n + " be done?");
+    });
+    tbl.appendChild(tb); tw.appendChild(tbl); box.appendChild(tw);
+    box.appendChild(el("p", "lead", "Recommended order, based on your ratings: Quick wins first, then Major projects, Fill-ins and Reconsider. Within each group, higher impact and lower effort come first."));
+    qs.slice(0, 6).forEach(function (t) {
+      var d = el("div", "qline"); d.appendChild(el("span", "badge question", "Question")); d.appendChild(el("span", null, t)); box.appendChild(d);
+    });
+    if (qs.length > 6) box.appendChild(el("p", "lead", "And " + (qs.length - 6) + " more detail" + (qs.length - 6 === 1 ? "" : "s") + " to fill in."));
+  }
+
+  document.getElementById("add-imp").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var input = document.getElementById("ai-text");
+    var t = input.value.trim();
+    if (!t) { input.focus(); return; }
+    var s = current();
+    s.analysis.improvements.push({ id: newId(), sourceKey: null, sourceType: "You", sourceKind: "", sourceText: "",
+      title: t, impact: 0, effort: 0, owner: "", due: "", status: "proposed", sourceMissing: false });
+    input.value = "";
+    saveSoon(); renderPriorities(s);
+  });
+
+  document.getElementById("copyPlan").addEventListener("click", function () {
+    var s = current();
+    var rows = [["Action plan", s.name], [], ["Order", "Action", "Type", "Impact (1-5)", "Effort (1-5)", "Owner", "Target date", "Based on"]];
+    planItems(s).forEach(function (x, i) {
+      rows.push([i + 1, x.m.title, x.q ? QUADS[x.q].name : "Not rated", x.m.impact || "", x.m.effort || "", x.m.owner || "", x.m.due || "",
+        x.m.sourceType === "You" ? "Added by you" : x.m.sourceType + " (" + (x.m.sourceKind === "fact" ? "fact" : "hypothesis") + "): " + x.m.sourceText]);
+    });
+    var text = rows.map(function (r) { return r.map(function (v) { return String(v == null ? "" : v).replace(/[\t\r\n]+/g, " "); }).join("\t"); }).join("\n");
+    function fallback() { openDialog({ title: "Copy the action plan", text: "Select all of the text below, copy it, then paste it into Excel, Numbers or an email.", area: text, okLabel: "Done", noCancel: true }); }
+    try { navigator.clipboard.writeText(text).then(function () { setStatus("Action plan copied. Paste into Excel, Numbers or an email."); }, fallback); }
+    catch (err) { fallback(); }
+  });
 
   showTab(activeTab);
 
