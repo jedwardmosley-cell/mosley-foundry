@@ -350,6 +350,25 @@
     .seg button { padding: 8px 6px; }
   }
 
+  /* ---------- Ask Claude ---------- */
+  .ai-row { border: 1px dashed var(--border); border-radius: 8px; padding: 10px 12px; margin: 0 0 14px; background: var(--item); }
+  .ai-line { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  button.ai-btn { background: var(--q-bg); color: var(--q-fg); border: 1px solid var(--q-fg); }
+  .ai-status { font-size: 13px; color: var(--muted); }
+  .ai-status.err { color: #c0392b; }
+  :root[data-theme="dark"] .ai-status.err { color: #ff8a80; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ai-status.err { color: #ff8a80; } }
+  .ai-note { font-size: 12px; color: var(--muted); margin: 6px 0 0; max-width: 75ch; }
+  .chip.claude { color: var(--q-fg); border-color: var(--q-fg); }
+  .ai-suggest { display: grid; gap: 6px; }
+  .ai-suggest > .ai-btn { width: fit-content; }
+  .ai-picks { display: grid; gap: 6px; }
+  button.ai-pick {
+    text-align: left; font-weight: 400; background: var(--panel); color: var(--text);
+    border: 1px dashed var(--q-fg); border-radius: 6px; padding: 7px 10px; font-size: 14px;
+  }
+  button.ai-pick:hover { background: var(--q-bg); }
+
   /* ---------- Automation ---------- */
   .auto-head, .auto-row {
     display: grid; grid-template-columns: minmax(150px, 1.3fr) 1fr 1fr 1fr 1.3fr;
@@ -500,7 +519,7 @@
   @media print {
     @page { size: landscape; margin: 12mm; }
     body { background: #fff; color: #1f2933; }
-    header, .add, .icon, .no-print, .overlay, .tabs, .subtabs, .finding .acts, .add-finding { display: none !important; }
+    header, .add, .icon, .no-print, .overlay, .tabs, .subtabs, .finding .acts, .add-finding, .ai-row, .ai-suggest { display: none !important; }
     .panel, .finding, .stat { break-inside: avoid; background: #fff; color: #1f2933; }
     .details input, .col, .items li { background: #fff; color: #1f2933; }
     .print-only { display: block; }
@@ -593,6 +612,14 @@
         <div><span class="badge hypothesis">Hypothesis</span> A possible issue, based on patterns. Check it before acting.</div>
         <div><span class="badge question">Question</span> Information is missing. Answer it to improve the analysis.</div>
       </div>
+      <div class="ai-row ai-only" hidden>
+        <div class="ai-line">
+          <button type="button" class="ai-btn" id="ai-bottleneck">Ask Claude for more ideas</button>
+          <button type="button" class="plain small" id="ai-bottleneck-stop" hidden>Stop</button>
+          <span class="ai-status" id="ai-bottleneck-status" role="status"></span>
+        </div>
+        <p class="ai-note">Sends this process's details to Claude using your own Claude account. Claude's suggestions are labeled "Suggested by Claude" and stay hypotheses until you approve them.</p>
+      </div>
       <p class="counts" id="counts"></p>
       <div id="findings"></div>
       <form class="add-finding" id="add-finding">
@@ -627,6 +654,14 @@
       <div class="panel">
         <h2>Automation opportunities</h2>
         <p class="lead">Every opportunity is a hypothesis until you check it. Edit the wording, then approve the ones worth pursuing; approved ones move to Priorities.</p>
+      <div class="ai-row ai-only" hidden>
+        <div class="ai-line">
+          <button type="button" class="ai-btn" id="ai-auto">Ask Claude for automation ideas</button>
+          <button type="button" class="plain small" id="ai-auto-stop" hidden>Stop</button>
+          <span class="ai-status" id="ai-auto-status" role="status"></span>
+        </div>
+        <p class="ai-note">Sends this process's details to Claude using your own Claude account. Claude's suggestions are labeled "Suggested by Claude" and stay hypotheses until you approve them.</p>
+      </div>
         <p class="counts" id="auto-counts"></p>
         <div id="auto-findings"></div>
       </div>
@@ -1621,6 +1656,7 @@
     if (f.kind !== "question") top.appendChild(el("span", "chip", f.category));
     if (f.level) top.appendChild(el("span", "chip level " + f.level.toLowerCase(), f.level + " potential"));
     if (f.source === "user") top.appendChild(el("span", "chip", "Added by you"));
+    if (f.source === "claude") top.appendChild(el("span", "chip claude", "Suggested by Claude"));
     if (f.edited) top.appendChild(el("span", "chip", "Edited"));
     if (f.status !== "proposed") top.appendChild(el("span", "state",
       f.status === "approved" ? "Approved" : (f.kind === "question" ? "Not applicable" : "Rejected")));
@@ -1655,7 +1691,7 @@
       if (f.status !== "proposed") btn("Undo", null, function () { setStatus2("proposed"); });
       if (f.edited) btn("Restore suggested wording", null, function () { f.edited = false; ctx.run(s); saveSoon(); rerender(); });
     }
-    if (f.source === "user" || f.stale) btn("Delete", null, function () {
+    if (f.source === "user" || f.source === "claude" || f.stale) btn("Delete", null, function () {
       s.analysis[ctx.arr] = s.analysis[ctx.arr].filter(function (x) { return x !== f; });
       saveSoon(); rerender();
     });
@@ -1895,6 +1931,10 @@
       row.appendChild(ev);
 
       row.appendChild(el("div", "tips"));
+      if (aiAvailable()) row.appendChild(whySuggest(s, w, i, row, ans, function (t) {
+        x.answer = t; x.confirmed = false; ans.value = t; fit(ans); paint();
+        saveSoon(); refreshTips(row, x, i); refreshRoot(); refreshQuestions(); refreshLabels();
+      }));
       if (i === w.whys.length - 1 && i > 0) {
         var rm = el("button", "plain small", "Remove this why"); rm.type = "button";
         rm.addEventListener("click", function () { w.whys.pop(); saveSoon(); renderWhys(s); });
@@ -2251,11 +2291,11 @@
   function improvementSources(s) {
     var src = [];
     s.analysis.findings.forEach(function (f) {
-      if (f.status === "approved" && f.kind === "hypothesis") src.push({ key: "f:" + f.id, type: "Bottleneck", kind: "hypothesis",
+      if (f.status === "approved" && f.kind === "hypothesis") src.push({ key: "f:" + f.id, type: f.source === "claude" ? "Bottleneck (Claude)" : "Bottleneck", kind: "hypothesis",
         text: f.text, title: actionFor(s, f, false) });
     });
     s.analysis.auto.forEach(function (f) {
-      if (f.status === "approved" && f.kind === "hypothesis") src.push({ key: "a:" + f.id, type: "Automation", kind: "hypothesis",
+      if (f.status === "approved" && f.kind === "hypothesis") src.push({ key: "a:" + f.id, type: f.source === "claude" ? "Automation (Claude)" : "Automation", kind: "hypothesis",
         text: f.text, title: actionFor(s, f, true) });
     });
     s.analysis.whys.forEach(function (w) {
@@ -2469,6 +2509,208 @@
     try { navigator.clipboard.writeText(text).then(function () { setStatus("Action plan copied. Paste into Excel, Numbers or an email."); }, fallback); }
     catch (err) { fallback(); }
   });
+
+  // =====================================================================
+  //  ASK CLAUDE (only on the private Claude page; uses the viewer's own
+  //  Claude account; every suggestion is a hypothesis for the user to review)
+  // =====================================================================
+  var aiSample = null;   // the "ask Claude" function, once available
+
+  function aiAvailable() { return !!aiSample; }
+  function showAiControls() {
+    document.querySelectorAll(".ai-only").forEach(function (n) { n.hidden = !aiSample; });
+  }
+  try {
+    if (window.claude && typeof window.claude.use === "function") {
+      window.claude.use("sample").then(function (fn) {
+        aiSample = fn || null;
+        showAiControls();
+        if (aiSample && activeTab === "analysis" && activeSub === "whys") renderWhys(current());
+      }, function () { aiSample = null; showAiControls(); });
+    }
+  } catch (e) { aiSample = null; }
+
+  function aiErrorText(code) {
+    switch (code) {
+      case "cancelled": return "";
+      case "not_granted": case "sampling_disabled": case "not_declared": case "capability_disabled": case "capability_removed":
+        return "Claude isn't available on this page, so suggestions are turned off. Everything else still works.";
+      case "rate_limited": return "Claude is busy, or your Claude usage limit has been reached. Try again a bit later.";
+      case "session_expired": return "Please sign in to Claude again, then try again.";
+      case "invalid_json": return "Claude's answer couldn't be read. Try again.";
+      case "refused": return "Claude couldn't help with this one. Try changing the wording of your steps.";
+      case "prompt_too_large": return "This process has too much text to send at once.";
+      default: return "Something went wrong reaching Claude. Try again.";
+    }
+  }
+  function aiPermanent(code) {
+    return ["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"].indexOf(code) >= 0;
+  }
+
+  // Describe the process in plain text, using only what the user entered
+  function processText(s) {
+    var L = [];
+    function known(v) { v = String(v == null ? "" : v).trim(); return v ? v : "unknown"; }
+    L.push("Process name: " + known(s.name));
+    L.push("Starts when: " + known(s.start));
+    L.push("Ends when: " + known(s.end));
+    ["suppliers", "inputs", "outputs", "customers"].forEach(function (k) {
+      L.push(k.charAt(0).toUpperCase() + k.slice(1) + ": " + (s[k].length ? s[k].join("; ") : "none listed"));
+    });
+    L.push("Process steps:");
+    s.process.forEach(function (name, i) {
+      var d = s.details[i], a = d.auto || {};
+      var work = num(d.work) == null ? "unknown" : d.work + " " + (d.workUnit === "hr" ? "hours" : "minutes");
+      var wait = num(d.wait) == null ? "unknown" : d.wait + " " + ({ min: "minutes", hr: "hours", day: "days" }[d.waitUnit] || "");
+      var vol = num(a.vol) == null ? "unknown" : a.vol + " times a " + (a.volUnit || "week");
+      L.push("  Step " + (i + 1) + ": " + name + " | who: " + known(d.role) + " | hands-on work: " + work + " | wait before it: " + wait +
+        " | tool: " + known(d.tool) + " | same way each time: " + known(a.rep) + " | clear rules: " + known(a.rules) +
+        " | information digital: " + known(a.digital) + " | how often: " + vol);
+    });
+    return L.join("\n").slice(0, 12000);
+  }
+  function existingText(list) {
+    var t = list.filter(function (f) { return f.kind !== "question"; }).map(function (f) { return "- " + f.text; }).join("\n");
+    return (t || "(none yet)").slice(0, 6000);
+  }
+  function normKey(t) { return String(t || "").toLowerCase().replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim(); }
+
+  var RULES = "Rules you must follow:\n" +
+    "- Use ONLY the information given. Do not invent numbers, times, names, volumes, tools or facts.\n" +
+    "- Everything you suggest is a possibility, not a fact. Use words like \"may\" or \"could\".\n" +
+    "- If something important is unknown, ask a short question about it instead of guessing.\n" +
+    "- Refer to steps as Step 1, Step 2 and so on, with the step name in quotes.\n" +
+    "- Focus on the process, not on blaming people.\n" +
+    "- Do not repeat anything already listed.\n" +
+    "- Plain, professional English. One or two sentences each. Do not use em dashes.";
+
+  // Adds Claude's suggestions to a findings list, labeled and unapproved
+  function addClaudeFindings(s, arr, hyps, questions, allowedCats, withLevel) {
+    var list = s.analysis[arr];
+    var seen = {};
+    list.forEach(function (f) { seen[normKey(f.text)] = 1; });
+    var added = 0;
+    (Array.isArray(hyps) ? hyps : []).slice(0, 6).forEach(function (h) {
+      if (!h || typeof h.text !== "string" || !h.text.trim()) return;
+      var text = h.text.trim().slice(0, 600);
+      if (seen[normKey(text)]) return;
+      seen[normKey(text)] = 1;
+      var cat = allowedCats.indexOf(h.category) >= 0 ? h.category : allowedCats[allowedCats.length - 1];
+      var lvl = withLevel && ["High", "Medium", "Low"].indexOf(h.level) >= 0 ? h.level : "";
+      list.push({ id: newId(), key: null, source: "claude", kind: "hypothesis", category: cat, level: lvl,
+        text: text, evidence: "Suggested by Claude" + (typeof h.reason === "string" && h.reason.trim() ? ". Reason given: " + h.reason.trim().slice(0, 300) : "."),
+        status: "proposed", edited: false, stale: false, order: 3000 + list.length });
+      added++;
+    });
+    (Array.isArray(questions) ? questions : []).slice(0, 4).forEach(function (q) {
+      if (typeof q !== "string" || !q.trim()) return;
+      var text = q.trim().slice(0, 300);
+      if (seen[normKey(text)]) return;
+      seen[normKey(text)] = 1;
+      list.push({ id: newId(), key: null, source: "claude", kind: "question", category: "Information needed", level: "",
+        text: text, evidence: "Asked by Claude: this information would help the analysis.",
+        status: "proposed", edited: false, stale: false, order: 3000 + list.length });
+      added++;
+    });
+    return added;
+  }
+
+  // One "Ask Claude" control: button, Stop, status line
+  function wireAi(prefix, buildPrompt, onResult, tier) {
+    var btn = document.getElementById(prefix), stop = document.getElementById(prefix + "-stop"), status = document.getElementById(prefix + "-status");
+    var ctl = null;
+    stop.addEventListener("click", function () { if (ctl) ctl.abort(); });
+    btn.addEventListener("click", function () {
+      if (!aiSample) return;
+      var s = current();
+      ctl = new AbortController();
+      btn.disabled = true; stop.hidden = false;
+      status.className = "ai-status"; status.textContent = "Claude is thinking... this can take up to a minute.";
+      aiSample.json(buildPrompt(s), { signal: ctl.signal, modelTier: tier || "default" }).then(function (data) {
+        var n = onResult(s, data || {});
+        status.textContent = n ? "Added " + n + " suggestion" + (n === 1 ? "" : "s") + " from Claude below. Review each one before approving." : "Claude had nothing new to add.";
+        saveSoon();
+      }, function (e) {
+        var code = e && e.code;
+        status.className = "ai-status err";
+        status.textContent = aiErrorText(code);
+        if (aiPermanent(code)) { aiSample = null; setTimeout(showAiControls, 6000); }
+      }).then(function () { btn.disabled = false; stop.hidden = true; ctl = null; });
+    });
+  }
+
+  wireAi("ai-bottleneck", function (s) {
+    return "You are helping a process improvement analyst review a SIPOC process map.\n" +
+      "Suggest up to 5 additional possible issues in this process: delays, duplication, unnecessary handoffs, or waste.\n\n" + RULES + "\n\n" +
+      "Reply with only JSON in this shape:\n" +
+      '{"hypotheses":[{"category":"Delay","text":"Step 2 \\"Check inventory\\" may ...","reason":"why you think so, based on the data"}],"questions":["A short question about missing information"]}\n' +
+      'category must be one of "Delay", "Handoff", "Duplication", "Waste", "Other". Use [] when you have nothing.\n\n' +
+      "PROCESS DATA\n" + processText(s) + "\n\nALREADY LISTED (do not repeat)\n" + existingText(s.analysis.findings);
+  }, function (s, data) {
+    var n = addClaudeFindings(s, "findings", data.hypotheses, data.questions, ["Delay", "Handoff", "Duplication", "Waste", "Other"], false);
+    renderFindings(s);
+    return n;
+  });
+
+  wireAi("ai-auto", function (s) {
+    return "You are helping a process improvement analyst find automation opportunities in a business process.\n" +
+      "Suggest up to 5 activities that could potentially be automated or assisted, using AI, workflow automation, or common business software.\n" +
+      "You may name well-known products only as examples (\"for example ...\"). Consider the answers about repetition, rules and digital information. " +
+      "Be realistic: say when a step is a poor fit.\n\n" + RULES + "\n\n" +
+      "Reply with only JSON in this shape:\n" +
+      '{"hypotheses":[{"category":"Workflow automation","level":"High","text":"Step 5 \\"Send invoice\\" could potentially ...","reason":"why, based on the data"}],"questions":["A short question about missing information"]}\n' +
+      'category must be one of "Workflow automation", "AI", "Existing software", "Digitize first", "Low potential". level must be "High", "Medium" or "Low". Use [] when you have nothing.\n\n' +
+      "PROCESS DATA\n" + processText(s) + "\n\nALREADY LISTED (do not repeat)\n" + existingText(s.analysis.auto);
+  }, function (s, data) {
+    var n = addClaudeFindings(s, "auto", data.hypotheses, data.questions, ["Workflow automation", "AI", "Existing software", "Digitize first", "Low potential"], true);
+    renderFindingList(s, CTX.auto);
+    return n;
+  });
+
+  // 5 Whys: suggest possible answers for one "Why?"
+  function whySuggest(s, w, i, row, ans, onPick) {
+    var box = el("div", "ai-suggest");
+    var b = el("button", "plain small ai-btn", "Suggest possible answers"); b.type = "button";
+    var stop = el("button", "plain small", "Stop"); stop.type = "button"; stop.hidden = true;
+    var st = el("span", "ai-status");
+    var picks = el("div", "ai-picks");
+    box.appendChild(b); box.appendChild(stop); box.appendChild(st); box.appendChild(picks);
+    var ctl = null;
+    stop.addEventListener("click", function () { if (ctl) ctl.abort(); });
+    b.addEventListener("click", function () {
+      if (!aiSample) return;
+      var prev = i === 0 ? w.problem : w.whys[i - 1].answer;
+      if (!String(prev || "").trim()) { st.className = "ai-status err"; st.textContent = "Fill in the answer above first."; return; }
+      var chain = w.whys.slice(0, i).map(function (x, k) {
+        return "Why " + (k + 1) + ": " + x.answer + " (" + (x.confirmed && String(x.evidence || "").trim() ? "confirmed: " + x.evidence : "suspected, not confirmed") + ")";
+      }).join("\n");
+      var prompt = "You are coaching someone through a 5 Whys root cause analysis.\n" +
+        "Problem: " + w.problem + "\n" + (chain ? "Answers so far:\n" + chain + "\n" : "") +
+        "\nSuggest 3 different possible answers to this question: Why does \"" + String(prev).trim() + "\" happen?\n" +
+        "Each answer must be one short sentence, describe a cause in the process or system (not a person's fault), and be something the person can check. " +
+        "Do not invent specific numbers, names or times. Do not use em dashes.\n\n" +
+        "Background on the process:\n" + processText(s).slice(0, 4000) + "\n\n" +
+        'Reply with only JSON: {"answers":["...","...","..."]}';
+      ctl = new AbortController();
+      b.disabled = true; stop.hidden = false; picks.innerHTML = "";
+      st.className = "ai-status"; st.textContent = "Claude is thinking...";
+      aiSample.json(prompt, { signal: ctl.signal, modelTier: "quick" }).then(function (data) {
+        var list = (data && Array.isArray(data.answers) ? data.answers : []).filter(function (a) { return typeof a === "string" && a.trim(); }).slice(0, 3);
+        st.textContent = list.length ? "Suggested by Claude. Each is only a possibility: pick one to use it as a suspected answer, then check it." : "Claude had no suggestions.";
+        list.forEach(function (a) {
+          var p = el("button", "ai-pick", a.trim()); p.type = "button";
+          p.addEventListener("click", function () { onPick(a.trim()); });
+          picks.appendChild(p);
+        });
+      }, function (e) {
+        st.className = "ai-status err"; st.textContent = aiErrorText(e && e.code);
+        if (aiPermanent(e && e.code)) aiSample = null;
+      }).then(function () { b.disabled = false; stop.hidden = true; ctl = null; });
+    });
+    return box;
+  }
+
+  showAiControls();
 
   showTab(activeTab);
 
