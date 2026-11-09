@@ -289,6 +289,67 @@
   .add-finding { display: grid; grid-template-columns: 150px 150px 1fr auto; gap: 8px; margin-top: 14px; }
   .add-finding button { background: var(--brand); color: #fff; }
 
+  /* ---------- 5 Whys ---------- */
+  .why-list { display: flex; gap: 8px; flex-wrap: wrap; }
+  .why-chip {
+    background: var(--panel); color: var(--text); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 12px; text-align: left; font-weight: 600; max-width: 100%;
+    display: inline-flex; gap: 8px; align-items: center; overflow-wrap: anywhere;
+  }
+  .why-chip[aria-pressed="true"] { border-color: var(--brand); box-shadow: inset 0 0 0 1px var(--brand); }
+  .why-chip.new { color: var(--brand); border-style: dashed; }
+  :root[data-theme="dark"] .why-chip.new { color: var(--fact-fg); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .why-chip.new { color: var(--fact-fg); } }
+  .dot.ok { font-size: 11px; font-weight: 700; color: var(--ok); background: var(--ok-bg); padding: 1px 6px; border-radius: 4px; }
+  .why-new { display: grid; gap: 6px; max-width: 720px; }
+  label.fl { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; margin-top: 8px; display: block; }
+  #why-editor textarea, #why-editor input, #why-editor select {
+    width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px;
+    background: var(--panel); color: var(--text); font-family: inherit; font-size: 14px;
+    line-height: 1.45; resize: none; overflow: hidden; min-width: 0;
+  }
+  #why-editor textarea.big { font-size: 16px; font-weight: 600; }
+  .why-head { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .why-head h2, .why-head h3 { margin: 0; }
+  .why-head .plain.small, .why-head .state { margin-left: auto; }
+  .why-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .why-sub { font-size: 15px; margin: 22px 0 4px; }
+  .why-chain { display: grid; gap: 10px; counter-reset: why; }
+  .why-step {
+    border: 1px solid var(--border); border-left: 4px solid var(--p);
+    border-radius: 8px; padding: 12px; display: grid; gap: 8px; background: var(--item);
+  }
+  .why-q { display: flex; gap: 8px; align-items: baseline; font-weight: 600; overflow-wrap: anywhere; min-width: 0; }
+  .why-n { color: #fff; background: var(--p); border-radius: 4px; padding: 1px 7px; font-size: 12px; white-space: nowrap; }
+  .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; width: fit-content; max-width: 100%; flex-wrap: wrap; }
+  .seg button { border: none; border-radius: 0; background: var(--panel); color: var(--muted); font-size: 13px; padding: 6px 10px; }
+  .seg button.on.hyp { background: var(--hyp-bg); color: var(--hyp-fg); }
+  .seg button.on.fact { background: var(--fact-bg); color: var(--fact-fg); }
+  .tips { display: grid; gap: 4px; }
+  .tip { font-size: 13px; padding: 6px 10px; border-radius: 6px; }
+  .tip.warn { background: var(--hyp-bg); color: var(--hyp-fg); }
+  .tip.good { background: var(--ok-bg); color: var(--ok); }
+  .row-acts { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+  .row-acts .approve { background: var(--ok-bg); color: var(--ok); }
+  button.plain.small, .plain.small { font-size: 13px; padding: 4px 10px; width: fit-content; }
+  button:disabled { opacity: 0.5; cursor: default; }
+  .muted-note { font-size: 13px; color: var(--muted); }
+  .why-questions { display: grid; gap: 6px; margin-top: 14px; }
+  .qline { display: flex; gap: 8px; align-items: baseline; font-size: 14px; }
+  .qline.flash { animation: flash 1s ease 1; }
+  @keyframes flash { 0%, 100% { background: transparent; } 30% { background: var(--q-bg); } }
+  @media (prefers-reduced-motion: reduce) { .qline.flash { animation: none; } }
+  .root { margin-top: 18px; border-top: 2px solid var(--border); padding-top: 4px; display: grid; gap: 8px; }
+  .root .state { font-size: 12px; font-weight: 700; }
+  .root.approved .state { color: var(--ok); }
+  .root.rejected .state { color: var(--no); }
+  .form-error { color: #c0392b; font-size: 13px; margin: 4px 0 0; }
+  #why-editor p.lead { margin: 0 0 10px; color: var(--muted); font-size: 13px; max-width: 75ch; }
+  @media (max-width: 600px) {
+    .seg { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+    .seg button { padding: 8px 6px; }
+  }
+
   @media (max-width: 860px) {
     .steps-head { display: none; }
     .step-row { grid-template-columns: 1fr 1fr; padding: 12px 0; }
@@ -414,12 +475,13 @@
 
   <section id="view-analysis" role="tabpanel" aria-labelledby="tab-analysis" hidden>
     <div class="subtabs" role="tablist" aria-label="Analysis tools">
-      <button class="subtab" role="tab" aria-selected="true">Bottleneck analysis</button>
-      <button class="subtab" role="tab" disabled>5 Whys <small>coming next</small></button>
+      <button class="subtab" role="tab" id="st-bottleneck" aria-selected="true">Bottleneck analysis</button>
+      <button class="subtab" role="tab" id="st-whys" aria-selected="false">5 Whys</button>
       <button class="subtab" role="tab" disabled>Automation <small>coming next</small></button>
       <button class="subtab" role="tab" disabled>Priorities <small>coming next</small></button>
     </div>
 
+    <div id="sub-bottleneck">
     <div class="panel" id="steps-panel">
       <h2>Step details</h2>
       <p class="lead">Add what you know about each process step. Leave anything you don't know blank: the analysis will ask for it instead of guessing. Steps come from the Process column on the SIPOC map.</p>
@@ -453,6 +515,16 @@
         <input id="af-text" placeholder="Add your own finding" aria-label="Your finding">
         <button type="submit">Add</button>
       </form>
+    </div>
+    </div>
+
+    <div id="sub-whys" hidden>
+      <div class="panel">
+        <h2>5 Whys root cause analysis</h2>
+        <p class="lead">Start with one clear problem, then keep asking "Why?" until you reach a cause the process can fix. Each answer is a hypothesis until you confirm it with evidence.</p>
+        <div class="why-list" id="why-list"></div>
+      </div>
+      <div class="panel" id="why-editor"></div>
     </div>
   </section>
 </main>
@@ -495,7 +567,7 @@
     return {
       id: newId(), name: name || "Untitled process", owner: "", date: today(), start: "", end: "",
       suppliers: [], inputs: [], process: [], outputs: [], customers: [],
-      details: [], analysis: { findings: [] }
+      details: [], analysis: { findings: [], whys: [] }
     };
   }
 
@@ -513,6 +585,7 @@
     if (s.details.length > s.process.length) s.details.length = s.process.length;
     if (!s.analysis || typeof s.analysis !== "object") s.analysis = {};
     if (!Array.isArray(s.analysis.findings)) s.analysis.findings = [];
+    if (!Array.isArray(s.analysis.whys)) s.analysis.whys = [];
     return s;
   }
 
@@ -538,6 +611,14 @@
       x.role = r[0]; x.work = String(r[1]); x.workUnit = r[2]; x.wait = String(r[3]); x.waitUnit = r[4]; x.tool = r[5];
       return x;
     });
+    s.analysis = { findings: [], whys: [{
+      id: newId(), problem: "Orders wait 1 day before picking starts (example)", stepId: s.details[2].id, fromFinding: "",
+      whys: [
+        { id: newId(), answer: "Pick lists are only printed once a day, first thing in the morning.", confirmed: true, evidence: "Checked print times on the warehouse printer for one week." },
+        { id: newId(), answer: "The warehouse plans all picking as one daily batch.", confirmed: false, evidence: "" },
+        { id: newId(), answer: "There is no standard for when new orders are released to the warehouse.", confirmed: false, evidence: "" }
+      ],
+      rootCause: "", rootEdited: false, fix: "", status: "proposed" }] };
     return s;
   }
 
@@ -571,9 +652,15 @@
   function saveSoon() {
     setStatus("Saving...");
     clearTimeout(saveTimer);
-    saveTimer = setTimeout(save, 300);
+    saveTimer = setTimeout(function () { saveTimer = null; save(); }, 300);
   }
   function setStatus(msg) { document.getElementById("status").textContent = msg; }
+  // Save right away if the page is closed, reloaded or put in the background,
+  // so a change made a moment before is never lost.
+  function flushSave() { if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; save(); } }
+  window.addEventListener("pagehide", flushSave);
+  window.addEventListener("beforeunload", flushSave);
+  document.addEventListener("visibilitychange", function () { if (document.visibilityState === "hidden") flushSave(); });
 
   function current() {
     for (var i = 0; i < state.sipocs.length; i++) {
@@ -733,7 +820,7 @@
     renderPicker();
     renderDetails();
     renderGrid();
-    if (activeTab === "analysis") renderAnalysis();
+    if (activeTab === "analysis") showSub(activeSub);
   }
 
   // ---------- Buttons and fields ----------
@@ -920,7 +1007,7 @@
     document.getElementById("tab-analysis").setAttribute("aria-selected", String(name === "analysis"));
     document.getElementById("view-sipoc").hidden = name !== "sipoc";
     document.getElementById("view-analysis").hidden = name !== "analysis";
-    if (name === "analysis") renderAnalysis();
+    if (name === "analysis") showSub(activeSub);
     else fitAll();
   }
   document.getElementById("tab-sipoc").addEventListener("click", function () { showTab("sipoc"); });
@@ -1426,6 +1513,334 @@
     saveSoon();
     renderFindings(s);
   });
+
+  // =====================================================================
+  //  5 WHYS ROOT CAUSE ANALYSIS
+  // =====================================================================
+  var SUB_KEY = "processiq.subtab";
+  var activeSub = "bottleneck";
+  try { if (localStorage.getItem(SUB_KEY) === "whys") activeSub = "whys"; } catch (e) {}
+  var activeWhyId = null;     // which 5 Whys is open
+  var creatingWhy = false;    // showing the "new" form
+
+  function showSub(name) {
+    activeSub = name;
+    try { localStorage.setItem(SUB_KEY, name); } catch (e) {}
+    document.getElementById("st-bottleneck").setAttribute("aria-selected", String(name === "bottleneck"));
+    document.getElementById("st-whys").setAttribute("aria-selected", String(name === "whys"));
+    document.getElementById("sub-bottleneck").hidden = name !== "bottleneck";
+    document.getElementById("sub-whys").hidden = name !== "whys";
+    if (name === "whys") { runAnalysis(current()); renderWhys(current()); saveSoon(); }
+    else renderAnalysis();
+  }
+  document.getElementById("st-bottleneck").addEventListener("click", function () { showSub("bottleneck"); });
+  document.getElementById("st-whys").addEventListener("click", function () { showSub("whys"); });
+
+  function blankWhy(problem) {
+    return { id: newId(), problem: problem || "", stepId: "", fromFinding: "",
+      whys: [{ id: newId(), answer: "", confirmed: false, evidence: "" }],
+      rootCause: "", rootEdited: false, fix: "", status: "proposed" };
+  }
+
+  // ----- Coaching rules (simple wording checks) -----
+  var BLAME = /\b(forg[eo]t\w*|lazy|careless\w*|human error|mistakes?|fault|sloppy|incompetent\w*|not careful|didn'?t (care|bother|pay attention|check)|wasn'?t paying attention|bad attitude)\b/i;
+  var SYSTEMIC = /\b(no (standard|procedure|process|checklist|system|training|owner|rule|policy|alert|reminder|template|schedule)|not (defined|documented|trained|tracked|automated|standardi[sz]ed)|policy|procedure|training|lack of|there is no|there are no|we don'?t have|isn'?t (defined|documented)|no one owns|nobody owns|not assigned|never (been )?(defined|documented|written down|agreed|set|trained|assigned)|undocumented|unclear (rules?|process|ownership|responsibilit\w*)|no clear)\b/i;
+
+  function words(t) { return String(t || "").trim().split(/\s+/).filter(Boolean).length; }
+  function normText(t) { return String(t || "").toLowerCase().replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim(); }
+
+  function coach(w, i, list) {
+    var tips = [];
+    var a = String(w.answer || "").trim();
+    if (!a) return tips;
+    if (words(a) < 4) tips.push({ t: "warn", m: "Add a bit more detail so the next \"Why?\" has something to work with." });
+    if (BLAME.test(a)) tips.push({ t: "warn", m: "This answer points at a person. People rarely are the root cause. Ask why the process allowed it to happen." });
+    if (i > 0 && normText(a) === normText(list[i - 1].answer)) tips.push({ t: "warn", m: "This repeats the previous answer. Try to go one level deeper." });
+    if (w.confirmed && !String(w.evidence || "").trim()) tips.push({ t: "warn", m: "Marked as confirmed: add the evidence (data, observation, or who confirmed it)." });
+    if (i >= 2 && SYSTEMIC.test(a)) tips.push({ t: "good", m: "This looks like something the process can fix. You may have reached the root cause." });
+    return tips;
+  }
+
+  function rootState(w) {
+    var filled = w.whys.filter(function (x) { return String(x.answer || "").trim(); });
+    var all = filled.length > 0 && filled.every(function (x) { return x.confirmed && String(x.evidence || "").trim(); });
+    return { filled: filled.length, confirmed: all };
+  }
+
+  function stepName(s, stepId) {
+    for (var i = 0; i < s.details.length; i++) if (s.details[i].id === stepId) return "Step " + (i + 1) + ": " + s.process[i];
+    return "";
+  }
+
+  // ----- Drawing -----
+  function renderWhys(s) {
+    var list = s.analysis.whys;
+    if (activeWhyId && !list.some(function (w) { return w.id === activeWhyId; })) activeWhyId = null;
+    if (!activeWhyId && list.length && !creatingWhy) activeWhyId = list[0].id;
+
+    renderWhyList(s);
+
+    var ed = document.getElementById("why-editor");
+    ed.innerHTML = "";
+    if (creatingWhy || !list.length) { renderNewWhy(s, ed); return; }
+    var w = list.filter(function (x) { return x.id === activeWhyId; })[0];
+    renderWhyEditor(s, w, ed);
+  }
+
+  function renderWhyList(s) {
+    var list = s.analysis.whys;
+    var box = document.getElementById("why-list");
+    box.innerHTML = "";
+    list.forEach(function (w, i) {
+      var b = el("button", "why-chip", (w.problem || "Untitled problem").slice(0, 60) + ((w.problem || "").length > 60 ? "..." : ""));
+      b.type = "button";
+      b.setAttribute("aria-pressed", String(w.id === activeWhyId && !creatingWhy));
+      if (w.status === "approved") b.appendChild(el("span", "dot ok", "Approved"));
+      b.addEventListener("click", function () { activeWhyId = w.id; creatingWhy = false; renderWhys(s); });
+      box.appendChild(b);
+    });
+    var nb = el("button", "why-chip new", "+ New 5 Whys");
+    nb.type = "button";
+    nb.setAttribute("aria-pressed", String(creatingWhy || !list.length));
+    nb.addEventListener("click", function () { creatingWhy = true; renderWhys(s); });
+    box.appendChild(nb);
+  }
+
+  function renderNewWhy(s, ed) {
+    ed.appendChild(el("h2", null, "Start a new 5 Whys"));
+    ed.appendChild(el("p", "lead", "Pick one specific problem. A good problem statement says what happens, where, and how much, for example \"Orders wait 1 day before picking starts.\" Avoid naming people."));
+
+    var approved = s.analysis.findings.filter(function (f) { return f.kind !== "question" && f.status === "approved"; });
+    var form = el("form", "why-new");
+
+    var l1 = el("label", "fl", "Start from an approved finding (optional)");
+    var sel = el("select"); sel.id = "wn-finding"; l1.htmlFor = sel.id;
+    var o0 = el("option", null, approved.length ? "Choose a finding..." : "No approved findings yet"); o0.value = ""; sel.appendChild(o0);
+    approved.forEach(function (f) { var o = el("option", null, (f.kind === "fact" ? "Fact: " : "Hypothesis: ") + f.text.slice(0, 110)); o.value = f.id; sel.appendChild(o); });
+    sel.disabled = !approved.length;
+
+    var l2 = el("label", "fl", "Problem statement");
+    var prob = el("textarea"); prob.id = "wn-problem"; prob.rows = 2; l2.htmlFor = prob.id;
+    prob.placeholder = "What is going wrong?";
+    sel.addEventListener("change", function () {
+      var f = approved.filter(function (x) { return x.id === sel.value; })[0];
+      if (f) prob.value = f.text;
+    });
+
+    var l3 = el("label", "fl", "Which step does it affect? (optional)");
+    var st = el("select"); st.id = "wn-step"; l3.htmlFor = st.id;
+    var so = el("option", null, "Not tied to one step"); so.value = ""; st.appendChild(so);
+    s.process.forEach(function (p, i) { var o = el("option", null, "Step " + (i + 1) + ": " + p); o.value = s.details[i].id; st.appendChild(o); });
+
+    var err = el("p", "form-error"); err.hidden = true; err.setAttribute("role", "alert");
+    var acts = el("div", "row-acts");
+    var go = el("button", "primary", "Start"); go.type = "submit";
+    acts.appendChild(go);
+    if (s.analysis.whys.length) {
+      var cancel = el("button", "plain", "Cancel"); cancel.type = "button";
+      cancel.addEventListener("click", function () { creatingWhy = false; renderWhys(s); });
+      acts.appendChild(cancel);
+    }
+    [l1, sel, l2, prob, l3, st, err, acts].forEach(function (n) { form.appendChild(n); });
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      if (!prob.value.trim()) { err.textContent = "Write the problem statement first. It is what every \"Why?\" will refer back to."; err.hidden = false; prob.focus(); return; }
+      var w = blankWhy(prob.value.trim());
+      w.stepId = st.value; w.fromFinding = sel.value;
+      s.analysis.whys.push(w);
+      activeWhyId = w.id; creatingWhy = false;
+      saveSoon(); renderWhys(s);
+      var first = document.querySelector("#why-editor .why-step textarea");
+      if (first) first.focus();
+    });
+    ed.appendChild(form);
+  }
+
+  function renderWhyEditor(s, w, ed) {
+    // Problem
+    var head = el("div", "why-head");
+    head.appendChild(el("h2", null, "Problem"));
+    var del = el("button", "plain small", "Delete this 5 Whys"); del.type = "button";
+    del.addEventListener("click", function () {
+      openDialog({ title: "Delete this 5 Whys?", text: "\"" + (w.problem || "Untitled problem") + "\" and all its answers will be removed.", okLabel: "Delete", danger: true,
+        onOk: function () { s.analysis.whys = s.analysis.whys.filter(function (x) { return x !== w; }); activeWhyId = null; saveSoon(); renderWhys(s); } });
+    });
+    head.appendChild(del);
+    ed.appendChild(head);
+
+    var prob = el("textarea", "big"); prob.rows = 1; prob.value = w.problem; prob.setAttribute("aria-label", "Problem statement");
+    prob.addEventListener("input", function () { w.problem = prob.value; fit(prob); saveSoon(); refreshQuestions(); refreshLabels(); });
+    ed.appendChild(prob);
+    var meta = el("div", "why-meta");
+    var sn = stepName(s, w.stepId);
+    if (sn) meta.appendChild(el("span", "chip", sn));
+    if (w.fromFinding) meta.appendChild(el("span", "chip", "From an approved finding"));
+    if (meta.childNodes.length) ed.appendChild(meta);
+
+    // Whys
+    ed.appendChild(el("h3", "why-sub", "Ask \"Why?\""));
+    ed.appendChild(el("p", "lead", "Answer each question, then ask again. Stop when you reach a cause the process can fix. Mark an answer as confirmed only when you have evidence; otherwise it stays a hypothesis."));
+    var chain = el("div", "why-chain");
+    var qSpans = [];
+    ed.appendChild(chain);
+
+    w.whys.forEach(function (x, i) {
+      var row = el("div", "why-step");
+      var q = el("div", "why-q");
+      q.appendChild(el("span", "why-n", "Why " + (i + 1)));
+      var prev = i === 0 ? w.problem : w.whys[i - 1].answer;
+      var qt = el("span");
+      qSpans.push(qt);
+      q.appendChild(qt);
+      row.appendChild(q);
+
+      var ans = el("textarea"); ans.rows = 1; ans.value = x.answer; ans.placeholder = "Because...";
+      ans.setAttribute("aria-label", "Answer to why " + (i + 1));
+      ans.addEventListener("input", function () { x.answer = ans.value; fit(ans); saveSoon(); refreshTips(row, x, i); refreshRoot(); refreshQuestions(); refreshLabels(); });
+      row.appendChild(ans);
+
+      var tog = el("div", "seg");
+      tog.setAttribute("role", "group"); tog.setAttribute("aria-label", "Is this answer confirmed?");
+      var bS = el("button", null, "Suspected (hypothesis)"); bS.type = "button";
+      var bC = el("button", null, "Confirmed (fact)"); bC.type = "button";
+      function paint() {
+        bS.setAttribute("aria-pressed", String(!x.confirmed));
+        bC.setAttribute("aria-pressed", String(!!x.confirmed));
+        bS.className = !x.confirmed ? "on hyp" : "";
+        bC.className = x.confirmed ? "on fact" : "";
+      }
+      bS.addEventListener("click", function () { x.confirmed = false; paint(); saveSoon(); refreshTips(row, x, i); refreshRoot(); refreshQuestions(); });
+      bC.addEventListener("click", function () { x.confirmed = true; paint(); saveSoon(); refreshTips(row, x, i); refreshRoot(); refreshQuestions(); });
+      paint();
+      tog.appendChild(bS); tog.appendChild(bC);
+      row.appendChild(tog);
+
+      var ev = el("input", "ev"); ev.value = x.evidence; ev.placeholder = "How do you know? Data, observation, who confirmed it";
+      ev.setAttribute("aria-label", "Evidence for why " + (i + 1));
+      ev.addEventListener("input", function () { x.evidence = ev.value; saveSoon(); refreshTips(row, x, i); refreshRoot(); refreshQuestions(); });
+      row.appendChild(ev);
+
+      row.appendChild(el("div", "tips"));
+      if (i === w.whys.length - 1 && i > 0) {
+        var rm = el("button", "plain small", "Remove this why"); rm.type = "button";
+        rm.addEventListener("click", function () { w.whys.pop(); saveSoon(); renderWhys(s); });
+        row.appendChild(rm);
+      }
+      chain.appendChild(row);
+      refreshTips(row, x, i);
+    });
+
+    var more = el("div", "row-acts");
+    var again = el("button", "primary", "Ask \"Why?\" again"); again.type = "button";
+    again.title = w.whys.length >= 7 ? "Seven levels is plenty. Try stating the root cause." : "";
+    again.addEventListener("click", function () {
+      w.whys.push({ id: newId(), answer: "", confirmed: false, evidence: "" });
+      saveSoon(); renderWhys(s);
+      var ts = document.querySelectorAll("#why-editor .why-step textarea");
+      if (ts.length) ts[ts.length - 1].focus();
+    });
+    more.appendChild(again);
+    if (w.whys.length >= 5) more.appendChild(el("span", "muted-note", "Five is a guide. If you haven't reached something the process can fix, keep going."));
+    ed.appendChild(more);
+
+    // Questions (missing information)
+    var qBox = el("div", "why-questions");
+    ed.appendChild(qBox);
+
+    // Root cause
+    var rc = el("div", "root " + w.status);
+    var rh = el("div", "why-head");
+    rh.appendChild(el("h3", "why-sub", "Root cause"));
+    var badge = el("span", "badge");
+    rh.appendChild(badge);
+    var stEl = el("span", "state");
+    rh.appendChild(stEl);
+    rc.appendChild(rh);
+    var rootNote = el("p", "lead");
+    rc.appendChild(rootNote);
+    var rt = el("textarea"); rt.rows = 1; rt.value = w.rootCause; rt.placeholder = "State the root cause in one sentence";
+    rt.setAttribute("aria-label", "Root cause");
+    rt.addEventListener("input", function () { w.rootCause = rt.value; fit(rt); saveSoon(); refreshQuestions(); });
+    rc.appendChild(rt);
+    var useLast = el("button", "plain small", "Use the last answer"); useLast.type = "button";
+    useLast.addEventListener("click", function () {
+      var filled = w.whys.filter(function (x) { return String(x.answer || "").trim(); });
+      if (!filled.length) return;
+      w.rootCause = filled[filled.length - 1].answer.trim(); rt.value = w.rootCause; fit(rt); saveSoon(); refreshQuestions();
+    });
+    rc.appendChild(useLast);
+
+    rc.appendChild(el("label", "fl", "Idea to fix it (optional)"));
+    var fx = el("textarea"); fx.rows = 1; fx.value = w.fix; fx.placeholder = "e.g. Add a daily cut-off time and an automatic reminder";
+    fx.setAttribute("aria-label", "Idea to fix it");
+    fx.addEventListener("input", function () { w.fix = fx.value; fit(fx); saveSoon(); });
+    rc.appendChild(fx);
+
+    var ra = el("div", "row-acts");
+    rc.appendChild(ra);
+    ed.appendChild(rc);
+
+    function refreshRoot() {
+      var r = rootState(w);
+      badge.className = "badge " + (r.confirmed ? "fact" : "hypothesis");
+      badge.textContent = r.confirmed ? "Fact: confirmed" : "Hypothesis";
+      rootNote.textContent = r.confirmed
+        ? "Every answer in the chain is confirmed with evidence."
+        : (r.filled ? "Not every answer is confirmed with evidence yet, so this root cause is still a hypothesis. You can approve it anyway, but check it before acting." : "Answer at least one \"Why?\" first.");
+      rc.className = "root " + w.status;
+      stEl.textContent = w.status === "approved" ? "Approved" : (w.status === "rejected" ? "Rejected" : "");
+      ra.innerHTML = "";
+      function b(label, cls, fn) { var x = el("button", cls, label); x.type = "button"; x.addEventListener("click", fn); ra.appendChild(x); }
+      if (w.status !== "approved") b("Approve root cause", "approve", function () {
+        if (!String(w.rootCause || "").trim()) { rt.focus(); refreshQuestions(true); return; }
+        w.status = "approved"; saveSoon(); renderWhys(s);
+      });
+      if (w.status !== "rejected") b("Reject", "plain", function () { w.status = "rejected"; saveSoon(); renderWhys(s); });
+      if (w.status !== "proposed") b("Undo", "plain", function () { w.status = "proposed"; saveSoon(); renderWhys(s); });
+    }
+
+    function refreshQuestions(highlight) {
+      var qs = [];
+      if (!String(w.problem || "").trim()) qs.push("What is the problem? The problem statement is empty.");
+      var unconfirmed = [];
+      w.whys.forEach(function (x, i) { if (String(x.answer || "").trim() && !(x.confirmed && String(x.evidence || "").trim())) unconfirmed.push(i + 1); });
+      if (unconfirmed.length) qs.push("What evidence would confirm why " + unconfirmed.join(", ") + "? Until then " + (unconfirmed.length === 1 ? "it stays a hypothesis" : "they stay hypotheses") + ".");
+      if (!String(w.rootCause || "").trim() && rootState(w).filled) qs.push("What is the root cause? Write it in one sentence, or use the last answer.");
+      qBox.innerHTML = "";
+      qs.forEach(function (t) {
+        var d = el("div", "qline" + (highlight ? " flash" : ""));
+        d.appendChild(el("span", "badge question", "Question"));
+        d.appendChild(el("span", null, t));
+        qBox.appendChild(d);
+      });
+    }
+
+    // Keep question wording, the "again" button and the list in sync while typing
+    function refreshLabels() {
+      qSpans.forEach(function (sp, i) {
+        var prev = i === 0 ? w.problem : w.whys[i - 1].answer;
+        sp.textContent = i === 0
+          ? "Why does this happen: \"" + (String(prev || "").trim() || "your problem") + "\"?"
+          : "Why does that happen: \"" + (String(prev || "").trim() || "the answer above") + "\"?";
+      });
+      var last = w.whys[w.whys.length - 1];
+      again.disabled = !String(last.answer || "").trim() || w.whys.length >= 7;
+      renderWhyList(s);
+    }
+
+    refreshRoot();
+    refreshQuestions();
+    refreshLabels();
+    ed.querySelectorAll("textarea").forEach(fit);
+  }
+
+  function refreshTips(row, x, i) {
+    var w = current().analysis.whys.filter(function (z) { return z.id === activeWhyId; })[0];
+    var box = row.querySelector(".tips");
+    box.innerHTML = "";
+    if (!w) return;
+    coach(x, i, w.whys).forEach(function (t) { box.appendChild(el("div", "tip " + t.t, t.m)); });
+  }
 
   showTab(activeTab);
 
