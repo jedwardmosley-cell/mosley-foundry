@@ -21,12 +21,19 @@
     --p: #8e44ad;
     --o: #e67e22;
     --c: #c0392b;
+    --fact-bg: #e3effa; --fact-fg: #164a7a;
+    --hyp-bg: #fdf0d5;  --hyp-fg: #8a5300;
+    --q-bg: #efe7f8;    --q-fg: #5b2d8a;
+    --ok: #1e7d46;      --ok-bg: #e3f4ea;
+    --no: #8a94a3;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       --bg: #10161f; --panel: #19212c; --item: #212b38; --hover: #2c3846;
       --text: #e6ebf1; --muted: #9aa8b8; --border: #2f3b4a; --brand: #173b5c;
       --overlay: rgba(0, 0, 0, 0.6);
+      --fact-bg: #16314d; --fact-fg: #a9d1f7; --hyp-bg: #3d2e10; --hyp-fg: #f4c46b;
+      --q-bg: #2f2140; --q-fg: #d4b8f2; --ok: #5fd08f; --ok-bg: #143222; --no: #7d8796;
       color-scheme: dark;
     }
   }
@@ -34,6 +41,8 @@
     --bg: #10161f; --panel: #19212c; --item: #212b38; --hover: #2c3846;
     --text: #e6ebf1; --muted: #9aa8b8; --border: #2f3b4a; --brand: #173b5c;
     --overlay: rgba(0, 0, 0, 0.6);
+    --fact-bg: #16314d; --fact-fg: #a9d1f7; --hyp-bg: #3d2e10; --hyp-fg: #f4c46b;
+    --q-bg: #2f2140; --q-fg: #d4b8f2; --ok: #5fd08f; --ok-bg: #143222; --no: #7d8796;
     color-scheme: dark;
   }
   * { box-sizing: border-box; }
@@ -185,6 +194,113 @@
   .status { font-size: 12px; opacity: 0.85; }
   .print-only, .print-text { display: none; }
 
+  /* ---------- Tabs ---------- */
+  .tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--border); margin-bottom: 18px; flex-wrap: wrap; }
+  .tab {
+    background: transparent; color: var(--muted); border: none; border-radius: 0;
+    padding: 10px 16px; font-size: 15px; border-bottom: 3px solid transparent; margin-bottom: -2px;
+  }
+  .tab[aria-selected="true"] { color: var(--text); border-bottom-color: var(--brand); }
+  :root[data-theme="dark"] .tab[aria-selected="true"] { border-bottom-color: var(--fact-fg); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tab[aria-selected="true"] { border-bottom-color: var(--fact-fg); } }
+
+  /* ---------- Analysis ---------- */
+  .subtabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .subtab {
+    background: var(--panel); color: var(--text); border: 1px solid var(--border);
+    border-radius: 999px; padding: 6px 14px; font-weight: 600;
+  }
+  .subtab[aria-selected="true"] { background: var(--brand); color: #fff; border-color: var(--brand); }
+  .subtab:disabled { color: var(--muted); cursor: default; opacity: 0.7; }
+  .subtab small { font-weight: 400; margin-left: 4px; }
+  .panel {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin-bottom: 16px; min-width: 0;
+  }
+  .panel h2 { margin: 0 0 4px; font-size: 17px; }
+  .panel > p.lead { margin: 0 0 14px; color: var(--muted); font-size: 13px; max-width: 75ch; }
+
+  .steps-head, .step-row {
+    display: grid;
+    grid-template-columns: minmax(150px, 1.4fr) 1.1fr 1fr 1fr 1.1fr;
+    gap: 10px; align-items: center;
+  }
+  .steps-head { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; padding: 0 0 6px; }
+  .step-row { padding: 8px 0; border-top: 1px solid var(--border); }
+  .step-name { font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+  .step-name .n { color: var(--p); margin-right: 4px; }
+  .step-row label.m { display: none; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 3px; }
+  .step-row input, .step-row select, .add-finding input, .add-finding select {
+    width: 100%; padding: 7px 8px; border: 1px solid var(--border); border-radius: 6px;
+    background: var(--panel); color: var(--text); min-width: 0;
+  }
+  .step-row input.missing { border-color: var(--q-fg); border-style: dashed; }
+  .dur { display: flex; gap: 4px; min-width: 0; }
+  .dur input { flex: 1 1 60px; }
+  .dur select { flex: 0 0 auto; width: auto; min-width: 0; }
+  .step-row > div { min-width: 0; }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+  .stat { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; background: var(--item); }
+  .stat .k { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; font-weight: 600; }
+  .stat .v { font-size: 22px; font-weight: 700; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .stat .v.na { font-size: 14px; font-weight: 600; color: var(--q-fg); }
+  .stat .s { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; margin-bottom: 14px; }
+  .legend div { font-size: 13px; color: var(--muted); display: flex; gap: 8px; align-items: flex-start; }
+  .badge {
+    display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+    text-transform: uppercase; padding: 3px 8px; border-radius: 4px; white-space: nowrap;
+  }
+  .badge.fact { background: var(--fact-bg); color: var(--fact-fg); }
+  .badge.hypothesis { background: var(--hyp-bg); color: var(--hyp-fg); }
+  .badge.question { background: var(--q-bg); color: var(--q-fg); }
+  .chip { font-size: 12px; color: var(--muted); border: 1px solid var(--border); border-radius: 999px; padding: 1px 8px; }
+  .counts { font-size: 13px; color: var(--muted); margin: 0 0 12px; }
+
+  .group-title { font-size: 14px; margin: 18px 0 8px; display: flex; gap: 8px; align-items: center; }
+  .group-title span.sub { font-weight: 400; color: var(--muted); font-size: 13px; }
+  .finding {
+    border: 1px solid var(--border); border-left: 4px solid var(--border);
+    border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; background: var(--panel);
+    display: grid; gap: 6px;
+  }
+  .finding.approved { border-left-color: var(--ok); }
+  .finding.rejected { border-left-color: var(--no); opacity: 0.65; }
+  .finding .top { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .finding .state { margin-left: auto; font-size: 12px; font-weight: 700; }
+  .finding.approved .state { color: var(--ok); }
+  .finding.rejected .state { color: var(--no); }
+  .finding textarea {
+    width: 100%; border: 1px solid transparent; border-radius: 6px; padding: 6px;
+    background: transparent; resize: none; overflow: hidden; line-height: 1.45;
+    font-family: inherit; font-size: 14px; color: var(--text); margin: 0 -6px;
+    width: calc(100% + 12px);
+  }
+  .finding textarea:hover { border-color: var(--border); }
+  .finding textarea:focus { outline: none; border-color: var(--brand); background: var(--item); }
+  .finding .why { font-size: 12px; color: var(--muted); }
+  .finding .acts { display: flex; gap: 6px; flex-wrap: wrap; }
+  .finding .acts button { padding: 4px 10px; font-size: 13px; border: 1px solid var(--border); background: var(--panel); color: var(--text); }
+  .finding .acts button.approve { background: var(--ok-bg); color: var(--ok); border-color: transparent; }
+  .finding .note { font-size: 12px; color: var(--hyp-fg); }
+  .empty-group { font-size: 13px; color: var(--muted); font-style: italic; margin: 0 0 8px; }
+  .add-finding { display: grid; grid-template-columns: 150px 150px 1fr auto; gap: 8px; margin-top: 14px; }
+  .add-finding button { background: var(--brand); color: #fff; }
+
+  @media (max-width: 860px) {
+    .steps-head { display: none; }
+    .step-row { grid-template-columns: 1fr 1fr; padding: 12px 0; }
+    .step-row .step-name { grid-column: 1 / -1; }
+    .step-row label.m { display: block; }
+    .add-finding { grid-template-columns: 1fr 1fr; }
+    .add-finding input { grid-column: 1 / -1; }
+  }
+  @media (max-width: 420px) {
+    .step-row { grid-template-columns: 1fr; }
+  }
+
   /* In-page box used for naming and confirming (instead of browser pop-ups) */
   .overlay {
     position: fixed; inset: 0; z-index: 50;
@@ -232,7 +348,8 @@
   @media print {
     @page { size: landscape; margin: 12mm; }
     body { background: #fff; color: #1f2933; }
-    header, .add, .icon, .no-print, .overlay { display: none !important; }
+    header, .add, .icon, .no-print, .overlay, .tabs, .subtabs, .finding .acts, .add-finding { display: none !important; }
+    .panel, .finding, .stat { break-inside: avoid; background: #fff; color: #1f2933; }
     .details input, .col, .items li { background: #fff; color: #1f2933; }
     .print-only { display: block; }
     .items li textarea { display: none; }
@@ -249,7 +366,7 @@
 <body>
 
 <header>
-  <h1>ProcessIQ <span>SIPOC Builder</span></h1>
+  <h1>ProcessIQ <span>Process Improvement</span></h1>
   <div class="toolbar">
     <select id="picker" aria-label="Choose a SIPOC"></select>
     <button id="newBtn">+ New SIPOC</button>
@@ -286,7 +403,58 @@
     </div>
   </section>
 
-  <section class="grid" id="grid"></section>
+  <nav class="tabs" role="tablist" aria-label="Views">
+    <button class="tab" role="tab" id="tab-sipoc" aria-controls="view-sipoc">SIPOC map</button>
+    <button class="tab" role="tab" id="tab-analysis" aria-controls="view-analysis">Process analysis</button>
+  </nav>
+
+  <section id="view-sipoc" role="tabpanel" aria-labelledby="tab-sipoc">
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section id="view-analysis" role="tabpanel" aria-labelledby="tab-analysis" hidden>
+    <div class="subtabs" role="tablist" aria-label="Analysis tools">
+      <button class="subtab" role="tab" aria-selected="true">Bottleneck analysis</button>
+      <button class="subtab" role="tab" disabled>5 Whys <small>coming next</small></button>
+      <button class="subtab" role="tab" disabled>Automation <small>coming next</small></button>
+      <button class="subtab" role="tab" disabled>Priorities <small>coming next</small></button>
+    </div>
+
+    <div class="panel" id="steps-panel">
+      <h2>Step details</h2>
+      <p class="lead">Add what you know about each process step. Leave anything you don't know blank: the analysis will ask for it instead of guessing. Steps come from the Process column on the SIPOC map.</p>
+      <div id="steps"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Summary</h2>
+      <p class="lead">Calculated only from the details you entered. Waiting days are counted as calendar days (24 hours).</p>
+      <div class="stats" id="summary"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Findings</h2>
+      <p class="lead">Findings update automatically as you add details. Edit any wording, then approve or reject each one. Your edits and decisions are kept.</p>
+      <div class="legend">
+        <div><span class="badge fact">Fact</span> Calculated directly from information you entered.</div>
+        <div><span class="badge hypothesis">Hypothesis</span> A possible issue, based on patterns. Check it before acting.</div>
+        <div><span class="badge question">Question</span> Information is missing. Answer it to improve the analysis.</div>
+      </div>
+      <p class="counts" id="counts"></p>
+      <div id="findings"></div>
+      <form class="add-finding" id="add-finding">
+        <select id="af-kind" aria-label="Type of finding">
+          <option value="fact">Fact</option>
+          <option value="hypothesis" selected>Hypothesis</option>
+        </select>
+        <select id="af-cat" aria-label="Category">
+          <option>Delay</option><option>Handoff</option><option>Duplication</option><option>Waste</option><option>Other</option>
+        </select>
+        <input id="af-text" placeholder="Add your own finding" aria-label="Your finding">
+        <button type="submit">Add</button>
+      </form>
+    </div>
+  </section>
 </main>
 
 <div class="overlay" id="overlay" hidden>
@@ -326,8 +494,26 @@
   function blankSipoc(name) {
     return {
       id: newId(), name: name || "Untitled process", owner: "", date: today(), start: "", end: "",
-      suppliers: [], inputs: [], process: [], outputs: [], customers: []
+      suppliers: [], inputs: [], process: [], outputs: [], customers: [],
+      details: [], analysis: { findings: [] }
     };
+  }
+
+  // Extra information about each process step, kept in the same order as the steps
+  function blankDetail() {
+    return { id: newId(), role: "", work: "", workUnit: "min", wait: "", waitUnit: "hr", tool: "" };
+  }
+
+  // Older saved SIPOCs have no step details or analysis yet: add empty ones.
+  // Nothing that already exists is changed or removed.
+  function ensureShape(s) {
+    COLUMNS.forEach(function (c) { if (!Array.isArray(s[c.key])) s[c.key] = []; });
+    if (!Array.isArray(s.details)) s.details = [];
+    while (s.details.length < s.process.length) s.details.push(blankDetail());
+    if (s.details.length > s.process.length) s.details.length = s.process.length;
+    if (!s.analysis || typeof s.analysis !== "object") s.analysis = {};
+    if (!Array.isArray(s.analysis.findings)) s.analysis.findings = [];
+    return s;
   }
 
   function exampleSipoc() {
@@ -340,6 +526,18 @@
     s.process = ["Receive order", "Check inventory", "Pick and pack items", "Ship order", "Send invoice"];
     s.outputs = ["Shipped package", "Tracking number", "Invoice"];
     s.customers = ["Customer", "Accounting team"];
+    var d = [
+      ["Sales", 10, "min", 0, "hr", "Email"],
+      ["Warehouse", 15, "min", 4, "hr", "Spreadsheet"],
+      ["Warehouse", 30, "min", 1, "day", "Paper pick list"],
+      ["Shipping", 20, "min", 4, "hr", "Carrier website"],
+      ["Accounting", 10, "min", "", "day", "Accounting software"]
+    ];
+    s.details = d.map(function (r) {
+      var x = blankDetail();
+      x.role = r[0]; x.work = String(r[1]); x.workUnit = r[2]; x.wait = String(r[3]); x.waitUnit = r[4]; x.tool = r[5];
+      return x;
+    });
     return s;
   }
 
@@ -351,11 +549,14 @@
       var raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         var data = JSON.parse(raw);
-        if (data && data.sipocs && data.sipocs.length) return data;
+        if (data && data.sipocs && data.sipocs.length) {
+          data.sipocs.forEach(ensureShape);
+          return data;
+        }
       }
     } catch (e) { /* storage unavailable: start fresh */ }
     var ex = exampleSipoc();
-    return { currentId: ex.id, sipocs: [ex] };
+    return { currentId: ex.id, sipocs: [ensureShape(ex)] };
   }
 
   var saveTimer = null;
@@ -456,17 +657,19 @@
         var up = el("button", "icon", "↑");
         up.title = "Move up";
         up.disabled = idx === 0;
-        up.addEventListener("click", function () { move(list, idx, -1); });
+        up.addEventListener("click", function () { move(list, idx, -1, col.key === "process"); });
 
         var down = el("button", "icon", "↓");
         down.title = "Move down";
         down.disabled = idx === list.length - 1;
-        down.addEventListener("click", function () { move(list, idx, 1); });
+        down.addEventListener("click", function () { move(list, idx, 1, col.key === "process"); });
+        var isProcess = col.key === "process";
 
         var del = el("button", "icon", "✕");
         del.title = "Remove";
         del.addEventListener("click", function () {
           list.splice(idx, 1);
+          if (isProcess) s.details.splice(idx, 1);
           saveSoon();
           renderGrid();
         });
@@ -491,6 +694,7 @@
         var v = addInput.value.trim();
         if (!v) return;
         list.push(v);
+        if (col.key === "process") s.details.push(blankDetail());
         saveSoon();
         renderGrid();
         // keep typing in the same column
@@ -513,10 +717,14 @@
   }
   window.addEventListener("resize", fitAll);
 
-  function move(list, idx, dir) {
+  function move(list, idx, dir, withDetails) {
     var j = idx + dir;
     if (j < 0 || j >= list.length) return;
     var tmp = list[idx]; list[idx] = list[j]; list[j] = tmp;
+    if (withDetails) {
+      var d = current().details;
+      var t2 = d[idx]; d[idx] = d[j]; d[j] = t2;
+    }
     saveSoon();
     renderGrid();
   }
@@ -525,6 +733,7 @@
     renderPicker();
     renderDetails();
     renderGrid();
+    if (activeTab === "analysis") renderAnalysis();
   }
 
   // ---------- Buttons and fields ----------
@@ -594,7 +803,7 @@
       placeholder: "e.g. Employee Onboarding",
       okLabel: "Create",
       onOk: function (name) {
-        var s = blankSipoc(name.trim() || "Untitled process");
+        var s = ensureShape(blankSipoc(name.trim() || "Untitled process"));
         state.sipocs.push(s);
         state.currentId = s.id;
         save();
@@ -613,7 +822,7 @@
       danger: true,
       onOk: function () {
         state.sipocs = state.sipocs.filter(function (x) { return x.id !== s.id; });
-        if (!state.sipocs.length) state.sipocs.push(blankSipoc());
+        if (!state.sipocs.length) state.sipocs.push(ensureShape(blankSipoc()));
         state.currentId = state.sipocs[0].id;
         save();
         renderAll();
@@ -694,6 +903,531 @@
     a.click();
     setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
   });
+
+  // =====================================================================
+  //  PROCESS ANALYSIS
+  // =====================================================================
+
+  // ---------- Tabs ----------
+  var TAB_KEY = "processiq.tab";
+  var activeTab = "sipoc";
+  try { if (localStorage.getItem(TAB_KEY) === "analysis") activeTab = "analysis"; } catch (e) {}
+
+  function showTab(name) {
+    activeTab = name;
+    try { localStorage.setItem(TAB_KEY, name); } catch (e) {}
+    document.getElementById("tab-sipoc").setAttribute("aria-selected", String(name === "sipoc"));
+    document.getElementById("tab-analysis").setAttribute("aria-selected", String(name === "analysis"));
+    document.getElementById("view-sipoc").hidden = name !== "sipoc";
+    document.getElementById("view-analysis").hidden = name !== "analysis";
+    if (name === "analysis") renderAnalysis();
+    else fitAll();
+  }
+  document.getElementById("tab-sipoc").addEventListener("click", function () { showTab("sipoc"); });
+  document.getElementById("tab-analysis").addEventListener("click", function () { showTab("analysis"); });
+
+  // ---------- Time helpers ----------
+  var UNIT_MIN = { min: 1, hr: 60, day: 1440 };
+
+  function num(v) {
+    if (v === "" || v == null) return null;
+    var n = parseFloat(String(v).replace(",", "."));
+    return isFinite(n) && n >= 0 ? n : null;
+  }
+  function minutes(value, unit) {
+    var n = num(value);
+    return n == null ? null : n * (UNIT_MIN[unit] || 1);
+  }
+  function round1(n) { return Math.round(n * 10) / 10; }
+  function fmt(mins) {
+    if (mins == null) return "";
+    if (mins < 60) return round1(mins) + " min";
+    if (mins < 1440) return round1(mins / 60) + " hr";
+    var d = round1(mins / 1440);
+    return d + (d === 1 ? " day" : " days");
+  }
+  // Share of time spent working, as words (never shows a misleading "0%")
+  function workShare(work, wait) {
+    var p = work / (work + wait) * 100;
+    if (p > 0 && p < 1) return { text: "less than 1%", rest: "nearly all of it" };
+    var r = Math.round(p);
+    return { text: "only " + r + "%", rest: (100 - r) + "%" };
+  }
+  function stepLabel(i, name) { return "Step " + (i + 1) + ' "' + name + '"'; }
+  function listSteps(idxs) {
+    var n = idxs.map(function (i) { return i + 1; });
+    if (n.length === 1) return "step " + n[0];
+    return "steps " + n.slice(0, -1).join(", ") + " and " + n[n.length - 1];
+  }
+
+  // ---------- The rules ----------
+  // Wording patterns that often point to delays or waste.
+  // Anything found this way is only ever a HYPOTHESIS.
+  var PATTERNS = [
+    { key: "approval", cat: "Delay", re: /\b(approv\w*|sign[- ]?off|signs? off|authori[sz]\w*)\b/i,
+      say: "involves an approval. Approvals often create queues while work waits for someone to sign off." },
+    { key: "waiting", cat: "Delay", re: /\b(wait\w*|hold|on hold|queue\w*|pending|backlog\w*)\b/i,
+      say: "mentions waiting or a queue, which usually means time passes with no work being done." },
+    { key: "check", cat: "Waste", re: /\b(check\w*|inspect\w*|verif\w*|review\w*|audit\w*|validat\w*|double[- ]check\w*)\b/i,
+      say: "is a checking step. Checks can be necessary, but repeated or late checks are a common form of waste. Could errors be prevented earlier instead?" },
+    { key: "entry", cat: "Duplication", re: /\b(enter\w*|re-?enter\w*|re-?type\w*|typ(e|es|ing) in|key(s|ed|ing)? in|copy\w*|transcrib\w*|data entry)\b/i,
+      say: "involves entering or copying information. Manual data entry often means the same information is typed more than once." },
+    { key: "transfer", cat: "Handoff", re: /\b(send|sends|sent|forward\w*|transfer\w*|rout(e|es|ed|ing)|hand ?off|hand(s|ed)? over|pass(es|ed)? (it )?to|email\w*)\b/i,
+      say: "moves work or information to someone else. Each hand-over is a point where work can wait or details can get lost." },
+    { key: "rework", cat: "Waste", re: /\b(rework\w*|redo\w*|re-do|correct\w*|fix\w*|resubmit\w*|return\w*)\b/i,
+      say: "suggests rework. Fixing or returning work usually means something went wrong earlier in the process." },
+    { key: "paper", cat: "Waste", re: /\b(print\w*|paper\w*|scan\w*|fax\w*|manual\w*)\b/i,
+      say: "involves paper or manual handling, which tends to be slower and easier to lose or get wrong." }
+  ];
+  var MANUAL_TOOL = /\b(paper|spreadsheet|excel|e-?mail|whiteboard|phone|manual\w*|notebook|post-?it)\b/i;
+  var STOP = { the: 1, a: 1, an: 1, and: 1, or: 1, to: 1, of: 1, for: 1, with: 1, in: 1, on: 1 };
+
+  function analyze(s) {
+    var out = [];
+    function add(key, kind, category, text, evidence) {
+      out.push({ key: key, kind: kind, category: category, text: text, evidence: evidence });
+    }
+    var steps = s.process;
+    var det = s.details;
+    var n = steps.length;
+
+    // ----- Missing information: ask, don't guess -----
+    if (!n) {
+      add("q-nosteps", "question", "Information needed",
+        "What are the main steps of this process? Add them to the Process column on the SIPOC map.",
+        "The Process column is empty.");
+    } else if (n < 4) {
+      add("q-fewsteps", "question", "Information needed",
+        "Only " + n + " step" + (n === 1 ? " is" : "s are") + " listed. Are any main steps missing? A SIPOC usually has 4 to 7.",
+        "Count of steps in the Process column.");
+    } else if (n > 7) {
+      add("q-manysteps", "question", "Information needed",
+        n + " steps are listed. A SIPOC is a high-level view, usually 4 to 7 steps. Can any be combined?",
+        "Count of steps in the Process column.");
+    }
+    if (!String(s.start || "").trim() || !String(s.end || "").trim()) {
+      add("q-bounds", "question", "Information needed",
+        "Where does this process start and end? Fill in \"Process starts when\" and \"Process ends when\" above, so the analysis covers the right scope.",
+        "One or both process boundaries are blank.");
+    }
+    [["suppliers", "suppliers"], ["inputs", "inputs"], ["outputs", "outputs"], ["customers", "customers"]].forEach(function (c) {
+      if (!s[c[0]].length) {
+        add("q-empty-" + c[0], "question", "Information needed",
+          "Who or what are the " + c[1] + " for this process? The " + c[1].charAt(0).toUpperCase() + c[1].slice(1) + " column is empty.",
+          "The " + c[1] + " column has no entries.");
+      }
+    });
+
+    var missRole = [], missWork = [], missWait = [];
+    for (var i = 0; i < n; i++) {
+      if (!String(det[i].role || "").trim()) missRole.push(i);
+      if (minutes(det[i].work, det[i].workUnit) == null) missWork.push(i);
+      if (minutes(det[i].wait, det[i].waitUnit) == null) missWait.push(i);
+    }
+    if (n && missRole.length) add("q-role", "question", "Information needed",
+      "Who performs " + listSteps(missRole) + "? Needed to count handoffs.", "Blank \"Who does it\" in Step details.");
+    if (n && missWork.length) add("q-work", "question", "Information needed",
+      "How long does the hands-on work take for " + listSteps(missWork) + "? Needed to find the longest step and total work time.", "Blank \"Work time\" in Step details.");
+    if (n && missWait.length) add("q-wait", "question", "Information needed",
+      "How long does work typically wait before it reaches " + listSteps(missWait) + "? Enter 0 if there is no wait. Needed to find delays.", "Blank \"Wait before\" in Step details.");
+
+    // ----- Facts: calculated from what was entered -----
+    var work = det.map(function (d) { return minutes(d.work, d.workUnit); });
+    var wait = det.map(function (d) { return minutes(d.wait, d.waitUnit); });
+    var allWork = n > 0 && !missWork.length, allWait = n > 0 && !missWait.length;
+    var sumWork = work.reduce(function (a, b) { return a + (b || 0); }, 0);
+    var sumWait = wait.reduce(function (a, b) { return a + (b || 0); }, 0);
+
+    if (allWork) add("f-work-total", "fact", "Summary",
+      "Total hands-on work time is " + fmt(sumWork) + " across " + n + " steps.", "Sum of Work time for every step.");
+    if (allWait) add("f-wait-total", "fact", "Delay",
+      "Work spends " + fmt(sumWait) + " waiting between steps.", "Sum of Wait before for every step.");
+    if (allWork && allWait && sumWork + sumWait > 0) {
+      var pct = sumWork / (sumWork + sumWait) * 100;
+      var ws = workShare(sumWork, sumWait);
+      add("f-efficiency", "fact", "Delay",
+        "From start to finish the process takes " + fmt(sumWork + sumWait) + ", and " + ws.text + " of that time is hands-on work. The rest (" + ws.rest + ") is waiting.",
+        "Work time divided by (work time + waiting time).");
+      if (pct < 25) add("h-mostly-waiting", "hypothesis", "Delay",
+        "Because most of the elapsed time is waiting, reducing waits will likely shorten the process more than speeding up the work itself.",
+        "Hands-on work is under 25% of total time.");
+    }
+
+    var knownWaits = [];
+    wait.forEach(function (w, i) { if (w != null) knownWaits.push(i); });
+    if (knownWaits.length >= 2) {
+      var wi = knownWaits.reduce(function (a, b) { return wait[b] > wait[a] ? b : a; });
+      if (wait[wi] > 0) {
+        var share = sumWait > 0 ? Math.round(wait[wi] / sumWait * 100) : 0;
+        add("f-longest-wait", "fact", "Delay",
+          "The longest wait is " + fmt(wait[wi]) + ", before " + stepLabel(wi, steps[wi]) + ". That is " + share + "% of all " + (allWait ? "" : "known ") + "waiting time.",
+          "Compared Wait before across " + knownWaits.length + " of " + n + " steps.");
+        add("h-bottleneck-" + det[wi].id, "hypothesis", "Delay",
+          stepLabel(wi, steps[wi]) + " is the most likely bottleneck: work queues there longer than anywhere else. Worth finding out why it waits.",
+          "Based on the longest wait you entered.");
+      }
+    }
+    var knownWork = [];
+    work.forEach(function (w, i) { if (w != null) knownWork.push(i); });
+    if (knownWork.length >= 2) {
+      var ki = knownWork.reduce(function (a, b) { return work[b] > work[a] ? b : a; });
+      if (work[ki] > 0) add("f-longest-work", "fact", "Summary",
+        "The step with the most hands-on work is " + stepLabel(ki, steps[ki]) + " at " + fmt(work[ki]) + ".",
+        "Compared Work time across " + knownWork.length + " of " + n + " steps.");
+    }
+
+    // Handoffs between consecutive steps where both roles are known
+    var hand = [], pairs = 0;
+    for (var h = 0; h + 1 < n; h++) {
+      var r1 = String(det[h].role || "").trim(), r2 = String(det[h + 1].role || "").trim();
+      if (!r1 || !r2) continue;
+      pairs++;
+      if (r1.toLowerCase() !== r2.toLowerCase()) hand.push(r1 + " to " + r2 + " (after step " + (h + 1) + ")");
+    }
+    if (pairs) {
+      add("f-handoffs", "fact", "Handoff",
+        hand.length
+          ? "Work changes hands " + hand.length + " time" + (hand.length === 1 ? "" : "s") + ": " + hand.join("; ") + "."
+          : "Work stays with the same person or team between every pair of steps checked.",
+        "Compared \"Who does it\" for " + pairs + " pair" + (pairs === 1 ? "" : "s") + " of consecutive steps" + (missRole.length ? " (steps with no role were skipped)." : "."));
+      if (hand.length >= 3) add("h-handoffs", "hypothesis", "Handoff",
+        "With " + hand.length + " handoffs, information may be lost or work may sit between teams. Could one person or team handle more consecutive steps?",
+        "Three or more handoffs counted.");
+    }
+
+    // Tools and systems
+    var tools = {};
+    det.forEach(function (d) { var t = String(d.tool || "").trim(); if (t) tools[t.toLowerCase()] = t; });
+    var toolList = Object.keys(tools).map(function (k) { return tools[k]; });
+    if (toolList.length >= 3) {
+      add("f-tools", "fact", "Summary",
+        "This process uses " + toolList.length + " different tools or systems: " + toolList.join(", ") + ".",
+        "Distinct entries in \"Tool or system\".");
+      add("h-tools", "hypothesis", "Duplication",
+        "Moving between " + toolList.length + " tools may mean the same information is re-entered in more than one place. Worth checking which details get typed twice.",
+        "Three or more different tools listed.");
+    }
+
+    // ----- Hypotheses from wording -----
+    for (var k = 0; k < n; k++) {
+      var name = String(steps[k] || "");
+      PATTERNS.forEach(function (p) {
+        var m = name.match(p.re);
+        if (m) add("h-" + p.key + "-" + det[k].id, "hypothesis", p.cat,
+          stepLabel(k, name) + " " + p.say,
+          'The step name contains "' + m[0] + '".');
+      });
+      var tool = String(det[k].tool || "");
+      var mt = tool.match(MANUAL_TOOL);
+      if (mt) add("h-manualtool-" + det[k].id, "hypothesis", "Waste",
+        stepLabel(k, name) + " relies on " + tool.trim() + ". Manual tools often mean re-typing, searching for information, or version mix-ups.",
+        'The tool entered contains "' + mt[0] + '".');
+    }
+
+    // Duplicated or repeated steps
+    var seen = {}, verbs = {};
+    for (var q = 0; q < n; q++) {
+      var norm = String(steps[q] || "").toLowerCase().replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
+      if (!norm) continue;
+      (seen[norm] = seen[norm] || []).push(q);
+      var first = norm.split(" ")[0];
+      if (first.length > 2 && !STOP[first]) (verbs[first] = verbs[first] || []).push(q);
+    }
+    var normOf = {};
+    Object.keys(seen).forEach(function (t) {
+      seen[t].forEach(function (i) { normOf[i] = t; });
+      if (seen[t].length > 1) add("h-dupname-" + t, "hypothesis", "Duplication",
+        "The same step appears more than once (" + listSteps(seen[t]) + "). Is the work being repeated, or are these different activities that need clearer names?",
+        "Identical step names.");
+    });
+    Object.keys(verbs).forEach(function (v) {
+      var idx = verbs[v];
+      var distinct = {};
+      idx.forEach(function (i) { distinct[normOf[i]] = 1; });
+      if (idx.length > 1 && Object.keys(distinct).length > 1) {
+        add("h-dupverb-" + v, "hypothesis", "Duplication",
+          listSteps(idx).charAt(0).toUpperCase() + listSteps(idx).slice(1) + (idx.length === 2 ? " both" : " all") + ' start with "' + v + '". Possible duplicated effort: check whether these overlap.',
+          "Several steps start with the same word.");
+      }
+    });
+
+    return out;
+  }
+
+  // ---------- Merge new results with the user's reviewed findings ----------
+  function runAnalysis(s) {
+    var cands = analyze(s);
+    var byKey = {};
+    cands.forEach(function (c, i) { c.order = i; byKey[c.key] = c; });
+    var kept = [];
+    s.analysis.findings.forEach(function (f) {
+      if (f.source !== "rule") { kept.push(f); return; }
+      var c = byKey[f.key];
+      if (c) {
+        if (!f.edited) f.text = c.text;
+        f.evidence = c.evidence; f.kind = c.kind; f.category = c.category;
+        f.order = c.order; f.stale = false;
+        delete byKey[f.key];
+        kept.push(f);
+      } else if (f.status !== "proposed" || f.edited) {
+        f.stale = true;           // keep anything the user reviewed or edited
+        kept.push(f);
+      }                           // untouched and no longer detected: drop it
+    });
+    Object.keys(byKey).forEach(function (key) {
+      var c = byKey[key];
+      kept.push({ id: newId(), key: key, source: "rule", kind: c.kind, category: c.category,
+        text: c.text, evidence: c.evidence, status: "proposed", edited: false, stale: false, order: c.order });
+    });
+    s.analysis.findings = kept;
+  }
+
+  // ---------- Drawing the analysis tab ----------
+  function renderAnalysis() {
+    var s = current();
+    runAnalysis(s);
+    renderSteps(s);
+    renderSummary(s);
+    renderFindings(s);
+    saveSoon();
+  }
+
+  var refreshTimer = null;
+  function refreshSoon() {
+    clearTimeout(refreshTimer);
+    refreshTimer = setTimeout(function () {
+      var s = current();
+      runAnalysis(s);
+      renderSummary(s);
+      renderFindings(s);
+      markMissing(s);
+      saveSoon();
+    }, 350);
+  }
+
+  function field(labelText, control) {
+    var wrap = el("div");
+    var l = el("label", "m", labelText);
+    if (control.id) l.htmlFor = control.id;
+    wrap.appendChild(l);
+    wrap.appendChild(control);
+    return wrap;
+  }
+
+  function renderSteps(s) {
+    var box = document.getElementById("steps");
+    box.innerHTML = "";
+    if (!s.process.length) {
+      box.appendChild(el("p", "empty-group", "No steps yet. Add them in the Process column on the SIPOC map."));
+      return;
+    }
+    var head = el("div", "steps-head");
+    ["Step", "Who does it", "Work time", "Wait before it starts", "Tool or system"].forEach(function (t) { head.appendChild(el("div", null, t)); });
+    box.appendChild(head);
+
+    var roles = el("datalist"); roles.id = "role-list";
+    var seenRoles = {};
+    s.details.forEach(function (d) { var r = String(d.role || "").trim(); if (r && !seenRoles[r]) { seenRoles[r] = 1; var o = el("option"); o.value = r; roles.appendChild(o); } });
+    box.appendChild(roles);
+
+    s.process.forEach(function (name, i) {
+      var d = s.details[i];
+      var row = el("div", "step-row");
+      var nm = el("div", "step-name");
+      nm.appendChild(el("span", "n", (i + 1) + "."));
+      nm.appendChild(document.createTextNode(name));
+      row.appendChild(nm);
+
+      function text(key, ph) {
+        var inp = el("input");
+        inp.id = "d-" + key + "-" + d.id;
+        inp.value = d[key] || "";
+        inp.placeholder = ph;
+        inp.dataset.k = key; inp.dataset.i = i;
+        inp.addEventListener("input", function () { d[key] = inp.value; refreshSoon(); });
+        return inp;
+      }
+      function dur(key, unitKey, units) {
+        var w = el("div", "dur");
+        var inp = el("input");
+        inp.id = "d-" + key + "-" + d.id;
+        inp.type = "text"; inp.inputMode = "decimal";
+        inp.value = d[key]; inp.placeholder = "?";
+        inp.dataset.k = key; inp.dataset.i = i;
+        inp.setAttribute("aria-label", (key === "work" ? "Work time" : "Wait before") + " for step " + (i + 1));
+        inp.addEventListener("input", function () { d[key] = inp.value.trim(); refreshSoon(); });
+        var sel = el("select");
+        sel.setAttribute("aria-label", "Unit");
+        units.forEach(function (u) { var o = el("option", null, u[1]); o.value = u[0]; if (d[unitKey] === u[0]) o.selected = true; sel.appendChild(o); });
+        sel.addEventListener("change", function () { d[unitKey] = sel.value; refreshSoon(); });
+        w.appendChild(inp); w.appendChild(sel);
+        return { wrap: w, input: inp };
+      }
+      var role = text("role", "e.g. Warehouse");
+      role.setAttribute("list", "role-list");
+      row.appendChild(field("Who does it", role));
+      var wk = dur("work", "workUnit", [["min", "min"], ["hr", "hours"]]);
+      row.appendChild(field("Work time", wk.wrap)).querySelector("label").htmlFor = wk.input.id;
+      var wt = dur("wait", "waitUnit", [["min", "min"], ["hr", "hours"], ["day", "days"]]);
+      row.appendChild(field("Wait before it starts", wt.wrap)).querySelector("label").htmlFor = wt.input.id;
+      row.appendChild(field("Tool or system", text("tool", "e.g. Spreadsheet")));
+      box.appendChild(row);
+    });
+    markMissing(s);
+  }
+
+  function markMissing(s) {
+    document.querySelectorAll("#steps input[data-k]").forEach(function (inp) {
+      var d = s.details[+inp.dataset.i];
+      if (!d) return;
+      var k = inp.dataset.k, miss = false;
+      if (k === "role") miss = !String(d.role || "").trim();
+      if (k === "work") miss = num(d.work) == null;
+      if (k === "wait") miss = num(d.wait) == null;
+      inp.classList.toggle("missing", miss);
+    });
+  }
+
+  function renderSummary(s) {
+    var box = document.getElementById("summary");
+    box.innerHTML = "";
+    var n = s.process.length;
+    var work = s.details.map(function (d) { return minutes(d.work, d.workUnit); });
+    var wait = s.details.map(function (d) { return minutes(d.wait, d.waitUnit); });
+    var kWork = work.filter(function (x) { return x != null; }).length;
+    var kWait = wait.filter(function (x) { return x != null; }).length;
+    var sumWork = work.reduce(function (a, b) { return a + (b || 0); }, 0);
+    var sumWait = wait.reduce(function (a, b) { return a + (b || 0); }, 0);
+    var allWork = n && kWork === n, allWait = n && kWait === n;
+    var hand = 0, pairs = 0, pairsTotal = Math.max(0, n - 1);
+    for (var i = 0; i + 1 < n; i++) {
+      var a = String(s.details[i].role || "").trim().toLowerCase(), b = String(s.details[i + 1].role || "").trim().toLowerCase();
+      if (a && b) { pairs++; if (a !== b) hand++; }
+    }
+    function stat(k, v, sub) {
+      var c = el("div", "stat");
+      c.appendChild(el("div", "k", k));
+      c.appendChild(el("div", "v" + (v == null ? " na" : ""), v == null ? "Needs details" : v));
+      if (sub) c.appendChild(el("div", "s", sub));
+      box.appendChild(c);
+    }
+    stat("Steps", String(n));
+    stat("Hands-on work", allWork ? fmt(sumWork) : null, kWork + " of " + n + " steps known");
+    stat("Waiting", allWait ? fmt(sumWait) : null, kWait + " of " + n + " steps known");
+    stat("Start to finish", allWork && allWait ? fmt(sumWork + sumWait) : null, "Work plus waiting");
+    stat("Time spent working", allWork && allWait && sumWork + sumWait > 0 ? (sumWork > 0 && sumWork / (sumWork + sumWait) < 0.01 ? "<1%" : Math.round(sumWork / (sumWork + sumWait) * 100) + "%") : null, "The rest is waiting");
+    stat("Handoffs", pairsTotal && pairs === pairsTotal ? String(hand) : null, pairs + " of " + pairsTotal + " step changes known");
+  }
+
+  var KIND_INFO = {
+    question: { title: "Questions", sub: "Information needed before the analysis can go further" },
+    fact: { title: "Facts", sub: "Calculated from what you entered" },
+    hypothesis: { title: "Hypotheses", sub: "Possible issues to confirm or rule out" }
+  };
+
+  function renderFindings(s) {
+    var box = document.getElementById("findings");
+    box.innerHTML = "";
+    var list = s.analysis.findings.slice().sort(function (a, b) {
+      return (a.stale - b.stale) || ((a.order == null ? 9999 : a.order) - (b.order == null ? 9999 : b.order));
+    });
+    var c = { proposed: 0, approved: 0, rejected: 0 };
+    list.forEach(function (f) { if (f.kind !== "question") c[f.status]++; });
+    document.getElementById("counts").textContent =
+      c.proposed + " to review · " + c.approved + " approved · " + c.rejected + " rejected";
+
+    ["question", "fact", "hypothesis"].forEach(function (kind) {
+      var items = list.filter(function (f) { return f.kind === kind; });
+      var h = el("h3", "group-title");
+      h.appendChild(el("span", "badge " + kind, KIND_INFO[kind].title));
+      h.appendChild(el("span", "sub", KIND_INFO[kind].sub));
+      box.appendChild(h);
+      if (!items.length) {
+        box.appendChild(el("p", "empty-group",
+          kind === "question" ? "Nothing missing right now." :
+          kind === "fact" ? "Add step details to calculate facts." : "No possible issues detected yet."));
+        return;
+      }
+      items.forEach(function (f) { box.appendChild(findingCard(s, f)); });
+    });
+    box.querySelectorAll("textarea").forEach(fit);
+  }
+
+  function findingCard(s, f) {
+    var card = el("div", "finding " + f.status);
+    var top = el("div", "top");
+    top.appendChild(el("span", "badge " + f.kind, f.kind === "question" ? "Question" : f.kind === "fact" ? "Fact" : "Hypothesis"));
+    if (f.kind !== "question") top.appendChild(el("span", "chip", f.category));
+    if (f.source === "user") top.appendChild(el("span", "chip", "Added by you"));
+    if (f.edited) top.appendChild(el("span", "chip", "Edited"));
+    if (f.status !== "proposed") top.appendChild(el("span", "state",
+      f.status === "approved" ? "Approved" : (f.kind === "question" ? "Not applicable" : "Rejected")));
+    card.appendChild(top);
+
+    var t = el("textarea");
+    t.rows = 1;
+    t.value = f.text;
+    t.setAttribute("aria-label", "Finding text");
+    t.readOnly = f.kind === "question";
+    t.addEventListener("input", function () {
+      f.text = t.value;
+      if (f.source === "rule") f.edited = true;
+      fit(t);
+      saveSoon();
+    });
+    t.addEventListener("change", function () { renderFindings(s); });
+    card.appendChild(t);
+
+    if (f.evidence) card.appendChild(el("div", "why", "Based on: " + f.evidence));
+    if (f.stale) card.appendChild(el("div", "note", "No longer detected in the latest data. Kept because you reviewed or edited it."));
+
+    var acts = el("div", "acts");
+    function btn(label, cls, fn) { var b = el("button", cls, label); b.type = "button"; b.addEventListener("click", fn); acts.appendChild(b); }
+    function setStatus2(st) { f.status = st; saveSoon(); renderFindings(s); }
+    if (f.kind === "question") {
+      btn("Go to step details", null, function () {
+        var target = /SIPOC map|Process column|column is empty/.test(f.text) ? "grid" : (/starts|ends/.test(f.text) ? "f-start" : "steps-panel");
+        if (target === "grid") { showTab("sipoc"); return; }
+        var node = document.getElementById(target);
+        node.scrollIntoView({ behavior: "smooth", block: "start" });
+        var firstMissing = document.querySelector("#steps input.missing");
+        if (target === "steps-panel" && firstMissing) setTimeout(function () { firstMissing.focus(); }, 300);
+        if (target === "f-start") node.focus();
+      });
+      if (f.status === "proposed") btn("Not applicable", null, function () { setStatus2("rejected"); });
+      else btn("Undo", null, function () { setStatus2("proposed"); });
+    } else {
+      if (f.status !== "approved") btn("Approve", "approve", function () { setStatus2("approved"); });
+      if (f.status !== "rejected") btn("Reject", null, function () { setStatus2("rejected"); });
+      if (f.status !== "proposed") btn("Undo", null, function () { setStatus2("proposed"); });
+      if (f.edited) btn("Restore suggested wording", null, function () { f.edited = false; runAnalysis(s); saveSoon(); renderFindings(s); });
+    }
+    if (f.source === "user" || f.stale) btn("Delete", null, function () {
+      s.analysis.findings = s.analysis.findings.filter(function (x) { return x !== f; });
+      saveSoon(); renderFindings(s);
+    });
+    card.appendChild(acts);
+    return card;
+  }
+
+  document.getElementById("add-finding").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var input = document.getElementById("af-text");
+    var text = input.value.trim();
+    if (!text) { input.focus(); return; }
+    var s = current();
+    s.analysis.findings.push({
+      id: newId(), key: null, source: "user",
+      kind: document.getElementById("af-kind").value,
+      category: document.getElementById("af-cat").value,
+      text: text, evidence: "Added by you.", status: "proposed", edited: false, stale: false, order: 5000 + s.analysis.findings.length
+    });
+    input.value = "";
+    saveSoon();
+    renderFindings(s);
+  });
+
+  showTab(activeTab);
 
   renderAll();
   setStatus("All changes saved");

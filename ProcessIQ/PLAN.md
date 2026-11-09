@@ -37,4 +37,11 @@ A one-page, high-level map of a process, organized in five columns:
 2. Build a basic working version and review a screenshot (done)
 3. Adjust based on feedback
 4. Save each finished step to GitHub
-5. Download to the Documents folder
+5. Download to the Documents folder (done)
+
+## Version 2: Process analysis (in progress)
+
+- Stage 1: Step details, fact/hypothesis/question findings with approval, and Bottleneck analysis (done)
+- Stage 2: 5 Whys root cause analysis
+- Stage 3: Automation opportunities and impact-versus-effort prioritization
+- Stage 4: "Ask Claude" button on the private page (uses the existing Claude account; no API key)
