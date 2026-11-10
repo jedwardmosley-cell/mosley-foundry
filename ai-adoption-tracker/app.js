@@ -1232,7 +1232,7 @@
     return `<div class="no-print">
       <a class="back" href="${id && id !== 'all' ? `#rollout-${esc(id)}` : '#dashboard'}">← Back</a>
       <div class="banner tone-info">
-        <div>${EMBEDDED ? 'Copy this summary as plain text to paste into an email. Printing and downloads work when you open the app from its folder.' : 'This page is designed to print cleanly. Use <strong>Print / Save as PDF</strong> to share it, or copy it as plain text into an email.'}</div>
+        <div>${EMBEDDED ? `Copy this summary as plain text to paste into an email${canDownload() ? ', or download it as a spreadsheet' : ''}. Printing works when you open the app from its folder.` : 'This page is designed to print cleanly. Use <strong>Print / Save as PDF</strong> to share it, or copy it as plain text into an email.'}</div>
         <div class="actions">
           ${EMBEDDED ? '' : '<button class="btn primary small" data-action="print">Print / Save as PDF</button>'}
           <button class="btn small" data-action="copy-summary" data-id="${esc(id || 'all')}">Copy as text</button>
@@ -1312,7 +1312,8 @@
     let bytes = 0;
     try { bytes = new Blob([JSON.stringify(db)]).size; } catch (_) { /* ignore */ }
     return `${pageHead('Data, backup and export', 'Your data is saved automatically in this browser, on this device only.')}
-    ${EMBEDDED ? '<div class="banner tone-warn"><div><strong>This is a preview.</strong> Downloads (backup, CSV, template) are blocked here. Open <code>index.html</code> from the app folder for the full version. Restore from a backup file still works.</div></div>' : ''}
+    ${EMBEDDED && !canDownload() ? '<div class="banner tone-warn"><div><strong>This is a preview.</strong> Downloads (backup, CSV, template) are blocked here. Open <code>index.html</code> from the app folder for the full version. Restore from a backup file still works.</div></div>' : ''}
+    ${EMBEDDED && canDownload() ? '<div class="banner tone-info"><div><strong>This is a preview.</strong> Each download asks you to confirm before the file is saved. Data entered here stays in this browser, separate from the app on your Mac.</div></div>' : ''}
     ${banners()}
     <div class="grid-2">
       <section class="card">
@@ -1351,7 +1352,7 @@
   function viewGuide() {
     return `${pageHead('How this tracker works', 'A plain-English guide for managers and change leads.')}
     <section class="card prose">
-      <h2>The weekly rhythm</h2>
+      <h2>How it works each week</h2>
       <ol>
         <li><strong>Create a rollout.</strong> One AI tool, one team, a sponsor, and a launch date.</li>
         <li><strong>Define the expected behaviors.</strong> Write what you would actually see someone do, name one accountable owner, set the weekly check-in dates, and describe the business outcome with a baseline and target.</li>
@@ -1681,7 +1682,28 @@
   }
   const toCSV = (header, rows) => `﻿${[header, ...rows].map((r) => r.map(csvCell).join(',')).join('\r\n')}\r\n`;
 
-  function download(filename, content, type) {
+  // In a shared preview link, files are saved through the viewer's own
+  // download prompt. This stays null when the app is opened from its folder.
+  let previewDownloads = null;
+  if (EMBEDDED && window.claude && typeof window.claude.use === 'function') {
+    window.claude.use('downloads').then((d) => { if (d) { previewDownloads = d; render(); } }).catch(() => {});
+  }
+  const canDownload = () => !EMBEDDED || !!previewDownloads;
+
+  /** Save a file. Resolves true when the file was handed over, false otherwise. */
+  async function download(filename, content, type) {
+    if (previewDownloads) {
+      try {
+        await previewDownloads.save({ filename, data: content });
+        return true;
+      } catch (e) {
+        const code = e && e.code;
+        if (code === 'declined') toast('Download cancelled.');
+        else if (code === 'rate_limited') toast('A download prompt is already open. Finish that one first.', 'error');
+        else toast('This preview could not save the file. Open index.html from the app folder instead.', 'error');
+        return false;
+      }
+    }
     if (EMBEDDED) {
       toast('Downloads are blocked in this preview. Open index.html from the app folder to download files.', 'error');
       return false;
@@ -1695,6 +1717,7 @@
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 2000);
+    return true;
   }
   const stamp = () => todayISO();
 
@@ -1757,8 +1780,8 @@
     download(withExample ? 'processiq-import-example.csv' : 'processiq-import-template.csv', toCSV(IMPORT_COLUMNS, rows), 'text/csv;charset=utf-8');
   }
 
-  function backup() {
-    if (download(`adoption-tracker-backup-${stamp()}.json`, JSON.stringify(db, null, 2), 'application/json') === false) return;
+  async function backup() {
+    if (!(await download(`adoption-tracker-backup-${stamp()}.json`, JSON.stringify(db, null, 2), 'application/json'))) return;
     db.meta.lastBackupAt = new Date().toISOString();
     persist(db);
     render();
