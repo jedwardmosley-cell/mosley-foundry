@@ -6,107 +6,302 @@
 <title>ProcessIQ</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
+  /* ==========================================================================
+     ProcessIQ design system. Aligned with the AI Adoption Follow-Through
+     Tracker: same tokens, header, cards, badges, KPI tiles and dark mode.
+     ========================================================================== */
   :root {
-    --bg: #f4f6f9;
-    --panel: #ffffff;
-    --item: #f8fafc;
-    --hover: #e4e7eb;
-    --text: #1f2933;
-    --muted: #616e7c;
-    --border: #d9e2ec;
-    --brand: #1f4e79;
-    --overlay: rgba(15, 23, 42, 0.45);
-    --s: #2f80ed;
-    --i: #27ae60;
-    --p: #8e44ad;
-    --o: #e67e22;
-    --c: #c0392b;
-    --fact-bg: #e3effa; --fact-fg: #164a7a;
-    --hyp-bg: #fdf0d5;  --hyp-fg: #8a5300;
-    --q-bg: #efe7f8;    --q-fg: #5b2d8a;
-    --ok: #1e7d46;      --ok-bg: #e3f4ea;
-    --no: #8a94a3;
+    --bg: #f5f6f8;
+    --surface: #ffffff;
+    --surface-2: #f0f2f5;
+    --border: #dfe3e8;
+    --border-strong: #c6ccd4;
+    --text: #1c2430;
+    --text-2: #4f5a68;
+    --text-3: #6f7a88;
+    --accent: #1f5fbf;
+    --accent-hover: #184d9c;
+    --accent-soft: #e6effb;
+    --on-accent: #ffffff;
+    --good: #1e7a46;
+    --good-soft: #e3f3ea;
+    --warn: #9a6200;
+    --warn-soft: #fdf1dc;
+    --bad: #b42318;
+    --bad-soft: #fde8e6;
+    --gap: #5b4fb0;
+    --gap-soft: #ecebfa;
+    --neutral: #59636f;
+    --neutral-soft: #eceff3;
+    --info-soft: #e8f0fb;
+    --on-solid: #ffffff;
+    --backdrop: rgba(10, 15, 22, 0.5);
+    --radius: 10px;
+    --radius-sm: 6px;
+    --shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.08);
+    --shadow-lg: 0 20px 50px rgba(16, 24, 40, 0.25);
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --gutter: 16px;
+
+    /* SIPOC column colors (ProcessIQ's own) */
+    --s: #2f6fd0;
+    --i: #1e8a55;
+    --p: #7a4cc2;
+    --o: #c46a00;
+    --c: #b8432f;
+
+    /* Older names used across ProcessIQ, mapped onto the shared tokens */
+    --panel: var(--surface);
+    --item: var(--surface-2);
+    --hover: var(--surface-2);
+    --muted: var(--text-3);
+    --brand: var(--accent);
+    --overlay: var(--backdrop);
+    --fact-bg: var(--accent-soft); --fact-fg: var(--accent);
+    --hyp-bg: var(--warn-soft);    --hyp-fg: var(--warn);
+    --q-bg: var(--gap-soft);       --q-fg: var(--gap);
+    --ok: var(--good);             --ok-bg: var(--good-soft);
+    --no: var(--neutral);
+    color-scheme: light;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #10161f; --panel: #19212c; --item: #212b38; --hover: #2c3846;
-      --text: #e6ebf1; --muted: #9aa8b8; --border: #2f3b4a; --brand: #173b5c;
-      --overlay: rgba(0, 0, 0, 0.6);
-      --fact-bg: #16314d; --fact-fg: #a9d1f7; --hyp-bg: #3d2e10; --hyp-fg: #f4c46b;
-      --q-bg: #2f2140; --q-fg: #d4b8f2; --ok: #5fd08f; --ok-bg: #143222; --no: #7d8796;
+      --bg: #12161c; --surface: #1a2028; --surface-2: #222a34; --border: #2e3843; --border-strong: #404c59;
+      --text: #e7ebf0; --text-2: #b4bdc8; --text-3: #8e98a5;
+      --accent: #6ea3f2; --accent-hover: #8db7f5; --accent-soft: #1d2d45; --on-accent: #0c1420;
+      --good: #5cc98a; --good-soft: #17301f; --warn: #e6b04f; --warn-soft: #33270f;
+      --bad: #f2796d; --bad-soft: #3a1c19; --gap: #a99cf5; --gap-soft: #262245;
+      --neutral: #aab3be; --neutral-soft: #262d36; --info-soft: #1b2a3f; --on-solid: #10151b;
+      --backdrop: rgba(0, 0, 0, 0.6);
+      --s: #6ea3f2; --i: #4fc488; --p: #b597f0; --o: #e6a04f; --c: #ef8a78;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.4); --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.6);
       color-scheme: dark;
     }
   }
   :root[data-theme="dark"] {
-    --bg: #10161f; --panel: #19212c; --item: #212b38; --hover: #2c3846;
-    --text: #e6ebf1; --muted: #9aa8b8; --border: #2f3b4a; --brand: #173b5c;
-    --overlay: rgba(0, 0, 0, 0.6);
-    --fact-bg: #16314d; --fact-fg: #a9d1f7; --hyp-bg: #3d2e10; --hyp-fg: #f4c46b;
-    --q-bg: #2f2140; --q-fg: #d4b8f2; --ok: #5fd08f; --ok-bg: #143222; --no: #7d8796;
+    --bg: #12161c; --surface: #1a2028; --surface-2: #222a34; --border: #2e3843; --border-strong: #404c59;
+    --text: #e7ebf0; --text-2: #b4bdc8; --text-3: #8e98a5;
+    --accent: #6ea3f2; --accent-hover: #8db7f5; --accent-soft: #1d2d45; --on-accent: #0c1420;
+    --good: #5cc98a; --good-soft: #17301f; --warn: #e6b04f; --warn-soft: #33270f;
+    --bad: #f2796d; --bad-soft: #3a1c19; --gap: #a99cf5; --gap-soft: #262245;
+    --neutral: #aab3be; --neutral-soft: #262d36; --info-soft: #1b2a3f; --on-solid: #10151b;
+    --backdrop: rgba(0, 0, 0, 0.6);
+    --s: #6ea3f2; --i: #4fc488; --p: #b597f0; --o: #e6a04f; --c: #ef8a78;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4); --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.6);
     color-scheme: dark;
   }
-  * { box-sizing: border-box; }
+
+  /* ---------- Base ---------- */
+  *, *::before, *::after { box-sizing: border-box; }
   [hidden] { display: none !important; }
+  html { -webkit-text-size-adjust: 100%; }
   body {
     margin: 0;
-    font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
     background: var(--bg);
     color: var(--text);
+    font-family: var(--font);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
   }
-  header {
-    background: var(--brand);
-    color: #fff;
-    padding-block: 14px;
-    padding-left: max(24px, env(safe-area-inset-left, 0px));
-    padding-right: max(24px, env(safe-area-inset-right, 0px));
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-  header h1 { margin: 0; font-size: 22px; letter-spacing: 0.5px; }
-  header h1 span { font-weight: 400; opacity: 0.8; font-size: 15px; margin-left: 8px; }
-  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; align-items: center; }
-  select, button, input, textarea {
-    font: inherit;
-    font-size: 14px;
-  }
+  h1, h2, h3 { line-height: 1.25; margin: 0 0 0.5rem; text-wrap: balance; }
+  h1 { font-size: 1.6rem; letter-spacing: -0.01em; }
+  h2 { font-size: 1.1rem; }
+  h3 { font-size: 1rem; }
+  a { color: var(--accent); }
+  a:hover { color: var(--accent-hover); }
+  select, button, input, textarea { font: inherit; color: inherit; font-size: 14px; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .muted { color: var(--text-3); }
+  .sub { color: var(--text-2); font-size: 0.85rem; }
+  .small { font-size: 0.85rem; }
+
   select {
-    padding: 7px 10px;
-    border-radius: 6px;
-    border: 1px solid var(--border);
-    min-width: 200px;
-    max-width: 100%;
-    background: var(--panel);
-    color: var(--text);
+    min-height: 38px; padding: 7px 10px;
+    border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+    background: var(--surface); color: var(--text); max-width: 100%;
   }
-  input, textarea { color: var(--text); }
-  button:focus-visible, select:focus-visible { outline: 2px solid #8cc4ff; outline-offset: 2px; }
+
+  /* ---------- Buttons ---------- */
   button {
-    padding: 7px 14px;
-    border-radius: 6px;
-    border: 1px solid transparent;
-    background: #fff;
-    color: var(--brand);
-    cursor: pointer;
-    font-weight: 600;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    min-height: 38px; padding: 7px 14px;
+    border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+    background: var(--surface); color: var(--text);
+    font-weight: 500; font-size: 0.9rem; cursor: pointer; white-space: nowrap;
   }
-  button:hover { filter: brightness(0.95); }
-  button.ghost { background: transparent; color: #fff; border-color: rgba(255,255,255,0.5); }
-  button.danger { background: #c0392b; color: #fff; }
-  button.primary { background: var(--brand); color: #fff; }
-  button.plain { background: transparent; color: var(--text); border-color: var(--border); }
+  button:hover { background: var(--surface-2); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  button.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  button.danger { background: var(--surface); color: var(--bad); border-color: var(--bad); }
+  button.danger:hover { background: var(--bad-soft); }
+  .dialog button.danger { background: var(--bad); color: var(--on-solid); }
+  button.plain { background: var(--surface); color: var(--text); border-color: var(--border-strong); }
+  button.ghost { background: transparent; border-color: transparent; }
+  button.small, .btn.small { min-height: 32px; padding: 4px 10px; font-size: 0.85rem; }
+  a.btn {
+    display: inline-flex; align-items: center; min-height: 38px; padding: 7px 14px;
+    border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+    background: var(--surface); color: var(--text); text-decoration: none; font-weight: 500; font-size: 0.9rem;
+  }
+  a.btn:hover { background: var(--surface-2); color: var(--text); }
+  a.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+
+  /* ---------- Header and navigation ---------- */
+  .app-header {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+    background: var(--surface); border-bottom: 1px solid var(--border);
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+    z-index: 21; background: var(--surface);
+  }
+  .header-inner {
+    max-width: 1280px; margin: 0 auto;
+    padding-block: 10px;
+    padding-left: max(var(--gutter), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--gutter), env(safe-area-inset-right, 0px));
+    display: flex; align-items: center; gap: 24px;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); flex-shrink: 0; }
+  .brand:hover { color: var(--text); }
+  .brand-mark { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; background: var(--accent); color: var(--on-accent); }
+  .brand-text { display: flex; flex-direction: column; line-height: 1.15; }
+  .brand-text strong { font-size: 0.95rem; }
+  .brand-text span { font-size: 0.78rem; color: var(--text-2); }
+  .nav { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav a {
+    padding: 8px 12px; border-radius: var(--radius-sm);
+    color: var(--text-2); text-decoration: none; font-weight: 500; font-size: 0.92rem; white-space: nowrap;
+  }
+  .nav a:hover { background: var(--surface-2); color: var(--text); }
+  .nav a.active { background: var(--accent-soft); color: var(--accent); }
+  .header-status { margin-left: auto; display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+  .status { font-size: 0.8rem; color: var(--text-3); white-space: nowrap; }
+  .sync {
+    font-size: 0.78rem; padding: 3px 10px; border-radius: 999px; white-space: nowrap;
+    background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border);
+  }
+  .sync::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; background: var(--neutral); vertical-align: 1px; }
+  .sync[data-state="ok"]::before { background: var(--good); }
+  .sync[data-state="busy"]::before { background: var(--accent); }
+  .sync[data-state="warn"]::before { background: var(--warn); }
+
   main {
-    padding-block: 24px;
-    padding-left: max(24px, env(safe-area-inset-left, 0px));
-    padding-right: max(24px, env(safe-area-inset-right, 0px));
-    max-width: 1400px;
-    margin: 0 auto;
+    max-width: 1280px; margin: 0 auto;
+    padding-block: 20px calc(48px + env(safe-area-inset-bottom, 0px));
+    padding-left: max(var(--gutter), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--gutter), env(safe-area-inset-right, 0px));
   }
+
+  /* ---------- Process bar (which process you are working on) ---------- */
+  .process-bar {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    margin-bottom: 18px; padding: 10px 14px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow);
+  }
+  .process-bar label { font-size: 0.78rem; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.04em; }
+  .process-bar select { flex: 0 1 380px; min-width: 0; font-weight: 600; }
+  .process-bar .spacer { flex: 1; }
+
+  /* ---------- Page structure ---------- */
+  .page-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
+  .page-head .lead { color: var(--text-2); margin: 0; max-width: 64ch; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow); min-width: 0;
+  }
+  .card > p { color: var(--text-2); max-width: 75ch; }
+  .card-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .card-head h2 { margin: 0; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  .cards .card { margin: 0; display: flex; flex-direction: column; gap: 6px; }
+  .cards .card .actions { margin-top: auto; padding-top: 8px; }
+  .card.is-current { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), var(--shadow); }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 16px; }
+  .grid-2 .card { margin-bottom: 0; }
+  .count { display: inline-block; min-width: 1.6em; padding: 0 6px; margin-left: 4px; border-radius: 999px; background: var(--surface-2); color: var(--text-2); font-size: 0.8rem; text-align: center; vertical-align: middle; }
+  .empty { text-align: center; padding: 40px 20px; background: var(--surface); border: 1px dashed var(--border-strong); border-radius: var(--radius); margin-bottom: 16px; }
+  .empty p { color: var(--text-2); max-width: 52ch; margin: 0 auto 16px; }
+  .ok-note { padding: 14px 16px; background: var(--good-soft); color: var(--good); border-radius: var(--radius-sm); font-weight: 500; }
+  .banner { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 16px; border-radius: var(--radius); margin-bottom: 16px; border: 1px solid transparent; }
+  .banner.tone-info { background: var(--info-soft); border-color: var(--accent-soft); }
+  .banner.tone-warn { background: var(--warn-soft); }
+  .mini-stats { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.85rem; color: var(--text-2); margin: 6px 0 0; font-variant-numeric: tabular-nums; }
+  .mini-stats b { color: var(--text); }
+  .danger-zone { border-color: var(--bad-soft); }
+
+  /* ---------- Status badges (tracker tones) ---------- */
+  .tbadge { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; white-space: nowrap; vertical-align: middle; }
+  .tone-good.tbadge { background: var(--good-soft); color: var(--good); }
+  .tone-warn.tbadge { background: var(--warn-soft); color: var(--warn); }
+  .tone-bad.tbadge { background: var(--bad-soft); color: var(--bad); }
+  .tone-gap.tbadge { background: var(--gap-soft); color: var(--gap); }
+  .tone-info.tbadge { background: var(--accent-soft); color: var(--accent); }
+  .tone-neutral.tbadge { background: var(--neutral-soft); color: var(--neutral); }
+
+  /* ---------- KPI tiles ---------- */
+  .kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); border-top: 3px solid var(--border-strong); min-width: 0; }
+  .kpi-num { font-size: 1.9rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .kpi-label { font-weight: 600; font-size: 0.88rem; margin-top: 2px; }
+  .kpi-sub { color: var(--text-3); font-size: 0.8rem; }
+  .kpi.tone-good { border-top-color: var(--good); } .kpi.tone-good .kpi-num { color: var(--good); }
+  .kpi.tone-warn { border-top-color: var(--warn); } .kpi.tone-warn .kpi-num { color: var(--warn); }
+  .kpi.tone-gap { border-top-color: var(--gap); } .kpi.tone-gap .kpi-num { color: var(--gap); }
+  .kpi.tone-info { border-top-color: var(--accent); } .kpi.tone-info .kpi-num { color: var(--accent); }
+
+  /* ---------- Attention list ---------- */
+  .attention { list-style: none; margin: 0; padding: 0; }
+  .attention li { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 0; border-top: 1px solid var(--border); }
+  .attention li:first-child { border-top: 0; padding-top: 0; }
+  .attention-main { flex: 1 1 360px; min-width: 0; }
+  .attention-main .tbadge { margin-right: 6px; }
+
+  /* ---------- Progress bar ---------- */
+  .progress-track { height: 8px; background: var(--surface-2); border-radius: 999px; overflow: hidden; border: 1px solid var(--border); margin-top: 6px; }
+  .progress-fill { height: 100%; border-radius: 999px; background: var(--accent); }
+  .progress-fill.p-good { background: var(--good); }
+
+  /* ---------- Guide ---------- */
+  .prose ol, .prose ul { padding-left: 20px; }
+  .prose li { margin-bottom: 6px; }
+  .prose p { color: var(--text-2); max-width: 75ch; }
+  .defs { display: grid; gap: 10px; margin: 0; }
+  .defs > div { display: grid; grid-template-columns: 200px 1fr; gap: 12px; align-items: baseline; }
+  .defs dt { font-weight: 600; }
+  .defs dd { margin: 0; color: var(--text-2); }
+  .sipoc-legend { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin: 10px 0 4px; }
+  .sipoc-legend div { border-radius: var(--radius-sm); padding: 10px 12px; color: #fff; }
+  .sipoc-legend b { display: block; font-size: 1.4rem; line-height: 1; }
+  .sipoc-legend span { font-size: 0.82rem; }
+
+  @media (max-width: 1000px) {
+    .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-2 { grid-template-columns: 1fr; }
+    .header-inner { flex-wrap: wrap; row-gap: 8px; padding-bottom: 6px; }
+    .nav { order: 3; flex: 1 1 100%; margin: 0 calc(-1 * var(--gutter)); padding: 0 var(--gutter); }
+  }
+  @media (max-width: 640px) {
+    h1 { font-size: 1.35rem; }
+    .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .kpi { padding: 12px; }
+    .kpi-num { font-size: 1.6rem; }
+    .card { padding: 16px; }
+    .cards { grid-template-columns: 1fr; }
+    .defs > div { grid-template-columns: 1fr; gap: 2px; }
+    .sipoc-legend { grid-template-columns: 1fr 1fr; }
+    .status { display: none; }
+    .process-bar select { flex: 1 1 100%; }
+  }
+
   .details {
     background: var(--panel);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    box-shadow: var(--shadow);
+    border-radius: var(--radius);
     padding: 18px 20px;
     display: grid;
     grid-template-columns: 2fr 1fr 1fr 1fr;
@@ -132,7 +327,8 @@
   .col {
     background: var(--panel);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    box-shadow: var(--shadow);
+    border-radius: var(--radius);
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -199,28 +395,18 @@
   .sync[data-state="warn"]::before { background: #f4c46b; }
   .print-only, .print-text { display: none; }
 
-  /* ---------- Tabs ---------- */
-  .tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--border); margin-bottom: 18px; flex-wrap: wrap; }
-  .tab {
-    background: transparent; color: var(--muted); border: none; border-radius: 0;
-    padding: 10px 16px; font-size: 15px; border-bottom: 3px solid transparent; margin-bottom: -2px;
-  }
-  .tab[aria-selected="true"] { color: var(--text); border-bottom-color: var(--brand); }
-  :root[data-theme="dark"] .tab[aria-selected="true"] { border-bottom-color: var(--fact-fg); }
-  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tab[aria-selected="true"] { border-bottom-color: var(--fact-fg); } }
-
   /* ---------- Analysis ---------- */
   .subtabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
   .subtab {
     background: var(--panel); color: var(--text); border: 1px solid var(--border);
     border-radius: 999px; padding: 6px 14px; font-weight: 600;
   }
-  .subtab[aria-selected="true"] { background: var(--brand); color: #fff; border-color: var(--brand); }
+  .subtab[aria-selected="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
   .subtab:disabled { color: var(--muted); cursor: default; opacity: 0.7; }
   .subtab small { font-weight: 400; margin-left: 4px; }
   .panel {
-    background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
-    padding: 18px 20px; margin-bottom: 16px; min-width: 0;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px; margin-bottom: 16px; min-width: 0; box-shadow: var(--shadow);
   }
   .panel h2 { margin: 0 0 4px; font-size: 17px; }
   .panel > p.lead { margin: 0 0 14px; color: var(--muted); font-size: 13px; max-width: 75ch; }
@@ -506,25 +692,14 @@
     .details .wide { grid-column: span 2; }
   }
   @media (max-width: 600px) {
-    main {
-      padding-block: 16px;
-      padding-left: max(16px, env(safe-area-inset-left, 0px));
-      padding-right: max(16px, env(safe-area-inset-right, 0px));
-    }
-    header {
-      padding-left: max(16px, env(safe-area-inset-left, 0px));
-      padding-right: max(16px, env(safe-area-inset-right, 0px));
-    }
-    .toolbar select { flex: 1 1 100%; }
     .grid, .details { grid-template-columns: 1fr; }
     .details .wide { grid-column: span 1; }
-    .toolbar { margin-left: 0; }
   }
 
   @media print {
     @page { size: landscape; margin: 12mm; }
     body { background: #fff; color: #1f2933; }
-    header, .add, .icon, .no-print, .overlay, .tabs, .subtabs, .finding .acts, .add-finding, .ai-row, .ai-suggest { display: none !important; }
+    .app-header, .process-bar, .page-head .actions, .add, .icon, .no-print, .overlay, .subtabs, .finding .acts, .add-finding, .ai-row, .ai-suggest { display: none !important; }
     .panel, .finding, .stat { break-inside: avoid; background: #fff; color: #1f2933; }
     .details input, .col, .items li { background: #fff; color: #1f2933; }
     .print-only { display: block; }
@@ -541,22 +716,45 @@
 </head>
 <body>
 
-<header>
-  <h1>ProcessIQ <span>Process Improvement</span></h1>
-  <div class="toolbar">
-    <select id="picker" aria-label="Choose a SIPOC"></select>
-    <button id="newBtn">+ New SIPOC</button>
-    <button id="copyBtn" class="ghost">Copy for Excel</button>
-    <button id="csvBtn" class="ghost file-only">Export CSV</button>
-    <button id="printBtn" class="ghost file-only">Print / PDF</button>
-    <button id="backupBtn" class="ghost">Backup</button>
-    <button id="deleteBtn" class="ghost">Delete</button>
-    <span class="status" id="status"></span>
-    <span class="sync" id="sync" role="status" hidden></span>
+<header class="app-header">
+  <div class="header-inner">
+    <a class="brand" href="#dashboard" aria-label="ProcessIQ, home">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="9" width="5" height="6" rx="1.2"/><rect x="16.5" y="4" width="5" height="6" rx="1.2"/><rect x="16.5" y="14" width="5" height="6" rx="1.2"/><path d="M7.5 12h4m0 0V7h5m-5 5v5h5"/></svg>
+      </span>
+      <span class="brand-text"><strong>ProcessIQ</strong><span>Process Improvement</span></span>
+    </a>
+    <nav id="nav" class="nav" aria-label="Main">
+      <a href="#dashboard" data-nav="dashboard">Dashboard</a>
+      <a href="#processes" data-nav="processes">Processes</a>
+      <a href="#map" data-nav="map">SIPOC map</a>
+      <a href="#analysis" data-nav="analysis">Analysis</a>
+      <a href="#data" data-nav="data">Data</a>
+      <a href="#guide" data-nav="guide">Guide</a>
+    </nav>
+    <div class="header-status">
+      <span class="status" id="status" role="status"></span>
+      <span class="sync" id="sync" role="status" hidden></span>
+    </div>
   </div>
 </header>
 
-<main>
+<main id="main">
+  <div class="process-bar" id="process-bar">
+    <label for="picker">Process</label>
+    <select id="picker"></select>
+    <span class="spacer"></span>
+    <button type="button" id="newBtn" class="small">+ New process</button>
+  </div>
+
+  <section class="page" id="page-dashboard" aria-label="Dashboard"></section>
+  <section class="page" id="page-processes" aria-label="Processes" hidden></section>
+
+  <section class="page" id="page-map" aria-labelledby="map-title" hidden>
+  <div class="page-head">
+    <div><h1 id="map-title">SIPOC map</h1><p class="lead">The high-level map of this process: who supplies what, the main steps, and who receives the results.</p></div>
+    <div class="actions"><button type="button" class="small" data-go="analysis:bottleneck">Analyze this process</button></div>
+  </div>
   <h2 class="print-only" style="margin:0 0 8px">SIPOC</h2>
   <section class="details">
     <div class="name wide">
@@ -581,16 +779,13 @@
     </div>
   </section>
 
-  <nav class="tabs" role="tablist" aria-label="Views">
-    <button class="tab" role="tab" id="tab-sipoc" aria-controls="view-sipoc">SIPOC map</button>
-    <button class="tab" role="tab" id="tab-analysis" aria-controls="view-analysis">Process analysis</button>
-  </nav>
-
-  <section id="view-sipoc" role="tabpanel" aria-labelledby="tab-sipoc">
-    <div class="grid" id="grid"></div>
+  <div class="grid" id="grid"></div>
   </section>
 
-  <section id="view-analysis" role="tabpanel" aria-labelledby="tab-analysis" hidden>
+  <section class="page" id="page-analysis" aria-labelledby="analysis-title" hidden>
+    <div class="page-head">
+      <div><h1 id="analysis-title">Analysis</h1><p class="lead">Find delays and waste, get to root causes, spot automation, and build the action plan. Facts, hypotheses and questions are always labeled.</p></div>
+    </div>
     <div class="subtabs" role="tablist" aria-label="Analysis tools">
       <button class="subtab" role="tab" id="st-bottleneck" aria-selected="true">Bottleneck analysis</button>
       <button class="subtab" role="tab" id="st-whys" aria-selected="false">5 Whys</button>
@@ -697,6 +892,91 @@
       </div>
     </div>
   </section>
+  <section class="page" id="page-data" aria-labelledby="data-title" hidden>
+    <div class="page-head">
+      <div><h1 id="data-title">Data, backup and export</h1><p class="lead">Where your work is saved, how to back it up, and how to take it into other tools.</p></div>
+    </div>
+    <div class="grid-2">
+      <section class="card">
+        <h2>Saving and sync</h2>
+        <p id="data-sync-text"></p>
+        <p class="sub" id="data-count"></p>
+      </section>
+      <section class="card">
+        <h2>Backup and restore</h2>
+        <p>Copy a backup of every process as text, or restore one. Use it to move work between the downloaded file and your private Claude page. Restoring never overwrites anything: matching processes are skipped and different versions are added as copies.</p>
+        <div class="actions"><button type="button" id="backupBtn" class="primary">Backup or restore</button></div>
+      </section>
+    </div>
+    <section class="card">
+      <h2>Export this process</h2>
+      <p>Take the current SIPOC into a spreadsheet, or print it.</p>
+      <div class="actions">
+        <button type="button" id="copyBtn">Copy SIPOC for Excel</button>
+        <button type="button" id="csvBtn" class="file-only">Download SIPOC (.csv)</button>
+        <button type="button" id="printBtn" class="file-only">Print SIPOC map</button>
+      </div>
+    </section>
+    <section class="card danger-zone">
+      <h2>Delete this process</h2>
+      <p>Removes the current process and all of its analysis from every device. This cannot be undone, so copy a backup first if you might need it.</p>
+      <div class="actions"><button type="button" id="deleteBtn" class="danger">Delete this process</button></div>
+    </section>
+  </section>
+
+  <section class="page" id="page-guide" aria-labelledby="guide-title" hidden>
+    <div class="page-head">
+      <div><h1 id="guide-title">How ProcessIQ works</h1><p class="lead">A plain-English guide to mapping a process and improving it.</p></div>
+    </div>
+    <section class="card prose">
+      <h2>What a SIPOC is</h2>
+      <p>A one-page, high-level map of a process. It shows the boundaries of the process and the five things that define it.</p>
+      <div class="sipoc-legend">
+        <div style="background:var(--s)"><b>S</b><span>Suppliers: who provides what the process needs</span></div>
+        <div style="background:var(--i)"><b>I</b><span>Inputs: what goes in</span></div>
+        <div style="background:var(--p)"><b>P</b><span>Process: the main steps, usually 4 to 7</span></div>
+        <div style="background:var(--o)"><b>O</b><span>Outputs: what the process produces</span></div>
+        <div style="background:var(--c)"><b>C</b><span>Customers: who receives the outputs</span></div>
+      </div>
+    </section>
+    <section class="card prose">
+      <h2>How to use it</h2>
+      <ol>
+        <li><strong>Map the process.</strong> On the SIPOC map, name the process, set where it starts and ends, and fill in the five columns.</li>
+        <li><strong>Add step details.</strong> Under Analysis, Bottleneck analysis, add who does each step, the hands-on work time, and how long work waits before it. Leave unknowns blank.</li>
+        <li><strong>Review the findings.</strong> Approve the ones that are true or worth checking, reject the rest, and edit any wording.</li>
+        <li><strong>Find root causes.</strong> Use 5 Whys on the biggest problem. Confirm each answer with evidence.</li>
+        <li><strong>Look for automation.</strong> Answer four quick questions per step to see where workflow tools, AI or existing software could help.</li>
+        <li><strong>Prioritize.</strong> Rate each improvement for impact and effort, approve the ones you will do, and give each an owner and a date.</li>
+      </ol>
+      <p>The Dashboard always shows what needs attention next.</p>
+    </section>
+    <section class="card prose">
+      <h2>Facts, hypotheses and questions</h2>
+      <dl class="defs">
+        <div><dt><span class="badge fact">Fact</span></dt><dd>Calculated directly from information you entered, such as total waiting time. Nothing is assumed.</dd></div>
+        <div><dt><span class="badge hypothesis">Hypothesis</span></dt><dd>A possible issue found from patterns, such as an approval step that may create a queue. Check it before acting on it.</dd></div>
+        <div><dt><span class="badge question">Question</span></dt><dd>Information is missing. ProcessIQ asks instead of guessing.</dd></div>
+        <div><dt>Approved</dt><dd>You have checked it and agree. Only approved items move on to Priorities.</dd></div>
+        <div><dt>Suggested by Claude</dt><dd>An idea from Claude, on the private page only. Always a hypothesis or a question, never a fact, and it waits for your approval.</dd></div>
+      </dl>
+    </section>
+    <section class="card prose">
+      <h2>How the action plan is ordered</h2>
+      <dl class="defs">
+        <div><dt><span class="tbadge tone-good">Quick wins</span></dt><dd>High impact, low effort. Do these first.</dd></div>
+        <div><dt><span class="tbadge tone-info">Major projects</span></dt><dd>High impact, high effort. Plan them carefully.</dd></div>
+        <div><dt><span class="tbadge tone-neutral">Fill-ins</span></dt><dd>Low impact, low effort. Do when there is time.</dd></div>
+        <div><dt><span class="tbadge tone-warn">Reconsider</span></dt><dd>Low impact, high effort. Usually not worth it.</dd></div>
+        <div><dt>Ratings</dt><dd>Impact and effort are rated 1 to 5 by you. A rating of 3 or more counts as high.</dd></div>
+      </dl>
+    </section>
+    <section class="card prose">
+      <h2>Where your data lives</h2>
+      <p>On your private Claude page, processes sync through private storage on your Claude account, so your computer and iPhone show the same work. Nobody else can see it, even if you share the page link. The downloaded file saves in that browser only. Use Backup on the Data page to move work between the two.</p>
+    </section>
+  </section>
+
 </main>
 
 <div class="overlay" id="overlay" hidden>
@@ -1001,7 +1281,10 @@
     renderPicker();
     renderDetails();
     renderGrid();
-    if (activeTab === "analysis") showSub(activeSub);
+    if (activePage === "analysis") showSub(activeSub);
+    else if (activePage === "dashboard") renderDashboard();
+    else if (activePage === "processes") renderProcesses();
+    else if (activePage === "data") renderDataPage();
   }
 
   // ---------- Buttons and fields ----------
@@ -1083,6 +1366,7 @@
         state.currentId = s.id;
         save();
         renderAll();
+        showPage("map");
         document.getElementById("f-owner").focus();
       }
     });
@@ -1151,7 +1435,7 @@
     document.querySelectorAll(".file-only").forEach(function (b) { b.hidden = true; });
   }
 
-  document.getElementById("printBtn").addEventListener("click", function () { window.print(); });
+  document.getElementById("printBtn").addEventListener("click", function () { showPage("map"); setTimeout(function () { window.print(); }, 50); });
 
   document.getElementById("csvBtn").addEventListener("click", function () {
     var s = current();
@@ -1185,23 +1469,7 @@
   //  PROCESS ANALYSIS
   // =====================================================================
 
-  // ---------- Tabs ----------
-  var TAB_KEY = "processiq.tab";
-  var activeTab = "sipoc";
-  try { if (localStorage.getItem(TAB_KEY) === "analysis") activeTab = "analysis"; } catch (e) {}
-
-  function showTab(name) {
-    activeTab = name;
-    try { localStorage.setItem(TAB_KEY, name); } catch (e) {}
-    document.getElementById("tab-sipoc").setAttribute("aria-selected", String(name === "sipoc"));
-    document.getElementById("tab-analysis").setAttribute("aria-selected", String(name === "analysis"));
-    document.getElementById("view-sipoc").hidden = name !== "sipoc";
-    document.getElementById("view-analysis").hidden = name !== "analysis";
-    if (name === "analysis") showSub(activeSub);
-    else fitAll();
-  }
-  document.getElementById("tab-sipoc").addEventListener("click", function () { showTab("sipoc"); });
-  document.getElementById("tab-analysis").addEventListener("click", function () { showTab("analysis"); });
+  var activeTab = "sipoc";   // kept for older checks; set by showPage
 
   // ---------- Time helpers ----------
   var UNIT_MIN = { min: 1, hr: 60, day: 1440 };
@@ -2750,6 +3018,7 @@
     return JSON.stringify(c);
   }
   function setSync(kind, text) {
+    syncState = kind;
     var e = document.getElementById("sync");
     if (!e) return;
     e.hidden = false;
@@ -2789,7 +3058,15 @@
     var reviewed = s.analysis.findings.concat(s.analysis.auto).some(function (f) { return f.status !== "proposed" || f.edited || f.source !== "rule"; });
     return !reviewed && !s.analysis.improvements.length;
   }
-  function dropSpareExamples() {
+  function dropSpareExamples(serverHasOthers) {
+    if (serverHasOthers) {
+      state.sipocs.slice().forEach(function (x) {
+        if (x.name === EXAMPLE_NAME && !lastSynced[x.id] && isPristineExample(x) && state.sipocs.length > 1) {
+          state.sipocs.splice(findIndex(x.id), 1);
+          if (state.currentId === x.id) state.currentId = state.sipocs[0].id;
+        }
+      });
+    }
     var examples = state.sipocs.filter(function (x) { return x.name === EXAMPLE_NAME; });
     if (examples.length < 2) return;
     var keep = examples.filter(function (x) { return !isPristineExample(x); });
@@ -2934,8 +3211,14 @@
           if (!syncReady) {
             if (snap.metadata && snap.metadata.fromCache) return;   // wait for the server's answer
             clearTimeout(timer);
-            snap.docs.forEach(function (doc) { if (doc.exists) applyRemote(doc.id, doc.data()); });
-            dropSpareExamples();
+            var others = 0;
+            snap.docs.forEach(function (doc) {
+              if (!doc.exists) return;
+              applyRemote(doc.id, doc.data());
+              var d = doc.data() || {};
+              if (!d.deleted && d.sipoc && d.sipoc.name !== EXAMPLE_NAME) others++;
+            });
+            dropSpareExamples(others > 0);
             syncReady = true;
             persistLocal();
             renderAll();
@@ -3018,7 +3301,305 @@
 
   startSync();
 
-  showTab(activeTab);
+  // =====================================================================
+  //  PAGES AND NAVIGATION (same structure as the Adoption Tracker)
+  // =====================================================================
+  var PAGES = ["dashboard", "processes", "map", "analysis", "data", "guide"];
+  var PAGE_TITLES = { dashboard: "Dashboard", processes: "Processes", map: "SIPOC map", analysis: "Analysis", data: "Data", guide: "Guide" };
+  var PAGE_KEY = "processiq.page";
+  var activePage = "dashboard";
+
+  function initialPage() {
+    var h = String(location.hash || "").replace(/^#/, "");
+    if (PAGES.indexOf(h) >= 0) return h;
+    try {
+      var saved = localStorage.getItem(PAGE_KEY);
+      if (PAGES.indexOf(saved) >= 0) return saved;
+      var oldTab = localStorage.getItem("processiq.tab");   // from the earlier two-tab layout
+      if (oldTab === "analysis") return "analysis";
+    } catch (e) {}
+    return "dashboard";
+  }
+
+  function showPage(name, opts) {
+    if (PAGES.indexOf(name) < 0) name = "dashboard";
+    var changed = name !== activePage;
+    activePage = name;
+    activeTab = name === "map" ? "sipoc" : name;
+    try { localStorage.setItem(PAGE_KEY, name); } catch (e) {}
+    if (String(location.hash).replace(/^#/, "") !== name) {
+      try { history.replaceState(null, "", "#" + name); } catch (e) { location.hash = name; }
+    }
+    PAGES.forEach(function (p) { document.getElementById("page-" + p).hidden = p !== name; });
+    document.querySelectorAll("#nav a").forEach(function (a) {
+      var on = a.dataset.nav === name;
+      a.classList.toggle("active", on);
+      if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+    });
+    document.getElementById("process-bar").hidden = name === "processes" || name === "guide";
+    document.title = name === "dashboard" ? "ProcessIQ" : PAGE_TITLES[name] + " · ProcessIQ";
+    if (name === "dashboard") renderDashboard();
+    else if (name === "processes") renderProcesses();
+    else if (name === "analysis") showSub((opts && opts.sub) || activeSub);
+    else if (name === "map") fitAll();
+    else if (name === "data") renderDataPage();
+    if (changed && !(opts && opts.keepScroll)) window.scrollTo(0, 0);
+  }
+  // Earlier code calls showTab("sipoc") / showTab("analysis")
+  function showTab(name) { showPage(name === "sipoc" ? "map" : name); }
+
+  document.querySelectorAll("#nav a, .brand").forEach(function (a) {
+    a.addEventListener("click", function (e) {
+      var to = (a.getAttribute("href") || "").replace(/^#/, "");
+      if (PAGES.indexOf(to) < 0) return;
+      e.preventDefault();
+      showPage(to);
+    });
+  });
+  window.addEventListener("hashchange", function () {
+    var h = String(location.hash).replace(/^#/, "");
+    if (PAGES.indexOf(h) >= 0 && h !== activePage) showPage(h);
+  });
+
+  // Buttons anywhere with data-go="page" or data-go="analysis:whys"
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest && e.target.closest("[data-go]");
+    if (!t) return;
+    e.preventDefault();
+    var parts = t.dataset.go.split(":");
+    if (t.dataset.process) { state.currentId = t.dataset.process; save(); renderPicker(); renderDetails(); renderGrid(); }
+    showPage(parts[0], parts[1] ? { sub: parts[1] } : null);
+  });
+
+  // ---------- Small builders ----------
+  function tbadge(text, tone) { return el("span", "tbadge tone-" + tone, text); }
+  function plural(n, word, many) { return n + " " + (n === 1 ? word : (many || word + "s")); }
+  function kpi(box, n, label, sub, tone) {
+    var c = el("div", "kpi" + (tone ? " tone-" + tone : ""));
+    c.appendChild(el("div", "kpi-num", String(n)));
+    c.appendChild(el("div", "kpi-label", label));
+    if (sub) c.appendChild(el("div", "kpi-sub", sub));
+    box.appendChild(c);
+  }
+  function goButton(label, go, primary) {
+    var b = el("button", "small" + (primary ? " primary" : ""), label);
+    b.type = "button"; b.dataset.go = go;
+    return b;
+  }
+  function fmtDay(ts) {
+    if (!ts) return "";
+    var d = new Date(ts);
+    return isNaN(d) ? "" : d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  }
+
+  // Everything the Dashboard and Processes pages count, for one process
+  function processStats(s) {
+    runAnalysis(s); runAutomation(s); syncImprovements(s);
+    var n = s.process.length;
+    var fields = 0, filled = 0;
+    s.details.forEach(function (d) {
+      fields += 3;
+      if (String(d.role || "").trim()) filled++;
+      if (num(d.work) != null) filled++;
+      if (num(d.wait) != null) filled++;
+    });
+    var all = s.analysis.findings.concat(s.analysis.auto);
+    var qOpen = all.filter(function (f) { return f.kind === "question" && f.status === "proposed"; });
+    var toReview = all.filter(function (f) { return f.kind !== "question" && f.status === "proposed"; });
+    var approved = all.filter(function (f) { return f.kind !== "question" && f.status === "approved"; });
+    var autoUnanswered = s.details.filter(function (d) { return !d.auto.rep || !d.auto.rules || !d.auto.digital; }).length;
+    var whys = s.analysis.whys;
+    var rootsApproved = whys.filter(function (w) { return w.status === "approved"; });
+    var rootsPending = whys.filter(function (w) { return w.status === "proposed"; });
+    var imps = s.analysis.improvements.filter(function (m) { return m.status !== "rejected"; });
+    var plan = s.analysis.improvements.filter(function (m) { return m.status === "approved"; });
+    return {
+      n: n, detailPct: fields ? Math.round(filled / fields * 100) : 0,
+      qOpen: qOpen, qBottleneck: s.analysis.findings.filter(function (f) { return f.kind === "question" && f.status === "proposed"; }).length,
+      toReview: toReview, reviewBottleneck: s.analysis.findings.filter(function (f) { return f.kind !== "question" && f.status === "proposed"; }).length,
+      approved: approved, autoUnanswered: autoUnanswered,
+      whys: whys, rootsApproved: rootsApproved, rootsPending: rootsPending,
+      unrated: imps.filter(function (m) { return m.status === "proposed" && (!m.impact || !m.effort); }),
+      toDecide: imps.filter(function (m) { return m.status === "proposed"; }),
+      plan: plan,
+      planGaps: plan.filter(function (m) { return !String(m.owner || "").trim() || !m.due; })
+    };
+  }
+
+  // ---------- Dashboard ----------
+  function renderDashboard() {
+    var s = current();
+    var st = processStats(s);
+    var box = document.getElementById("page-dashboard");
+    box.innerHTML = "";
+
+    if (syncState === "off") {
+      var bn = el("div", "banner tone-info");
+      var bt = el("div");
+      bt.appendChild(el("strong", null, "Saved in this browser only. "));
+      bt.appendChild(document.createTextNode("This copy can't sync. Use Backup on the Data page to move work between copies."));
+      bn.appendChild(bt);
+      bn.appendChild(goButton("Open Data page", "data"));
+      box.appendChild(bn);
+    }
+
+    var head = el("div", "page-head");
+    var hl = el("div");
+    hl.appendChild(el("h1", null, s.name || "Untitled process"));
+    hl.appendChild(el("p", "lead", "Where this process stands, and what needs your attention next."));
+    head.appendChild(hl);
+    var ha = el("div", "actions");
+    ha.appendChild(goButton("Open SIPOC map", "map"));
+    ha.appendChild(goButton("Open analysis", "analysis", true));
+    head.appendChild(ha);
+    box.appendChild(head);
+
+    var k = el("section", "kpis"); k.setAttribute("aria-label", "Key numbers");
+    kpi(k, st.n, "Steps mapped", st.n >= 4 && st.n <= 7 ? "Within the 4 to 7 guide" : "A SIPOC usually has 4 to 7", st.n >= 4 && st.n <= 7 ? "good" : "warn");
+    kpi(k, st.detailPct + "%", "Step details complete", "Who, work time and wait", st.detailPct === 100 ? "good" : st.detailPct ? "info" : "gap");
+    kpi(k, st.qOpen.length, "Open questions", st.qOpen.length ? "Missing information" : "Nothing missing", st.qOpen.length ? "gap" : "good");
+    kpi(k, st.toReview.length, "Findings to review", st.approved.length + " approved so far", st.toReview.length ? "warn" : "");
+    kpi(k, st.plan.length, "Actions in plan", st.planGaps.length ? plural(st.planGaps.length, "needs", "need") + " an owner or date" : (st.plan.length ? "All have owners and dates" : "None approved yet"), st.plan.length ? (st.planGaps.length ? "warn" : "good") : "");
+    box.appendChild(k);
+
+    // Needs attention
+    var items = [];
+    function add(tone, label, text, sub, btnLabel, go) { items.push({ tone: tone, label: label, text: text, sub: sub, btn: btnLabel, go: go }); }
+    if (!st.n) add("gap", "Map", "Add the main process steps", "The Process column on the SIPOC map is empty.", "Open SIPOC map", "map");
+    if (st.qBottleneck) add("gap", "Question", st.qBottleneck === 1 ? "1 question needs an answer" : st.qBottleneck + " questions need answers", "Bottleneck analysis is asking for missing details.", "Answer", "analysis:bottleneck");
+    if (st.detailPct < 100 && st.n) add("gap", "Details", "Step details are " + st.detailPct + "% complete", "Who does each step, work time, and wait before it.", "Fill in", "analysis:bottleneck");
+    if (st.reviewBottleneck) add("warn", "Review", plural(st.reviewBottleneck, "finding") + " to approve or reject", "Bottleneck analysis.", "Review", "analysis:bottleneck");
+    if (st.autoUnanswered && st.n) add("gap", "Automation", "Automation questions unanswered for " + plural(st.autoUnanswered, "step"), "Same way each time, clear rules, digital, how often.", "Answer", "analysis:auto");
+    var autoReview = s.analysis.auto.filter(function (f) { return f.kind !== "question" && f.status === "proposed"; }).length;
+    if (autoReview) add("warn", "Review", plural(autoReview, "automation opportunity", "automation opportunities") + " to review", "Automation.", "Review", "analysis:auto");
+    if (!st.whys.length && st.n) add("neutral", "Root cause", "No 5 Whys yet", "Pick the biggest problem and find its root cause.", "Start 5 Whys", "analysis:whys");
+    if (st.rootsPending.length) add("warn", "Root cause", (st.rootsPending.length === 1 ? "1 root cause is" : st.rootsPending.length + " root causes are") + " not yet approved", "5 Whys.", "Open 5 Whys", "analysis:whys");
+    if (st.unrated.length) add("warn", "Priorities", (st.unrated.length === 1 ? "1 improvement needs" : st.unrated.length + " improvements need") + " impact and effort ratings", "Only you can judge these.", "Rate", "analysis:prio");
+    else if (st.toDecide.length) add("warn", "Priorities", (st.toDecide.length === 1 ? "1 improvement is" : st.toDecide.length + " improvements are") + " waiting for a decision", "Approve the ones you will act on.", "Decide", "analysis:prio");
+    if (st.planGaps.length) add("warn", "Action plan", (st.planGaps.length === 1 ? "1 action is" : st.planGaps.length + " actions are") + " missing an owner or target date", "Recommended action plan.", "Fix", "analysis:prio");
+
+    var att = el("section", "card");
+    var ah = el("div", "card-head");
+    ah.appendChild(el("h2", null, "Needs attention"));
+    if (items.length) ah.appendChild(el("span", "count", String(items.length)));
+    att.appendChild(ah);
+    if (!items.length) att.appendChild(el("div", "ok-note", "Nothing needs attention right now. Your action plan is ready."));
+    else {
+      var ul = el("ul", "attention");
+      items.forEach(function (it) {
+        var li = el("li");
+        var m = el("div", "attention-main");
+        m.appendChild(tbadge(it.label, it.tone));
+        m.appendChild(el("strong", null, it.text));
+        if (it.sub) m.appendChild(el("div", "sub", it.sub));
+        li.appendChild(m);
+        var a = el("div", "actions"); a.appendChild(goButton(it.btn, it.go)); li.appendChild(a);
+        ul.appendChild(li);
+      });
+      att.appendChild(ul);
+    }
+    box.appendChild(att);
+
+    // Two summary cards
+    var g = el("div", "grid-2");
+    var c1 = el("section", "card");
+    var c1h = el("div", "card-head"); c1h.appendChild(el("h2", null, "Process at a glance")); c1h.appendChild(goButton("Edit", "map")); c1.appendChild(c1h);
+    var dl = el("dl", "defs");
+    [["Owner", s.owner], ["Starts when", s.start], ["Ends when", s.end],
+     ["Suppliers", s.suppliers.length + " listed"], ["Inputs", s.inputs.length + " listed"], ["Outputs", s.outputs.length + " listed"], ["Customers", s.customers.length + " listed"]
+    ].forEach(function (r) {
+      var row = el("div"); row.appendChild(el("dt", null, r[0]));
+      var dd = el("dd", null, String(r[1] || "").trim() || "Not set yet");
+      if (!String(r[1] || "").trim()) dd.className = "muted";
+      row.appendChild(dd); dl.appendChild(row);
+    });
+    c1.appendChild(dl);
+    g.appendChild(c1);
+
+    var c2 = el("section", "card");
+    var c2h = el("div", "card-head"); c2h.appendChild(el("h2", null, "Action plan")); c2h.appendChild(goButton("Open", "analysis:prio")); c2.appendChild(c2h);
+    var items2 = planItems(s);
+    if (!items2.length) c2.appendChild(el("p", "muted", "No actions approved yet. Approve findings and root causes, then rate and approve improvements under Priorities."));
+    else {
+      var ol = el("ol", "prose");
+      ol.style.paddingLeft = "20px"; ol.style.margin = "0";
+      items2.slice(0, 6).forEach(function (x) {
+        var li = el("li");
+        li.appendChild(el("strong", null, x.m.title));
+        var bits = [];
+        if (x.q) bits.push(QUADS[x.q].name);
+        bits.push(x.m.owner ? "Owner: " + x.m.owner : "No owner yet");
+        if (x.m.due) bits.push("Due " + x.m.due);
+        li.appendChild(el("div", "sub", bits.join(" · ")));
+        ol.appendChild(li);
+      });
+      c2.appendChild(ol);
+      if (items2.length > 6) c2.appendChild(el("p", "sub", "And " + (items2.length - 6) + " more."));
+    }
+    g.appendChild(c2);
+    box.appendChild(g);
+    saveSoon();
+  }
+
+  // ---------- Processes ----------
+  function renderProcesses() {
+    var box = document.getElementById("page-processes");
+    box.innerHTML = "";
+    var head = el("div", "page-head");
+    var hl = el("div");
+    hl.appendChild(el("h1", null, "Processes"));
+    hl.appendChild(el("p", "lead", "Every process you have mapped. Open one to work on it."));
+    head.appendChild(hl);
+    var ha = el("div", "actions");
+    var nb = el("button", "primary", "+ New process"); nb.type = "button";
+    nb.addEventListener("click", function () { document.getElementById("newBtn").click(); });
+    ha.appendChild(nb);
+    head.appendChild(ha);
+    box.appendChild(head);
+
+    var grid = el("div", "cards");
+    state.sipocs.forEach(function (s) {
+      var st = processStats(s);
+      var c = el("section", "card" + (s.id === state.currentId ? " is-current" : ""));
+      var top = el("div", "card-head");
+      top.style.marginBottom = "0";
+      top.appendChild(el("h2", null, s.name || "Untitled process"));
+      if (s.id === state.currentId) top.appendChild(tbadge("Open now", "info"));
+      c.appendChild(top);
+      c.appendChild(el("div", "sub", [s.owner ? "Owner: " + s.owner : "No owner set", plural(st.n, "step"), s.updatedAt ? "Updated " + fmtDay(s.updatedAt) : (s.date ? "Dated " + s.date : "")].filter(Boolean).join(" · ")));
+      var ms = el("div", "mini-stats");
+      [[st.detailPct + "%", "details"], [st.qOpen.length, "open questions"], [st.toReview.length, "to review"], [st.plan.length, "actions"]].forEach(function (x) {
+        var sp = el("span"); sp.appendChild(el("b", null, String(x[0]))); sp.appendChild(document.createTextNode(" " + x[1])); ms.appendChild(sp);
+      });
+      c.appendChild(ms);
+      var bar = el("div", "progress-track"); var fill = el("div", "progress-fill" + (st.detailPct === 100 ? " p-good" : "")); fill.style.width = st.detailPct + "%"; bar.appendChild(fill);
+      bar.setAttribute("aria-label", "Step details " + st.detailPct + "% complete"); c.appendChild(bar);
+      var a = el("div", "actions");
+      var open = el("button", "small primary", "Open"); open.type = "button"; open.dataset.go = "dashboard"; open.dataset.process = s.id;
+      var map = el("button", "small", "SIPOC map"); map.type = "button"; map.dataset.go = "map"; map.dataset.process = s.id;
+      var del = el("button", "small danger", "Delete"); del.type = "button";
+      del.addEventListener("click", function () { state.currentId = s.id; renderPicker(); document.getElementById("deleteBtn").click(); });
+      a.appendChild(open); a.appendChild(map); a.appendChild(del);
+      c.appendChild(a);
+      grid.appendChild(c);
+    });
+    box.appendChild(grid);
+    saveSoon();
+  }
+
+  // ---------- Data page (only the parts that change) ----------
+  syncState = syncState || "off";   // sync may have already reported its state
+  function renderDataPage() {
+    var e = document.getElementById("data-sync-text");
+    if (!e) return;
+    var pill = document.getElementById("sync");
+    e.textContent = syncState === "off"
+      ? "This copy saves in this browser only. To keep work on several devices, use ProcessIQ on your private Claude page, which syncs automatically."
+      : "Your processes sync through your private storage on your Claude account. Each device also keeps its own copy, so it keeps working offline. Status: " + (pill ? pill.textContent : "") + ".";
+    document.getElementById("data-count").textContent = plural(state.sipocs.length, "process", "processes") + " saved";
+  }
+
+  showPage(initialPage());
 
   renderAll();
   setStatus("All changes saved");

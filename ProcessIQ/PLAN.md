@@ -50,3 +50,9 @@ A one-page, high-level map of a process, organized in five columns:
 
 - SIPOCs sync through private per-user storage on the Claude page; each device still saves locally first (done)
 - Backup button: copy all data as text, or restore it, to move work between the downloaded file and the private page (done)
+
+## Version 4: Aligned with the AI Adoption Follow-Through Tracker
+
+- Stage A: shared design system, header navigation, Dashboard, Processes, Data and Guide pages (done)
+- Stage B: action plan outcome fields, printable Report, and a CSV export in the tracker's ProcessIQ import format
+- Stage C: process Metrics section and a numbered path through the analysis
