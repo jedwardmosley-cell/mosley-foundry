@@ -12,6 +12,9 @@
      1. Settings and fixed lists
      ------------------------------------------------------------------------ */
   const STORE_KEY = 'aftt-data-v1';
+  // True when the app runs inside another page (for example a shared preview link).
+  // Browsers block downloads and printing there, so the app says so instead.
+  const EMBEDDED = (() => { try { return window.self !== window.top; } catch (_) { return true; } })();
   const DATA_VERSION = 1;
   const BACKUP_REMINDER_DAYS = 14;
   const SUSTAINED_WEEKS = 3; // "Used" this many weeks in a row = Sustained
@@ -616,7 +619,7 @@
 
     return `${banners()}
     ${pageHead('Adoption dashboard', `As of ${esc(fmtDate(todayISO()))}. Are the expected behaviors happening, sticking, and paying off?`,
-      `${rolloutFilterSelect()}<a class="btn" href="#/summary/${ui.rolloutFilter === 'all' ? 'all' : esc(ui.rolloutFilter)}">Summary</a>`)}
+      `${rolloutFilterSelect()}<a class="btn" href="#summary-${ui.rolloutFilter === 'all' ? 'all' : esc(ui.rolloutFilter)}">Summary</a>`)}
 
     <section class="kpis" aria-label="Key numbers">
       ${kpi(st.active.length, 'Behaviors tracked', `${plural(ui.rolloutFilter === 'all' ? db.rollouts.length : 1, 'rollout')}`)}
@@ -632,7 +635,7 @@
         ${attention.map(({ b, r, a }) => `<li>
           <div class="attention-main">
             ${badge(a.status)}
-            <a class="strong" href="#/rollout/${esc(r.id)}">${esc(b.description)}</a>
+            <a class="strong" href="#rollout-${esc(r.id)}">${esc(b.description)}</a>
             <div class="sub">${esc(b.owner)} · ${esc(r.tool)}</div>
             <div class="sub">${esc(statusReason(a))}${a.openBarriers.length ? ` ${plural(a.openBarriers.length, 'open barrier')}.` : ' No barrier logged yet.'}</div>
           </div>
@@ -650,7 +653,7 @@
         <thead><tr><th>Behavior</th><th>Status</th><th>Weekly record</th><th class="num">Missed in a row</th><th class="num">Missing check-ins</th><th class="num">Open barriers</th></tr></thead>
         <tbody>
         ${st.rows.map(({ b, r, a }) => `<tr class="${a.status === 'paused' ? 'is-paused' : ''}">
-          <td data-label="Behavior"><a class="strong" href="#/rollout/${esc(r.id)}">${esc(b.description)}</a><div class="sub">${esc(b.owner)} · ${esc(r.tool)}</div></td>
+          <td data-label="Behavior"><a class="strong" href="#rollout-${esc(r.id)}">${esc(b.description)}</a><div class="sub">${esc(b.owner)} · ${esc(r.tool)}</div></td>
           <td data-label="Status">${badge(a.status)}<div class="sub">${esc(statusReason(a))}</div></td>
           <td data-label="Weekly record">${weekStrip(b, a, { max: 8 })}</td>
           <td data-label="Missed in a row" class="num"><span class="${a.missedStreak >= FLAG_WEEKS ? 'num-bad' : ''}">${a.missedStreak}</span></td>
@@ -675,7 +678,7 @@
       </section>
 
       <section class="card">
-        <div class="card-head"><h2>Unresolved barriers by type</h2><a class="link small" href="#/barriers">View all</a></div>
+        <div class="card-head"><h2>Unresolved barriers by type</h2><a class="link small" href="#barriers">View all</a></div>
         ${st.openBarriers.length ? `<ul class="bars">
           ${barrierCounts.map((x) => `<li><span class="bars-label">${esc(x.label)}</span>
             <span class="bars-track"><span class="bars-fill cat-${x.id}" style="width:${(x.n / maxBar) * 100}%"></span></span>
@@ -696,7 +699,7 @@
       ${sorted.map((r) => {
         const st = rolloutStats(r.id);
         const rev = latestReview(r.id);
-        return `<a class="card rollout-card" href="#/rollout/${esc(r.id)}">
+        return `<a class="card rollout-card" href="#rollout-${esc(r.id)}">
           <h2>${esc(r.tool)}</h2>
           <dl class="facts">
             <div><dt>Team</dt><dd>${esc(r.team)}</dd></div>
@@ -718,16 +721,16 @@
   /* ---- Rollout detail ---- */
   function viewRollout(id) {
     const r = rolloutById(id);
-    if (!r) return emptyState('Rollout not found', 'It may have been deleted.', '<a class="btn" href="#/rollouts">Back to rollouts</a>');
+    if (!r) return emptyState('Rollout not found', 'It may have been deleted.', '<a class="btn" href="#rollouts">Back to rollouts</a>');
     const st = rolloutStats(r.id);
     const barriers = db.barriers.filter((x) => x.rolloutId === r.id).sort((a, b) => (a.status === b.status ? 0 : a.status === 'open' ? -1 : 1));
     const reviews = db.reviews.filter((x) => x.rolloutId === r.id).sort((a, b) => String(b.date).localeCompare(String(a.date)));
 
-    return `<a class="back" href="#/rollouts">← All rollouts</a>
+    return `<a class="back" href="#rollouts">← All rollouts</a>
     ${pageHead(r.tool, `${esc(r.team)} · Sponsor: ${esc(r.sponsor)} · Launched ${esc(fmtDate(r.launchDate))}`,
       `<button class="btn primary" data-action="new-behavior" data-r="${esc(r.id)}">Add behavior</button>
-       <a class="btn" href="#/review/${esc(r.id)}">Manager review</a>
-       <a class="btn" href="#/summary/${esc(r.id)}">Summary</a>
+       <a class="btn" href="#review-${esc(r.id)}">Manager review</a>
+       <a class="btn" href="#summary-${esc(r.id)}">Summary</a>
        <button class="btn" data-action="edit-rollout" data-r="${esc(r.id)}">Edit</button>`)}
     ${r.purpose ? `<p class="purpose">${esc(r.purpose)}</p>` : ''}
 
@@ -750,7 +753,7 @@
     </section>
 
     <section class="card">
-      <div class="card-head"><h2>Manager reviews</h2><a class="btn small" href="#/review/${esc(r.id)}">Start review</a></div>
+      <div class="card-head"><h2>Manager reviews</h2><a class="btn small" href="#review-${esc(r.id)}">Start review</a></div>
       ${reviews.length ? `<ul class="list">${reviews.map(reviewItem).join('')}</ul>` : '<p class="muted">No reviews yet. A review walks you through flagged behaviors, missing check-ins, barriers, and outcomes.</p>'}
     </section>
 
@@ -818,7 +821,7 @@
   /* ---- Check-ins ---- */
   function viewCheckins() {
     if (!db.behaviors.length) {
-      return pageHead('Weekly check-ins') + emptyState('Nothing to check in yet', 'Add a behavior to a rollout first. Its weekly check-in dates will show up here.', '<a class="btn primary" href="#/rollouts">Go to rollouts</a>');
+      return pageHead('Weekly check-ins') + emptyState('Nothing to check in yet', 'Add a behavior to a rollout first. Its weekly check-in dates will show up here.', '<a class="btn primary" href="#rollouts">Go to rollouts</a>');
     }
     const today = todayISO();
     const horizon = addDays(today, 7);
@@ -922,13 +925,13 @@
             <span>${plural(st.openBarriers.length, 'open barrier')}</span>
           </div>
           <p class="sub">Last review: ${rev ? `${esc(fmtDate(rev.date))} ${assessmentBadge(rev.assessment)}` : 'none yet'}${rev && rev.nextReviewDate ? ` · Next: <span class="${overdue ? 'num-bad' : ''}">${esc(fmtDate(rev.nextReviewDate))}${overdue ? ' (overdue)' : ''}</span>` : ''}</p>
-          <div class="actions"><a class="btn primary" href="#/review/${esc(r.id)}">Start review</a></div>
+          <div class="actions"><a class="btn primary" href="#review-${esc(r.id)}">Start review</a></div>
         </div>`;
       }).join('')}</div>`;
     }
 
     const r = rolloutById(id);
-    if (!r) return emptyState('Rollout not found', '', '<a class="btn" href="#/review">Back</a>');
+    if (!r) return emptyState('Rollout not found', '', '<a class="btn" href="#review">Back</a>');
     if (!ui.reviewDraft || ui.reviewDraft.rolloutId !== id) {
       ui.reviewDraft = {
         rolloutId: id, step: 0, flags: {}, gaps: {}, barriers: {}, outcomeNotes: '',
@@ -1023,7 +1026,7 @@
       ${noteField('notes', 'Summary and next actions', 'Key messages for the sponsor and the team.')}`;
     }
 
-    return `<a class="back" href="#/review">← All reviews</a>
+    return `<a class="back" href="#review">← All reviews</a>
     ${pageHead(`Review: ${r.tool}`, `${esc(r.team)} · Sponsor: ${esc(r.sponsor)}`)}
     ${stepper}
     <section class="card review-body">${body}</section>
@@ -1089,7 +1092,7 @@
     db.reviews.push(review);
     const rid = dr.rolloutId;
     ui.reviewDraft = null;
-    location.hash = `#/rollout/${rid}`;
+    location.hash = `#rollout-${rid}`;
     commit(`Review saved.${paused ? ` ${plural(paused, 'behavior')} paused.` : ''}`);
   }
 
@@ -1225,13 +1228,13 @@
   /* ---- Exportable summary ---- */
   function viewSummary(id) {
     const scope = id && id !== 'all' ? [rolloutById(id)].filter(Boolean) : db.rollouts;
-    if (!scope.length) return emptyState('Nothing to summarize', 'Create a rollout first.', '<a class="btn" href="#/rollouts">Go to rollouts</a>');
+    if (!scope.length) return emptyState('Nothing to summarize', 'Create a rollout first.', '<a class="btn" href="#rollouts">Go to rollouts</a>');
     return `<div class="no-print">
-      <a class="back" href="${id && id !== 'all' ? `#/rollout/${esc(id)}` : '#/dashboard'}">← Back</a>
+      <a class="back" href="${id && id !== 'all' ? `#rollout-${esc(id)}` : '#dashboard'}">← Back</a>
       <div class="banner tone-info">
-        <div>This page is designed to print cleanly. Use <strong>Print / Save as PDF</strong> to share it, or copy it as plain text into an email.</div>
+        <div>${EMBEDDED ? 'Copy this summary as plain text to paste into an email. Printing and downloads work when you open the app from its folder.' : 'This page is designed to print cleanly. Use <strong>Print / Save as PDF</strong> to share it, or copy it as plain text into an email.'}</div>
         <div class="actions">
-          <button class="btn primary small" data-action="print">Print / Save as PDF</button>
+          ${EMBEDDED ? '' : '<button class="btn primary small" data-action="print">Print / Save as PDF</button>'}
           <button class="btn small" data-action="copy-summary" data-id="${esc(id || 'all')}">Copy as text</button>
           <button class="btn small" data-action="export-behaviors" data-id="${esc(id || 'all')}">Download CSV</button>
         </div>
@@ -1309,6 +1312,7 @@
     let bytes = 0;
     try { bytes = new Blob([JSON.stringify(db)]).size; } catch (_) { /* ignore */ }
     return `${pageHead('Data, backup and export', 'Your data is saved automatically in this browser, on this device only.')}
+    ${EMBEDDED ? '<div class="banner tone-warn"><div><strong>This is a preview.</strong> Downloads (backup, CSV, template) are blocked here. Open <code>index.html</code> from the app folder for the full version. Restore from a backup file still works.</div></div>' : ''}
     ${banners()}
     <div class="grid-2">
       <section class="card">
@@ -1327,7 +1331,7 @@
       <h2>Export</h2>
       <p>Spreadsheet files (CSV) open in Excel, Numbers, or Google Sheets.</p>
       <div class="actions wrap">
-        <a class="btn" href="#/summary/all">Printable summary</a>
+        <a class="btn" href="#summary-all">Printable summary</a>
         <button class="btn" data-action="export-behaviors" data-id="all">Behavior status (.csv)</button>
         <button class="btn" data-action="export-checkins">Check-in history (.csv)</button>
         <button class="btn" data-action="export-barriers">Barriers (.csv)</button>
@@ -1382,7 +1386,7 @@
     </section>
     <section class="card prose">
       <h2>Where your data lives</h2>
-      <p>Everything is stored in this browser on this device. Nothing is sent anywhere. Clearing your browser history or site data can erase it, so download a backup from the <a href="#/data">Data page</a> regularly. The tracker reminds you every ${BACKUP_REMINDER_DAYS} days.</p>
+      <p>Everything is stored in this browser on this device. Nothing is sent anywhere. Clearing your browser history or site data can erase it, so download a backup from the <a href="#data">Data page</a> regularly. The tracker reminds you every ${BACKUP_REMINDER_DAYS} days.</p>
     </section>`;
   }
 
@@ -1407,6 +1411,16 @@
     if (!modal.open) modal.showModal();
     const first = modal.querySelector('.modal-body input:not([type=hidden]):not([type=radio]), .modal-body textarea, .modal-body select');
     if (first && window.matchMedia('(hover: hover)').matches) first.focus();
+  }
+
+  /** Ask a yes/no question inside the page (browser pop-ups are not used). */
+  function askConfirm(message, onYes, yesLabel = 'Yes, continue') {
+    openModal({
+      title: 'Please confirm',
+      body: message.split('\n\n').map((t) => `<p>${esc(t)}</p>`).join(''),
+      submitLabel: yesLabel,
+      onSubmit() { onYes(); return true; },
+    });
   }
 
   function closeModal() {
@@ -1444,7 +1458,7 @@
         } else {
           const nr = { id: uid(), tool: d.tool, team: d.team, sponsor: d.sponsor, launchDate: d.launchDate, purpose: d.purpose, createdAt: new Date().toISOString() };
           db.rollouts.push(nr);
-          location.hash = `#/rollout/${nr.id}`;
+          location.hash = `#rollout-${nr.id}`;
           commit('Rollout created. Next, add the behaviors you expect to see.');
         }
         return true;
@@ -1496,11 +1510,17 @@
         if (b) {
           const newDates = new Set(scheduleFor(fields));
           const orphans = db.checkins.filter((c) => c.behaviorId === b.id && !newDates.has(c.weekDate));
-          if (orphans.length && !confirm(`${plural(orphans.length, 'recorded check-in')} fall outside the new schedule and will be deleted. Continue?`)) return false;
-          db.checkins = db.checkins.filter((c) => !orphans.includes(c));
-          if (b.rolloutId !== fields.rolloutId) db.barriers.forEach((x) => { if (x.behaviorId === b.id) x.rolloutId = fields.rolloutId; });
-          Object.assign(b, fields, { paused: d.paused === 'on' });
-          commit('Behavior updated.');
+          const apply = () => {
+            db.checkins = db.checkins.filter((c) => !orphans.includes(c));
+            if (b.rolloutId !== fields.rolloutId) db.barriers.forEach((x) => { if (x.behaviorId === b.id) x.rolloutId = fields.rolloutId; });
+            Object.assign(b, fields, { paused: d.paused === 'on' });
+            commit('Behavior updated.');
+          };
+          if (orphans.length) {
+            askConfirm(`${plural(orphans.length, 'recorded check-in')} fall outside the new schedule and will be deleted.\n\nSave the new schedule anyway?`, apply, 'Save and delete them');
+            return false;
+          }
+          apply();
         } else {
           const nb = { id: uid(), ...fields, paused: false, source: preset.importId ? 'processiq' : 'manual', sourceId: preset.sourceId || '', createdAt: new Date().toISOString() };
           db.behaviors.push(nb);
@@ -1662,6 +1682,10 @@
   const toCSV = (header, rows) => `﻿${[header, ...rows].map((r) => r.map(csvCell).join(',')).join('\r\n')}\r\n`;
 
   function download(filename, content, type) {
+    if (EMBEDDED) {
+      toast('Downloads are blocked in this preview. Open index.html from the app folder to download files.', 'error');
+      return false;
+    }
     const blob = new Blob([content], { type });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1734,9 +1758,9 @@
   }
 
   function backup() {
+    if (download(`adoption-tracker-backup-${stamp()}.json`, JSON.stringify(db, null, 2), 'application/json') === false) return;
     db.meta.lastBackupAt = new Date().toISOString();
     persist(db);
-    download(`adoption-tracker-backup-${stamp()}.json`, JSON.stringify(db, null, 2), 'application/json');
     render();
     toast('Backup downloaded. Keep the file somewhere safe.');
   }
@@ -1748,11 +1772,13 @@
       try {
         const data = normalize(JSON.parse(String(reader.result)));
         const msg = `Restore "${file.name}"?\n\nIt contains ${plural(data.rollouts.length, 'rollout')}, ${plural(data.behaviors.length, 'behavior')} and ${plural(data.checkins.length, 'check-in')}.\n\nThis replaces everything currently in the tracker.`;
-        if (!confirm(msg)) { render(); return; }
-        db = data;
-        ui.reviewDraft = null;
-        ui.rolloutFilter = 'all';
-        commit('Backup restored.');
+        askConfirm(msg, () => {
+          db = data;
+          ui.reviewDraft = null;
+          ui.rolloutFilter = 'all';
+          commit('Backup restored.');
+        }, 'Replace and restore');
+        render();
       } catch (e) {
         toast(`Could not restore: ${e.message || 'the file is not valid.'}`, 'error');
         render();
@@ -1784,6 +1810,7 @@
      10. Buttons and inputs
      ------------------------------------------------------------------------ */
   const actions = {
+    skip: () => main.focus(),
     'close-modal': closeModal,
     'new-rollout': () => rolloutForm(null),
     'edit-rollout': (d) => rolloutForm(rolloutById(d.r)),
@@ -1791,15 +1818,16 @@
       const r = rolloutById(d.r);
       if (!r) return;
       const bIds = db.behaviors.filter((b) => b.rolloutId === r.id).map((b) => b.id);
-      if (!confirm(`Delete "${r.tool}"?\n\nThis also deletes its ${plural(bIds.length, 'behavior')}, their check-ins, barriers and reviews. This cannot be undone unless you have a backup.`)) return;
+      askConfirm(`Delete "${r.tool}"?\n\nThis also deletes its ${plural(bIds.length, 'behavior')}, their check-ins, barriers and reviews. This cannot be undone unless you have a backup.`, () => {
       db.rollouts = db.rollouts.filter((x) => x.id !== r.id);
       db.behaviors = db.behaviors.filter((b) => b.rolloutId !== r.id);
       db.checkins = db.checkins.filter((c) => !bIds.includes(c.behaviorId));
       db.barriers = db.barriers.filter((x) => x.rolloutId !== r.id);
       db.reviews = db.reviews.filter((x) => x.rolloutId !== r.id);
       db.imports.forEach((x) => { if (bIds.includes(x.behaviorId)) { x.status = 'pending'; delete x.behaviorId; } });
-      location.hash = '#/rollouts';
+      location.hash = '#rollouts';
       commit('Rollout deleted.');
+      }, 'Delete rollout');
     },
     'new-behavior': (d) => {
       if (!db.rollouts.length) { rolloutForm(null); return; }
@@ -1808,19 +1836,21 @@
     'edit-behavior': (d) => behaviorForm(behaviorById(d.b)),
     'delete-behavior': (d) => {
       const b = behaviorById(d.b);
-      if (!b || !confirm(`Delete this behavior and its check-ins and barriers?\n\n"${b.description}"`)) return;
+      if (!b) return;
+      askConfirm(`Delete this behavior and its check-ins and barriers?\n\n"${b.description}"`, () => {
       db.behaviors = db.behaviors.filter((x) => x.id !== b.id);
       db.checkins = db.checkins.filter((c) => c.behaviorId !== b.id);
       db.barriers = db.barriers.filter((x) => x.behaviorId !== b.id);
       db.imports.forEach((x) => { if (x.behaviorId === b.id) { x.status = 'pending'; delete x.behaviorId; } });
       commit('Behavior deleted.');
+      }, 'Delete behavior');
     },
     checkin: (d) => checkinForm(d.b, d.d),
     'delete-checkin': (d) => {
-      if (!confirm('Delete this check-in? The week will show as missing.')) return;
-      db.checkins = db.checkins.filter((c) => c.id !== d.id);
-      closeModal();
-      commit('Check-in deleted.');
+      askConfirm('Delete this check-in? The week will show as missing.', () => {
+        db.checkins = db.checkins.filter((c) => c.id !== d.id);
+        commit('Check-in deleted.');
+      }, 'Delete check-in');
     },
     'new-barrier': (d) => {
       if (!db.behaviors.length) { toast('Add a behavior first.', 'error'); return; }
@@ -1836,9 +1866,10 @@
       commit('Barrier reopened.');
     },
     'delete-barrier': (d) => {
-      if (!confirm('Delete this barrier?')) return;
-      db.barriers = db.barriers.filter((x) => x.id !== d.id);
-      commit('Barrier deleted.');
+      askConfirm('Delete this barrier?', () => {
+        db.barriers = db.barriers.filter((x) => x.id !== d.id);
+        commit('Barrier deleted.');
+      }, 'Delete barrier');
     },
     'barrier-filter': (d) => { ui.barrierFilter = d.v; render(); },
     'review-step': (d) => {
@@ -1851,9 +1882,10 @@
     'save-review': saveReview,
     'view-review': (d) => showReview(d.id),
     'delete-review': (d) => {
-      if (!confirm('Delete this review record? Barrier changes made by the review stay as they are.')) return;
-      db.reviews = db.reviews.filter((x) => x.id !== d.id);
-      commit('Review deleted.');
+      askConfirm('Delete this review record? Barrier changes made by the review stay as they are.', () => {
+        db.reviews = db.reviews.filter((x) => x.id !== d.id);
+        commit('Review deleted.');
+      }, 'Delete review');
     },
     'download-template': () => downloadTemplate(false),
     'download-template-example': () => downloadTemplate(true),
@@ -1894,26 +1926,30 @@
       toast(ok ? 'Summary copied. Paste it into an email or document.' : 'Could not copy automatically. Use Print / Save as PDF instead.', ok ? '' : 'error');
     },
     'load-sample': () => {
-      if (db.rollouts.length && !confirm('Replace everything with the fictional example data?\n\nDownload a backup first if you want to keep your current data.')) return;
-      db = buildSampleData();
-      ui.reviewDraft = null;
-      ui.rolloutFilter = 'all';
-      location.hash = '#/dashboard';
-      commit('Example data loaded.');
+      const go = () => {
+        db = buildSampleData();
+        ui.reviewDraft = null;
+        ui.rolloutFilter = 'all';
+        location.hash = '#dashboard';
+        commit('Example data loaded.');
+      };
+      if (db.rollouts.length) askConfirm('Replace everything with the fictional example data?\n\nDownload a backup first if you want to keep your current data.', go, 'Replace with example data');
+      else go();
     },
     'start-fresh': () => {
       const msg = db.meta.sample
         ? 'Remove the example data and start with a blank tracker?'
         : 'Erase ALL your data and start blank?\n\nThis cannot be undone unless you have a backup file.';
-      if (!confirm(msg)) return;
+      askConfirm(msg, () => {
       const last = db.meta.lastBackupAt;
       db = emptyDb();
       db.meta.lastBackupAt = last;
       ui.reviewDraft = null;
       ui.rolloutFilter = 'all';
       ui.importPreview = null;
-      location.hash = '#/dashboard';
+      location.hash = '#dashboard';
       commit('Blank tracker ready. Create your first rollout to begin.');
+      }, db.meta.sample ? 'Start blank' : 'Erase everything');
     },
   };
 
@@ -1967,9 +2003,12 @@
   const NAV_FOR = { rollout: 'rollouts', summary: 'review' };
 
   function parseRoute() {
-    const h = location.hash.replace(/^#\/?/, '');
-    const [view, ...rest] = h.split('/');
-    return { view: VIEWS[view] ? view : 'dashboard', id: decodeURIComponent(rest.join('/') || '') };
+    // Addresses look like #dashboard or #rollout-<id>. Older #/rollout/<id> links still work.
+    const h = location.hash.replace(/^#\/?/, '').replace('/', '-');
+    const i = h.indexOf('-');
+    const view = i === -1 ? h : h.slice(0, i);
+    const id = i === -1 ? '' : h.slice(i + 1);
+    return { view: VIEWS[view] ? view : 'dashboard', id: decodeURIComponent(id) };
   }
 
   function render() {
@@ -1984,7 +2023,7 @@
       if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
     const titles = { dashboard: 'Dashboard', rollouts: 'Rollouts', rollout: 'Rollout', checkins: 'Check-ins', barriers: 'Barriers', review: 'Manager review', import: 'Import', data: 'Data', summary: 'Summary', guide: 'Guide' };
-    document.title = `${titles[view]} · AI Adoption Follow-Through Tracker`;
+    document.title = view === 'dashboard' ? 'AI Adoption Follow-Through Tracker' : `${titles[view]} · AI Adoption Follow-Through Tracker`;
     if (key !== ui.lastRoute) {
       window.scrollTo(0, 0);
       const active = $('#nav a.active');
