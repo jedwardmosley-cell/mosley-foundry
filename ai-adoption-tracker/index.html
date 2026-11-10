@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Track whether the behaviors expected from an AI rollout are being adopted, sustained, and producing measurable improvements.">
+  <title>AI Adoption Follow-Through Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="app-header">
+    <div class="header-inner">
+      <a class="brand" href="#/dashboard" aria-label="AI Adoption Follow-Through Tracker, home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22"><path d="M4 13l5 5L20 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <span class="brand-text">
+          <strong>AI Adoption</strong>
+          <span>Follow-Through Tracker</span>
+        </span>
+      </a>
+      <nav id="nav" class="nav" aria-label="Main">
+        <a href="#/dashboard" data-nav="dashboard">Dashboard</a>
+        <a href="#/rollouts" data-nav="rollouts">Rollouts</a>
+        <a href="#/checkins" data-nav="checkins">Check-ins</a>
+        <a href="#/barriers" data-nav="barriers">Barriers</a>
+        <a href="#/review" data-nav="review">Review</a>
+        <a href="#/import" data-nav="import">Import</a>
+        <a href="#/data" data-nav="data">Data</a>
+        <a href="#/guide" data-nav="guide">Guide</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="main" tabindex="-1"></main>
+
+  <dialog id="modal" class="modal" aria-labelledby="modal-title"></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <noscript>
+    <p class="noscript">This tracker needs JavaScript turned on in your browser.</p>
+  </noscript>
+
+  <script src="app.js"></script>
+</body>
+</html>
