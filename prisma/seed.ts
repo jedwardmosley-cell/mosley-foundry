@@ -91,6 +91,7 @@ async function main() {
       userId: dana.id, cycleId: cycle.id, date: ymd(day(-9 + i)), status: pattern[i],
       note: i === 4 ? "Back-to-back meetings, no room to practice" : i === 7 ? "Asked Marco what he was seeing before defending the forecast" : "",
       reflection: i === 7 ? "The question bought me five seconds and changed the temperature." : i === 2 ? "Caught it halfway through. Private note: I was exhausted." : "",
+      tags: JSON.stringify(pattern[i] === "NOT_YET" ? [] : i % 2 ? ["In a meeting"] : ["One-on-one"]),
       shared: i === 7,
     } });
   }

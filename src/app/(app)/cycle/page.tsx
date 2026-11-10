@@ -69,15 +69,16 @@ export default async function CyclePage() {
                 <form action={saveWeek} className="mt-4 space-y-3">
                   <input type="hidden" name="id" value={cycle.id} />
                   <input type="hidden" name="week" value={w.week} />
-                  <Field label={["What I observed", "What shifted", "What the feedback revealed", "What changed in how I see the work"][w.week - 1] ?? "Notes"}>
-                    <textarea name="note" defaultValue={notes[w.week]} className="textarea" maxLength={4000} />
-                  </Field>
                   <div className="flex flex-wrap items-center gap-4">
                     <span className="text-sm">Did I do it?</span>
                     {Object.entries(CHECKIN_STATUS).map(([k, v]) => (
                       <label key={k} className="flex items-center gap-1.5 text-sm"><input type="radio" name="status" value={k} defaultChecked={wstat[w.week] === k} className="accent-navy" />{v}</label>
                     ))}
                   </div>
+                  <details open={!!notes[w.week]}>
+                    <summary className="cursor-pointer text-sm text-navy">{["What I observed", "What shifted", "What the feedback revealed", "What changed in how I see the work"][w.week - 1] ?? "Notes"} <span className="text-ink-mute">(optional)</span></summary>
+                    <textarea name="note" aria-label="Week notes" defaultValue={notes[w.week]} className="textarea mt-2" maxLength={4000} />
+                  </details>
                   <Submit className="btn-quiet">Save week {w.week}</Submit>
                 </form>
               )}
@@ -92,9 +93,11 @@ export default async function CyclePage() {
         {pos.day >= 28 || pos.finished ? (
           <form action={completeCycle} className="mt-4 space-y-4">
             <input type="hidden" name="id" value={cycle.id} />
-            <Field label="Final review" hint="What did you practice? What evidence do you have that anything changed? What surprised you?">
-              <textarea name="finalReview" className="textarea min-h-[140px]" maxLength={6000} required />
-            </Field>
+            <details>
+              <summary className="cursor-pointer text-sm text-navy">Write a final review <span className="text-ink-mute">(optional)</span></summary>
+              <p className="mt-2 text-xs text-ink-mute">What did you practice? What evidence do you have that anything changed? What surprised you?</p>
+              <textarea name="finalReview" aria-label="Final review" className="textarea min-h-[120px] mt-2" maxLength={6000} />
+            </details>
             <fieldset className="space-y-2">
               <legend className="label">Your answer</legend>
               {Object.entries(DAY30_DECISIONS).map(([k, v]) => (

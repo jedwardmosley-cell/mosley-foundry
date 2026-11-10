@@ -7,7 +7,7 @@ import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { parse } from "@/lib/validation";
 import { addDays } from "@/lib/dates";
-import { aiAvailable, generateReply, type AiMode } from "@/lib/ai";
+import { aiAvailable, generateReply, draftField, type AiMode } from "@/lib/ai";
 
 export type ChatState = { error?: string } | undefined;
 
@@ -62,4 +62,23 @@ export async function deleteAllConversations() {
   await db.aiConversation.deleteMany({ where: { userId: u.id } });
   revalidatePath("/companion");
   revalidatePath("/settings");
+}
+
+export type DraftKind = "destination" | "why" | "forgeStatement";
+
+/** "Help me write this": returns draft text for the participant to edit. Saves nothing. */
+export async function draftWithAI(kind: DraftKind): Promise<{ text: string } | { error: string }> {
+  const u = await requireUser("PARTICIPANT");
+  if (!["destination", "why", "forgeStatement"].includes(kind)) return { error: "Unknown field." };
+  if (!aiAvailable()) return { error: "The AI Companion is not turned on for this site yet." };
+  const profile = await db.profile.findUnique({ where: { userId: u.id } });
+  if (profile && !profile.aiEnabled) return { error: "You turned the AI Companion off in Settings." };
+  try {
+    const text = await draftField(u.id, kind);
+    return text ? { text } : { error: "No draft this time. Try writing a few words first." };
+  } catch (err) {
+    if (err instanceof Anthropic.RateLimitError) return { error: "The AI is busy right now. Try again in a minute." };
+    if (err instanceof Anthropic.APIError) return { error: "The AI service could not draft this right now." };
+    throw err;
+  }
 }

@@ -49,5 +49,5 @@ test("cycle position and the no-failure practice summary", () => {
 });
 
 test("content pack has no em dashes (house style)", { skip: !licensed }, () => {
-  assert.equal(JSON.stringify(licensed).includes("—"), false);
+  assert.equal(JSON.stringify(licensed).includes("\u2014"), false);
 });

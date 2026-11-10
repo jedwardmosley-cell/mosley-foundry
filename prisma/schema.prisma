@@ -201,6 +201,7 @@ model DailyCheckIn {
   status     String   // enum: DONE | PARTIAL | NOT_YET
   note       String   @default("")
   reflection String   @default("")
+  tags       String   @default("[]") // JSON array of quick tags (where the practice showed up)
   shared     Boolean  @default(false) // reflection text visible to coach only when true AND reflections scope granted
   createdAt  DateTime @default(now())
 
@@ -216,6 +217,7 @@ model WeeklyReflection {
   avoided    String   @default("") // What did I avoid?
   nextWeek   String   @default("") // What does next week need?
   didIt      String   @default("") // enum: YES | PARTIAL | NOT_YET (Did I do what I said I was going to do?)
+  held       String   @default("[]") // JSON array of Blueprint commitment ids that held this week
   shared     Boolean  @default(false)
   createdAt  DateTime @default(now())
 

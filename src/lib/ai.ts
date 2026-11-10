@@ -173,3 +173,52 @@ export async function generateReply(opts: { userId: string; mode: AiMode; histor
 export async function purgeExpired(userId: string) {
   await db.aiConversation.deleteMany({ where: { userId, expiresAt: { lt: new Date() } } });
 }
+
+// ---------- "Help me write this" drafts ----------
+
+export type DraftKind = "destination" | "why" | "forgeStatement";
+
+const DRAFT_ASK: Record<DraftKind, { query: string; ask: string }> = {
+  destination: {
+    query: "Future Focused destination paragraph picture of the leader you are becoming Road Test",
+    ask: "Draft the participant's Destination Paragraph: one short paragraph, first person, present tense, describing the leader they are becoming and the future they are building toward. A picture of a person, not a goal list or metrics.",
+  },
+  why: {
+    query: "Reason Rooted why sentence generous reason holds when results disappear",
+    ask: "Draft the participant's Why Sentence: one sentence, first person, the reason behind the trip that would still be true if the results disappeared tomorrow. Generous rather than self-serving.",
+  },
+  forgeStatement: {
+    query: "FORGE Statement one paragraph leader becoming destination discipline committing",
+    ask: "Draft the participant's FORGE Statement: one paragraph, first person, present tense. The leader they are becoming, the destination they are driving toward, and the discipline they are committing to build.",
+  },
+};
+
+/** Returns a first draft only. Uses the participant's own records; the participant edits and saves it themselves. */
+export async function draftField(userId: string, kind: DraftKind) {
+  const client = new Anthropic();
+  const sources = await retrieve(DRAFT_ASK[kind].query, 4);
+  const context = await participantContext(userId);
+  const stream = client.beta.messages.stream({
+    model: AI_MODEL,
+    max_tokens: 2000,
+    thinking: { type: "adaptive" },
+    output_config: { effort: "low" },
+    betas: ["server-side-fallback-2026-07-01"],
+    fallbacks: "default",
+    system: [
+      "You write first drafts inside Both Hands on the Wheel, a personal leadership app by Jason Mosley. The participant will edit your draft until it is true for them.",
+      "Use only what the participant has recorded. Do not invent facts, names, numbers or achievements. If the records are thin, write a short, plain draft and keep it general rather than making things up.",
+      "Plain, direct, warm language. No em dashes. No hype. Return only the draft text, with no introduction, quotation marks or citations.",
+      "",
+      "PARTICIPANT RECORDS:",
+      context || "(none)",
+      "",
+      "PROGRAM GUIDANCE:",
+      sources.map((s) => `${s.ref}: ${s.text}`).join("\n\n") || "(none)",
+    ].join("\n"),
+    messages: [{ role: "user", content: DRAFT_ASK[kind].ask }],
+  });
+  const msg = await stream.finalMessage();
+  if (msg.stop_reason === "refusal") return null;
+  return msg.content.filter((b) => b.type === "text").map((b) => (b as { text: string }).text).join("\n").trim().replace(/\u2014/g, ", ");
+}

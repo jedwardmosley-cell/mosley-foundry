@@ -77,6 +77,11 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
               <p className="mt-3 text-[15px]"><span className="font-medium">Day {pos.day}, {week.phase}.</span> {v.cycle.focus}{v.cycle.status === "COMPLETED" && v.cycle.decision ? ` · Day 30 decision: ${DAY30_DECISIONS[v.cycle.decision as keyof typeof DAY30_DECISIONS]}` : ""}</p>
             )}
             <p className="mt-2 text-sm">Last 30 entries: {practice.done} done · {practice.partial} partial · {practice.notYet} not yet</p>
+            {(() => {
+              const counts = new Map<string, number>();
+              v.practice.forEach((p) => p.tags.forEach((t) => counts.set(t, (counts.get(t) ?? 0) + 1)));
+              return counts.size > 0 ? <p className="mt-1 text-sm muted">Where it showed up: {[...counts].sort((a, b) => b[1] - a[1]).map(([t, n]) => `${t} (${n})`).join(" · ")}</p> : null;
+            })()}
             <div className="mt-3 flex gap-1">
               {[...v.practice].reverse().map((p) => <span key={p.date} title={`${p.date} ${p.status}`} className={`h-4 flex-1 rounded ${p.status === "DONE" ? "bg-navy" : p.status === "PARTIAL" ? "bg-brass" : "bg-line"}`} />)}
             </div>

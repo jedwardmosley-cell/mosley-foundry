@@ -6,6 +6,8 @@ import { SEGMENTS, BLUEPRINT_AREAS } from "@/content/program";
 import { saveGoal, addCommitment } from "@/app/actions/participant";
 import { PageHeader, Card, PillarMark, Draft, Field } from "@/components/ui";
 import { Submit } from "@/components/Submit";
+import { Picks } from "@/components/Picks";
+import { ONE_MOVE, BLUEPRINT_PICKS } from "@/content/options";
 
 export default async function SegmentPage({ params }: { params: Promise<{ key: string }> }) {
   const u = await requireUser("PARTICIPANT");
@@ -40,13 +42,19 @@ export default async function SegmentPage({ params }: { params: Promise<{ key: s
       </Card>
       <Card className="mt-5">
         <h2 className="h3">Your development goal for this segment</h2>
-        <form action={saveGoal} className="mt-4 grid gap-4 sm:grid-cols-3">
+        <form action={saveGoal} className="mt-4 space-y-4">
           <input type="hidden" name="pillar" value={s.pillars[0]} />
           <input type="hidden" name="segmentKey" value={s.key} />
-          <Field label="Where I am now"><textarea name="whereNow" defaultValue={goal?.whereNow} className="textarea !min-h-[80px]" /></Field>
-          <Field label="Where I want to be"><textarea name="whereWant" defaultValue={goal?.whereWant} className="textarea !min-h-[80px]" /></Field>
-          <Field label="One move this week"><textarea name="oneMove" defaultValue={goal?.oneMove} className="textarea !min-h-[80px]" /></Field>
-          <div className="sm:col-span-3"><Submit className="btn-quiet">Save goal</Submit></div>
+          <Field label="One move this week"><input name="oneMove" defaultValue={goal?.oneMove} className="input" /></Field>
+          <Picks list={ONE_MOVE[s.pillars[0]]} target="oneMove" />
+          <details open={!!(goal?.whereNow || goal?.whereWant)}>
+            <summary className="cursor-pointer text-sm text-navy">Where I am now and where I want to be <span className="text-ink-mute">(optional)</span></summary>
+            <div className="mt-3 grid gap-4 sm:grid-cols-2">
+              <Field label="Where I am now"><textarea name="whereNow" defaultValue={goal?.whereNow} className="textarea !min-h-[80px]" /></Field>
+              <Field label="Where I want to be"><textarea name="whereWant" defaultValue={goal?.whereWant} className="textarea !min-h-[80px]" /></Field>
+            </div>
+          </details>
+          <Submit className="btn-quiet">Save goal</Submit>
         </form>
       </Card>
       <Card className="mt-5">
@@ -55,8 +63,11 @@ export default async function SegmentPage({ params }: { params: Promise<{ key: s
         <form action={addCommitment} className="mt-4 grid gap-3 sm:grid-cols-2">
           <input type="hidden" name="area" value={area.key} />
           <input type="hidden" name="detail" value={`Segment ${s.key}: ${s.title}`} />
-          <Field label="Commitment"><input name="title" required className="input" /></Field>
-          <Field label="When"><input name="when" className="input" /></Field>
+          <div className="sm:col-span-2">
+            <Field label="Commitment"><input name="title" required className="input" /></Field>
+            {BLUEPRINT_PICKS[area.key] && <Picks list={BLUEPRINT_PICKS[area.key]} target="title" />}
+          </div>
+          <Field label="When (optional)"><input name="when" className="input" /></Field>
           <input type="hidden" name="cadence" value="WEEKLY" />
           <div className="sm:col-span-2"><Submit className="btn-quiet">Add to Blueprint</Submit></div>
         </form>
