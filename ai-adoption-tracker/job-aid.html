@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Adoption Tracker Job Aid</title>
+<style>
+/* Layout: a two-page reference card. Quick-scan sections in a two-column grid, single column on phones, clean two-page print. */
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --surface-2: #f0f2f5;
+  --border: #dfe3e8;
+  --text: #1c2430;
+  --text-2: #4f5a68;
+  --accent: #1f5fbf;
+  --accent-soft: #e6effb;
+  --on-solid: #ffffff;
+  --good: #1e7a46; --good-soft: #e3f3ea;
+  --warn: #9a6200; --warn-soft: #fdf1dc;
+  --bad: #b42318;  --bad-soft: #fde8e6;
+  --gap: #5b4fb0;  --gap-soft: #ecebfa;
+  --neutral: #59636f; --neutral-soft: #eceff3;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12161c; --surface: #1a2028; --surface-2: #222a34; --border: #2e3843;
+    --text: #e7ebf0; --text-2: #b4bdc8; --accent: #6ea3f2; --accent-soft: #1d2d45; --on-solid: #10151b;
+    --good: #5cc98a; --good-soft: #17301f; --warn: #e6b04f; --warn-soft: #33270f;
+    --bad: #f2796d; --bad-soft: #3a1c19; --gap: #a99cf5; --gap-soft: #262245;
+    --neutral: #aab3be; --neutral-soft: #262d36;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12161c; --surface: #1a2028; --surface-2: #222a34; --border: #2e3843;
+  --text: #e7ebf0; --text-2: #b4bdc8; --accent: #6ea3f2; --accent-soft: #1d2d45; --on-solid: #10151b;
+  --good: #5cc98a; --good-soft: #17301f; --warn: #e6b04f; --warn-soft: #33270f;
+  --bad: #f2796d; --bad-soft: #3a1c19; --gap: #a99cf5; --gap-soft: #262245;
+  --neutral: #aab3be; --neutral-soft: #262d36;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+.page {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding-block: 28px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid;
+  gap: 16px;
+}
+h1, h2, h3 { margin: 0; line-height: 1.25; text-wrap: balance; }
+h1 { font-size: 1.75rem; letter-spacing: -0.01em; }
+h2 { font-size: 1.05rem; }
+h3 { font-size: 0.95rem; }
+p { margin: 0; }
+.eyebrow { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.muted { color: var(--text-2); }
+.small { font-size: 0.85rem; }
+
+header.top { display: grid; gap: 6px; }
+header.top .lead { color: var(--text-2); max-width: 68ch; }
+.meta-row { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.85rem; color: var(--text-2); margin-top: 4px; }
+.meta-row strong { color: var(--text); }
+
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.grid > * { min-width: 0; }
+.span-2 { grid-column: 1 / -1; }
+
+section.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 20px;
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+.card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.when { font-size: 0.8rem; color: var(--text-2); font-weight: 600; }
+
+/* Numbered steps: used only where order matters */
+ol.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; counter-reset: step; }
+ol.steps > li { counter-increment: step; display: grid; grid-template-columns: 26px 1fr; gap: 10px; align-items: start; }
+ol.steps > li::before {
+  content: counter(step);
+  display: grid; place-items: center;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--accent); color: var(--on-solid);
+  font-weight: 700; font-size: 0.8rem;
+}
+.steps b { display: block; }
+.steps span { color: var(--text-2); font-size: 0.9rem; }
+.where { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 0 6px; border-radius: 4px; background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border); margin-left: 4px; }
+
+/* Status key */
+.key { display: grid; gap: 8px; }
+.key-row { display: grid; grid-template-columns: 140px 1fr; gap: 10px; align-items: start; }
+.key-row > div { min-width: 0; }
+.badge { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+.b-bad { background: var(--bad-soft); color: var(--bad); }
+.b-gap { background: var(--gap-soft); color: var(--gap); }
+.b-warn { background: var(--warn-soft); color: var(--warn); }
+.b-good { background: var(--good-soft); color: var(--good); }
+.b-neutral { background: var(--neutral-soft); color: var(--neutral); }
+.do { font-size: 0.85rem; color: var(--text-2); }
+.do strong { color: var(--text); }
+
+.weeks { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 0.85rem; }
+.weeks span { display: inline-flex; align-items: center; gap: 6px; }
+.dot { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 5px; font-size: 0.75rem; font-weight: 700; border: 1.5px solid transparent; }
+.d-used { background: var(--good); color: var(--on-solid); }
+.d-partly { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+.d-not { background: var(--bad); color: var(--on-solid); }
+.d-missing { background: var(--surface); color: var(--gap); border: 1.5px dashed var(--gap); }
+.d-up { background: var(--surface-2); border-color: var(--border); }
+
+.rule { background: var(--accent-soft); border-radius: 8px; padding: 10px 14px; font-size: 0.9rem; }
+.rule strong { color: var(--text); }
+
+/* Tables */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+th { text-align: left; font-size: 0.72rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-2); padding: 6px 8px; border-bottom: 1px solid var(--border); }
+td { padding: 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+td:first-child { font-weight: 600; white-space: nowrap; }
+
+.compare { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.compare > div { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; display: grid; gap: 6px; font-size: 0.9rem; justify-items: start; }
+
+ul.plain { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 0.9rem; }
+dl.faq { margin: 0; display: grid; gap: 10px; }
+dl.faq dt { font-weight: 600; font-size: 0.92rem; }
+dl.faq dd { margin: 2px 0 0; color: var(--text-2); font-size: 0.9rem; }
+
+.practice ol { margin: 0; padding-left: 20px; display: grid; gap: 8px; font-size: 0.9rem; }
+details.answers { border-top: 1px solid var(--border); padding-top: 10px; }
+details.answers summary { cursor: pointer; font-weight: 600; color: var(--accent); }
+details.answers ol { margin-top: 8px; color: var(--text-2); }
+.checkbox { display: inline-block; width: 13px; height: 13px; border: 1.5px solid var(--text-2); border-radius: 3px; vertical-align: -2px; margin-right: 6px; }
+
+footer.foot { font-size: 0.8rem; color: var(--text-2); display: flex; flex-wrap: wrap; gap: 6px 16px; justify-content: space-between; }
+
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+@media screen and (max-width: 760px) {
+  .grid { grid-template-columns: 1fr; }
+  h1 { font-size: 1.4rem; }
+  .key-row { grid-template-columns: 1fr; gap: 2px; }
+  .compare { grid-template-columns: 1fr; }
+  section.card { padding: 16px; }
+}
+
+@media print {
+  :root { --bg: #fff; --surface: #fff; --text: #000; --text-2: #333; --border: #bbb; color-scheme: light; }
+  @page { margin: 12mm; }
+  body { font-size: 8pt; line-height: 1.32; }
+  .page { padding: 0; gap: 6px; max-width: none; }
+  .grid { gap: 6px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  section.card { padding: 7px 10px; gap: 5px; break-inside: avoid; border-radius: 6px; }
+  h1 { font-size: 14pt; }
+  h2 { font-size: 10pt; }
+  ol.steps { gap: 4px; }
+  ol.steps > li { grid-template-columns: 18px 1fr; gap: 6px; }
+  ol.steps > li::before { width: 18px; height: 18px; font-size: 7pt; }
+  .steps span, .do, td, ul.plain, dl.faq dd, .practice ol, .rule { font-size: 8pt; }
+  td, th { padding: 3px 6px; }
+  .key { gap: 3px; }
+  .key-row { grid-template-columns: 110px 1fr; }
+  .badge { font-size: 7pt; padding: 1px 6px; }
+  .dot { width: 16px; height: 16px; font-size: 7pt; }
+  .rule { padding: 5px 9px; }
+  ul.plain, dl.faq { gap: 3px; }
+  .practice ol { gap: 2px; }
+  p, .small, .when, .meta-row, dl.faq dt, .compare > div, .print-answers { font-size: 8pt; }
+  header.top .lead { font-size: 8.5pt; }
+  .page-break { break-before: auto; }
+  details.answers { display: none; }
+  .print-answers { display: block !important; }
+}
+.print-answers { display: none; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header class="top">
+    <span class="eyebrow">Job aid</span>
+    <h1>AI Adoption Follow-Through Tracker</h1>
+    <p class="lead">Use this tracker to answer three questions about an AI rollout: are people doing the new behaviors, are the behaviors sticking, and are they improving results? Keep this page next to you while you work in the tracker.</p>
+    <div class="meta-row">
+      <span><strong>Who uses it:</strong> managers, team leads, change leads</span>
+      <span><strong>Time per week:</strong> about 5 minutes per rollout</span>
+      <span><strong>Open it:</strong> double-click <code>index.html</code> in the app folder</span>
+    </div>
+  </header>
+
+  <div class="grid">
+    <section class="card">
+      <div class="card-head"><h2>Set up a rollout</h2><span class="when">Once per rollout</span></div>
+      <ol class="steps">
+        <li><div><b>Create the rollout</b><span>Go to <span class="where">Rollouts</span> &gt; New rollout. Enter the AI tool, the team, the sponsor, and the launch date.</span></div></li>
+        <li><div><b>Add each expected behavior</b><span>Open the rollout &gt; Add behavior. Write one observable action and name one accountable owner.</span></div></li>
+        <li><div><b>Set the weekly check-in dates</b><span>Pick the first check-in date and how many weeks to track. The tracker fills in every 7 days.</span></div></li>
+        <li><div><b>Define the business outcome</b><span>Add the measure, the baseline (today's number), and the target. Include the unit: %, min, hours.</span></div></li>
+      </ol>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><h2>Record the weekly check-in</h2><span class="when">Every week</span></div>
+      <ol class="steps">
+        <li><div><b>Open Check-ins</b><span>Go to <span class="where">Check-ins</span>. Missing weeks are listed first, then the ones due this week.</span></div></li>
+        <li><div><b>Choose what happened</b><span>Select <strong>Used</strong>, <strong>Partly used</strong>, or <strong>Not used</strong> for that week.</span></div></li>
+        <li><div><b>Add notes and evidence</b><span>Note what you saw. Evidence is optional: a report name, a link, or a short description.</span></div></li>
+        <li><div><b>Update the measure</b><span>If you have this week's number, enter it. It becomes the "current" value on the dashboard.</span></div></li>
+        <li><div><b>Log a barrier if you heard one</b><span>Open "Log a possible barrier" in the same form. Then select Save.</span></div></li>
+      </ol>
+    </section>
+
+    <section class="card span-2">
+      <div class="card-head"><h2>What each status means and what to do</h2><span class="when">Read the dashboard</span></div>
+      <div class="key">
+        <div class="key-row"><div><span class="badge b-bad">Missed 2+ weeks</span></div><div class="do">Reported <strong>Not used</strong> for the two most recent completed weeks in a row. <strong>Do:</strong> talk with the owner, log the barrier, and bring it to the manager review.</div></div>
+        <div class="key-row"><div><span class="badge b-gap">Check-in missing</span></div><div class="do">The last check-in date passed with nothing recorded. This is a data gap, not nonuse. <strong>Do:</strong> ask the owner for the check-in and record it. Past weeks stay open.</div></div>
+        <div class="key-row"><div><span class="badge b-warn">Watch</span></div><div class="do">Last week was <strong>Partly used</strong>, or a single week of Not used. <strong>Do:</strong> ask what got in the way before it becomes a flag.</div></div>
+        <div class="key-row"><div><span class="badge b-good">On track</span></div><div class="do">Last week was <strong>Used</strong>. <strong>Do:</strong> keep checking in and recognize the progress.</div></div>
+        <div class="key-row"><div><span class="badge b-good">Sustained</span></div><div class="do"><strong>Used</strong> three or more weeks in a row. The behavior is sticking. <strong>Do:</strong> share what is working with other teams.</div></div>
+        <div class="key-row"><div><span class="badge b-neutral">Not started</span> <span class="badge b-neutral">Paused</span></div><div class="do">No check-in date has arrived yet, or the behavior was paused or retired. Paused behaviors are left out of the totals.</div></div>
+      </div>
+      <div class="weeks" aria-label="Weekly record symbols">
+        <span><i class="dot d-used">✓</i> Used</span>
+        <span><i class="dot d-partly">½</i> Partly used</span>
+        <span><i class="dot d-not">✕</i> Not used</span>
+        <span><i class="dot d-missing">?</i> No check-in</span>
+        <span><i class="dot d-up"></i> Upcoming</span>
+      </div>
+      <p class="rule"><strong>Key rule:</strong> Partly used never counts toward the two-week flag, and a missing check-in never counts as Not used. The tracker keeps "nobody reported" separate from "it did not happen."</p>
+    </section>
+
+    <section class="card span-2 page-break">
+      <div class="card-head"><h2>Choosing a barrier type</h2><span class="when">When you hear a reason</span></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Type</th><th>What you might hear</th><th>A good first move</th></tr></thead>
+          <tbody>
+            <tr><td>Skills</td><td>"I'm not sure how to edit what it gives me."</td><td>Short demo, a peer coach, or a one-page how-to</td></tr>
+            <tr><td>Time</td><td>"Meetings are back to back. There's no slot to prep."</td><td>Protect time on the calendar or remove another task</td></tr>
+            <tr><td>Access</td><td>"I still don't have a license or login."</td><td>Raise it with IT and set a date it will be fixed</td></tr>
+            <tr><td>Workflow design</td><td>"It's on a separate screen, so I have to leave my queue."</td><td>Change the process or system so the step fits the work</td></tr>
+            <tr><td>Willingness</td><td>"I don't trust it after it got one wrong."</td><td>Listen, share evidence, and involve the person in fixes</td></tr>
+            <tr><td>Unknown</td><td>Nothing yet, or mixed signals</td><td>Have a conversation, then change the type once it's clear</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="small muted">When a barrier is dealt with, select <strong>Mark resolved</strong> and write what was done. Resolved barriers stay in the history.</p>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><h2>Run the manager review</h2><span class="when">Every 2 weeks, or as agreed</span></div>
+      <ol class="steps">
+        <li><div><b>Missed 2+ weeks</b><span>Pick a decision for each flagged behavior, such as coach the owner, remove a barrier, or escalate.</span></div></li>
+        <li><div><b>Missing check-ins</b><span>Decide how to close each data gap.</span></div></li>
+        <li><div><b>Barriers</b><span>Tick the ones that are resolved and note what happened.</span></div></li>
+        <li><div><b>Outcomes</b><span>Compare current values with the baseline and target. Note what you see.</span></div></li>
+        <li><div><b>Sign off</b><span>Choose On track, At risk, or Off track, set the next review date, and select Save review.</span></div></li>
+      </ol>
+      <p class="small muted">Then share it: <span class="where">Summary</span> &gt; Print / Save as PDF, or Copy as text for an email.</p>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><h2>Write behaviors people can see</h2><span class="when">The most common mistake</span></div>
+      <div class="compare">
+        <div><span class="badge b-bad">Vague</span><p>"Embraces the new AI tool."</p></div>
+        <div><span class="badge b-good">Observable</span><p>"Uses the AI draft as the starting point for every first reply to a complaint."</p></div>
+      </div>
+      <ul class="plain">
+        <li>Start with an action verb: uses, reviews, saves, logs.</li>
+        <li>Say when or how often: every claim, before each meeting, by Friday.</li>
+        <li>Name one owner, not a team.</li>
+        <li>Ask yourself: could someone else confirm it happened?</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><h2>Protect the data</h2><span class="when">Every 2 weeks</span></div>
+      <ul class="plain">
+        <li>Data is saved in the browser on that computer only. Nothing is sent anywhere.</li>
+        <li>Go to <span class="where">Data</span> &gt; <strong>Download backup</strong>. Keep the file in a safe folder or shared drive. The tracker reminds you after 14 days.</li>
+        <li>To move to another computer, or to recover lost data, use <strong>Restore</strong> with your latest backup file.</li>
+        <li>Clearing browser history or site data can erase the tracker. Back up first.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><h2>Common questions</h2></div>
+      <dl class="faq">
+        <div><dt>I forgot to record last week. Is it too late?</dt><dd>No. Click the week in the behavior's weekly record and record it now.</dd></div>
+        <div><dt>Why isn't a behavior flagged when it was Partly used twice?</dt><dd>Only Not used counts toward the flag. Partly used shows as Watch.</dd></div>
+        <div><dt>My data is gone.</dt><dd>Check that you're in the same browser on the same computer. If so, restore your latest backup from the Data page.</dd></div>
+        <div><dt>How do I bring in ProcessIQ opportunities?</dt><dd>Go to <span class="where">Import</span>, download the template, fill it in, and upload it. Then select Create behavior for each row.</dd></div>
+      </dl>
+    </section>
+
+    <section class="card span-2 practice">
+      <div class="card-head"><h2>Practice with the example data</h2><span class="when">For training, about 15 minutes</span></div>
+      <p class="small muted">The tracker opens with a fictional company, Harborview Mutual. Try each task, then check the answers.</p>
+      <ol>
+        <li><span class="checkbox"></span>On the Dashboard, find the behavior missed the most weeks in a row. Who owns it?</li>
+        <li><span class="checkbox"></span>Find the behavior with missing check-ins. Record this week's check-in for it as Partly used, with a short note.</li>
+        <li><span class="checkbox"></span>Log a Skills barrier for any behavior, then mark it resolved.</li>
+        <li><span class="checkbox"></span>Run a manager review for ClaimsPilot. Give every flagged behavior a decision and save the review.</li>
+        <li><span class="checkbox"></span>Open the Summary and copy it as text.</li>
+        <li><span class="checkbox"></span>Download a backup from the Data page.</li>
+      </ol>
+      <details class="answers"><summary>Show answers</summary>
+        <ol>
+          <li>Taylor Grant: "Reads the AI-generated prep brief before every renewal meeting," 3 weeks Not used.</li>
+          <li>Sam Ortiz: "Logs any incorrect AI output in the feedback form." Click a dashed ? week in its weekly record.</li>
+          <li>Barriers &gt; Log barrier, choose Skills, save. Then select Mark resolved and write what was done.</li>
+          <li>Review &gt; Start review on ClaimsPilot. Step 1 lists Priya Natarajan's behavior. Choose a decision, go to Sign off, pick an assessment, and save.</li>
+          <li>Summary button on the Dashboard, then Copy as text.</li>
+          <li>Data &gt; Download backup. The file name starts with "adoption-tracker-backup".</li>
+        </ol>
+      </details>
+      <div class="print-answers small muted"><strong>Answers:</strong> 1. Taylor Grant (3 weeks). 2. Sam Ortiz's feedback-form behavior. 3. Barriers &gt; Log barrier, then Mark resolved. 4. Priya Natarajan's behavior is in Step 1. 5. Summary &gt; Copy as text. 6. Data &gt; Download backup.</div>
+    </section>
+  </div>
+
+  <footer class="foot">
+    <span>AI Adoption Follow-Through Tracker, version 1</span>
+    <span>Full rules: the Guide page inside the tracker</span>
+  </footer>
+</div>
+</body>
+</html>

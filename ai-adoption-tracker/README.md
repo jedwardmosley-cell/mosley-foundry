@@ -19,6 +19,7 @@ You don't need to install anything, sign up for anything, or be online. The firs
 | `styles.css` | The look and layout (light and dark mode, phone layout) |
 | `app.js` | All the logic: rollouts, check-ins, flags, dashboard, review, import, export |
 | `processiq-import-template.csv` | Blank template for importing ProcessIQ opportunities |
+| `job-aid.html` | Two-page training reference. Open it and print, or save as PDF |
 
 ## Where your data lives
 
