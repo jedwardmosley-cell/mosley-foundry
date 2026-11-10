@@ -191,7 +191,10 @@
         try { localStorage.setItem(`${STORE_KEY}-unreadable-${Date.now()}`, raw); } catch (_) { /* ignore */ }
       }
     }
-    const sample = buildSampleData();
+    // A page can supply its own starting scenario in window.AFTT_SEED (a backup-format object).
+    let sample = null;
+    try { if (window.AFTT_SEED) sample = normalize(JSON.parse(JSON.stringify(window.AFTT_SEED))); } catch (_) { sample = null; }
+    if (!sample) sample = buildSampleData();
     persist(sample);
     return sample;
   }
