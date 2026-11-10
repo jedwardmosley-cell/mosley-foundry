@@ -10,7 +10,7 @@ export const metadata = { title: "Weekly Reflection" };
 
 export default async function ReflectPage() {
   const u = await requireUser("PARTICIPANT");
-  const { pack } = getContent();
+  const { pack } = await getContent();
   const weekOf = mondayOf();
   const [current, past, coach] = await Promise.all([
     db.weeklyReflection.findUnique({ where: { userId_weekOf: { userId: u.id, weekOf } } }),

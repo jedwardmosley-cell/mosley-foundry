@@ -18,7 +18,7 @@ export default async function AssessmentResult({ params, searchParams }: { param
   const a = await db.assessment.findFirst({ where: { id, userId: u.id } });
   if (!a) notFound();
   const profile = await db.profile.findUnique({ where: { userId: u.id } });
-  const { pack, entrepreneur } = getContent();
+  const { pack, entrepreneur } = await getContent();
   const s = scoresFrom(a);
   const focusKey = (PILLAR_KEYS as string[]).includes(focus ?? "") ? (focus as PillarKey) : undefined;
   const r = interpret(pack, s, focusKey ?? (profile?.priorityPillar as PillarKey | undefined));

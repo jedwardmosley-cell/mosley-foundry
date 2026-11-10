@@ -12,12 +12,12 @@ export const aiAvailable = () => Boolean(process.env.ANTHROPIC_API_KEY);
 
 export type Chunk = { id: string; ref: string; text: string };
 
-let chunkCache: Chunk[] | null = null;
+let chunkCache: { pack: unknown; chunks: Chunk[] } | null = null;
 
 /** Approved sources: the licensed pack (book + workbook), the entrepreneur worksheet, and the program brief. */
-export function buildChunks(): Chunk[] {
-  if (chunkCache) return chunkCache;
-  const { pack, entrepreneur } = getContent();
+export async function buildChunks(): Promise<Chunk[]> {
+  const { pack, entrepreneur } = await getContent();
+  if (chunkCache && chunkCache.pack === pack) return chunkCache.chunks;
   const out: Chunk[] = [];
   const add = (ref: string, text: string) => text.trim() && out.push({ id: `S${out.length + 1}`, ref, text });
 
@@ -46,7 +46,7 @@ export function buildChunks(): Chunk[] {
     for (const pt of entrepreneur.patterns) add(`FORGE Worksheet for Entrepreneurs, ${pt.title}`, pt.text.join(" "));
     add(`FORGE Ahead session: building a business`, entrepreneur.owner.fourBuilds.map((b) => `${b.label}: ${b.detail}. ${b.signal}`).join(" ") + " " + entrepreneur.owner.howToBuild + " " + entrepreneur.owner.sellableTest);
   }
-  chunkCache = out;
+  chunkCache = { pack, chunks: out };
   return out;
 }
 
@@ -54,8 +54,8 @@ const STOP = new Set("the a an and or of to in is it that this for on with you y
 const tokens = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]/g, " ").split(/\s+/).filter((t) => t.length > 2 && !STOP.has(t));
 
 /** Small BM25-style ranking. Good enough for a few hundred approved chunks; swap for embeddings later. */
-export function retrieve(query: string, k = 6): Chunk[] {
-  const chunks = buildChunks();
+export async function retrieve(query: string, k = 6): Promise<Chunk[]> {
+  const chunks = await buildChunks();
   const q = tokens(query);
   if (!q.length) return chunks.slice(0, 0);
   const N = chunks.length;
@@ -147,7 +147,7 @@ export function systemPrompt(mode: AiMode, context: string, sources: Chunk[]) {
 export async function generateReply(opts: { userId: string; mode: AiMode; history: { role: "user" | "assistant"; content: string }[] }) {
   const client = new Anthropic();
   const lastUser = [...opts.history].reverse().find((m) => m.role === "user")?.content ?? "";
-  const sources = retrieve(lastUser + " " + opts.history.slice(-3).map((m) => m.content).join(" "));
+  const sources = await retrieve(lastUser + " " + opts.history.slice(-3).map((m) => m.content).join(" "));
   const context = await participantContext(opts.userId);
 
   const stream = client.beta.messages.stream({

@@ -12,7 +12,7 @@ export const metadata = { title: "Start a 30-day cycle" };
 
 export default async function NewCycle() {
   const u = await requireUser("PARTICIPANT");
-  const { pack } = getContent();
+  const { pack } = await getContent();
   const profile = await db.profile.findUnique({ where: { userId: u.id } });
   const pathway = PATHWAYS[(profile?.pathway ?? "PERSONAL") as keyof typeof PATHWAYS];
   const defaultTemplate = pack.thirtyDayPlan.length ? pathway.cycleTemplate : "NIRS_30";

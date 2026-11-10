@@ -13,7 +13,7 @@ export const metadata = { title: "Participants" };
 
 export default async function CoachHome() {
   const coach = await requireUser("COACH");
-  const { pack } = getContent();
+  const { pack } = await getContent();
   const assignments = await db.coachAssignment.findMany({ where: { coachId: coach.id, active: true }, include: { participant: { select: { id: true, name: true } } } });
   const views = await Promise.all(assignments.map((a) => getCoachView(coach, a.participant.id)));
   const upcoming = await db.coachingSession.findMany({ where: { coachId: coach.id, scheduledAt: { gte: new Date() } }, orderBy: { scheduledAt: "asc" }, take: 5, include: { participant: { select: { name: true } } } });

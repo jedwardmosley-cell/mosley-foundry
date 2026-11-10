@@ -12,7 +12,7 @@ export const metadata = { title: "FORGE Self-Assessment" };
 
 export default async function AssessmentPage() {
   const u = await requireUser("PARTICIPANT");
-  const { pack, entrepreneur } = getContent();
+  const { pack, entrepreneur } = await getContent();
   const profile = await db.profile.findUnique({ where: { userId: u.id } });
   const past = await db.assessment.findMany({ where: { userId: u.id, isSecondOpinion: false }, orderBy: { completedAt: "desc" } });
   const useEntre = profile?.pathway === "ENTREPRENEURIAL" && !!entrepreneur;

@@ -1,6 +1,5 @@
-// Both Hands on the Wheel: relational data model.
-// SQLite for local development; switch provider to "postgresql" for production
-// (see docs/ARCHITECTURE.md for the row-level-security policies to add there).
+// Both Hands on the Wheel: relational data model (PostgreSQL).
+// See docs/ARCHITECTURE.md for the row-level-security policies to add in production.
 // String columns marked "enum:" hold one of the listed values (validated in src/lib/validation.ts).
 
 generator client {
@@ -8,8 +7,9 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url       = env("DATABASE_URL")          // pooled connection used by the app
+  directUrl = env("DATABASE_URL_UNPOOLED") // direct connection used to create tables
 }
 
 // ---------- Identity and organizations ----------
@@ -385,4 +385,14 @@ model AuditEvent {
   targetUserId String?
   detail       String   @default("")
   createdAt    DateTime @default(now())
+}
+
+// ---------- Licensed content ----------
+
+// The licensed content pack (book + workbook), uploaded by the platform owner at /setup.
+// Kept in the database so it never has to live in the public repository.
+model ContentPack {
+  key       String   @id // "pack" | "entrepreneur"
+  json      String
+  updatedAt DateTime @updatedAt
 }

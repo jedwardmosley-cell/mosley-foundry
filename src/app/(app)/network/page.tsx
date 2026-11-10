@@ -13,7 +13,7 @@ export const metadata = { title: "People" };
 
 export default async function NetworkPage() {
   const u = await requireUser("PARTICIPANT");
-  const { pack } = getContent();
+  const { pack } = await getContent();
   const rels = await db.relationship.findMany({
     where: { ownerId: u.id, active: true },
     orderBy: { nextCheckIn: "asc" },

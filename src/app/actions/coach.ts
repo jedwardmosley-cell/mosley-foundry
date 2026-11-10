@@ -16,7 +16,7 @@ async function coachFor(participantId: string) {
 export async function assignExercise(fd: FormData) {
   const d = parse(z.object({ participantId: z.string(), exerciseRef: z.string().max(60), title: z.string().trim().max(200).default(""), instructions: text(6000), dueOn: z.string().optional() }), fd);
   const c = await coachFor(d.participantId);
-  const ex = exerciseText(d.exerciseRef);
+  const ex = await exerciseText(d.exerciseRef);
   if (ex) {
     d.title ||= ex.title;
     d.instructions ||= ex.text;

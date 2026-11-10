@@ -11,7 +11,7 @@ export const metadata = { title: "My Pathway" };
 
 export default async function PathwayPage() {
   const u = await requireUser("PARTICIPANT");
-  const { entrepreneur } = getContent();
+  const { entrepreneur } = await getContent();
   const profile = await db.profile.findUniqueOrThrow({ where: { userId: u.id } });
   const pathway = PATHWAYS[profile.pathway as keyof typeof PATHWAYS];
   const membership = await db.cohortMember.findFirst({

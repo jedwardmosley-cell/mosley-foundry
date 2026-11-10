@@ -11,7 +11,7 @@ import { db } from "./db";
 export async function developmentSummary(userId: string, name: string) {
   const d = await loadParticipant(userId);
   const cycles = await db.developmentCycle.findMany({ where: { userId }, orderBy: { startDate: "asc" } });
-  const { pack } = getContent();
+  const { pack } = await getContent();
   const L: string[] = [];
   const pName = (k: string) => pack.pillars.find((p) => p.key === k)?.name ?? k;
   L.push(`# Development Summary: ${name}`, `Both Hands on the Wheel · generated ${fmt(new Date(), { month: "long", day: "numeric", year: "numeric" })}`, "");

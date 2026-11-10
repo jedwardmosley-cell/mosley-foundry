@@ -13,7 +13,7 @@ const CADENCES = { DAILY: "Daily", WEEKLY: "Weekly", MONTHLY: "Monthly", QUARTER
 
 export default async function BlueprintPage() {
   const u = await requireUser("PARTICIPANT");
-  const { pack } = getContent();
+  const { pack } = await getContent();
   const [items, rels] = await Promise.all([
     db.commitment.findMany({ where: { userId: u.id, active: true }, orderBy: { createdAt: "asc" } }),
     db.relationship.findMany({ where: { ownerId: u.id, active: true } }),

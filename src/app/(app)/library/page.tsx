@@ -6,7 +6,7 @@ export const metadata = { title: "Road Library" };
 
 export default async function LibraryPage() {
   await requireUser();
-  const { pack } = getContent();
+  const { pack } = await getContent();
   if (pack.kind !== "licensed") {
     return (
       <>

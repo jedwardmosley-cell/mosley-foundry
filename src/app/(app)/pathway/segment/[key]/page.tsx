@@ -12,7 +12,7 @@ export default async function SegmentPage({ params }: { params: Promise<{ key: s
   const { key } = await params;
   const s = SEGMENTS.find((x) => x.key === key);
   if (!s) notFound();
-  const { pack } = getContent();
+  const { pack } = await getContent();
   const goal = await db.developmentGoal.findFirst({ where: { userId: u.id, segmentKey: s.key } });
   const area = BLUEPRINT_AREAS.find((a) => a.key === s.commitmentArea)!;
   const leading = key === "04" ? pack.discipline.leadingOthers : [];
