@@ -658,6 +658,30 @@
   table.sipoc-table th { border-bottom-width: 3px; }
   .report-foot { color: var(--text-3); font-size: 0.8rem; border-top: 1px solid var(--border); padding-top: 12px; margin: 0; }
   @media (max-width: 640px) { .report { padding: 16px; } }
+  .stepper { list-style: none; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; padding: 0; margin: 0 0 16px; }
+  .stepper button {
+    width: 100%; height: 100%; display: flex; align-items: center; justify-content: flex-start; gap: 8px;
+    padding: 9px 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    text-align: left; white-space: normal; min-height: 54px; box-shadow: var(--shadow);
+  }
+  .step-n { display: inline-grid; place-items: center; width: 26px; height: 26px; flex-shrink: 0; border-radius: 50%; background: var(--surface-2); color: var(--text-2); font-weight: 700; font-size: 0.8rem; }
+  .step-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
+  .step-label { font-weight: 600; font-size: 0.88rem; color: var(--text); }
+  .step-status { font-size: 0.75rem; color: var(--text-3); overflow-wrap: anywhere; }
+  .stepper .done .step-n { background: var(--good); color: var(--on-solid); }
+  .stepper .done .step-status { color: var(--good); }
+  .stepper .current button { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), var(--shadow); }
+  .stepper .current .step-n { background: var(--accent); color: var(--on-accent); }
+  .metrics-table { min-width: 560px; }
+  .metrics-table td { padding: 6px 6px; vertical-align: middle; }
+  .metrics-table td:first-child { width: 46%; }
+  .metrics-table td:last-child { width: 40px; }
+  .metrics-table input { width: 100%; min-height: 36px; padding: 6px 8px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); }
+  .metrics-table input.missing { border-style: dashed; border-color: var(--q-fg); }
+  .metrics .add-imp { max-width: 560px; }
+  .metrics .qline { margin-top: 10px; }
+  @media (max-width: 1000px) { .stepper { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 640px) { .stepper { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   .table-wrap { overflow-x: auto; }
   table.plan { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 620px; }
   table.plan th { text-align: left; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; padding: 6px 8px; border-bottom: 2px solid var(--border); }
@@ -805,12 +829,14 @@
   </section>
 
   <div class="grid" id="grid"></div>
+  <section class="card metrics" id="metrics-card" style="margin-top:16px"></section>
   </section>
 
   <section class="page" id="page-analysis" aria-labelledby="analysis-title" hidden>
     <div class="page-head">
       <div><h1 id="analysis-title">Analysis</h1><p class="lead">Find delays and waste, get to root causes, spot automation, and build the action plan. Facts, hypotheses and questions are always labeled.</p></div>
     </div>
+    <div id="path-analysis"></div>
     <div class="subtabs" role="tablist" aria-label="Analysis tools">
       <button class="subtab" role="tab" id="st-bottleneck" aria-selected="true">Bottleneck analysis</button>
       <button class="subtab" role="tab" id="st-whys" aria-selected="false">5 Whys</button>
@@ -1071,6 +1097,7 @@
     if (!Array.isArray(s.analysis.whys)) s.analysis.whys = [];
     if (!Array.isArray(s.analysis.auto)) s.analysis.auto = [];
     if (!Array.isArray(s.analysis.improvements)) s.analysis.improvements = [];
+    if (!Array.isArray(s.metrics)) s.metrics = [];
     s.details.forEach(function (d) {
       if (!d.auto || typeof d.auto !== "object") d.auto = blankAuto();
     });
@@ -1141,6 +1168,7 @@
       setStatus("Could not save in this browser");
     }
     pushChanges();
+    if (activePage === "analysis") renderPath("path-analysis", current());
   }
   function saveSoon() {
     setStatus("Saving...");
@@ -1318,6 +1346,7 @@
     else if (activePage === "processes") renderProcesses();
     else if (activePage === "data") renderDataPage();
     else if (activePage === "report") renderReport();
+    else if (activePage === "map") renderMetrics(current());
   }
 
   // ---------- Buttons and fields ----------
@@ -2050,6 +2079,7 @@
     var s = current();
     // Keep every tool's results up to date, whichever one is open
     runAnalysis(s); runAutomation(s);
+    renderPath("path-analysis", s);
     if (name === "whys") { renderWhys(s); saveSoon(); }
     else if (name === "auto") renderAutomation(s);
     else if (name === "prio") renderPriorities(s);
@@ -2704,6 +2734,7 @@
     more.appendChild(g2);
     more.appendChild(el("p", "sub", "Optional. If \"Behavior to track\" is blank, the action itself is sent. Baseline and target must be numbers."));
     card.appendChild(more);
+    linkMeasureToMetrics(s, m, card);
     if (!m.impact || !m.effort) {
       var ql = el("div", "qline");
       ql.appendChild(el("span", "badge question", "Question"));
@@ -3386,7 +3417,7 @@
     if (name === "dashboard") renderDashboard();
     else if (name === "processes") renderProcesses();
     else if (name === "analysis") showSub((opts && opts.sub) || activeSub);
-    else if (name === "map") fitAll();
+    else if (name === "map") { fitAll(); renderMetrics(current()); }
     else if (name === "data") renderDataPage();
     else if (name === "report") renderReport();
     if (changed && !(opts && opts.keepScroll)) window.scrollTo(0, 0);
@@ -3507,6 +3538,8 @@
     kpi(k, st.toReview.length, "Findings to review", st.approved.length + " approved so far", st.toReview.length ? "warn" : "");
     kpi(k, st.plan.length, "Actions in plan", st.planGaps.length ? plural(st.planGaps.length, "needs", "need") + " an owner or date" : (st.plan.length ? "All have owners and dates" : "None approved yet"), st.plan.length ? (st.planGaps.length ? "warn" : "good") : "");
     box.appendChild(k);
+    var pathBox = el("div"); pathBox.id = "path-dash"; box.appendChild(pathBox);
+    renderPath("path-dash", s);
 
     // Needs attention
     var items = [];
@@ -3522,6 +3555,9 @@
     if (st.rootsPending.length) add("warn", "Root cause", (st.rootsPending.length === 1 ? "1 root cause is" : st.rootsPending.length + " root causes are") + " not yet approved", "5 Whys.", "Open 5 Whys", "analysis:whys");
     if (st.unrated.length) add("warn", "Priorities", (st.unrated.length === 1 ? "1 improvement needs" : st.unrated.length + " improvements need") + " impact and effort ratings", "Only you can judge these.", "Rate", "analysis:prio");
     else if (st.toDecide.length) add("warn", "Priorities", (st.toDecide.length === 1 ? "1 improvement is" : st.toDecide.length + " improvements are") + " waiting for a decision", "Approve the ones you will act on.", "Decide", "analysis:prio");
+    var mg = metricGaps(s);
+    if (!s.metrics.length && st.n) add("neutral", "Metrics", "No process metrics yet", "Add how you will measure improvement, with a baseline and a target.", "Add metrics", "map");
+    else if (mg.length) add("gap", "Metrics", (mg.length === 1 ? "1 metric has" : mg.length + " metrics have") + " no baseline yet", mg.map(function (m) { return m.name; }).join(", "), "Add baselines", "map");
     if (st.planGaps.length) add("warn", "Action plan", (st.planGaps.length === 1 ? "1 action is" : st.planGaps.length + " actions are") + " missing an owner or target date", "Recommended action plan.", "Fix", "analysis:prio");
 
     var att = el("section", "card");
@@ -3748,7 +3784,7 @@
     var name = "processiq-" + fileSlug(s.name) + "-for-tracker-" + todayStamp() + ".csv";
     var msg = plural(out.rows.length, "approved action") + " will be saved in the Adoption Tracker's import format. In the tracker, open Import, choose the file, then add the opportunities to its queue." +
       (out.problems.length ? " Worth knowing first: " + out.problems.slice(0, 4).join(" ") + (out.problems.length > 4 ? " And " + (out.problems.length - 4) + " more." : "") : "");
-    openDialog({ title: "Send to Adoption Tracker", text: msg, okLabel: "Save the file", onOk: function () { saveFile(name, text, "text/csv;charset=utf-8"); } });
+    openDialog({ title: "Send to Adoption Tracker", text: msg, okLabel: "Save the file", onOk: function () { markReported(s); saveFile(name, text, "text/csv;charset=utf-8"); } });
   }
 
   // =====================================================================
@@ -3847,6 +3883,25 @@
     fs.appendChild(nums);
     list(fs, r.facts, function (li, f) { li.appendChild(label("Fact", "fact")); li.appendChild(document.createTextNode(" " + f.text)); });
 
+    var msec = section("Metrics");
+    if (!s.metrics.length) msec.appendChild(el("p", "muted", "No metrics defined yet."));
+    else {
+      var mtw = el("div", "table-wrap"); var mt = el("table", "plan");
+      var mh = el("tr"); ["Metric", "Baseline", "Target"].forEach(function (h) { mh.appendChild(el("th", null, h)); });
+      var mth = el("thead"); mth.appendChild(mh); mt.appendChild(mth);
+      var mtb = el("tbody");
+      s.metrics.forEach(function (x) {
+        var row = el("tr");
+        row.appendChild(el("td", null, x.name || "Unnamed metric"));
+        [x.baseline, x.target].forEach(function (v) {
+          var t2 = numText(v);
+          row.appendChild(el("td", t2 ? "num" : "na", t2 ? t2 + (x.unit ? " " + x.unit : "") : "Not known yet"));
+        });
+        mtb.appendChild(row);
+      });
+      mt.appendChild(mtb); mtw.appendChild(mt); msec.appendChild(mtw);
+    }
+
     var hs = section("Approved findings");
     hs.appendChild(el("p", "sub", "Possible issues you reviewed and agreed are worth acting on. Still hypotheses until confirmed."));
     list(hs, r.hyps, function (li, f) {
@@ -3909,6 +3964,10 @@
     summaryNumbers(s).forEach(function (x) { L.push("- " + x[0] + ": " + x[1]); });
     r.facts.forEach(function (f) { L.push("- [Fact] " + f.text); });
     L.push("");
+    L.push("METRICS");
+    if (!s.metrics.length) L.push("- None defined yet.");
+    s.metrics.forEach(function (x) { L.push("- " + (x.name || "Unnamed metric") + ": baseline " + (numText(x.baseline) ? x.baseline + (x.unit ? " " + x.unit : "") : "not known yet") + ", target " + (numText(x.target) ? x.target + (x.unit ? " " + x.unit : "") : "not set")); });
+    L.push("");
     L.push("APPROVED FINDINGS (hypotheses to verify)");
     if (!r.hyps.length) L.push("- None yet.");
     r.hyps.forEach(function (f) { L.push("- [Hypothesis, " + f.category + (f.source === "claude" ? ", suggested by Claude" : "") + "] " + f.text); });
@@ -3932,6 +3991,7 @@
   function copyReportText(s) {
     var text = reportText(s);
     function fallback() { openDialog({ title: "Copy the report", text: "Select all of the text below, copy it, and paste it into an email or document.", area: text, okLabel: "Done", noCancel: true }); }
+    markReported(s);
     try { navigator.clipboard.writeText(text).then(function () { setStatus("Report copied. Paste it into an email or document."); }, fallback); }
     catch (e) { fallback(); }
   }
@@ -3951,11 +4011,171 @@
     var title = (s.name || "Process") + " report";
     var html = "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>" +
       title.replace(/[<>&"]/g, "") + "</title><style>" + REPORT_CSS + "</style></head><body>" + body.innerHTML + "</body></html>";
+    markReported(s);
     saveFile("processiq-" + fileSlug(s.name) + "-report-" + todayStamp() + ".html", html, "text/html;charset=utf-8");
   }
 
   document.getElementById("trackerBtn").addEventListener("click", sendToTracker);
   document.getElementById("trackerBtn2").addEventListener("click", sendToTracker);
+
+  // =====================================================================
+  //  METRICS (how the process is measured; baseline and target optional)
+  // =====================================================================
+  function blankMetric(name) { return { id: newId(), name: name || "", baseline: "", target: "", unit: "" }; }
+  function numText(v) { var t = String(v == null ? "" : v).trim(); return t; }
+  function metricGaps(s) {
+    return s.metrics.filter(function (m) { return String(m.name || "").trim() && !numText(m.baseline); });
+  }
+
+  function renderMetrics(s) {
+    var box = document.getElementById("metrics-card");
+    if (!box) return;
+    box.innerHTML = "";
+    var head = el("div", "card-head");
+    var hl = el("div");
+    hl.appendChild(el("h2", null, "Process metrics"));
+    hl.appendChild(el("p", "sub", "How you will know the process is improving. Baseline is where it is today; target is where you want it. Leave numbers blank until you know them."));
+    head.appendChild(hl);
+    box.appendChild(head);
+
+    if (!s.metrics.length) box.appendChild(el("p", "muted", "No metrics yet. Add the measures that matter for this process, such as time from request to delivery."));
+    else {
+      var tw = el("div", "table-wrap");
+      var t = el("table", "plan metrics-table");
+      var hr = el("tr");
+      ["Metric", "Baseline", "Target", "Unit", ""].forEach(function (h) { hr.appendChild(el("th", null, h)); });
+      var th = el("thead"); th.appendChild(hr); t.appendChild(th);
+      var tb = el("tbody");
+      s.metrics.forEach(function (m, idx) {
+        var tr = el("tr");
+        function cell(key, ph, cls, label) {
+          var td = el("td");
+          var i = el("input", cls || null);
+          i.id = "m-" + key + "-" + m.id;
+          i.value = m[key] || ""; i.placeholder = ph;
+          i.setAttribute("aria-label", label + " for " + (m.name || "metric " + (idx + 1)));
+          if (key === "baseline" || key === "target") { i.inputMode = "decimal"; i.classList.toggle("missing", key === "baseline" && !numText(m.baseline)); }
+          i.addEventListener("input", function () {
+            m[key] = i.value;
+            if (key === "baseline") i.classList.toggle("missing", !numText(m.baseline));
+            if (key === "baseline" || key === "name") updateMetricQuestion(s);
+            saveSoon();
+          });
+          td.appendChild(i); tr.appendChild(td);
+        }
+        cell("name", "e.g. Days from session to follow-up", null, "Metric name");
+        cell("baseline", "?", null, "Baseline");
+        cell("target", "?", null, "Target");
+        cell("unit", "e.g. days, %", null, "Unit");
+        var td = el("td");
+        var del = el("button", "icon", "✕"); del.type = "button"; del.title = "Remove metric";
+        del.setAttribute("aria-label", "Remove " + (m.name || "metric"));
+        del.addEventListener("click", function () { s.metrics.splice(idx, 1); saveSoon(); renderMetrics(s); });
+        td.appendChild(del); tr.appendChild(td);
+        tb.appendChild(tr);
+      });
+      t.appendChild(tb); tw.appendChild(t); box.appendChild(tw);
+      box.appendChild(el("div", "metric-q"));
+      updateMetricQuestion(s);
+    }
+    var form = el("form", "add-imp");
+    var inp = el("input"); inp.id = "metric-new"; inp.placeholder = "Add a metric"; inp.setAttribute("aria-label", "New metric name");
+    var b = el("button", null, "Add"); b.type = "submit";
+    form.appendChild(inp); form.appendChild(b);
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var v = inp.value.trim();
+      if (!v) { inp.focus(); return; }
+      s.metrics.push(blankMetric(v));
+      saveSoon(); renderMetrics(s);
+      var again = document.getElementById("metric-new"); if (again) again.focus();
+    });
+    box.appendChild(form);
+  }
+
+  function updateMetricQuestion(s) {
+    var holder = document.querySelector("#metrics-card .metric-q");
+    if (!holder) return;
+    holder.innerHTML = "";
+    var gaps = metricGaps(s);
+    if (!gaps.length) return;
+    var q = el("div", "qline");
+    q.appendChild(el("span", "badge question", "Question"));
+    q.appendChild(el("span", null, "What is the baseline today for " + gaps.map(function (m) { return "\"" + m.name.trim() + "\""; }).join(", ") + "? Without a baseline, progress can't be measured."));
+    holder.appendChild(q);
+  }
+
+  // When an action's measure matches a process metric, carry its numbers over (only into blank fields)
+  function linkMeasureToMetrics(s, m, card) {
+    var input = card.querySelector('input[id^="i-measure-"]');
+    if (!input) return;
+    var dl = el("datalist"); dl.id = "metric-names-" + m.id;
+    s.metrics.forEach(function (x) { if (String(x.name || "").trim()) { var o = el("option"); o.value = x.name.trim(); dl.appendChild(o); } });
+    card.appendChild(dl);
+    input.setAttribute("list", dl.id);
+    input.addEventListener("change", function () {
+      var hit = s.metrics.filter(function (x) { return String(x.name || "").trim().toLowerCase() === input.value.trim().toLowerCase(); })[0];
+      if (!hit) return;
+      ["baseline", "target", "unit"].forEach(function (k) {
+        if (!numText(m[k]) && numText(hit[k])) {
+          m[k] = hit[k];
+          var f = card.querySelector('input[id^="i-' + k + '-"]'); if (f) f.value = hit[k];
+        }
+      });
+      saveSoon(); renderPlan(s);
+    });
+  }
+
+  // =====================================================================
+  //  THE PATH: six numbered steps, each with a clear "done" rule
+  // =====================================================================
+  function pathSteps(s) {
+    var st = processStats(s);
+    var cols = COLUMNS.filter(function (c) { return s[c.key].length; }).length;
+    var bounds = String(s.start || "").trim() && String(s.end || "").trim();
+    var reviewLeft = st.toReview.length;
+    var planOk = st.plan.length && !st.planGaps.length;
+    return [
+      { n: 1, label: "Map", go: "map", done: st.n > 0 && cols === 5 && !!bounds,
+        status: st.n > 0 && cols === 5 && bounds ? "Done" : cols + " of 5 columns" + (bounds ? "" : ", scope not set") },
+      { n: 2, label: "Details", go: "analysis:bottleneck", done: st.n > 0 && st.detailPct === 100,
+        status: st.detailPct === 100 && st.n ? "Done" : st.detailPct + "% complete" },
+      { n: 3, label: "Analyze", go: reviewLeft && st.reviewBottleneck === 0 ? "analysis:auto" : "analysis:bottleneck", done: st.n > 0 && reviewLeft === 0,
+        status: st.n > 0 && reviewLeft === 0 ? "Done" : plural(reviewLeft, "finding") + " to review" },
+      { n: 4, label: "Root cause", go: "analysis:whys", done: st.rootsApproved.length > 0,
+        status: st.rootsApproved.length ? plural(st.rootsApproved.length, "approved") : (st.whys.length ? "Not approved yet" : "Not started") },
+      { n: 5, label: "Prioritize", go: "analysis:prio", done: !!planOk,
+        status: planOk ? plural(st.plan.length, "action") + " planned" : (st.plan.length ? (st.planGaps.length === 1 ? "1 action needs" : st.planGaps.length + " actions need") + " an owner or date" : "No actions approved") },
+      { n: 6, label: "Report", go: "report", done: !!s.reportedAt,
+        status: s.reportedAt ? "Shared " + fmtDay(s.reportedAt) : "Not shared yet" }
+    ];
+  }
+
+  function renderPath(boxId, s) {
+    var box = document.getElementById(boxId);
+    if (!box) return;
+    box.innerHTML = "";
+    var steps = pathSteps(s);
+    var currentN = (steps.filter(function (x) { return !x.done; })[0] || { n: 0 }).n;
+    var ol = el("ol", "stepper");
+    ol.setAttribute("aria-label", "Your path through this process");
+    steps.forEach(function (x) {
+      var li = el("li", x.done ? "done" : (x.n === currentN ? "current" : ""));
+      var b = el("button"); b.type = "button"; b.dataset.go = x.go;
+      if (x.n === currentN) b.setAttribute("aria-current", "step");
+      b.appendChild(el("span", "step-n", x.done ? "✓" : String(x.n)));
+      var txt = el("span", "step-text");
+      txt.appendChild(el("span", "step-label", x.label));
+      txt.appendChild(el("span", "step-status", x.status));
+      b.appendChild(txt);
+      b.title = x.label + ": " + x.status;
+      li.appendChild(b);
+      ol.appendChild(li);
+    });
+    box.appendChild(ol);
+  }
+
+  function markReported(s) { s.reportedAt = Date.now(); saveSoon(); }
 
   showPage(initialPage());
 
