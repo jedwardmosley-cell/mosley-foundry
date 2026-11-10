@@ -1,0 +1,366 @@
+{
+  "version": 1,
+  "rollouts": [
+    {
+      "id": "r-copilot-ops",
+      "tool": "Microsoft 365 Copilot (Operations Productivity Pilot)",
+      "team": "Enterprise Operations (60 employees, 6 supervisors)",
+      "sponsor": "Patricia Williams, VP Operations",
+      "launchDate": "2026-10-12",
+      "purpose": "Copilot Operations Productivity Pilot. Objective: reduce administrative effort and improve information quality. Program owner: Marcus Johnson, Operations Manager. Weekly active users: 22 today, target 45. Check-in statuses are owner-reported, not independently verified. Fictional demonstration data.",
+      "createdAt": "2026-11-10T09:00:00.000Z"
+    }
+  ],
+  "behaviors": [
+    {
+      "id": "b-b01",
+      "rolloutId": "r-copilot-ops",
+      "description": "Uses Copilot to draft shift handoff notes (daily).",
+      "owner": "Marcus Johnson",
+      "firstCheckin": "2026-10-19",
+      "weeks": 8,
+      "outcome": "Faster shift handoffs.",
+      "measure": "Handoff preparation time",
+      "baseline": 25,
+      "target": 12,
+      "unit": "min",
+      "current": 23,
+      "paused": false,
+      "source": "manual",
+      "sourceId": "B01",
+      "createdAt": "2026-11-10T09:00:00.000Z"
+    },
+    {
+      "id": "b-b02",
+      "rolloutId": "r-copilot-ops",
+      "description": "Uses Copilot to summarize team meetings (weekly).",
+      "owner": "Angela Brooks",
+      "firstCheckin": "2026-10-19",
+      "weeks": 8,
+      "outcome": "Less time writing meeting summaries.",
+      "measure": "Meeting summary preparation time",
+      "baseline": 30,
+      "target": 10,
+      "unit": "min",
+      "current": 12,
+      "paused": false,
+      "source": "manual",
+      "sourceId": "B02",
+      "createdAt": "2026-11-10T09:00:00.000Z"
+    },
+    {
+      "id": "b-b03",
+      "rolloutId": "r-copilot-ops",
+      "description": "Uses Copilot to prepare project status reports (weekly).",
+      "owner": "David Chen",
+      "firstCheckin": "2026-10-19",
+      "weeks": 8,
+      "outcome": "Less time preparing weekly status reports.",
+      "measure": "Weekly status report preparation time",
+      "baseline": 90,
+      "target": 40,
+      "unit": "min",
+      "current": 75,
+      "paused": false,
+      "source": "manual",
+      "sourceId": "B03",
+      "createdAt": "2026-11-10T09:00:00.000Z"
+    },
+    {
+      "id": "b-b04",
+      "rolloutId": "r-copilot-ops",
+      "description": "Uses Copilot to draft customer responses (daily).",
+      "owner": "Sarah Mitchell",
+      "firstCheckin": "2026-10-19",
+      "weeks": 8,
+      "outcome": "Less administrative effort on customer responses.",
+      "measure": "",
+      "baseline": "",
+      "target": "",
+      "unit": "",
+      "current": "",
+      "paused": false,
+      "source": "manual",
+      "sourceId": "B04",
+      "createdAt": "2026-11-10T09:00:00.000Z"
+    },
+    {
+      "id": "b-b05",
+      "rolloutId": "r-copilot-ops",
+      "description": "Uses Copilot to summarize operating procedures (weekly).",
+      "owner": "Nicole Davis",
+      "firstCheckin": "2026-10-19",
+      "weeks": 8,
+      "outcome": "Better information quality in procedure summaries.",
+      "measure": "",
+      "baseline": "",
+      "target": "",
+      "unit": "",
+      "current": "",
+      "paused": false,
+      "source": "manual",
+      "sourceId": "B05",
+      "createdAt": "2026-11-10T09:00:00.000Z"
+    }
+  ],
+  "checkins": [
+    {
+      "id": "c-b01-1",
+      "behaviorId": "b-b01",
+      "weekDate": "2026-10-19",
+      "status": "partly",
+      "notes": "Owner-reported.",
+      "evidence": "",
+      "measureValue": "",
+      "recordedAt": "2026-11-10T09:00:00.000Z"
+    },
+    {
+      "id": "c-b01-2",
+      "behaviorId": "b-b01",
+      "weekDate": "2026-10-26",
+      "status": "partly",
+      "notes": "Owner-reported.",
+      "evidence": "",
+      "measureValue": "",
+      "recordedAt": "2026-11-10T09:00:00.000Z"
+    },
+    {
+      "id": "c-b01-3",
+      "behaviorId": "b-b01",
+      "weekDate": "2026-11-02",
+      "status": "not_used",
+      "notes": "Owner-reported.",
+      "evidence": "",
+      "measureValue": "",
+      "recordedAt": "2026-11-10T09:00:00.000Z"
+    },
+    {
+      "id": "c-b01-4",
+      "behaviorId": "b-b01",
+      "weekDate": "2026-11-09",
+      "status": "not_used",
+      "notes": "Owner-reported.",
+      "evidence": "",
+      "measureValue": "",
+      "recordedAt": "2026-11-10T09:00:00.000Z"
+    },
+    {
+      "id": "c-b02-1",
+      "behaviorId": "b-b02",
+      "weekDate": "2026-10-19",
+      "status": "used",
+      "notes": "Owner-reported.",
+      "evidence": "",
+      "measureValue": "",
+      "recordedAt": "2026-11-10T09:00:00.000Z"
+    },
+    {
+      "id": "c-b02-2",
+      "behaviorId": "b-b02",
+      "weekDate": "2026-10-26",
+      "status": "used",
+      "notes": "Owner-reported.",
+      "evidence": "",
+      "measureValue": "",
+      "recordedAt": "2026-11-10T09:00:00.000Z"
+    },
+    {
+      "id": "c-b02-3",
+      "behaviorId": "b-b02",
+      "weekDate": "2026-11-02",
+      "status": "used",
+      "notes": "Owner-reported.",
+      "evidence": "",
+      "measureValue": "",
+      "recordedAt": "2026-11-10T09:00:00.000Z"
+    },
+    {
+      "id": "c-b02-4",
+      "behaviorId": "b-b02",
+      "weekDate": "2026-11-09",
+      "status": "used",
+      "notes": "Owner-reported. No significant barrier reported. Document and share successful practices.",
+      "evidence": "",
+      "measureValue": "",
+      "recordedAt": "2026-11-10T09:00:00.000Z"
+    },
+    {
+      "id": "c-b03-1",
+      "behaviorId": "b-b03",
+      "weekDate": "2026-10-19",
+      "status": "used",
+      "notes": "Owner-reported.",
+      "evidence": "",
+      "measureValue": "",
+      "recordedAt": "2026-11-10T09:00:00.000Z"
+    },
+    {
+      "id": "c-b03-2",
+      "behaviorId": "b-b03",
+      "weekDate": "2026-10-26",
+      "status": "partly",
+      "notes": "Owner-reported.",
+      "evidence": "",
+      "measureValue": "",
+      "recordedAt": "2026-11-10T09:00:00.000Z"
+    },
+    {
+      "id": "c-b03-3",
+      "behaviorId": "b-b03",
+      "weekDate": "2026-11-02",
+      "status": "partly",
+      "notes": "Owner-reported.",
+      "evidence": "",
+      "measureValue": "",
+      "recordedAt": "2026-11-10T09:00:00.000Z"
+    },
+    {
+      "id": "c-b03-4",
+      "behaviorId": "b-b03",
+      "weekDate": "2026-11-09",
+      "status": "not_used",
+      "notes": "Owner-reported.",
+      "evidence": "",
+      "measureValue": "",
+      "recordedAt": "2026-11-10T09:00:00.000Z"
+    },
+    {
+      "id": "c-b04-1",
+      "behaviorId": "b-b04",
+      "weekDate": "2026-10-19",
+      "status": "partly",
+      "notes": "Owner-reported.",
+      "evidence": "",
+      "measureValue": "",
+      "recordedAt": "2026-11-10T09:00:00.000Z"
+    },
+    {
+      "id": "c-b04-2",
+      "behaviorId": "b-b04",
+      "weekDate": "2026-10-26",
+      "status": "used",
+      "notes": "Owner-reported.",
+      "evidence": "",
+      "measureValue": "",
+      "recordedAt": "2026-11-10T09:00:00.000Z"
+    },
+    {
+      "id": "c-b04-3",
+      "behaviorId": "b-b04",
+      "weekDate": "2026-11-02",
+      "status": "used",
+      "notes": "Owner-reported.",
+      "evidence": "",
+      "measureValue": "",
+      "recordedAt": "2026-11-10T09:00:00.000Z"
+    },
+    {
+      "id": "c-b04-4",
+      "behaviorId": "b-b04",
+      "weekDate": "2026-11-09",
+      "status": "partly",
+      "notes": "Owner-reported.",
+      "evidence": "",
+      "measureValue": "",
+      "recordedAt": "2026-11-10T09:00:00.000Z"
+    },
+    {
+      "id": "c-b05-1",
+      "behaviorId": "b-b05",
+      "weekDate": "2026-10-19",
+      "status": "partly",
+      "notes": "Owner-reported.",
+      "evidence": "",
+      "measureValue": "",
+      "recordedAt": "2026-11-10T09:00:00.000Z"
+    },
+    {
+      "id": "c-b05-2",
+      "behaviorId": "b-b05",
+      "weekDate": "2026-10-26",
+      "status": "not_used",
+      "notes": "Owner-reported.",
+      "evidence": "",
+      "measureValue": "",
+      "recordedAt": "2026-11-10T09:00:00.000Z"
+    },
+    {
+      "id": "c-b05-3",
+      "behaviorId": "b-b05",
+      "weekDate": "2026-11-02",
+      "status": "not_used",
+      "notes": "Owner-reported.",
+      "evidence": "",
+      "measureValue": "",
+      "recordedAt": "2026-11-10T09:00:00.000Z"
+    },
+    {
+      "id": "c-b05-4",
+      "behaviorId": "b-b05",
+      "weekDate": "2026-11-09",
+      "status": "not_used",
+      "notes": "Owner-reported.",
+      "evidence": "",
+      "measureValue": "",
+      "recordedAt": "2026-11-10T09:00:00.000Z"
+    }
+  ],
+  "barriers": [
+    {
+      "id": "x-b01",
+      "behaviorId": "b-b01",
+      "rolloutId": "r-copilot-ops",
+      "category": "willingness",
+      "description": "Employees distrust generated handoff notes. Proposed intervention (hypothesis to test): test outputs against an approved quality checklist.",
+      "identifiedDate": "2026-11-09",
+      "status": "open",
+      "resolution": "",
+      "resolvedDate": "",
+      "createdAt": "2026-11-10T09:00:00.000Z"
+    },
+    {
+      "id": "x-b03",
+      "behaviorId": "b-b03",
+      "rolloutId": "r-copilot-ops",
+      "category": "access",
+      "description": "Project data is fragmented. Proposed intervention (hypothesis to test): establish a reliable information source.",
+      "identifiedDate": "2026-11-09",
+      "status": "open",
+      "resolution": "",
+      "resolvedDate": "",
+      "createdAt": "2026-11-10T09:00:00.000Z"
+    },
+    {
+      "id": "x-b04",
+      "behaviorId": "b-b04",
+      "rolloutId": "r-copilot-ops",
+      "category": "workflow",
+      "description": "Drafts require extensive corrections. Proposed intervention (hypothesis to test): improve templates and review standards.",
+      "identifiedDate": "2026-11-09",
+      "status": "open",
+      "resolution": "",
+      "resolvedDate": "",
+      "createdAt": "2026-11-10T09:00:00.000Z"
+    },
+    {
+      "id": "x-b05",
+      "behaviorId": "b-b05",
+      "rolloutId": "r-copilot-ops",
+      "category": "skills",
+      "description": "Employees lack confidence using Copilot. Proposed intervention (hypothesis to test): provide guided practice and job aids.",
+      "identifiedDate": "2026-11-09",
+      "status": "open",
+      "resolution": "",
+      "resolvedDate": "",
+      "createdAt": "2026-11-10T09:00:00.000Z"
+    }
+  ],
+  "reviews": [],
+  "imports": [],
+  "meta": {
+    "createdAt": "2026-11-10T09:00:00.000Z",
+    "lastBackupAt": null,
+    "sample": true,
+    "scenario": "Copilot Operations Productivity Pilot (fictional demonstration case)"
+  }
+}
