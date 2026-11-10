@@ -634,6 +634,30 @@
     .mx-name { font-size: 13px; }
     .mx-dot { width: 22px; height: 22px; font-size: 11px; }
   }
+  .imp-more summary { cursor: pointer; font-weight: 600; color: var(--accent); font-size: 0.9rem; margin: 4px 0; }
+  .imp-more[open] summary { margin-bottom: 8px; }
+  .imp-more .sub { margin: 6px 0 0; }
+  .chip.piq { font-variant-numeric: tabular-nums; color: var(--accent); border-color: var(--accent-soft); }
+  .panel-head .actions { gap: 8px; }
+  .report { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow); }
+  .report-head { border-bottom: 2px solid var(--text); margin-bottom: 18px; padding-bottom: 10px; }
+  .report-title { font-size: 1.5rem; margin: 0 0 4px; }
+  .report-section { margin-bottom: 24px; break-inside: avoid-page; }
+  .report-section + .report-section { border-top: 1px solid var(--border); padding-top: 18px; }
+  .report-section h3 { margin-bottom: 8px; }
+  .report-kpis { display: flex; flex-wrap: wrap; gap: 10px 28px; margin: 10px 0 14px; }
+  .report-kpis div { display: flex; flex-direction: column; }
+  .report-kpis strong { font-size: 1.3rem; line-height: 1.2; font-variant-numeric: tabular-nums; }
+  .report-kpis span { font-size: 0.8rem; color: var(--text-2); }
+  .report-list { list-style: none; margin: 0; padding: 0; }
+  .report-list li { padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .report-list li:last-child { border-bottom: 0; }
+  .report-list .badge, .report-list .chip { margin-right: 6px; }
+  .cell-list { margin: 0; padding-left: 18px; }
+  table.sipoc-table { min-width: 760px; }
+  table.sipoc-table th { border-bottom-width: 3px; }
+  .report-foot { color: var(--text-3); font-size: 0.8rem; border-top: 1px solid var(--border); padding-top: 12px; margin: 0; }
+  @media (max-width: 640px) { .report { padding: 16px; } }
   .table-wrap { overflow-x: auto; }
   table.plan { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 620px; }
   table.plan th { text-align: left; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; padding: 6px 8px; border-bottom: 2px solid var(--border); }
@@ -729,6 +753,7 @@
       <a href="#processes" data-nav="processes">Processes</a>
       <a href="#map" data-nav="map">SIPOC map</a>
       <a href="#analysis" data-nav="analysis">Analysis</a>
+      <a href="#report" data-nav="report">Report</a>
       <a href="#data" data-nav="data">Data</a>
       <a href="#guide" data-nav="guide">Guide</a>
     </nav>
@@ -886,12 +911,14 @@
       <div class="panel">
         <div class="panel-head">
           <h2>Recommended action plan</h2>
-          <button type="button" id="copyPlan">Copy action plan</button>
+          <div class="actions"><button type="button" id="copyPlan">Copy action plan</button><button type="button" id="trackerBtn2" class="primary">Send to Adoption Tracker</button></div>
         </div>
         <div id="plan"></div>
       </div>
     </div>
   </section>
+  <section class="page" id="page-report" aria-label="Report" hidden></section>
+
   <section class="page" id="page-data" aria-labelledby="data-title" hidden>
     <div class="page-head">
       <div><h1 id="data-title">Data, backup and export</h1><p class="lead">Where your work is saved, how to back it up, and how to take it into other tools.</p></div>
@@ -909,11 +936,16 @@
       </section>
     </div>
     <section class="card">
+      <h2>Adoption Tracker</h2>
+      <p>Send this process's approved actions to the AI Adoption Follow-Through Tracker. ProcessIQ saves a CSV in the tracker's import format; in the tracker, open Import and choose the file. Each action keeps a permanent ID, so importing again never creates duplicates.</p>
+      <div class="actions"><button type="button" id="trackerBtn" class="primary">Send to Adoption Tracker (.csv)</button><button type="button" data-go="report">Open the report</button></div>
+    </section>
+    <section class="card">
       <h2>Export this process</h2>
       <p>Take the current SIPOC into a spreadsheet, or print it.</p>
       <div class="actions">
         <button type="button" id="copyBtn">Copy SIPOC for Excel</button>
-        <button type="button" id="csvBtn" class="file-only">Download SIPOC (.csv)</button>
+        <button type="button" id="csvBtn">Download SIPOC (.csv)</button>
         <button type="button" id="printBtn" class="file-only">Print SIPOC map</button>
       </div>
     </section>
@@ -1285,6 +1317,7 @@
     else if (activePage === "dashboard") renderDashboard();
     else if (activePage === "processes") renderProcesses();
     else if (activePage === "data") renderDataPage();
+    else if (activePage === "report") renderReport();
   }
 
   // ---------- Buttons and fields ----------
@@ -1456,13 +1489,7 @@
         return q(v);
       }).join(","));
     }
-    var blob = new Blob(["﻿" + rows.join("\r\n")], { type: "text/csv;charset=utf-8" });
-    var a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = (s.name || "sipoc").replace(/[^\w\- ]+/g, "").trim().replace(/\s+/g, "_") + "_SIPOC.csv";
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    saveFile("processiq-" + fileSlug(s.name) + "-sipoc-" + todayStamp() + ".csv", "\ufeff" + rows.join("\r\n"), "text/csv;charset=utf-8");
   });
 
   // =====================================================================
@@ -2628,6 +2655,7 @@
     var card = el("div", "finding imp " + m.status);
     var top = el("div", "top");
     top.appendChild(el("span", "num-dot", String(idx + 1)));
+    if (m.piq) top.appendChild(el("span", "chip piq", m.piq));
     top.appendChild(el("span", "chip", m.sourceType === "You" ? "Added by you" : "From " + m.sourceType));
     if (m.sourceType !== "You") top.appendChild(el("span", "badge " + m.sourceKind, m.sourceKind === "fact" ? "Fact" : "Hypothesis"));
     var q = quadrant(m);
@@ -2659,6 +2687,23 @@
     g.appendChild(txt("Owner", "owner", "text", "Who will do it?"));
     g.appendChild(txt("Target date", "due", "date"));
     card.appendChild(g);
+    var more = el("details", "imp-more");
+    if (["behavior", "outcome", "measure", "baseline", "target", "unit"].some(function (k) { return String(m[k] || "").trim(); })) more.open = true;
+    more.appendChild(el("summary", null, "Outcome and measure (sent to the Adoption Tracker)"));
+    var g2 = el("div", "imp-fields");
+    var bh = txt("Behavior to track", "behavior", "text", "What people will visibly do differently");
+    bh.style.gridColumn = "1 / -1";
+    g2.appendChild(bh);
+    var oc = txt("Expected outcome", "outcome", "text", "The business result you expect");
+    oc.style.gridColumn = "1 / -1";
+    g2.appendChild(oc);
+    g2.appendChild(txt("Outcome measure", "measure", "text", "e.g. Days from session to follow-up"));
+    g2.appendChild(txt("Baseline", "baseline", "text", "Number now"));
+    g2.appendChild(txt("Target", "target", "text", "Number wanted"));
+    g2.appendChild(txt("Unit", "unit", "text", "e.g. days, %, hours"));
+    more.appendChild(g2);
+    more.appendChild(el("p", "sub", "Optional. If \"Behavior to track\" is blank, the action itself is sent. Baseline and target must be numbers."));
+    card.appendChild(more);
     if (!m.impact || !m.effort) {
       var ql = el("div", "qline");
       ql.appendChild(el("span", "badge question", "Question"));
@@ -2667,7 +2712,7 @@
     }
     var acts = el("div", "acts");
     function btn(label, cls, fn) { var b = el("button", cls, label); b.type = "button"; b.addEventListener("click", fn); acts.appendChild(b); }
-    function setSt(st) { m.status = st; saveSoon(); renderPriorities(s); }
+    function setSt(st) { m.status = st; if (st === "approved") ensurePiq(s, m); saveSoon(); renderPriorities(s); }
     if (m.status !== "approved") btn("Approve for action plan", "approve", function () { setSt("approved"); });
     if (m.status !== "rejected") btn("Reject", null, function () { setSt("rejected"); });
     if (m.status !== "proposed") btn("Undo", null, function () { setSt("proposed"); });
@@ -3304,8 +3349,8 @@
   // =====================================================================
   //  PAGES AND NAVIGATION (same structure as the Adoption Tracker)
   // =====================================================================
-  var PAGES = ["dashboard", "processes", "map", "analysis", "data", "guide"];
-  var PAGE_TITLES = { dashboard: "Dashboard", processes: "Processes", map: "SIPOC map", analysis: "Analysis", data: "Data", guide: "Guide" };
+  var PAGES = ["dashboard", "processes", "map", "analysis", "report", "data", "guide"];
+  var PAGE_TITLES = { dashboard: "Dashboard", processes: "Processes", map: "SIPOC map", analysis: "Analysis", report: "Report", data: "Data", guide: "Guide" };
   var PAGE_KEY = "processiq.page";
   var activePage = "dashboard";
 
@@ -3343,6 +3388,7 @@
     else if (name === "analysis") showSub((opts && opts.sub) || activeSub);
     else if (name === "map") fitAll();
     else if (name === "data") renderDataPage();
+    else if (name === "report") renderReport();
     if (changed && !(opts && opts.keepScroll)) window.scrollTo(0, 0);
   }
   // Earlier code calls showTab("sipoc") / showTab("analysis")
@@ -3598,6 +3644,318 @@
       : "Your processes sync through your private storage on your Claude account. Each device also keeps its own copy, so it keeps working offline. Status: " + (pill ? pill.textContent : "") + ".";
     document.getElementById("data-count").textContent = plural(state.sipocs.length, "process", "processes") + " saved";
   }
+
+  // =====================================================================
+  //  FILES: one way to save a file, wherever ProcessIQ is running
+  //  - private Claude page: the viewer confirms each save
+  //  - downloaded file: a normal browser download
+  //  - anywhere else: the text is shown to copy
+  // =====================================================================
+  function getDownloads() {
+    try {
+      if (window.claude && typeof window.claude.use === "function") {
+        return window.claude.use("downloads").then(function (ns) { return ns || null; }, function () { return null; });
+      }
+    } catch (e) {}
+    return Promise.resolve(null);
+  }
+  function showTextToCopy(filename, text) {
+    openDialog({ title: "Copy the file contents", text: "Saving files isn't available here. Select all of the text below, copy it, and save it in a file named " + filename + ".",
+      area: text, okLabel: "Done", noCancel: true });
+  }
+  function saveFile(filename, text, mime) {
+    return getDownloads().then(function (ns) {
+      if (ns) {
+        return ns.save({ filename: filename, data: text }).then(function () {
+          setStatus("Saved " + filename);
+        }, function (e) {
+          var code = e && e.code;
+          if (code === "declined") return;
+          if (code === "rate_limited") { setStatus("A save is already waiting for your answer."); return; }
+          showTextToCopy(filename, text);
+        });
+      }
+      if (!embedded) {
+        var blob = new Blob([text], { type: mime || "text/plain;charset=utf-8" });
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+        setStatus("Saved " + filename);
+        return;
+      }
+      showTextToCopy(filename, text);
+    });
+  }
+  function csvCell(v) {
+    var t = String(v == null ? "" : v);
+    return /[",\r\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t;
+  }
+  function toCSV(header, rows) {
+    return [header].concat(rows).map(function (r) { return r.map(csvCell).join(","); }).join("\r\n");
+  }
+  function fileSlug(name) {
+    return (String(name || "process").replace(/[^\w\- ]+/g, "").trim().replace(/\s+/g, "-").toLowerCase() || "process").slice(0, 60);
+  }
+  function todayStamp() { var d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+
+  // =====================================================================
+  //  ADOPTION TRACKER EXPORT (the tracker's "Import ProcessIQ opportunities")
+  // =====================================================================
+  var TRACKER_COLUMNS = ["opportunity_id", "process_name", "opportunity_description", "proposed_behavior",
+    "suggested_owner", "expected_outcome", "outcome_measure", "baseline", "target", "unit"];
+
+  // A permanent ID per action: PIQ-<process code>-<number>. Unique across processes and devices.
+  function ensurePiq(s, m) {
+    if (m.piq) return m.piq;
+    if (!s.piqCode) s.piqCode = String(s.id || newId()).replace(/[^a-z0-9]/gi, "").slice(-4).toUpperCase();
+    s.piqSeq = (s.piqSeq || 0) + 1;
+    m.piq = "PIQ-" + s.piqCode + "-" + String(s.piqSeq).padStart(2, "0");
+    return m.piq;
+  }
+
+  function trackerRows(s) {
+    var problems = [];
+    var rows = planItems(s).map(function (x, i) {
+      var m = x.m;
+      var id = ensurePiq(s, m);
+      var behavior = String(m.behavior || "").trim() || m.title;
+      var base = String(m.baseline == null ? "" : m.baseline).trim(), targ = String(m.target == null ? "" : m.target).trim();
+      if ((base && isNaN(Number(base))) || (targ && isNaN(Number(targ)))) {
+        problems.push(id + ": baseline and target must be numbers, so they were left out.");
+        base = isNaN(Number(base)) ? "" : base; targ = isNaN(Number(targ)) ? "" : targ;
+      }
+      if (!String(m.owner || "").trim()) problems.push(id + " has no owner yet.");
+      if (!String(m.measure || "").trim()) problems.push(id + " has no outcome measure yet.");
+      var desc = m.sourceType === "You" ? "" : (m.sourceText || "");
+      return [id, s.name || "", desc, behavior, m.owner || "", m.outcome || "", m.measure || "", base, targ, m.unit || ""];
+    });
+    return { rows: rows, problems: problems };
+  }
+
+  function sendToTracker() {
+    var s = current();
+    syncImprovements(s);
+    var out = trackerRows(s);
+    saveSoon();
+    if (!out.rows.length) {
+      openDialog({ title: "Nothing to send yet", text: "Only approved actions go to the Adoption Tracker. Approve improvements under Analysis, Priorities, then try again.", okLabel: "OK", noCancel: true });
+      return;
+    }
+    var text = "﻿" + toCSV(TRACKER_COLUMNS, out.rows);
+    var name = "processiq-" + fileSlug(s.name) + "-for-tracker-" + todayStamp() + ".csv";
+    var msg = plural(out.rows.length, "approved action") + " will be saved in the Adoption Tracker's import format. In the tracker, open Import, choose the file, then add the opportunities to its queue." +
+      (out.problems.length ? " Worth knowing first: " + out.problems.slice(0, 4).join(" ") + (out.problems.length > 4 ? " And " + (out.problems.length - 4) + " more." : "") : "");
+    openDialog({ title: "Send to Adoption Tracker", text: msg, okLabel: "Save the file", onOk: function () { saveFile(name, text, "text/csv;charset=utf-8"); } });
+  }
+
+  // =====================================================================
+  //  REPORT
+  // =====================================================================
+  function summaryNumbers(s) {
+    var n = s.process.length;
+    var work = s.details.map(function (d) { return minutes(d.work, d.workUnit); });
+    var wait = s.details.map(function (d) { return minutes(d.wait, d.waitUnit); });
+    var allWork = n && work.every(function (x) { return x != null; });
+    var allWait = n && wait.every(function (x) { return x != null; });
+    var sw = work.reduce(function (a, b) { return a + (b || 0); }, 0), sq = wait.reduce(function (a, b) { return a + (b || 0); }, 0);
+    var hand = 0, pairs = 0;
+    for (var i = 0; i + 1 < n; i++) {
+      var a = String(s.details[i].role || "").trim().toLowerCase(), b = String(s.details[i + 1].role || "").trim().toLowerCase();
+      if (a && b) { pairs++; if (a !== b) hand++; }
+    }
+    return [
+      ["Steps", String(n)],
+      ["Hands-on work", allWork ? fmtWork(sw) : "Not known yet"],
+      ["Waiting", allWait ? fmt(sq) : "Not known yet"],
+      ["Start to finish", allWork && allWait ? fmt(sw + sq) : "Not known yet"],
+      ["Time spent working", allWork && allWait && sw + sq > 0 ? (sw / (sw + sq) < 0.01 && sw > 0 ? "<1%" : Math.round(sw / (sw + sq) * 100) + "%") : "Not known yet"],
+      ["Handoffs", n > 1 && pairs === n - 1 ? String(hand) : "Not known yet"]
+    ];
+  }
+
+  function reportData(s) {
+    runAnalysis(s); runAutomation(s); syncImprovements(s);
+    var all = s.analysis.findings.concat(s.analysis.auto);
+    return {
+      facts: s.analysis.findings.concat(s.analysis.auto).filter(function (f) { return f.kind === "fact" && f.status !== "rejected"; }),
+      hyps: all.filter(function (f) { return f.kind === "hypothesis" && f.status === "approved"; }),
+      roots: s.analysis.whys.filter(function (w) { return w.status === "approved" && String(w.rootCause || "").trim(); }),
+      plan: planItems(s),
+      questions: all.filter(function (f) { return f.kind === "question" && f.status === "proposed"; }),
+      unreviewed: all.filter(function (f) { return f.kind !== "question" && f.status === "proposed"; }).length
+    };
+  }
+
+  function renderReport() {
+    var s = current();
+    var r = reportData(s);
+    var box = document.getElementById("page-report");
+    box.innerHTML = "";
+    var head = el("div", "page-head");
+    var hl = el("div");
+    hl.appendChild(el("h1", null, "Report"));
+    hl.appendChild(el("p", "lead", "A one-page summary of this process to share with your team or sponsor. Only approved findings are included, and every item keeps its label."));
+    head.appendChild(hl);
+    var ha = el("div", "actions");
+    var cp = el("button", null, "Copy as text"); cp.type = "button"; cp.addEventListener("click", function () { copyReportText(s); });
+    var dl = el("button", "primary", "Save report (.html)"); dl.type = "button"; dl.addEventListener("click", function () { saveReportFile(s); });
+    ha.appendChild(cp); ha.appendChild(dl);
+    if (!embedded) { var pr = el("button", null, "Print or save as PDF"); pr.type = "button"; pr.addEventListener("click", function () { window.print(); }); ha.appendChild(pr); }
+    head.appendChild(ha);
+    box.appendChild(head);
+
+    var rep = el("article", "report");
+    rep.id = "report-body";
+    var rh = el("header", "report-head");
+    rh.appendChild(el("h2", "report-title", s.name || "Untitled process"));
+    rh.appendChild(el("div", "sub", ["Process improvement summary", s.owner ? "Owner: " + s.owner : "", "Prepared " + fmtDay(Date.now())].filter(Boolean).join(" · ")));
+    rep.appendChild(rh);
+
+    function section(title) { var sec = el("section", "report-section"); sec.appendChild(el("h3", null, title)); rep.appendChild(sec); return sec; }
+    function list(sec, items, render) {
+      if (!items.length) { sec.appendChild(el("p", "muted", "None yet.")); return; }
+      var ul = el("ul", "report-list"); items.forEach(function (x) { var li = el("li"); render(li, x); ul.appendChild(li); }); sec.appendChild(ul);
+    }
+    function label(text, kind) { return el("span", "badge " + kind, text); }
+
+    var b = section("Scope");
+    var dlb = el("dl", "defs");
+    [["Starts when", s.start], ["Ends when", s.end]].forEach(function (x) {
+      var row = el("div"); row.appendChild(el("dt", null, x[0])); row.appendChild(el("dd", String(x[1] || "").trim() ? null : "muted", String(x[1] || "").trim() || "Not set")); dlb.appendChild(row);
+    });
+    b.appendChild(dlb);
+
+    var sp = section("SIPOC");
+    var tw = el("div", "table-wrap"); var t = el("table", "plan sipoc-table");
+    var trh = el("tr"); COLUMNS.forEach(function (c) { var th = el("th", null, c.title); th.style.borderBottomColor = c.color; trh.appendChild(th); });
+    var thead = el("thead"); thead.appendChild(trh); t.appendChild(thead);
+    var tr = el("tr"); COLUMNS.forEach(function (c) {
+      var td = el("td"); var ol = el(c.key === "process" ? "ol" : "ul", "cell-list");
+      s[c.key].forEach(function (v) { ol.appendChild(el("li", null, v)); });
+      if (!s[c.key].length) td.appendChild(el("span", "muted", "None listed")); else td.appendChild(ol);
+      tr.appendChild(td);
+    });
+    var tb = el("tbody"); tb.appendChild(tr); t.appendChild(tb); tw.appendChild(t); sp.appendChild(tw);
+
+    var fs = section("Facts");
+    fs.appendChild(el("p", "sub", "Calculated only from the details entered."));
+    var nums = el("div", "report-kpis");
+    summaryNumbers(s).forEach(function (x) { var d = el("div"); d.appendChild(el("strong", null, x[1])); d.appendChild(el("span", null, x[0])); nums.appendChild(d); });
+    fs.appendChild(nums);
+    list(fs, r.facts, function (li, f) { li.appendChild(label("Fact", "fact")); li.appendChild(document.createTextNode(" " + f.text)); });
+
+    var hs = section("Approved findings");
+    hs.appendChild(el("p", "sub", "Possible issues you reviewed and agreed are worth acting on. Still hypotheses until confirmed."));
+    list(hs, r.hyps, function (li, f) {
+      li.appendChild(label("Hypothesis", "hypothesis"));
+      li.appendChild(el("span", "chip", f.category));
+      if (f.source === "claude") li.appendChild(el("span", "chip claude", "Suggested by Claude"));
+      li.appendChild(document.createTextNode(" " + f.text));
+    });
+
+    var rs = section("Root causes");
+    list(rs, r.roots, function (li, w) {
+      var st = rootState(w);
+      li.appendChild(label(st.confirmed ? "Fact: confirmed" : "Hypothesis", st.confirmed ? "fact" : "hypothesis"));
+      li.appendChild(el("strong", null, " " + w.problem));
+      li.appendChild(el("div", null, "Root cause: " + w.rootCause));
+      if (String(w.fix || "").trim()) li.appendChild(el("div", "sub", "Idea to fix it: " + w.fix));
+    });
+
+    var ps = section("Action plan");
+    if (!r.plan.length) ps.appendChild(el("p", "muted", "No actions approved yet."));
+    else {
+      var tw2 = el("div", "table-wrap"); var t2 = el("table", "plan");
+      var h2 = el("tr"); ["#", "Action", "Type", "Owner", "Target date", "Measure"].forEach(function (h) { h2.appendChild(el("th", null, h)); });
+      var th2 = el("thead"); th2.appendChild(h2); t2.appendChild(th2);
+      var tb2 = el("tbody");
+      r.plan.forEach(function (x, i) {
+        var row = el("tr");
+        row.appendChild(el("td", "num", String(i + 1)));
+        var a = el("td"); a.appendChild(el("strong", null, x.m.title)); if (x.m.piq) a.appendChild(el("div", "sub", x.m.piq)); row.appendChild(a);
+        row.appendChild(el("td", null, x.q ? QUADS[x.q].name : "Not rated"));
+        row.appendChild(el("td", x.m.owner ? null : "na", x.m.owner || "Not set"));
+        row.appendChild(el("td", x.m.due ? "num" : "na", x.m.due || "Not set"));
+        var meas = String(x.m.measure || "").trim();
+        var bt = [x.m.baseline, x.m.target].some(function (v) { return String(v == null ? "" : v).trim(); });
+        row.appendChild(el("td", meas ? null : "na", meas ? meas + (bt ? ": " + (x.m.baseline || "?") + " to " + (x.m.target || "?") + (x.m.unit ? " " + x.m.unit : "") : "") : "Not set"));
+        tb2.appendChild(row);
+      });
+      t2.appendChild(tb2); tw2.appendChild(t2); ps.appendChild(tw2);
+    }
+
+    var qs = section("Still open");
+    list(qs, r.questions, function (li, f) { li.appendChild(label("Question", "question")); li.appendChild(document.createTextNode(" " + f.text)); });
+    if (r.unreviewed) qs.appendChild(el("p", "sub", plural(r.unreviewed, "finding") + " not yet reviewed " + (r.unreviewed === 1 ? "is" : "are") + " left out of this report."));
+
+    rep.appendChild(el("p", "report-foot", "Prepared with ProcessIQ. Facts are calculated from entered data. Hypotheses are possibilities to verify before acting. Questions mark missing information."));
+    box.appendChild(rep);
+    saveSoon();
+  }
+
+  function reportText(s) {
+    var r = reportData(s), L = [];
+    L.push(s.name || "Untitled process");
+    L.push("Process improvement summary" + (s.owner ? " | Owner: " + s.owner : "") + " | Prepared " + fmtDay(Date.now()));
+    L.push("");
+    L.push("SCOPE"); L.push("Starts when: " + (s.start || "Not set")); L.push("Ends when: " + (s.end || "Not set")); L.push("");
+    L.push("SIPOC");
+    COLUMNS.forEach(function (c) { L.push(c.title + ": " + (s[c.key].length ? s[c.key].join("; ") : "None listed")); });
+    L.push("");
+    L.push("FACTS (calculated from entered data)");
+    summaryNumbers(s).forEach(function (x) { L.push("- " + x[0] + ": " + x[1]); });
+    r.facts.forEach(function (f) { L.push("- [Fact] " + f.text); });
+    L.push("");
+    L.push("APPROVED FINDINGS (hypotheses to verify)");
+    if (!r.hyps.length) L.push("- None yet.");
+    r.hyps.forEach(function (f) { L.push("- [Hypothesis, " + f.category + (f.source === "claude" ? ", suggested by Claude" : "") + "] " + f.text); });
+    L.push("");
+    L.push("ROOT CAUSES");
+    if (!r.roots.length) L.push("- None yet.");
+    r.roots.forEach(function (w) { var st = rootState(w); L.push("- [" + (st.confirmed ? "Fact: confirmed" : "Hypothesis") + "] " + w.problem + ". Root cause: " + w.rootCause + (w.fix ? ". Idea to fix it: " + w.fix : "")); });
+    L.push("");
+    L.push("ACTION PLAN");
+    if (!r.plan.length) L.push("- No actions approved yet.");
+    r.plan.forEach(function (x, i) {
+      L.push((i + 1) + ". " + x.m.title + " (" + (x.q ? QUADS[x.q].name : "Not rated") + "; owner: " + (x.m.owner || "not set") + "; target date: " + (x.m.due || "not set") + (x.m.measure ? "; measure: " + x.m.measure : "") + ")");
+    });
+    L.push("");
+    L.push("STILL OPEN");
+    if (!r.questions.length) L.push("- No open questions.");
+    r.questions.forEach(function (f) { L.push("- [Question] " + f.text); });
+    if (r.unreviewed) L.push("- " + plural(r.unreviewed, "finding") + " not yet reviewed are left out.");
+    return L.join("\n");
+  }
+  function copyReportText(s) {
+    var text = reportText(s);
+    function fallback() { openDialog({ title: "Copy the report", text: "Select all of the text below, copy it, and paste it into an email or document.", area: text, okLabel: "Done", noCancel: true }); }
+    try { navigator.clipboard.writeText(text).then(function () { setStatus("Report copied. Paste it into an email or document."); }, fallback); }
+    catch (e) { fallback(); }
+  }
+  var REPORT_CSS = "body{font:15px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;color:#1c2430;max-width:1000px;margin:32px auto;padding:0 20px}" +
+    "h2{font-size:1.5rem;margin:0 0 4px}h3{font-size:1.05rem;margin:0 0 8px}.sub{color:#4f5a68;font-size:.85rem}.muted{color:#6f7a88}" +
+    ".report-head{border-bottom:2px solid #1c2430;padding-bottom:10px;margin-bottom:20px}.report-section{margin-bottom:24px;border-top:1px solid #dfe3e8;padding-top:16px}" +
+    ".defs{display:grid;gap:6px;margin:0}.defs>div{display:grid;grid-template-columns:160px 1fr;gap:12px}.defs dt{font-weight:600}.defs dd{margin:0}" +
+    "table{width:100%;border-collapse:collapse;font-size:.9rem}th{text-align:left;font-size:.75rem;text-transform:uppercase;letter-spacing:.04em;color:#6f7a88;padding:6px 8px;border-bottom:2px solid #dfe3e8}td{padding:8px;border-bottom:1px solid #dfe3e8;vertical-align:top}" +
+    ".cell-list{margin:0;padding-left:18px}.na{color:#5b4fb0;font-style:italic}.report-kpis{display:flex;flex-wrap:wrap;gap:10px 28px;margin:10px 0}.report-kpis div{display:flex;flex-direction:column}.report-kpis strong{font-size:1.3rem}.report-kpis span{font-size:.8rem;color:#4f5a68}" +
+    ".report-list{padding-left:0;list-style:none;margin:0}.report-list li{padding:6px 0;border-bottom:1px solid #eceff3}" +
+    ".badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:2px 7px;border-radius:4px;margin-right:4px}" +
+    ".badge.fact{background:#e6effb;color:#1f5fbf}.badge.hypothesis{background:#fdf1dc;color:#9a6200}.badge.question{background:#ecebfa;color:#5b4fb0}" +
+    ".chip{font-size:12px;color:#4f5a68;border:1px solid #dfe3e8;border-radius:999px;padding:1px 8px;margin-right:4px}.report-foot{color:#6f7a88;font-size:.8rem;border-top:1px solid #dfe3e8;padding-top:12px}";
+  function saveReportFile(s) {
+    var body = document.getElementById("report-body");
+    if (!body) { renderReport(); body = document.getElementById("report-body"); }
+    var title = (s.name || "Process") + " report";
+    var html = "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>" +
+      title.replace(/[<>&"]/g, "") + "</title><style>" + REPORT_CSS + "</style></head><body>" + body.innerHTML + "</body></html>";
+    saveFile("processiq-" + fileSlug(s.name) + "-report-" + todayStamp() + ".html", html, "text/html;charset=utf-8");
+  }
+
+  document.getElementById("trackerBtn").addEventListener("click", sendToTracker);
+  document.getElementById("trackerBtn2").addEventListener("click", sendToTracker);
 
   showPage(initialPage());
 

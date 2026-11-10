@@ -54,5 +54,5 @@ A one-page, high-level map of a process, organized in five columns:
 ## Version 4: Aligned with the AI Adoption Follow-Through Tracker
 
 - Stage A: shared design system, header navigation, Dashboard, Processes, Data and Guide pages (done)
-- Stage B: action plan outcome fields, printable Report, and a CSV export in the tracker's ProcessIQ import format
+- Stage B: action plan outcome fields, Report page, and a CSV export in the tracker's ProcessIQ import format, tested by importing into the tracker (done)
 - Stage C: process Metrics section and a numbered path through the analysis
