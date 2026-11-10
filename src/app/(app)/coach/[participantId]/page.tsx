@@ -28,7 +28,7 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
     if (e instanceof ForbiddenError) notFound();
     throw e;
   }
-  const { pack } = getContent();
+  const { pack } = await getContent();
   const s = new Set(v.scopes);
   const flags = attentionFlags(v);
   const pk = v.profile?.priorityPillar as PillarKey | undefined;

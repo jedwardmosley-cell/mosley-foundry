@@ -14,7 +14,7 @@ export const metadata = { title: "30-Day Cycle" };
 
 export default async function CyclePage() {
   const u = await requireUser("PARTICIPANT");
-  const { pack } = getContent();
+  const { pack } = await getContent();
   const cycle = await db.developmentCycle.findFirst({ where: { userId: u.id, status: "ACTIVE" }, orderBy: { startDate: "desc" } });
   const past = await db.developmentCycle.findMany({ where: { userId: u.id, status: { not: "ACTIVE" } }, orderBy: { startDate: "desc" }, take: 5 });
   if (!cycle) {

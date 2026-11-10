@@ -17,7 +17,7 @@ export default async function Dashboard() {
   const u = await requireUser("PARTICIPANT");
   const d = await loadParticipant(u.id);
   if (!d.profile?.onboardedAt) redirect("/onboarding");
-  const { pack } = getContent();
+  const { pack } = await getContent();
   const pillarKey = (d.profile.priorityPillar ?? d.cycle?.pillar) as PillarKey | undefined;
   const p = pillarKey ? pack.pillars.find((x) => x.key === pillarKey) : null;
   const goal = d.goals.find((g) => g.isPriority) ?? d.goals[0];

@@ -15,7 +15,7 @@ export const metadata = { title: "History & Export" };
 export default async function HistoryPage() {
   const u = await requireUser("PARTICIPANT");
   const d = await loadParticipant(u.id);
-  const { pack } = getContent();
+  const { pack } = await getContent();
   const cycles = await db.developmentCycle.findMany({ where: { userId: u.id }, orderBy: { startDate: "desc" }, include: { checkIns: true } });
   const reflections = await db.dailyCheckIn.findMany({ where: { userId: u.id, OR: [{ reflection: { not: "" } }, { note: { not: "" } }] }, orderBy: { date: "desc" }, take: 40 });
   const hasCoach = d.coaches.length > 0;

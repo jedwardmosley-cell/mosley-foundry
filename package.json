@@ -5,7 +5,7 @@
   "description": "Both Hands on the Wheel: personal leadership and coaching platform (Mosley Foundry)",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "tsc --noEmit",
     "db:push": "prisma db push",
@@ -13,7 +13,9 @@
     "db:reset": "prisma db push && tsx prisma/seed.ts",
     "content:build": "python3 -I scripts/build-content-pack.py",
     "test": "tsx --conditions=react-server --test tests/*.test.ts",
-    "test:e2e": "tsx tests/e2e/workflow.ts"
+    "test:e2e": "tsx tests/e2e/workflow.ts",
+    "vercel-build": "bash scripts/vercel-build.sh",
+    "postinstall": "prisma generate"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

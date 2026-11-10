@@ -16,6 +16,7 @@ const signUpSchema = z.object({
 });
 
 export async function signUp(_: AuthState, fd: FormData): Promise<AuthState> {
+  if (process.env.ALLOW_SIGNUP === "false") return { error: "Sign-up is by invitation. Ask your program administrator to enroll you." };
   const r = signUpSchema.safeParse(Object.fromEntries(fd));
   if (!r.success) return { error: r.error.issues[0].message };
   const { name, email, password, invite } = r.data;

@@ -7,7 +7,7 @@ Created by Jason Mosley, Mosley Foundry. Lead yourself. Develop others. Build a 
 | Layer | Choice | Why |
 |---|---|---|
 | App | Next.js 15 (App Router, React Server Components, Server Actions), TypeScript | One deployable unit. Pages render on the server, so private data is never shipped to the browser unless a page renders it. Forms work without JavaScript. |
-| Data | Prisma ORM. SQLite in development, PostgreSQL in production | Relational, typed queries; one-line provider switch. |
+| Data | Prisma ORM on PostgreSQL (Neon in production) | Relational, typed queries. |
 | Auth | Email and password. scrypt hashes with per-user salt. Random 256-bit session tokens in httpOnly, SameSite=Lax cookies; only a SHA-256 of the token is stored | No third-party identity dependency for the MVP. SSO (Google, Microsoft) can be added for organizations later. |
 | Authorization | `src/lib/access.ts`, enforced in every page and server action | See section 4. |
 | AI | Anthropic Claude (`claude-opus-5-5`, adaptive thinking, server-side refusal fallback) via `@anthropic-ai/sdk`, called only from the server | API key stays on the server. Retrieval over approved content only. |
@@ -33,7 +33,7 @@ Curriculum is data, not code, and is never invented in the app.
 | Segment practice exercises | `src/content/program.ts` | **Draft, marked in the UI for author review** |
 | Public fallback (FORGE names and one-line rules only, draft assessment) | `src/content/public-pack.ts` (committed) | Used only when the licensed pack is absent; labeled Draft everywhere |
 
-The repository is public, so book and workbook text is kept out of git. To rebuild the pack, export the manuscript and workbook as text and run:
+The repository is public, so book and workbook text is kept out of git. On a live site the pack is uploaded once at `/setup` (protected by `SETUP_TOKEN`) and stored in the `ContentPack` table. Locally, files in `src/content/licensed/` take precedence. To rebuild the pack, export the manuscript and workbook as text and run:
 
 ```
 npm run content:build -- <folder-with-manuscript.txt-and-workbook.txt> src/content/licensed/pack.json

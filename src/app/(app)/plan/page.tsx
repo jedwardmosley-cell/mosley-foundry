@@ -9,7 +9,7 @@ export const metadata = { title: "FORGE Plan" };
 
 export default async function PlanPage() {
   const u = await requireUser("PARTICIPANT");
-  const { pack, entrepreneur } = getContent();
+  const { pack, entrepreneur } = await getContent();
   const [profile, goals] = await Promise.all([
     db.profile.findUnique({ where: { userId: u.id } }),
     db.developmentGoal.findMany({ where: { userId: u.id, status: "ACTIVE", segmentKey: null } }),
