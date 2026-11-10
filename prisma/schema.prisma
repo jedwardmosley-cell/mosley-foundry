@@ -1,0 +1,388 @@
+// Both Hands on the Wheel: relational data model.
+// SQLite for local development; switch provider to "postgresql" for production
+// (see docs/ARCHITECTURE.md for the row-level-security policies to add there).
+// String columns marked "enum:" hold one of the listed values (validated in src/lib/validation.ts).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Identity and organizations ----------
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  isDemo    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  users     User[]
+  cohorts   Cohort[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         String   @default("PARTICIPANT") // enum: PARTICIPANT | COACH | ADMIN
+  orgId        String?
+  org          Organization? @relation(fields: [orgId], references: [id])
+  isDemo       Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  sessions          Session[]
+  profile           Profile?
+  assessments       Assessment[]
+  goals             DevelopmentGoal[]
+  commitments       Commitment[]
+  relationships     Relationship[]       @relation("RelOwner")
+  linkedRelations   Relationship[]       @relation("RelLinked")
+  cycles            DevelopmentCycle[]
+  checkIns          DailyCheckIn[]
+  weeklyReflections WeeklyReflection[]
+  journal           JournalEntry[]
+  sharesGiven       ShareGrant[]         @relation("ShareOwner")
+  sharesReceived    ShareGrant[]         @relation("ShareGrantee")
+  coaching          CoachAssignment[]    @relation("AssignParticipant")
+  coachOf           CoachAssignment[]    @relation("AssignCoach")
+  cohortMemberships CohortMember[]
+  attendance        Attendance[]
+  eqiPriorities     EqiPriority[]
+  conversations     AiConversation[]
+  exercisesAssigned AssignedExercise[]   @relation("ExerciseParticipant")
+  exercisesGiven    AssignedExercise[]   @relation("ExerciseCoach")
+  coachingSessionsAsCoach       CoachingSession[] @relation("SessionCoach")
+  coachingSessionsAsParticipant CoachingSession[] @relation("SessionParticipant")
+  auditEvents       AuditEvent[]         @relation("AuditActor")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+// ---------- Personal development profile ----------
+
+model Profile {
+  userId          String   @id
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pathway         String   @default("PERSONAL") // enum: PERSONAL | LEADING_OTHERS | ENTREPRENEURIAL
+  destination     String   @default("")         // Destination Paragraph
+  why             String   @default("")         // Why Sentence
+  forgeStatement  String   @default("")
+  priorityPillar  String?                       // enum: F | O | R | G | E
+  reminderTime    String   @default("07:30")
+  reminderDays    String   @default("1,2,3,4,5")
+  remindersOn     Boolean  @default(false)
+  aiEnabled       Boolean  @default(true)
+  aiRetentionDays Int      @default(90)
+  onboardedAt     DateTime?
+  updatedAt       DateTime @updatedAt
+}
+
+model Assessment {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  instrument  String   // enum: FORGE_PERSONAL | FORGE_ENTREPRENEUR | FORGE_DRAFT
+  f           Int
+  o           Int
+  r           Int
+  g           Int
+  e           Int
+  revisedF    Int?
+  revisedO    Int?
+  revisedR    Int?
+  revisedG    Int?
+  revisedE    Int?
+  reflections String   @default("{}") // JSON: { F: "...", O: "..." }
+  oneWords    String   @default("{}") // JSON: one word per pillar
+  isSecondOpinion Boolean @default(false) // future: rating from an invited observer
+  completedAt DateTime @default(now())
+}
+
+model DevelopmentGoal {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pillar     String   // enum: F | O | R | G | E
+  whereNow   String   @default("")
+  whereWant  String   @default("")
+  oneMove    String   @default("")
+  isPriority Boolean  @default(false)
+  segmentKey String?  // links a goal to a Leading Others segment
+  status     String   @default("ACTIVE") // enum: ACTIVE | ACHIEVED | PAUSED
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// Discipline by Design Blueprint items (routines, learning, leadership responsibilities...)
+model Commitment {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  area      String   // enum: see BLUEPRINT_AREAS in src/content/program.ts
+  title     String
+  detail    String   @default("")
+  cadence   String   @default("WEEKLY") // enum: DAILY | WEEKLY | MONTHLY | QUARTERLY | ONCE
+  when      String   @default("")       // e.g. "Sunday 7:00 pm", "Before 7 am"
+  startsOn  DateTime?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+// ---------- Accountability network ----------
+
+model Relationship {
+  id            String   @id @default(cuid())
+  ownerId       String
+  owner         User     @relation("RelOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  name          String
+  role          String   // enum: MENTOR | COACH | ACCOUNTABILITY_PARTNER | MENTEE | GROUP | DIRECT_REPORT
+  purpose       String   @default("")
+  cadenceDays   Int      @default(14)
+  nextCheckIn   DateTime?
+  email         String?
+  linkedUserId  String?
+  linkedUser    User?    @relation("RelLinked", fields: [linkedUserId], references: [id])
+  inviteToken   String?  @unique
+  inviteStatus  String   @default("NONE") // enum: NONE | PENDING | ACCEPTED | DECLINED
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  checkIns      RelationshipCheckIn[]
+}
+
+model RelationshipCheckIn {
+  id             String   @id @default(cuid())
+  relationshipId String
+  relationship   Relationship @relation(fields: [relationshipId], references: [id], onDelete: Cascade)
+  occurredOn     DateTime
+  happened       Boolean  @default(true)
+  lessons        String   @default("")
+  agreedActions  String   @default("")
+  createdAt      DateTime @default(now())
+}
+
+// ---------- 30-day development cycles ----------
+
+model DevelopmentCycle {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  template    String   // key into CYCLE_TEMPLATES (src/content/program.ts)
+  pillar      String   // enum: F | O | R | G | E
+  focus       String   @default("") // the behavior being worked
+  startDate   DateTime
+  status      String   @default("ACTIVE") // enum: ACTIVE | COMPLETED | STOPPED
+  weekNotes   String   @default("{}") // JSON: { "1": "...", "2": "..." }
+  weekStatus  String   @default("{}") // JSON: { "1": "DONE" | "PARTIAL" | "NOT_YET" }
+  finalReview String   @default("")
+  decision    String   @default("") // enum-ish: CONTINUE_ALONE | GO_FURTHER | NEW_CYCLE, plus free text
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  checkIns    DailyCheckIn[]
+}
+
+model DailyCheckIn {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cycleId    String?
+  cycle      DevelopmentCycle? @relation(fields: [cycleId], references: [id], onDelete: SetNull)
+  date       String   // YYYY-MM-DD in the participant's day
+  status     String   // enum: DONE | PARTIAL | NOT_YET
+  note       String   @default("")
+  reflection String   @default("")
+  shared     Boolean  @default(false) // reflection text visible to coach only when true AND reflections scope granted
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, date])
+}
+
+model WeeklyReflection {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  weekOf     String   // YYYY-MM-DD (Monday)
+  built      String   @default("") // What did I build?
+  avoided    String   @default("") // What did I avoid?
+  nextWeek   String   @default("") // What does next week need?
+  didIt      String   @default("") // enum: YES | PARTIAL | NOT_YET (Did I do what I said I was going to do?)
+  shared     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, weekOf])
+}
+
+// Never shareable. No coach, admin or AI access path exists.
+model JournalEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String   @default("")
+  body      String
+  createdAt DateTime @default(now())
+}
+
+// ---------- Sharing and coaching ----------
+
+// Participant-controlled. A coach assignment grants nothing by itself.
+model ShareGrant {
+  id        String   @id @default(cuid())
+  ownerId   String
+  owner     User     @relation("ShareOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  granteeId String
+  grantee   User     @relation("ShareGrantee", fields: [granteeId], references: [id], onDelete: Cascade)
+  scope     String   // enum: see SHARE_SCOPES in src/lib/access.ts
+  createdAt DateTime @default(now())
+
+  @@unique([ownerId, granteeId, scope])
+}
+
+model CoachAssignment {
+  id            String   @id @default(cuid())
+  coachId       String
+  coach         User     @relation("AssignCoach", fields: [coachId], references: [id], onDelete: Cascade)
+  participantId String
+  participant   User     @relation("AssignParticipant", fields: [participantId], references: [id], onDelete: Cascade)
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  @@unique([coachId, participantId])
+}
+
+model CoachingSession {
+  id               String   @id @default(cuid())
+  coachId          String
+  coach            User     @relation("SessionCoach", fields: [coachId], references: [id], onDelete: Cascade)
+  participantId    String
+  participant      User     @relation("SessionParticipant", fields: [participantId], references: [id], onDelete: Cascade)
+  scheduledAt      DateTime
+  agenda           String   @default("")
+  coachNotes       String   @default("") // coach-private
+  commitments      String   @default("") // agreed commitments, visible to participant
+  participantPrep  String   @default("") // participant's own prep note, visible to coach once written
+  createdAt        DateTime @default(now())
+}
+
+model AssignedExercise {
+  id            String   @id @default(cuid())
+  coachId       String
+  coach         User     @relation("ExerciseCoach", fields: [coachId], references: [id], onDelete: Cascade)
+  participantId String
+  participant   User     @relation("ExerciseParticipant", fields: [participantId], references: [id], onDelete: Cascade)
+  exerciseRef   String   // content key, e.g. "ed:0", "jay:2", "chapter:3:roadTest", "segment:03"
+  title         String
+  instructions  String   @default("")
+  dueOn         DateTime?
+  status        String   @default("ASSIGNED") // enum: ASSIGNED | DONE | PARTIAL | NOT_YET
+  response      String   @default("")
+  responseShared Boolean @default(false)
+  createdAt     DateTime @default(now())
+}
+
+model EqiPriority {
+  id                  String   @id @default(cuid())
+  userId              String
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label               String   // participant's own words for the development priority
+  note                String   @default("")
+  practice            String   @default("")
+  coachInterpretation String   @default("") // recorded by a qualified coach
+  interpretationBy    String?
+  participantApproved Boolean  @default(false)
+  createdAt           DateTime @default(now())
+}
+
+// ---------- Programs and cohorts ----------
+
+model Cohort {
+  id             String   @id @default(cuid())
+  orgId          String
+  org            Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  name           String
+  pathway        String   @default("LEADING_OTHERS")
+  deliveryFormat String   @default("THREE_DAY") // enum: THREE_DAY | THREE_WEEK
+  startDate      DateTime
+  reinforceDays  Int      @default(30)
+  isDemo         Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  members        CohortMember[]
+  sessions       TrainingSession[]
+}
+
+model CohortMember {
+  id       String @id @default(cuid())
+  cohortId String
+  cohort   Cohort @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role     String @default("PARTICIPANT") // enum: PARTICIPANT | FACILITATOR
+
+  @@unique([cohortId, userId])
+}
+
+model TrainingSession {
+  id            String   @id @default(cuid())
+  cohortId      String
+  cohort        Cohort   @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  segmentKey    String   // "01".."06"
+  startsAt      DateTime
+  facilitatorId String?
+  location      String   @default("")
+  attendance    Attendance[]
+}
+
+model Attendance {
+  id        String @id @default(cuid())
+  sessionId String
+  session   TrainingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status    String @default("PRESENT") // enum: PRESENT | ABSENT | EXCUSED
+
+  @@unique([sessionId, userId])
+}
+
+// ---------- AI companion ----------
+
+model AiConversation {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String   @default("New conversation")
+  mode      String   @default("COACH") // enum: COACH | PRACTICE | SESSION_PREP
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  messages  AiMessage[]
+}
+
+model AiMessage {
+  id             String   @id @default(cuid())
+  conversationId String
+  conversation   AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           String   // enum: user | assistant
+  content        String
+  citations      String   @default("[]") // JSON array of source references
+  createdAt      DateTime @default(now())
+}
+
+// ---------- Audit ----------
+
+model AuditEvent {
+  id           String   @id @default(cuid())
+  actorId      String
+  actor        User     @relation("AuditActor", fields: [actorId], references: [id], onDelete: Cascade)
+  action       String
+  targetUserId String?
+  detail       String   @default("")
+  createdAt    DateTime @default(now())
+}
