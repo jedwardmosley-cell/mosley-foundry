@@ -7,6 +7,7 @@ import { scoresFrom, total } from "@/lib/forge";
 import { fmt } from "@/lib/dates";
 import { PageHeader, PillarMark, Draft, Source } from "@/components/ui";
 import { Submit } from "@/components/Submit";
+import { DictationHint } from "@/components/Picks";
 
 export const metadata = { title: "FORGE Self-Assessment" };
 
@@ -83,11 +84,14 @@ export default async function AssessmentPage() {
                   ))}
                 </div>
               </div>
-              <label className="block mt-5">
-                <span className="label">Reflection</span>
-                <span className="block text-[14px] text-ink-soft mb-2">{e?.reflection ?? p.reflection}</span>
-                <textarea name={`refl${p.key}`} className="textarea" maxLength={4000} />
-              </label>
+              <details className="mt-5">
+                <summary className="cursor-pointer text-sm text-navy">Add a reflection <span className="text-ink-mute">(optional)</span></summary>
+                <label className="block mt-2">
+                  <span className="block text-[14px] text-ink-soft mb-2">{e?.reflection ?? p.reflection}</span>
+                  <textarea name={`refl${p.key}`} className="textarea" maxLength={4000} />
+                  <DictationHint />
+                </label>
+              </details>
             </fieldset>
           );
         })}

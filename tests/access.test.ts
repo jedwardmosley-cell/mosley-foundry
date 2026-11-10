@@ -34,6 +34,11 @@ test("reflection text needs the scope AND the entry marked shared", async () => 
   assert.ok(!all.includes("Private note: I was exhausted"), "unshared reflection must not leak");
 });
 
+test("practice tags are shown when practice is shared", async () => {
+  const v = await getCoachView(coach, dana.id);
+  assert.ok(v.practice.some((p) => p.tags.includes("In a meeting")));
+});
+
 test("journal is unreachable through the coach view", async () => {
   const v = JSON.stringify(await getCoachView(coach, dana.id));
   assert.ok(!v.includes("PRIVATE DEMO JOURNAL"));
@@ -63,6 +68,7 @@ test("revoking a grant takes effect immediately", async () => {
   try {
     const v = await getCoachView(coach, dana.id);
     assert.ok(v.practice.every((p) => p.status === null));
+    assert.ok(v.practice.every((p) => p.tags.length === 0), "tags hidden without PRACTICE");
     assert.equal(v.cycle, null);
   } finally {
     await db.shareGrant.create({ data: { ownerId: dana.id, granteeId: coach.id, scope: "PRACTICE" } });

@@ -8,6 +8,7 @@ import { fmt, daysBetween, ymd } from "@/lib/dates";
 import { PageHeader, Card, Field, Source } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 import { RelationshipMap } from "@/components/RelationshipMap";
+import { RelationshipFields } from "@/components/RelationshipFields";
 
 export const metadata = { title: "People" };
 
@@ -81,8 +82,13 @@ export default async function NetworkPage() {
                 <input type="hidden" name="id" value={r.id} />
                 <Field label="Date"><input type="date" name="occurredOn" defaultValue={ymd()} className="input" /></Field>
                 <label className="flex items-center gap-2 text-sm sm:mt-7"><input type="checkbox" name="happened" defaultChecked className="h-4 w-4 accent-navy" /> It happened</label>
-                <Field label="Lesson"><input name="lessons" className="input" maxLength={4000} /></Field>
-                <Field label="Agreed actions"><input name="agreedActions" className="input" maxLength={4000} /></Field>
+                <details className="sm:col-span-2">
+                  <summary className="cursor-pointer text-sm text-navy">Lesson and agreed actions <span className="text-ink-mute">(optional)</span></summary>
+                  <div className="mt-2 grid gap-3 sm:grid-cols-2">
+                    <Field label="Lesson"><input name="lessons" className="input" maxLength={4000} /></Field>
+                    <Field label="Agreed actions"><input name="agreedActions" className="input" maxLength={4000} /></Field>
+                  </div>
+                </details>
                 <div className="sm:col-span-2"><Submit className="btn-quiet">Save check-in</Submit></div>
               </form>
             </details>
@@ -104,15 +110,12 @@ export default async function NetworkPage() {
         <h2 className="h3">Add a person or group</h2>
         <form action={addRelationship} className="mt-4 grid gap-4 sm:grid-cols-2">
           <Field label="Name"><input name="name" required maxLength={120} className="input" /></Field>
-          <Field label="Role">
-            <select name="role" className="input" defaultValue="ACCOUNTABILITY_PARTNER">
-              {Object.entries(RELATIONSHIP_ROLES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-            </select>
-          </Field>
-          <div className="sm:col-span-2"><Field label="Purpose" hint="What is this relationship for?"><input name="purpose" maxLength={1000} className="input" /></Field></div>
-          <Field label="Check in every (days)"><input type="number" name="cadenceDays" min={1} max={365} defaultValue={14} className="input" /></Field>
-          <Field label="Next check-in"><input type="date" name="nextCheckIn" className="input" /></Field>
-          <div className="sm:col-span-2"><Field label="Email (optional)" hint="Only used if you create an invitation link."><input type="email" name="email" className="input" /></Field></div>
+          <RelationshipFields />
+          <details className="sm:col-span-2">
+            <summary className="cursor-pointer text-sm text-navy">Next check-in date <span className="text-ink-mute">(optional, defaults from the schedule)</span></summary>
+            <div className="mt-2 max-w-xs"><Field label="Next check-in"><input type="date" name="nextCheckIn" className="input" /></Field></div>
+          </details>
+          <details className="sm:col-span-2"><summary className="cursor-pointer text-sm text-navy">Email <span className="text-ink-mute">(optional, only for invitation links)</span></summary><div className="mt-2"><input type="email" name="email" aria-label="Email" className="input" /></div></details>
           <div className="sm:col-span-2"><Submit>Add</Submit></div>
         </form>
         <p className="mt-4 text-xs text-ink-mute">Invited people can see that you named them. They never see your assessments, reflections, journal or plan.</p>

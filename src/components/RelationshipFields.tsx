@@ -1,0 +1,33 @@
+"use client";
+import { useState } from "react";
+import { RELATIONSHIP_ROLES } from "@/content/program";
+import { RELATIONSHIP_PURPOSE, CADENCES } from "@/content/options";
+import { Picks } from "./Picks";
+
+/** Role, purpose and cadence for a new relationship, with role-aware purpose suggestions. */
+export function RelationshipFields() {
+  const [role, setRole] = useState("ACCOUNTABILITY_PARTNER");
+  return (
+    <>
+      <label className="block">
+        <span className="label">Role</span>
+        <select name="role" className="input" value={role} onChange={(e) => setRole(e.target.value)}>
+          {Object.entries(RELATIONSHIP_ROLES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+        </select>
+      </label>
+      <label className="block">
+        <span className="label">Check in</span>
+        <select name="cadenceDays" className="input" defaultValue="14">
+          {CADENCES.map((c) => <option key={c.days} value={c.days}>{c.label}</option>)}
+        </select>
+      </label>
+      <div className="sm:col-span-2">
+        <label className="block">
+          <span className="label">Purpose <span className="text-ink-mute font-normal">(what is this relationship for?)</span></span>
+          <input name="purpose" maxLength={1000} className="input" />
+        </label>
+        {RELATIONSHIP_PURPOSE[role] && <Picks key={role} list={RELATIONSHIP_PURPOSE[role]} target="purpose" />}
+      </div>
+    </>
+  );
+}

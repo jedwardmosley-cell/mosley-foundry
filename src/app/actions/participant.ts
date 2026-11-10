@@ -9,6 +9,7 @@ import { bool, parse, pillarKey, score, text } from "@/lib/validation";
 import { addDays, ymd } from "@/lib/dates";
 import { PATHWAYS, BLUEPRINT_AREAS, RELATIONSHIP_ROLES } from "@/content/program";
 import { SHARE_SCOPES } from "@/lib/access";
+import { CHECKIN_TAGS } from "@/content/options";
 
 const participant = () => requireUser("PARTICIPANT");
 
@@ -108,16 +109,25 @@ export async function saveGoal(fd: FormData) {
 
 const commitmentSchema = z.object({
   area: z.enum(BLUEPRINT_AREAS.map((a) => a.key) as [string, ...string[]]),
-  title: z.string().trim().min(1).max(200),
+  title: z.string().trim().min(1, "Pick an option or write your own").max(200),
   detail: text(1500),
   cadence: z.enum(["DAILY", "WEEKLY", "MONTHLY", "QUARTERLY", "ONCE"]),
   when: text(120),
+  whenDays: text(40),
+  whenTime: z.string().regex(/^(\d{2}:\d{2})?$/).default(""),
   startsOn: z.string().optional(),
 });
 
+const fmtTime = (t: string) => {
+  if (!t) return "";
+  const [h, m] = t.split(":").map(Number);
+  return `${((h + 11) % 12) + 1}:${String(m).padStart(2, "0")} ${h < 12 ? "am" : "pm"}`;
+};
+
 export async function addCommitment(fd: FormData) {
   const u = await participant();
-  const d = parse(commitmentSchema, fd);
+  const { whenDays, whenTime, ...d } = parse(commitmentSchema, fd);
+  if (!d.when) d.when = [whenDays, fmtTime(whenTime)].filter(Boolean).join(", ");
   await db.commitment.create({
     data: { ...d, userId: u.id, startsOn: d.startsOn ? new Date(d.startsOn + "T12:00:00") : null },
   });
@@ -222,12 +232,14 @@ const checkInSchema = z.object({
 export async function logCheckIn(fd: FormData) {
   const u = await participant();
   const d = parse(checkInSchema, fd);
+  const allowed = new Set(CHECKIN_TAGS.options);
+  const tags = JSON.stringify(fd.getAll("tags").map(String).filter((t) => allowed.has(t)));
   const date = d.date ?? ymd();
   const cycle = await db.developmentCycle.findFirst({ where: { userId: u.id, status: "ACTIVE" } });
   await db.dailyCheckIn.upsert({
     where: { userId_date: { userId: u.id, date } },
-    create: { userId: u.id, date, status: d.status, note: d.note, reflection: d.reflection, shared: d.shared, cycleId: cycle?.id },
-    update: { status: d.status, note: d.note, reflection: d.reflection, shared: d.shared },
+    create: { userId: u.id, date, status: d.status, note: d.note, reflection: d.reflection, shared: d.shared, tags, cycleId: cycle?.id },
+    update: { status: d.status, note: d.note, reflection: d.reflection, shared: d.shared, tags },
   });
   revalidatePath("/dashboard");
   revalidatePath("/cycle");
@@ -248,7 +260,7 @@ export async function saveWeek(fd: FormData) {
 
 export async function completeCycle(fd: FormData) {
   const u = await participant();
-  const d = parse(z.object({ id: z.string(), finalReview: text(6000), decision: z.enum(["CONTINUE_ALONE", "GO_FURTHER", "NEW_CYCLE"]) }), fd);
+  const d = parse(z.object({ id: z.string(), finalReview: text(6000).optional().default(""), decision: z.enum(["CONTINUE_ALONE", "GO_FURTHER", "NEW_CYCLE"]) }), fd);
   const n = await db.developmentCycle.updateMany({
     where: { id: d.id, userId: u.id },
     data: { finalReview: d.finalReview, decision: d.decision, status: "COMPLETED", completedAt: new Date() },
@@ -261,11 +273,15 @@ export async function completeCycle(fd: FormData) {
 
 export async function saveWeekly(fd: FormData) {
   const u = await participant();
-  const d = parse(z.object({ weekOf: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), built: text(), avoided: text(), nextWeek: text(), didIt: z.enum(["YES", "PARTIAL", "NOT_YET", ""]).default(""), shared: bool }), fd);
+  const d = parse(z.object({ weekOf: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), built: text(), avoided: text(), nextWeek: text(), didIt: z.enum(["YES", "PARTIAL", "NOT_YET", ""]).default(""), shared: bool, held: z.string().optional() }), fd);
+  const mine = new Set((await db.commitment.findMany({ where: { userId: u.id, active: true }, select: { id: true } })).map((c) => c.id));
+  const { held: _ignored, ...rest } = d;
+  void _ignored;
+  const record = { ...rest, held: JSON.stringify(fd.getAll("held").map(String).filter((id) => mine.has(id))) };
   await db.weeklyReflection.upsert({
     where: { userId_weekOf: { userId: u.id, weekOf: d.weekOf } },
-    create: { ...d, userId: u.id },
-    update: d,
+    create: { ...record, userId: u.id },
+    update: record,
   });
   revalidatePath("/reflect");
 }

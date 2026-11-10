@@ -12,11 +12,13 @@ export default async function ReflectPage() {
   const u = await requireUser("PARTICIPANT");
   const { pack } = await getContent();
   const weekOf = mondayOf();
-  const [current, past, coach] = await Promise.all([
+  const [current, past, coach, commitments] = await Promise.all([
     db.weeklyReflection.findUnique({ where: { userId_weekOf: { userId: u.id, weekOf } } }),
     db.weeklyReflection.findMany({ where: { userId: u.id, weekOf: { not: weekOf } }, orderBy: { weekOf: "desc" }, take: 12 }),
     db.coachAssignment.findFirst({ where: { participantId: u.id, active: true } }),
+    db.commitment.findMany({ where: { userId: u.id, active: true }, orderBy: { createdAt: "asc" } }),
   ]);
+  const held = new Set(JSON.parse(current?.held ?? "[]") as string[]);
   const weekly = pack.discipline.inventory.find((i) => i.label === "Weekly")?.text;
   return (
     <>
@@ -34,9 +36,27 @@ export default async function ReflectPage() {
               ))}
             </div>
           </fieldset>
-          <Field label="What did I build?"><textarea name="built" defaultValue={current?.built} className="textarea" maxLength={4000} /></Field>
-          <Field label="What did I avoid?"><textarea name="avoided" defaultValue={current?.avoided} className="textarea" maxLength={4000} /></Field>
-          <Field label="What does next week need?"><textarea name="nextWeek" defaultValue={current?.nextWeek} className="textarea" maxLength={4000} /></Field>
+          {commitments.length > 0 && (
+            <fieldset>
+              <legend className="label">Which commitments held this week?</legend>
+              <div className="space-y-2">
+                {commitments.map((c) => (
+                  <label key={c.id} className="flex items-start gap-2.5 text-[15px] cursor-pointer">
+                    <input type="checkbox" name="held" value={c.id} defaultChecked={held.has(c.id)} className="mt-1 h-4 w-4 accent-navy" />
+                    <span>{c.title}{c.when ? <span className="text-ink-mute"> · {c.when}</span> : null}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          )}
+          <Field label="What does next week need?" hint="One line is enough."><input name="nextWeek" defaultValue={current?.nextWeek} className="input" maxLength={4000} /></Field>
+          <details open={!!(current?.built || current?.avoided)}>
+            <summary className="cursor-pointer text-sm text-navy">What did I build? What did I avoid? <span className="text-ink-mute">(optional)</span></summary>
+            <div className="mt-3 space-y-3">
+              <Field label="What did I build?"><textarea name="built" defaultValue={current?.built} className="textarea" maxLength={4000} /></Field>
+              <Field label="What did I avoid?"><textarea name="avoided" defaultValue={current?.avoided} className="textarea" maxLength={4000} /></Field>
+            </div>
+          </details>
           {coach && <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="shared" defaultChecked={current?.shared} className="h-4 w-4 accent-navy" /> Share this week&apos;s reflection with my coach</label>}
           <Submit>Save this week</Submit>
         </form>
@@ -51,6 +71,7 @@ export default async function ReflectPage() {
               {w.built && <p className="mt-2 text-[15px]"><span className="text-ink-mute">Built: </span>{w.built}</p>}
               {w.avoided && <p className="mt-1 text-[15px]"><span className="text-ink-mute">Avoided: </span>{w.avoided}</p>}
               {w.nextWeek && <p className="mt-1 text-[15px]"><span className="text-ink-mute">Next: </span>{w.nextWeek}</p>}
+              {JSON.parse(w.held || "[]").length > 0 && <p className="mt-1 text-sm muted">{JSON.parse(w.held).length} commitment{JSON.parse(w.held).length === 1 ? "" : "s"} held</p>}
             </Card>
           ))}
         </div>

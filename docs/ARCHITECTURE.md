@@ -31,6 +31,7 @@ Curriculum is data, not code, and is never invented in the app.
 | FORGE Worksheet for Entrepreneurs + FORGE Ahead session deck | `src/content/licensed/entrepreneur.json` (gitignored) | Source |
 | Program structure: pathways, 10 Blueprint areas, six segments, delivery formats, Name It / Interrupt It / Replace It / Sustain It phases | `src/content/program.ts` (committed) | From the build brief |
 | Segment practice exercises | `src/content/program.ts` | **Draft, marked in the UI for author review** |
+| Quick-pick options (one move per pillar, 30-day starter behaviors, check-in tags, Blueprint picks, relationship purposes) | `src/content/options.ts` | **Draft, labeled "Draft options" in the UI.** Written in the program's voice; not quotations. Approve a list by setting its `status` to `"approved"` |
 | Public fallback (FORGE names and one-line rules only, draft assessment) | `src/content/public-pack.ts` (committed) | Used only when the licensed pack is absent; labeled Draft everywhere |
 
 The repository is public, so book and workbook text is kept out of git. On a live site the pack is uploaded once at `/setup` (protected by `SETUP_TOKEN`) and stored in the `ContentPack` table. Locally, files in `src/content/licensed/` take precedence. To rebuild the pack, export the manuscript and workbook as text and run:
@@ -54,6 +55,10 @@ Typography: em dashes are converted, following the author's own edit notes in th
 - **Programs:** `Cohort` (delivery format, start date, reinforcement days), `CohortMember` (participant or facilitator), `TrainingSession` (segment, date and time, facilitator, location), `Attendance`.
 - **AI:** `AiConversation` (mode, expiry), `AiMessage` (citations).
 - **Audit:** `AuditEvent` (every coach read of participant data).
+
+### Reducing typing
+
+Taps first, writing optional. The assessment, daily check-in, FORGE Plan, Blueprint, People, 30-day cycle and weekly reflection all work with taps and short picks; longer writing sits behind "optional" folds. The FORGE Plan opens only the priority pillar. "Help me write this" drafts the destination, why and FORGE Statement from the participant's own records (requires the AI key) and saves nothing until the participant does.
 
 ## 4. Privacy and access control
 

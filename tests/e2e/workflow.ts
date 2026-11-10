@@ -62,6 +62,7 @@ const submitAndWait = async (page: Page, selector: string) => {
   await check("2. complete a FORGE assessment", async () => {
     const scores: Record<string, number> = { F: 4, O: 3, R: 4, G: 3, E: 2 };
     for (const [k, v] of Object.entries(scores)) await page.locator(`input[name="${k}"][value="${v}"]`).check({ force: true });
+    await page.locator("fieldset", { hasText: "Emotionally Anchored" }).locator("summary", { hasText: "Add a reflection" }).click();
     await page.fill('textarea[name="reflE"]', "When my numbers get questioned in front of my boss, I get sharp.");
     await page.screenshot({ path: `${shots}/02-assessment.png`, fullPage: false });
     await Promise.all([page.waitForURL(/\/assessment\/[a-z0-9]+$/), page.click('button:has-text("See my profile")')]);
@@ -82,26 +83,36 @@ const submitAndWait = async (page: Page, selector: string) => {
   await check("4. create a Discipline by Design Blueprint", async () => {
     await page.goto(`${BASE}/blueprint`);
     const routines = page.locator("section", { hasText: "Personal commitments and routines" });
-    await routines.locator("summary").click();
+    await routines.locator("summary", { hasText: "Add to this area" }).click();
+    await routines.locator('button:has-text("Journaling")').click(); // quick pick fills the field
+    assert.equal(await routines.locator('input[name="title"]').inputValue(), "Journaling");
     await routines.locator('input[name="title"]').fill("Fifteen quiet minutes before email");
-    await routines.locator('input[name="when"]').fill("6:30 am");
-    await Promise.all([page.waitForLoadState("networkidle"), routines.locator('button:has-text("Add")').click()]);
+    await routines.locator('select[name="whenDays"]').selectOption("Weekdays");
+    await routines.locator('input[name="whenTime"]').fill("06:30");
+    await Promise.all([page.waitForLoadState("networkidle"), routines.locator('button[type="submit"]:has-text("Add")').click()]);
     await page.waitForSelector("text=Fifteen quiet minutes before email");
+    await page.waitForSelector("text=Weekdays, 6:30 am");
     await page.screenshot({ path: `${shots}/04-blueprint.png`, fullPage: false });
   });
 
   await check("5. name an accountability relationship", async () => {
     await page.goto(`${BASE}/network`);
     await page.fill('input[name="name"]', "Jamie Cole");
+    await page.locator('select[name="role"]').selectOption("MENTOR");
+    await page.locator('button:has-text("Perspective from further up the road")').click();
+    assert.equal(await page.inputValue('input[name="purpose"]'), "Perspective from further up the road");
+    await page.locator('select[name="role"]').selectOption("ACCOUNTABILITY_PARTNER");
     await page.fill('input[name="purpose"]', "Checks on my pause practice");
-    await page.fill('input[name="cadenceDays"]', "7");
-    await submitAndWait(page, 'form:has(input[name="cadenceDays"]) button[type="submit"]');
+    await page.locator('select[name="cadenceDays"]').selectOption("7");
+    await submitAndWait(page, 'form:has(select[name="cadenceDays"]) button[type="submit"]');
     await page.waitForSelector("text=Jamie Cole");
     await page.screenshot({ path: `${shots}/05-network.png`, fullPage: true });
   });
 
   await check("6. start a 30-day development cycle", async () => {
     await page.goto(`${BASE}/cycle/new`);
+    await page.locator('button:has-text("Pausing before I answer when a decision gets challenged")').click();
+    assert.match(await page.inputValue('input[name="focus"]'), /Pausing before I answer/);
     await page.fill('input[name="focus"]', "Pause before I answer a challenge");
     await Promise.all([page.waitForURL("**/cycle"), page.click('button:has-text("Start the cycle")')]);
     await page.waitForSelector("text=Day 1 of 30");
@@ -110,14 +121,40 @@ const submitAndWait = async (page: Page, selector: string) => {
   await check("7. record a daily reflection", async () => {
     await page.goto(`${BASE}/dashboard`);
     await page.locator('input[name="status"][value="DONE"]').check({ force: true });
+    await page.locator('label:has(input[name="tags"][value="In a meeting"])').click();
+    assert.ok(await page.locator('input[name="tags"][value="In a meeting"]').isChecked());
+    await page.locator("summary:has-text('Add a note or reflection')").click();
     await page.fill('input[name="note"]', "Paused in the 10 am review");
-    await page.locator("summary:has-text('Add a reflection')").click();
     await page.fill('textarea[name="reflection"]', "E2E-REFLECTION-TEXT: the pause gave me room.");
     await submitAndWait(page, 'button:has-text("Log today")');
     await page.screenshot({ path: `${shots}/06-dashboard.png`, fullPage: true });
   });
 
-  await check("1b/7b. sign out, sign back in, saved progress and reflection retrieved", async () => {
+  await check("7a. weekly reflection with Blueprint checkboxes, no essay required", async () => {
+    await page.goto(`${BASE}/reflect`);
+    await page.locator('input[name="didIt"][value="PARTIAL"]').check();
+    await page.locator('input[name="held"]').first().check();
+    await page.fill('input[name="nextWeek"]', "Keep the pause going");
+    await submitAndWait(page, 'button:has-text("Save this week")');
+    const w = await db.weeklyReflection.findFirstOrThrow({ where: { user: { email } } });
+    assert.equal(JSON.parse(w.held).length, 1);
+    const c = await db.dailyCheckIn.findFirstOrThrow({ where: { user: { email } } });
+    assert.deepEqual(JSON.parse(c.tags), ["In a meeting"]);
+  });
+
+  await check("7b. FORGE Plan: priority open, one-move suggestion fills the field", async () => {
+    await page.goto(`${BASE}/plan`);
+    const pri = page.locator("details[open]", { hasText: "Emotionally Anchored" });
+    await pri.locator('button:has-text("one breath, one question")').click();
+    assert.match(await pri.locator('input[name="oneMove"]').inputValue(), /one breath/);
+    await Promise.all([page.waitForLoadState("networkidle"), pri.locator('button:has-text("Save E")').click()]);
+    const g = await db.developmentGoal.findFirstOrThrow({ where: { user: { email }, pillar: "E", segmentKey: null } });
+    assert.match(g.oneMove, /one breath/);
+    assert.equal(await page.locator("details[open]", { hasText: "Future Focused" }).count(), 0, "non-priority pillars start folded");
+    await page.screenshot({ path: `${shots}/06b-plan.png`, fullPage: false });
+  });
+
+  await check("1b/7c. sign out, sign back in, saved progress and reflection retrieved", async () => {
     await logout(page);
     await login(page, email, "e2e-password-123");
     await page.goto(`${BASE}/dashboard`);

@@ -1,7 +1,9 @@
 import { logCheckIn } from "@/app/actions/participant";
 import { Submit } from "./Submit";
+import { TagChoices } from "./Picks";
+import { CHECKIN_TAGS } from "@/content/options";
 
-type Existing = { status: string; note: string; reflection: string; shared: boolean } | null;
+type Existing = { status: string; note: string; reflection: string; shared: boolean; tags: string } | null;
 
 const OPTIONS = [
   { v: "DONE", label: "Done" },
@@ -26,12 +28,10 @@ export function CheckInForm({ existing, hasCoach }: { existing: Existing; hasCoa
           ))}
         </div>
       </fieldset>
-      <label className="block">
-        <span className="label">What happened? <span className="text-ink-mute font-normal">(one line, optional)</span></span>
-        <input name="note" defaultValue={existing?.note} className="input" maxLength={1000} placeholder="The moment, what you did, what changed" />
-      </label>
-      <details className="group" open={!!existing?.reflection}>
-        <summary className="cursor-pointer text-sm text-navy">Add a reflection</summary>
+      <TagChoices name="tags" list={CHECKIN_TAGS} legend="Where did it show up?" selected={existing ? (JSON.parse(existing.tags || "[]") as string[]) : []} />
+      <details className="group" open={!!(existing?.note || existing?.reflection)}>
+        <summary className="cursor-pointer text-sm text-navy">Add a note or reflection</summary>
+        <input name="note" defaultValue={existing?.note} className="input mt-2" maxLength={1000} placeholder="One line: the moment, what you did, what changed" />
         <textarea name="reflection" defaultValue={existing?.reflection} className="textarea mt-2" maxLength={3000} placeholder="What did today show you?" />
       </details>
       {hasCoach && (

@@ -6,10 +6,13 @@ import { addCommitment, removeCommitment } from "@/app/actions/participant";
 import { PageHeader, Card, Source, Field } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 import Link from "next/link";
+import { BLUEPRINT_PICKS } from "@/content/options";
+import { Picks } from "@/components/Picks";
 
 export const metadata = { title: "Discipline by Design Blueprint" };
 
 const CADENCES = { DAILY: "Daily", WEEKLY: "Weekly", MONTHLY: "Monthly", QUARTERLY: "Quarterly", ONCE: "One time" };
+const DAY_CHOICES = ["", "Every day", "Weekdays", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 export default async function BlueprintPage() {
   const u = await requireUser("PARTICIPANT");
@@ -74,18 +77,31 @@ export default async function BlueprintPage() {
               ) : (
                 <details className="mt-3">
                   <summary className="cursor-pointer text-sm text-navy">Add to this area</summary>
-                  <form action={addCommitment} className="mt-3 grid gap-3 sm:grid-cols-2">
+                  <form action={addCommitment} className="mt-3 space-y-3">
                     <input type="hidden" name="area" value={area.key} />
-                    <Field label="What"><input name="title" required maxLength={200} className="input" placeholder={area.key === "ROUTINES" ? "Fifteen minutes before anyone else is up" : ""} /></Field>
-                    <Field label="When"><input name="when" maxLength={120} className="input" placeholder={area.key === "WEEKLY" ? "Sunday evening" : "6:30 am"} /></Field>
-                    <Field label="How often">
-                      <select name="cadence" className="input" defaultValue={area.key === "ROUTINES" ? "DAILY" : area.key === "REVIEW" ? "QUARTERLY" : "WEEKLY"}>
-                        {Object.entries(CADENCES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-                      </select>
-                    </Field>
-                    <Field label="Starting"><input type="date" name="startsOn" className="input" /></Field>
-                    <div className="sm:col-span-2"><Field label="Detail (optional)"><input name="detail" maxLength={1500} className="input" /></Field></div>
-                    <div className="sm:col-span-2"><Submit className="btn-quiet">Add</Submit></div>
+                    <Field label="What"><input name="title" required maxLength={200} className="input" /></Field>
+                    {BLUEPRINT_PICKS[area.key] && <Picks list={BLUEPRINT_PICKS[area.key]} target="title" />}
+                    <div className="grid gap-3 grid-cols-2 sm:grid-cols-3">
+                      <Field label="How often">
+                        <select name="cadence" className="input" defaultValue={area.key === "ROUTINES" ? "DAILY" : area.key === "REVIEW" ? "QUARTERLY" : area.key === "LEARNING" ? "MONTHLY" : "WEEKLY"}>
+                          {Object.entries(CADENCES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                        </select>
+                      </Field>
+                      <Field label="Which days">
+                        <select name="whenDays" className="input" defaultValue={area.key === "ROUTINES" ? "Every day" : area.key === "WEEKLY" ? "Sunday" : ""}>
+                          {DAY_CHOICES.map((d) => <option key={d} value={d}>{d || "Any day"}</option>)}
+                        </select>
+                      </Field>
+                      <Field label="Time (optional)"><input type="time" name="whenTime" className="input" /></Field>
+                    </div>
+                    <details>
+                      <summary className="cursor-pointer text-sm text-navy">More details <span className="text-ink-mute">(optional)</span></summary>
+                      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                        <Field label="Starting"><input type="date" name="startsOn" className="input" /></Field>
+                        <Field label="Detail"><input name="detail" maxLength={1500} className="input" /></Field>
+                      </div>
+                    </details>
+                    <Submit className="btn-quiet">Add</Submit>
                   </form>
                 </details>
               )}

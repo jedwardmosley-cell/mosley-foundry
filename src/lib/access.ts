@@ -79,7 +79,7 @@ export async function getCoachView(coach: CurrentUser, participantId: string) {
       : null,
     has("PRACTICE") || has("REFLECTIONS")
       ? db.dailyCheckIn.findMany({ where: { userId: participantId }, orderBy: { date: "desc" }, take: 30,
-          select: { date: true, status: true, shared: true, reflection: true, note: true } })
+          select: { date: true, status: true, shared: true, reflection: true, note: true, tags: true } })
       : [],
     has("REFLECTIONS")
       ? db.weeklyReflection.findMany({ where: { userId: participantId, shared: true }, orderBy: { weekOf: "desc" }, take: 6 })
@@ -96,6 +96,7 @@ export async function getCoachView(coach: CurrentUser, participantId: string) {
   const practice = checkIns.map((c) => ({
     date: c.date,
     status: has("PRACTICE") ? c.status : null,
+    tags: has("PRACTICE") ? (JSON.parse(c.tags || "[]") as string[]) : [],
     reflection: has("REFLECTIONS") && c.shared ? c.reflection : null,
     note: has("REFLECTIONS") && c.shared ? c.note : null,
   }));

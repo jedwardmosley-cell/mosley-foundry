@@ -5,8 +5,10 @@ import { PATHWAYS } from "@/content/program";
 import { CYCLE_TEMPLATES, cycleWeeks } from "@/lib/cycle";
 import { startCycle } from "@/app/actions/participant";
 import { ymd } from "@/lib/dates";
-import { PageHeader, Card, Field, PillarMark, Draft } from "@/components/ui";
+import { PageHeader, Card, Field, Draft } from "@/components/ui";
 import { Submit } from "@/components/Submit";
+import { CycleFocusFields } from "@/components/CycleFocusFields";
+import type { PillarKey } from "@/content/types";
 
 export const metadata = { title: "Start a 30-day cycle" };
 
@@ -23,22 +25,7 @@ export default async function NewCycle() {
       </PageHeader>
       <Card>
         <form action={startCycle} className="space-y-5">
-          <fieldset>
-            <legend className="label">Pillar</legend>
-            <div className="grid grid-cols-5 gap-2">
-              {pack.pillars.map((p) => (
-                <label key={p.key} className="cursor-pointer">
-                  <input type="radio" name="pillar" value={p.key} defaultChecked={(profile?.priorityPillar ?? "F") === p.key} className="peer sr-only" />
-                  <span className="flex flex-col items-center gap-1 rounded-xl border border-line bg-white py-3 peer-checked:border-navy peer-checked:ring-2 peer-checked:ring-navy/20">
-                    <PillarMark k={p.key} size="sm" /><span className="text-[11px] text-center leading-tight px-1">{p.name}</span>
-                  </span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
-          <Field label="The behavior you are working on" hint="Specific. Not a category. The situation and what you do in it.">
-            <input name="focus" className="input" maxLength={500} placeholder="e.g. Pausing before I answer when a decision gets challenged" />
-          </Field>
+          <CycleFocusFields pillars={pack.pillars.map((p) => ({ key: p.key, name: p.name }))} initial={(profile?.priorityPillar ?? "F") as PillarKey} />
           <fieldset>
             <legend className="label">Structure</legend>
             <div className="space-y-3">
