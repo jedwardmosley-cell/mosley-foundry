@@ -7,6 +7,8 @@ import { PageHeader, Card, Source, Field } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 import Link from "next/link";
 import { BLUEPRINT_PICKS } from "@/content/options";
+import { LEVELS, PRACTICE, type IdentityLevel } from "@/content/identity";
+import { addIdentityPractice } from "@/app/actions/identity";
 import { Picks } from "@/components/Picks";
 
 export const metadata = { title: "Discipline by Design Blueprint" };
@@ -21,6 +23,7 @@ export default async function BlueprintPage() {
     db.commitment.findMany({ where: { userId: u.id, active: true }, orderBy: { createdAt: "asc" } }),
     db.relationship.findMany({ where: { ownerId: u.id, active: true } }),
   ]);
+  const identity = await db.identityProfile.findUnique({ where: { userId: u.id } });
   const d = pack.discipline;
   const inv = (label: string | null) => (label ? d.inventory.find((i) => i.label === label)?.text : undefined);
   // The four people areas (accountability partners, mentors and coaches, mentees, groups) show as one card.
@@ -46,6 +49,38 @@ export default async function BlueprintPage() {
           <p className="eyebrow !text-white/60">So who&apos;s checking?</p>
           <p className="mt-2 font-serif text-xl leading-snug">{d.whosChecking[0]}</p>
           <p className="mt-3 text-white/80 text-[15px]">{d.whosChecking[2]}</p>
+        </Card>
+      )}
+
+      {identity && (
+        <Card className="mb-6" >
+          <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+            <h2 className="h3">Identity practice</h2>
+            <Link href="/identity" className="chip whitespace-nowrap" style={{ borderColor: LEVELS[identity.level as IdentityLevel].color, color: LEVELS[identity.level as IdentityLevel].color }}>Level {LEVELS[identity.level as IdentityLevel].n} · {LEVELS[identity.level as IdentityLevel].name}</Link>
+          </div>
+          <p className="mt-1 text-sm text-ink-soft">How practice is built at your level. Add the ones you want. You set every commitment and how often, and you can remove any of them below.</p>
+          <ul className="mt-3 divide-y divide-line">
+            {PRACTICE[identity.level as IdentityLevel].map((item, i) => {
+              const a = item.action;
+              const source = a.kind === "commit" ? (a.from === "behavior" ? identity.behavior : a.from === "cue" ? identity.personaCue : a.from === "standards" ? identity.personaStandards : "ok") : "ok";
+              const title = a.kind === "commit" ? (a.from === "behavior" ? identity.behavior.split("\n")[0].trim().slice(0, 200) : a.from === "cue" ? identity.personaCue.split("\n")[0].trim().slice(0, 200) : a.from === "standards" ? "Read my standards" : "Review my week against my standards") : "";
+              const added = a.kind === "commit" && items.some((c) => c.title === title && c.detail === "Identity Shift");
+              return (
+                <li key={item.text} className="py-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5">
+                  <span className="text-[15px]">{item.text}</span>
+                  {a.kind === "link" ? (
+                    <Link href={a.href} className="text-sm btn-link">{a.button}</Link>
+                  ) : added ? (
+                    <span className="chip !text-sage">In your Blueprint</span>
+                  ) : source ? (
+                    <form action={addIdentityPractice}><input type="hidden" name="index" value={i} /><button className="text-sm btn-link text-left">{a.button}</button></form>
+                  ) : (
+                    <Link href="/identity" className="text-sm btn-link">{a.from === "behavior" ? "Write your behavior first" : a.from === "cue" ? "Write your activation cue first" : "Write your standards first"}</Link>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
         </Card>
       )}
 

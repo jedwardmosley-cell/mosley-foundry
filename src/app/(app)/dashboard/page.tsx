@@ -143,7 +143,7 @@ export default async function Dashboard() {
           <p className="mt-3 muted">No active cycle. <Link className="btn-link" href="/cycle/new">Start one</Link> and you will get one specific practice each day.</p>
         )}
         <div className="mt-5 border-t border-line pt-5">
-          <CheckInForm existing={d.todayCheckIn} hasCoach={d.coaches.length > 0} />
+          <CheckInForm existing={d.todayCheckIn} hasCoach={d.coaches.length > 0} identityLevel={d.identity?.level} />
         </div>
       </Card>
 

@@ -80,3 +80,75 @@ export const PERSONA_FIELDS: { key: "personaName" | "personaQualities" | "person
 
 export const NO_RANK_NOTE = "These three levels describe how big a change you want to make. They say nothing about your worth, your health, or how far along you are. Level 3 does not rank above Level 1 or 2.";
 export const PERSONA_NOTE = "A performance identity is a practice tool you choose on purpose. It is a way to prepare for demanding situations. It is still you, and it makes no claim about changing your psychology.";
+
+// ---------- Part 2: how the level shapes FORGE, the Blueprint and the daily check-in ----------
+
+/**
+ * One prompt per FORGE pillar per level. DRAFT FOR AUTHOR REVIEW.
+ * The author's brief gave these for someone working on decisiveness. They are reworded here
+ * to fit any behavior. Set the status to "approved" to remove the Draft label.
+ */
+export const PILLAR_PROMPTS_STATUS: "draft" | "approved" = "draft";
+export const PILLAR_PROMPTS: Record<"F" | "O" | "R" | "G" | "E", Record<IdentityLevel, string>> = {
+  F: {
+    CORE: "Describe what the person you are becoming looks like on an ordinary day.",
+    ROLE: "List the decisions and responsibilities your new role asks of you.",
+    REINVENT: "Write the standards of the performance identity you chose.",
+  },
+  O: {
+    CORE: "Track your everyday behavior and your follow-through.",
+    ROLE: "Track the decisions you make in the role and how they turn out.",
+    REINVENT: "Review how you performed in your most demanding situations this week.",
+  },
+  R: {
+    CORE: "Connect the behavior to a value you care about.",
+    ROLE: "Connect your decisions to what the role is responsible for.",
+    REINVENT: "Connect your standards to a mission that matters to you.",
+  },
+  G: {
+    CORE: "Practice the behavior, then reflect on how it went.",
+    ROLE: "Rehearse one responsibility that is still unfamiliar.",
+    REINVENT: "Use deliberate practice to replace one pattern that is not working.",
+  },
+  E: {
+    CORE: "Notice where you hesitate and what triggers it.",
+    ROLE: "Stay effective in situations that are new to you.",
+    REINVENT: "Use your activation cue to prepare before a demanding situation.",
+  },
+};
+
+/**
+ * How practice is structured at each level (brief, section 5). The item text is the author's.
+ * Each item points at an existing part of the app. The participant still sets every commitment
+ * and how often. A higher level never forces more check-ins.
+ */
+export type PracticeAction =
+  | { kind: "commit"; area: string; cadence: "DAILY" | "WEEKLY"; from: "behavior" | "cue" | "standards" | "review"; button: string }
+  | { kind: "link"; href: string; button: string };
+export const PRACTICE: Record<IdentityLevel, { text: string; action: PracticeAction }[]> = {
+  CORE: [
+    { text: "One repeatable daily behavior", action: { kind: "commit", area: "ROUTINES", cadence: "DAILY", from: "behavior", button: "Add my behavior as a daily routine" } },
+    { text: "Simple weekly reflection", action: { kind: "link", href: "/reflect", button: "Open the weekly reflection" } },
+    { text: "Optional accountability relationship", action: { kind: "link", href: "/network?role=ACCOUNTABILITY_PARTNER#add", button: "Add an accountability partner" } },
+  ],
+  ROLE: [
+    { text: "Role-specific behavioral commitments", action: { kind: "commit", area: "LEADERSHIP", cadence: "WEEKLY", from: "behavior", button: "Add my behavior as a role commitment" } },
+    { text: "Real-world practice assignments", action: { kind: "link", href: "/cycle/new", button: "Start a 30-day cycle on it" } },
+    { text: "Scheduled feedback and accountability check-ins", action: { kind: "link", href: "/network?role=ACCOUNTABILITY_PARTNER#add", button: "Add someone who will give me feedback" } },
+  ],
+  REINVENT: [
+    { text: "Defined performance standards", action: { kind: "commit", area: "ROUTINES", cadence: "DAILY", from: "standards", button: "Add reading my standards as a daily routine" } },
+    { text: "Preparation or activation ritual", action: { kind: "commit", area: "ROUTINES", cadence: "DAILY", from: "cue", button: "Add my activation cue as a routine" } },
+    { text: "Deliberate practice assignments", action: { kind: "link", href: "/cycle/new", button: "Start a 30-day cycle on it" } },
+    { text: "Evidence-based performance review", action: { kind: "commit", area: "REVIEW", cadence: "WEEKLY", from: "review", button: "Add a weekly review against my standards" } },
+    { text: "Intentionally chosen accountability relationships", action: { kind: "link", href: "/network?role=ACCOUNTABILITY_PARTNER#add", button: "Choose who checks on me" } },
+  ],
+};
+
+/** Daily check-in wording (brief, section 7). Always optional. */
+export const CHECKIN_IDENTITY = {
+  question: "Did you act like the person you're becoming today?",
+  followUp: "What did you do that demonstrates it?",
+  level3: "Where did you meet your standard today, and where did you fall short?",
+  answers: { YES: "Yes", PARTLY: "Partly", NOT_YET: "Not yet" } as const,
+};

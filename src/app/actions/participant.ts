@@ -227,6 +227,8 @@ const checkInSchema = z.object({
   reflection: text(3000),
   shared: bool,
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  identityActed: z.enum(["YES", "PARTLY", "NOT_YET", ""]).default(""),
+  identityNote: text(500),
 });
 
 export async function logCheckIn(fd: FormData) {
@@ -238,8 +240,8 @@ export async function logCheckIn(fd: FormData) {
   const cycle = await db.developmentCycle.findFirst({ where: { userId: u.id, status: "ACTIVE" } });
   await db.dailyCheckIn.upsert({
     where: { userId_date: { userId: u.id, date } },
-    create: { userId: u.id, date, status: d.status, note: d.note, reflection: d.reflection, shared: d.shared, tags, cycleId: cycle?.id },
-    update: { status: d.status, note: d.note, reflection: d.reflection, shared: d.shared, tags },
+    create: { userId: u.id, date, status: d.status, note: d.note, reflection: d.reflection, shared: d.shared, tags, identityActed: d.identityActed, identityNote: d.identityNote, cycleId: cycle?.id },
+    update: { status: d.status, note: d.note, reflection: d.reflection, shared: d.shared, tags, identityActed: d.identityActed, identityNote: d.identityNote },
   });
   revalidatePath("/dashboard");
   revalidatePath("/cycle");

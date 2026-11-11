@@ -18,6 +18,7 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
   const u = await requireUser("PARTICIPANT");
   const { pack } = await getContent();
   const profile = await db.profile.findUnique({ where: { userId: u.id } });
+  const identity = await db.identityProfile.findUnique({ where: { userId: u.id }, select: { behavior: true } });
   const pathway = PATHWAYS[(profile?.pathway ?? "PERSONAL") as keyof typeof PATHWAYS];
   const defaultTemplate = pack.thirtyDayPlan.length ? pathway.cycleTemplate : "NIRS_30";
   return (
@@ -27,7 +28,7 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
       </PageHeader>
       <Card>
         <form action={startCycle} className="space-y-5">
-          <CycleFocusFields pillars={pack.pillars.map((p) => ({ key: p.key, name: p.name }))} initial={fromLink ?? ((profile?.priorityPillar ?? "F") as PillarKey)} initialFocus={(sp.focus ?? "").slice(0, 500)} />
+          <CycleFocusFields pillars={pack.pillars.map((p) => ({ key: p.key, name: p.name }))} initial={fromLink ?? ((profile?.priorityPillar ?? "F") as PillarKey)} initialFocus={(sp.focus ?? "").slice(0, 500)} identityBehavior={identity?.behavior.split("\n")[0].slice(0, 300) ?? ""} />
           <fieldset>
             <legend className="label">Structure</legend>
             <div className="space-y-3">
