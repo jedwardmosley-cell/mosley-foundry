@@ -12,7 +12,8 @@ import { RelationshipFields } from "@/components/RelationshipFields";
 
 export const metadata = { title: "People" };
 
-export default async function NetworkPage() {
+export default async function NetworkPage({ searchParams }: { searchParams: Promise<{ role?: string }> }) {
+  const { role: wantedRole } = await searchParams;
   const u = await requireUser("PARTICIPANT");
   const { pack } = await getContent();
   const rels = await db.relationship.findMany({
@@ -35,7 +36,7 @@ export default async function NetworkPage() {
   return (
     <>
       <PageHeader eyebrow="Accountability network" title="Name your people">
-        {pack.nobodyNote ?? "A life built around growth needs people built around growth."}
+        {rels.length === 0 ? (pack.nobodyNote ?? "A life built around growth needs people built around growth.") : "The people around your growth, and how often you check in with each one."}
       </PageHeader>
 
       <div className="grid gap-5 md:grid-cols-[1.2fr_1fr]">
@@ -106,11 +107,12 @@ export default async function NetworkPage() {
         ))}
       </div>
 
+      <div id="add" className="scroll-mt-20" />
       <Card className="mt-6">
         <h2 className="h3">Add a person or group</h2>
         <form action={addRelationship} className="mt-4 grid gap-4 sm:grid-cols-2">
           <Field label="Name"><input name="name" required maxLength={120} className="input" /></Field>
-          <RelationshipFields />
+          <RelationshipFields initialRole={wantedRole && wantedRole in RELATIONSHIP_ROLES ? wantedRole : undefined} />
           <details className="sm:col-span-2">
             <summary className="cursor-pointer text-sm text-navy">Next check-in date <span className="text-ink-mute">(optional, defaults from the schedule)</span></summary>
             <div className="mt-2 max-w-xs"><Field label="Next check-in"><input type="date" name="nextCheckIn" className="input" /></Field></div>

@@ -23,12 +23,17 @@ export default async function BlueprintPage() {
   ]);
   const d = pack.discipline;
   const inv = (label: string | null) => (label ? d.inventory.find((i) => i.label === label)?.text : undefined);
-  const relAreas: Record<string, string[]> = {
-    ACCOUNTABILITY: ["ACCOUNTABILITY_PARTNER"],
-    MENTORING: ["MENTOR", "COACH"],
-    MENTEES: ["MENTEE", "DIRECT_REPORT"],
-    GROUPS: ["GROUP"],
-  };
+  // The four people areas (accountability partners, mentors and coaches, mentees, groups) show as one card.
+  const PEOPLE_AREAS = ["ACCOUNTABILITY", "MENTORING", "MENTEES", "GROUPS"];
+  const first = (label: string) => (inv(label) ?? "").split(/(?<=[.?!])\s/)[0];
+  const peopleRows = [
+    { label: "Accountability partner", roles: ["ACCOUNTABILITY_PARTNER"], add: "ACCOUNTABILITY_PARTNER", line: "When you don't do what you said, who finds out?" },
+    { label: "Mentor", roles: ["MENTOR"], add: "MENTOR", line: first("Your mentor") },
+    { label: "Coach", roles: ["COACH"], add: "COACH", line: "Somebody who works with you on the road you're on right now." },
+    { label: "Mentee", roles: ["MENTEE", "DIRECT_REPORT"], add: "MENTEE", line: first("Your mentee") },
+    { label: "Group", roles: ["GROUP"], add: "GROUP", line: first("Your groups") },
+  ];
+  const peopleNamed = peopleRows.filter((r) => rels.some((x) => r.roles.includes(x.role))).length;
 
   return (
     <>
@@ -46,8 +51,38 @@ export default async function BlueprintPage() {
 
       <div className="space-y-4">
         {BLUEPRINT_AREAS.map((area) => {
+          if (area.key === "ACCOUNTABILITY") {
+            return (
+              <Card key="PEOPLE">
+                <div className="flex items-baseline justify-between gap-3">
+                  <h2 className="h3">My people</h2>
+                  <span className="text-xs muted">{peopleNamed} of {peopleRows.length} named</span>
+                </div>
+                <p className="mt-1 text-sm text-ink-soft">A life built around growth needs people built around growth. Name one person for each role.</p>
+                <ul className="mt-3 divide-y divide-line">
+                  {peopleRows.map((row) => {
+                    const named = rels.filter((x) => row.roles.includes(x.role));
+                    return (
+                      <li key={row.label} className="py-3 flex items-start justify-between gap-4">
+                        <div>
+                          <p className="text-[15px] font-medium">{row.label}</p>
+                          {named.length > 0
+                            ? <p className="text-[15px]">{named.map((x) => x.name).join(", ")}</p>
+                            : row.line && <p className="text-sm text-ink-soft">{row.line}</p>}
+                        </div>
+                        {named.length > 0
+                          ? <Link href="/network" className="text-sm btn-link shrink-0">Check-ins</Link>
+                          : <Link href={`/network?role=${row.add}#add`} className="text-sm btn-link shrink-0">Add</Link>}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </Card>
+            );
+          }
+          if (PEOPLE_AREAS.includes(area.key)) return null;
           const mine = items.filter((i) => i.area === area.key);
-          const people = rels.filter((r) => relAreas[area.key]?.includes(r.role));
+          const people: typeof rels = [];
           const text = inv(area.inventory);
           return (
             <Card key={area.key}>
@@ -72,9 +107,6 @@ export default async function BlueprintPage() {
                   ))}
                 </ul>
               )}
-              {relAreas[area.key] ? (
-                <Link href="/network" className="mt-3 inline-block text-sm btn-link">Add a person in People</Link>
-              ) : (
                 <details className="mt-3">
                   <summary className="cursor-pointer text-sm text-navy">Add to this area</summary>
                   <form action={addCommitment} className="mt-3 space-y-3">
@@ -104,7 +136,6 @@ export default async function BlueprintPage() {
                     <Submit className="btn-quiet">Add</Submit>
                   </form>
                 </details>
-              )}
             </Card>
           );
         })}

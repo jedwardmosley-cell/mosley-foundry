@@ -5,8 +5,8 @@ import { RELATIONSHIP_PURPOSE, CADENCES } from "@/content/options";
 import { Picks } from "./Picks";
 
 /** Role, purpose and cadence for a new relationship, with role-aware purpose suggestions. */
-export function RelationshipFields() {
-  const [role, setRole] = useState("ACCOUNTABILITY_PARTNER");
+export function RelationshipFields({ initialRole }: { initialRole?: string }) {
+  const [role, setRole] = useState(initialRole ?? "ACCOUNTABILITY_PARTNER");
   return (
     <>
       <label className="block">
