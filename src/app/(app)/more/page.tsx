@@ -3,6 +3,7 @@ import { requireUser } from "@/lib/auth";
 import { PageHeader } from "@/components/ui";
 
 const LINKS = [
+  ["/guide", "Guide", "Short steps for each part of the app."],
   ["/assessment", "FORGE Assessment", "Score all five pillars. Revise after reading the anchors."],
   ["/blueprint", "Discipline by Design Blueprint", "Routines, people, learning and review."],
   ["/reflect", "Weekly Reflection", "Did I do what I said I was going to do?"],

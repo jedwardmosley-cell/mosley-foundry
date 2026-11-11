@@ -21,7 +21,9 @@ const PARTICIPANT_NAV = [
   { href: "/history", label: "History & Export" },
   { href: "/sharing", label: "Sharing" },
   { href: "/settings", label: "Settings" },
+  { href: "/guide", label: "Guide" },
 ];
+const GUIDE_TAB = { href: "/guide", label: "Guide", mobile: true };
 
 const COACH_NAV = [
   { href: "/coach", label: "My clients", mobile: true },
@@ -33,7 +35,7 @@ const ADMIN_NAV = [
 ];
 
 export function Shell({ user, children }: { user: CurrentUser; children: ReactNode }) {
-  const nav = user.role === "COACH" ? COACH_NAV : user.role === "ADMIN" ? (user.alsoCoach ? [...ADMIN_NAV, ...COACH_NAV] : ADMIN_NAV) : PARTICIPANT_NAV;
+  const nav = user.role === "COACH" ? [...COACH_NAV, GUIDE_TAB] : user.role === "ADMIN" ? (user.alsoCoach ? [...ADMIN_NAV, ...COACH_NAV, GUIDE_TAB] : [...ADMIN_NAV, GUIDE_TAB]) : PARTICIPANT_NAV;
   return (
     <div className="min-h-screen md:flex">
       <aside className="hidden md:flex md:w-64 md:flex-col md:border-r md:border-line md:bg-card md:px-5 md:py-6 md:sticky md:top-0 md:h-screen">

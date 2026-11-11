@@ -54,6 +54,7 @@ export default async function Dashboard() {
               </li>
             ))}
           </ol>
+          <p className="mt-4 text-sm text-white/70">New here? <Link href="/guide" className="underline underline-offset-4 decoration-brass">Read the guide</Link>. It takes a few minutes.</p>
         </Card>
       )}
 
