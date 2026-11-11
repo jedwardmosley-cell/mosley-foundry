@@ -54,7 +54,7 @@ export async function enroll(fd: FormData): Promise<void> {
   if (!user) {
     tempPassword = randomBytes(9).toString("base64url");
     user = await db.user.create({
-      data: { email: d.email, name: d.name, passwordHash: hashPassword(tempPassword), role: d.role === "FACILITATOR" ? "COACH" : "PARTICIPANT", orgId: a.orgId, profile: { create: { pathway: "LEADING_OTHERS" } } },
+      data: { email: d.email, name: d.name, passwordHash: hashPassword(tempPassword), mustChangePassword: true, role: d.role === "FACILITATOR" ? "COACH" : "PARTICIPANT", orgId: a.orgId, profile: { create: { pathway: "LEADING_OTHERS" } } },
     });
   } else if (user.orgId && user.orgId !== a.orgId) {
     throw new Error("That person belongs to another organization.");

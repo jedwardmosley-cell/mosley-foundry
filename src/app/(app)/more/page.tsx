@@ -14,6 +14,7 @@ const LINKS = [
   ["/journal", "Private Journal", "Private to you and never shared."],
   ["/history", "History & Export", "Your development over time."],
   ["/sharing", "Sharing", "Choose what your coach can see."],
+  ["/account/password", "Change password", "Pick a new password for your account."],
   ["/settings", "Settings", "Reminders and AI retention."],
 ];
 

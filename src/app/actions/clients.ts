@@ -35,7 +35,7 @@ export async function addClient(_: ClientState, fd: FormData): Promise<ClientSta
   } else {
     const password = randomBytes(9).toString("base64url");
     user = await db.user.create({
-      data: { email, name, role: "PARTICIPANT", orgId: coach.orgId, passwordHash: hashPassword(password), profile: { create: {} } },
+      data: { email, name, role: "PARTICIPANT", orgId: coach.orgId, passwordHash: hashPassword(password), mustChangePassword: true, profile: { create: {} } },
     });
     temp = { email, password };
   }

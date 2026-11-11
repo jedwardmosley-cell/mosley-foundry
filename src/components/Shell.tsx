@@ -49,7 +49,7 @@ export function Shell({ user, children }: { user: CurrentUser; children: ReactNo
       <div className="flex-1 min-w-0">
         <header className="md:hidden flex items-center justify-between px-4 py-3 border-b border-line bg-card sticky top-0 z-20">
           <Brand compact />
-          <form action={signOut}><button className="text-sm text-ink-soft">Sign out</button></form>
+          <div className="flex items-center gap-4 text-sm text-ink-soft"><Link href="/account/password">Password</Link><form action={signOut}><button>Sign out</button></form></div>
         </header>
         {user.isDemo && (
           <div className="bg-brass-soft text-[13px] text-ink px-4 py-2 text-center">
@@ -82,7 +82,8 @@ function UserBox({ user }: { user: CurrentUser }) {
     <div className="border-t border-line pt-4 text-sm">
       <p className="font-medium text-ink truncate">{user.name}</p>
       <p className="text-ink-mute text-xs capitalize">{user.role === "ADMIN" && user.alsoCoach ? "Administrator and coach" : user.role.toLowerCase()}</p>
-      <form action={signOut} className="mt-2"><button className="text-ink-soft hover:text-ink text-sm">Sign out</button></form>
+      <Link href="/account/password" className="mt-2 block text-ink-soft hover:text-ink text-sm">Change password</Link>
+      <form action={signOut} className="mt-1"><button className="text-ink-soft hover:text-ink text-sm">Sign out</button></form>
     </div>
   );
 }
