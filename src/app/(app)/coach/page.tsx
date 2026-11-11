@@ -42,7 +42,7 @@ export default async function CoachHome() {
             <Link key={v.participant.id} href={`/coach/${v.participant.id}`} className="card block hover:border-navy/40">
               <div className="flex items-center justify-between gap-3">
                 <h2 className="h3">{v.participant.name}</h2>
-                <span className="text-xs muted">{v.scopes.length} of 7 areas shared</span>
+                <span className="text-xs muted">{v.scopes.length} of 8 areas shared</span>
               </div>
               <div className="mt-3 text-[15px] space-y-1.5">
                 <p className="flex items-center gap-2">{pk ? <><PillarMark k={pk} size="sm" /> {pack.pillars.find((p) => p.key === pk)?.name}</> : <span className="muted">Focus not shared</span>}</p>

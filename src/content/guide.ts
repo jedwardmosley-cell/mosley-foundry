@@ -120,6 +120,21 @@ export const CLIENT_GUIDE: GuideSection[] = [
     link: { href: "/companion", label: "Open the AI Companion" },
   },
   {
+    id: "identity",
+    title: "Identity Shift (optional)",
+    intro: "Some people want to strengthen who they are. Some are stepping into a new role. Some want to reinvent how they show up. Identity Shift lets you say which one fits, and the coaching adjusts.",
+    steps: [
+      "Open Identity Shift from your FORGE Plan, your FORGE results, or More.",
+      "Answer three questions: who you are becoming, why now, and the behavior that would show it.",
+      "Tap each level on the spectrum to read about it, then choose one. No level ranks above another, and your FORGE scores do not decide it.",
+      "At Level 3 you can create a performance identity: a name, standards and an activation cue you use to prepare for demanding situations. It is a practice tool and it is still you.",
+      "Your FORGE Plan, Blueprint, 30-day cycle and daily check-in then show prompts that fit your level. Everything stays optional.",
+      "You can change your level at any time. Earlier versions are kept.",
+      "On the same page you choose the AI Companion's tone, what it can use, and whether your coach can see your performance identity.",
+    ],
+    link: { href: "/identity", label: "Open Identity Shift" },
+  },
+  {
     id: "eqi",
     title: "EQ-i priorities (optional)",
     intro: "This part is for people who have taken the EQ-i 2.0 and had a debrief. If you have not, skip it.",
@@ -160,8 +175,8 @@ export const COACH_GUIDE: GuideSection[] = [
     id: "see",
     title: "What you can and cannot see",
     steps: [
-      "A new client shows 0 of 7 areas shared. Ask them to open Sharing and turn on what they want you to see.",
-      "The seven areas are goals, FORGE scores, practice, reflections, Blueprint, people, and EQ-i priorities.",
+      "A new client shows 0 of 8 areas shared. Ask them to open Sharing and turn on what they want you to see.",
+      "The eight areas are goals, FORGE scores, practice, reflections, Blueprint, people, EQ-i priorities, and Identity Shift.",
       "You see a written reflection only when the client marks that entry as shared.",
       "You cannot see a client's Private Journal or their AI conversations.",
       "The client page flags items for your attention, such as no check-ins this week or an overdue check-in with a mentor.",
@@ -186,6 +201,16 @@ export const COACH_GUIDE: GuideSection[] = [
       "You can add your interpretation on the client's page. It goes back to the client to approve before you see it again.",
     ],
     note: "The app stores no EQ-i scores or reports.",
+  },
+  {
+    id: "identity",
+    title: "Identity Shift",
+    steps: [
+      "Clients choose their own level. You cannot set it for them.",
+      "To suggest identity work, assign one of the Identity Shift exercises from the program list.",
+      "You see a client's statement, level and behavior only if they turn on Identity Shift in Sharing. You see their performance identity only if they also tick that box.",
+      "You see how often they answered yes to acting like the person they are becoming. Their written notes on that question stay private.",
+    ],
   },
   {
     id: "reset",

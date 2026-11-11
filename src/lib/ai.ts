@@ -4,6 +4,7 @@ import { getContent } from "@/content";
 import { SEGMENTS, PATHWAYS } from "@/content/program";
 import { db } from "./db";
 import { scoresFrom } from "./forge";
+import { effectiveTone, toneBlock } from "./identityTone";
 
 export const AI_MODEL = "claude-opus-5-5";
 export const aiAvailable = () => Boolean(process.env.ANTHROPIC_API_KEY);
@@ -108,7 +109,27 @@ export async function participantContext(userId: string) {
   for (const s of sessions) if (s.commitments) lines.push(`Coaching commitments from ${s.scheduledAt.toDateString()}: ${s.commitments}`);
   for (const e of eqi) lines.push(`EQ-i development priority (participant's own words, no scores): ${e.label}${e.pillar ? `; linked by the participant to FORGE ${e.pillar}` : ""}${e.practice ? `; practice: ${e.practice}` : ""}`);
   for (const r of rels) lines.push(`Relationship: ${r.name} (${r.role})${r.purpose ? `, purpose: ${r.purpose}` : ""}`);
+  // Identity Shift: sent only if the participant left "use with the AI Companion" on.
+  // The performance identity is sent only if they also ticked that box.
+  const id = await db.identityProfile.findUnique({ where: { userId } });
+  if (id && id.aiUse) {
+    const level = { CORE: "Level 1, Core Alignment", ROLE: "Level 2, Role Transition", REINVENT: "Level 3, Identity Reinvention" }[id.level as "CORE"] ?? id.level;
+    lines.push(`Identity Shift (participant's own choice of scope, not a ranking): ${level}`);
+    if (id.becoming) lines.push(`Who they are becoming (their words): ${id.becoming}`);
+    if (id.behavior) lines.push(`Behavior that would show it (their words): ${id.behavior}`);
+    if (id.level === "REINVENT" && id.aiUsePersona) {
+      if (id.personaName) lines.push(`Performance identity they chose, a practice tool: ${id.personaName}`);
+      if (id.personaStandards) lines.push(`Their personal standards: ${id.personaStandards}`);
+      if (id.personaCue) lines.push(`Their activation cue: ${id.personaCue}`);
+    }
+  }
   return lines.join("\n");
+}
+
+/** The tone block for this participant, or "" when they have no identity profile or turned AI use off. */
+export async function participantTone(userId: string) {
+  const id = await db.identityProfile.findUnique({ where: { userId }, select: { level: true, tone: true, aiUse: true } });
+  return toneBlock(id && id.aiUse ? effectiveTone(id) : null);
 }
 
 /** House writing style for everything the AI writes. Set by the author. */
@@ -135,7 +156,7 @@ export function plainPunctuation(t: string) {
   return t.replace(/\s*\u2014\s*/g, ", ").replace(/[\u201C\u201D]/g, '"').replace(/[\u2018\u2019]/g, "'");
 }
 
-export function systemPrompt(mode: AiMode, context: string, sources: Chunk[]) {
+export function systemPrompt(mode: AiMode, context: string, sources: Chunk[], tone = "") {
   return [
     "You are the Coaching Companion inside Both Hands on the Wheel, a personal leadership platform created by Jason Mosley of Mosley Foundry. You reinforce human coaching. You do not replace it.",
     "",
@@ -152,6 +173,7 @@ export function systemPrompt(mode: AiMode, context: string, sources: Chunk[]) {
     "- Push toward real-world action and human accountability: a specific behavior, a date, and a person who will know.",
     "",
     `MODE: ${MODES[mode]}`,
+    ...(tone ? ["", tone] : []),
     "",
     "PARTICIPANT RECORDS (recorded facts, shared by the participant with you):",
     context || "(none)",
@@ -166,6 +188,7 @@ export async function generateReply(opts: { userId: string; mode: AiMode; histor
   const lastUser = [...opts.history].reverse().find((m) => m.role === "user")?.content ?? "";
   const sources = await retrieve(lastUser + " " + opts.history.slice(-3).map((m) => m.content).join(" "));
   const context = await participantContext(opts.userId);
+  const tone = await participantTone(opts.userId);
 
   const stream = client.beta.messages.stream({
     model: AI_MODEL,
@@ -174,7 +197,7 @@ export async function generateReply(opts: { userId: string; mode: AiMode; histor
     output_config: { effort: "medium" },
     betas: ["server-side-fallback-2026-07-01"],
     fallbacks: "default",
-    system: systemPrompt(opts.mode, context, sources),
+    system: systemPrompt(opts.mode, context, sources, tone),
     messages: opts.history.map((m) => ({ role: m.role, content: m.content })),
   });
   const msg = await stream.finalMessage();

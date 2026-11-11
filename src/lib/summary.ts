@@ -22,6 +22,12 @@ export async function developmentSummary(userId: string, name: string) {
     if (d.profile.why) L.push("", "## Why", d.profile.why);
     if (d.profile.forgeStatement) L.push("", "## FORGE Statement", d.profile.forgeStatement);
   }
+  if (d.identity) {
+    const lv = { CORE: "Level 1, Core Alignment", ROLE: "Level 2, Role Transition", REINVENT: "Level 3, Identity Reinvention" }[d.identity.level as "CORE"];
+    L.push("", "## Identity Shift", `**Level:** ${lv}`, "", d.identity.becoming);
+    if (d.identity.behavior) L.push("", `**Behavior that shows it:** ${d.identity.behavior}`);
+    if (d.identity.personaName) L.push(`**Performance identity:** ${d.identity.personaName}`);
+  }
   if (d.assessments.length) {
     L.push("", "## FORGE self-assessments", "", "| Date | F | O | R | G | E | Total |", "|---|---|---|---|---|---|---|");
     for (const a of d.assessments) {

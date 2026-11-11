@@ -14,6 +14,7 @@ import { PageHeader, Card, PillarMark, Gauge, Field } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 import { removeClient } from "@/app/actions/clients";
 import { ResetPasswordForm } from "@/components/ResetPasswordForm";
+import { LEVELS, IDENTITY_EXERCISES, type IdentityLevel } from "@/content/identity";
 
 function NotShared({ scope }: { scope: ShareScope }) {
   return <p className="text-sm text-ink-mute">Not shared: {SHARE_SCOPES[scope].toLowerCase()}.</p>;
@@ -46,6 +47,7 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
     ...pack.jaysJourney.map((j, i) => ({ ref: `jay:${i}`, title: `Jay's Journey: ${j.title}`, text: [j.setup, ...j.prompts].filter(Boolean).join("\n\n") })),
     ...pack.chapters.filter((c) => c.roadTest.length).map((c) => ({ ref: `chapter:${c.number}:roadTest`, title: `Road Test: ${c.title}`, text: c.roadTest.join("\n\n") })),
     ...SEGMENTS.map((x) => ({ ref: `segment:${x.key}`, title: `Segment ${x.key} practice: ${x.title}`, text: x.practice.text })),
+    ...IDENTITY_EXERCISES.map((x, i) => ({ ref: `identity:${i}`, title: `Identity Shift: ${x.title}`, text: x.text })),
   ];
 
   return (
@@ -127,6 +129,33 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
         <Card className="mt-5">
           <p className="eyebrow">Blueprint</p>
           <ul className="mt-3 space-y-1 text-[15px]">{v.commitments.map((c) => <li key={c.id}>{c.title}{c.when ? <span className="muted"> · {c.when}</span> : null}</li>)}</ul>
+        </Card>
+      )}
+
+      {s.has("IDENTITY") && (
+        <Card className="mt-5">
+          <p className="eyebrow">Identity Shift</p>
+          {v.identity ? (
+            <>
+              <p className="mt-2 text-sm"><span className="chip">Level {LEVELS[v.identity.level as IdentityLevel].n} · {LEVELS[v.identity.level as IdentityLevel].name}</span> <span className="text-ink-mute">The client chose this level.</span></p>
+              <p className="mt-3 font-serif text-[16px] leading-relaxed">{v.identity.becoming}</p>
+              {v.identity.situation && <p className="mt-2 text-[15px]"><span className="text-ink-mute">Why now: </span>{v.identity.situation}</p>}
+              {v.identity.behavior && <p className="mt-1 text-[15px]"><span className="text-ink-mute">Behavior that shows it: </span>{v.identity.behavior}</p>}
+              {v.identity.persona && (
+                <div className="mt-3 rounded-xl bg-paper p-3 text-[15px] space-y-1">
+                  <p className="text-xs text-ink-mute">Performance identity, shared by the client</p>
+                  {v.identity.persona.name && <p className="font-medium">{v.identity.persona.name}</p>}
+                  {v.identity.persona.standards && <p><span className="text-ink-mute">Standards: </span>{v.identity.persona.standards}</p>}
+                  {v.identity.persona.cue && <p><span className="text-ink-mute">Activation cue: </span>{v.identity.persona.cue}</p>}
+                </div>
+              )}
+              {(() => {
+                const a = v.practice.filter((p) => p.identityActed);
+                const yes = a.filter((p) => p.identityActed === "YES").length, partly = a.filter((p) => p.identityActed === "PARTLY").length;
+                return a.length ? <p className="mt-3 text-sm">Acted like the person they are becoming, last {a.length} answers: {yes} yes · {partly} partly · {a.length - yes - partly} not yet</p> : null;
+              })()}
+            </>
+          ) : <p className="mt-2 text-sm muted">Sharing is on, but the client has not set up an Identity Shift.</p>}
         </Card>
       )}
 

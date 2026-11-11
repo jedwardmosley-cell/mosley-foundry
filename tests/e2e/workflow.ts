@@ -331,6 +331,36 @@ const submitAndWait = async (page: Page, selector: string) => {
     await dc.close();
   });
 
+  await check("9d. Identity Shift sharing is the client's choice; the coach sees nothing until it is on", async () => {
+    const dc = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const dp: Page = await dc.newPage();
+    await login(dp, "dana@demo.bothhands.app");
+    await dp.goto(`${BASE}/identity`);
+    await dp.fill('textarea[name="becoming"]', "E2E-ID: a manager who makes hard calls on time.");
+    await dp.locator("label", { hasText: "Identity Reinvention" }).click();
+    await dp.locator("summary", { hasText: "Create a performance identity" }).click();
+    await dp.fill('input[name="personaName"]', "E2E-PERSONA");
+    await Promise.all([dp.waitForURL("**/identity?saved=1"), dp.click('button:has-text("Save my identity shift")')]);
+    await page.goto(`${BASE}/coach/${dana.id}`);
+    assert.ok(!(await page.content()).includes("E2E-ID"), "not visible before the client shares");
+    await dp.goto(`${BASE}/sharing`);
+    await Promise.all([dp.waitForLoadState("networkidle"), dp.click('button[aria-label^="Share: Identity Shift"]')]);
+    await dp.waitForSelector('button[aria-label^="Stop sharing: Identity Shift"]');
+    await page.goto(`${BASE}/coach/${dana.id}`);
+    await page.waitForSelector("text=E2E-ID: a manager who makes hard calls on time.");
+    assert.ok(!(await page.content()).includes("E2E-PERSONA"), "persona needs its own tick");
+    await dp.goto(`${BASE}/identity`);
+    await dp.locator('input[name="sharePersona"]').check();
+    await dp.locator('input[value="SUPPORTIVE"]').check();
+    await Promise.all([dp.waitForLoadState("networkidle"), dp.click('button:has-text("Save these settings")')]);
+    const row = await db.identityProfile.findUniqueOrThrow({ where: { userId: dana.id } });
+    assert.equal(row.tone, "SUPPORTIVE", "tone override saved independently of the level");
+    assert.equal(row.level, "REINVENT");
+    await page.goto(`${BASE}/coach/${dana.id}`);
+    await page.waitForSelector("text=E2E-PERSONA");
+    await dc.close();
+  });
+
   await check("10b. private material stays inaccessible to the coach", async () => {
     const html = await page.content();
     assert.ok(!html.includes("PRIVATE DEMO JOURNAL"), "journal leaked");
@@ -454,7 +484,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await row.locator('button:has-text("Assign")').waitFor({ state: "detached" });
     await page.goto(`${BASE}/coach`);
     await page.waitForSelector("text=Lena Ortiz");
-    await page.waitForSelector("text=0 of 7 areas shared");
+    await page.waitForSelector("text=0 of 8 areas shared");
     const denied = await page.goto(`${BASE}/coach/${dana.id}`);
     assert.equal(denied?.status(), 404, "admin-coach cannot open someone they do not coach");
     const j = await page.goto(`${BASE}/journal`);
