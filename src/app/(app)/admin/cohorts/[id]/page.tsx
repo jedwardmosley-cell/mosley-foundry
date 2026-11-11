@@ -25,7 +25,9 @@ export default async function CohortAdmin({ params }: { params: Promise<{ id: st
   });
   if (!cohort) notFound();
   const report = await cohortReport(cohort.id);
-  const facilitators = cohort.members.filter((m) => m.role === "FACILITATOR");
+  const facilitators: { userId: string; user: { name: string } }[] = cohort.members.filter((m) => m.role === "FACILITATOR");
+  // An administrator who also coaches can assign themselves without being enrolled.
+  if (a.alsoCoach && !facilitators.some((f) => f.userId === a.id)) facilitators.push({ userId: a.id, user: { name: `${a.name} (me)` } });
   const participants = cohort.members.filter((m) => m.role === "PARTICIPANT");
   const assignments = await db.coachAssignment.findMany({ where: { participantId: { in: participants.map((p) => p.userId) }, active: true }, include: { coach: { select: { name: true } } } });
   const flashRaw = (await cookies()).get("enroll_flash")?.value;

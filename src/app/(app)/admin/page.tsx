@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { createCohort } from "@/app/actions/admin";
+import { createCohort, setAlsoCoach } from "@/app/actions/admin";
 import { DELIVERY_FORMATS } from "@/content/program";
 import { fmt, ymd } from "@/lib/dates";
 import { PageHeader, Card, Field } from "@/components/ui";
@@ -26,6 +26,18 @@ export default async function AdminHome() {
           </Link>
         ))}
       </div>
+      <Card className="mt-6">
+        <h2 className="h3">Coaching</h2>
+        <p className="text-sm muted mt-1">
+          {a.alsoCoach
+            ? "You are set up as a coach too. Assign yourself to people on a cohort page. You will see only what each person chooses to share with you, the same as any coach."
+            : "Do you coach people yourself? Turn this on to get the coach screens. You will see only what each person chooses to share with you, the same as any coach."}
+        </p>
+        <form action={setAlsoCoach} className="mt-3">
+          <input type="hidden" name="on" value={a.alsoCoach ? "false" : "true"} />
+          <Submit className="btn-quiet">{a.alsoCoach ? "Turn off coaching for my account" : "I also coach"}</Submit>
+        </form>
+      </Card>
       <Card className="mt-6">
         <h2 className="h3">New cohort: Leading Others program</h2>
         <form action={createCohort} className="mt-4 grid gap-4 sm:grid-cols-2">

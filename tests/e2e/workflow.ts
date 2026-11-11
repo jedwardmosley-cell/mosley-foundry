@@ -255,6 +255,24 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.screenshot({ path: `${shots}/10-admin-cohort.png`, fullPage: true });
   });
 
+  await check("11. admin turns on coaching, assigns self, sees only what is shared", async () => {
+    await page.goto(`${BASE}/admin`);
+    await submitAndWait(page, 'button:has-text("I also coach")');
+    await page.waitForSelector("text=Turn off coaching for my account");
+    await page.locator("a", { hasText: "Spring Manager Cohort" }).click();
+    const row = page.locator("tr", { hasText: "Lena Ortiz" });
+    await row.locator('select[name="coachId"]').selectOption({ label: "Jordan Park (Demo Admin) (me)" });
+    await row.locator('button:has-text("Assign")').click();
+    await row.locator('button:has-text("Assign")').waitFor({ state: "detached" });
+    await page.goto(`${BASE}/coach`);
+    await page.waitForSelector("text=Lena Ortiz");
+    await page.waitForSelector("text=0 of 7 areas shared");
+    const denied = await page.goto(`${BASE}/coach/${dana.id}`);
+    assert.equal(denied?.status(), 404, "admin-coach cannot open someone they do not coach");
+    const j = await page.goto(`${BASE}/journal`);
+    assert.ok(!j?.url().endsWith("/journal"));
+  });
+
   await check("desktop layout renders", async () => {
     await logout(page);
     const desk = await browser.newPage({ viewport: { width: 1280, height: 900 } });
