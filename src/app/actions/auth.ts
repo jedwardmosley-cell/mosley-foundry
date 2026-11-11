@@ -63,7 +63,7 @@ export async function changePassword(_: PasswordState, fd: FormData): Promise<Pa
   if (next === current) return { error: "Choose a new password that is different from the current one." };
   const row = await db.user.findUniqueOrThrow({ where: { id: u.id } });
   if (!verifyPassword(current, row.passwordHash)) return { error: "The current password is wrong." };
-  await db.user.update({ where: { id: u.id }, data: { passwordHash: hashPassword(next), mustChangePassword: false } });
+  await db.user.update({ where: { id: u.id }, data: { passwordHash: hashPassword(next), mustChangePassword: false, passwordResetAt: null, passwordResetBy: null } });
   await db.session.deleteMany({ where: { userId: u.id } });
   await createSession(u.id);
   return { ok: true };

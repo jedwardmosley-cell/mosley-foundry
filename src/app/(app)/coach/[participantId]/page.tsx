@@ -13,6 +13,7 @@ import { PILLAR_KEYS } from "@/content/types";
 import { PageHeader, Card, PillarMark, Gauge, Field } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 import { removeClient } from "@/app/actions/clients";
+import { ResetPasswordForm } from "@/components/ResetPasswordForm";
 
 function NotShared({ scope }: { scope: ShareScope }) {
   return <p className="text-sm text-ink-mute">Not shared: {SHARE_SCOPES[scope].toLowerCase()}.</p>;
@@ -199,6 +200,10 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
         </div>
       )}
       <details className="mt-10">
+        <summary className="cursor-pointer text-sm text-ink-mute">Reset {v.participant.name.split(" (")[0]}&apos;s password</summary>
+        <div className="mt-3"><ResetPasswordForm participantId={participantId} /></div>
+      </details>
+      <details className="mt-4">
         <summary className="cursor-pointer text-sm text-ink-mute">Stop coaching {v.participant.name.split(" (")[0]}</summary>
         <form action={removeClient} className="mt-3">
           <input type="hidden" name="participantId" value={participantId} />

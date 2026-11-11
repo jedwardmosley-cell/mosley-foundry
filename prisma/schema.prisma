@@ -30,6 +30,8 @@ model User {
   passwordHash String
   role         String   @default("PARTICIPANT") // enum: PARTICIPANT | COACH | ADMIN
   mustChangePassword Boolean @default(false) // set when an account is created with a temporary password
+  passwordResetAt    DateTime? // when a coach last reset this password; shown to the person at next sign-in
+  passwordResetBy    String?   // name of the coach who reset it
   alsoCoach    Boolean  @default(false) // an administrator who also coaches; coach access rules still apply
   orgId        String?
   org          Organization? @relation(fields: [orgId], references: [id])

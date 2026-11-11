@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { fmt } from "@/lib/dates";
 import { signOut } from "@/app/actions/auth";
 import { PasswordForm } from "@/components/PasswordForm";
 
@@ -7,6 +9,7 @@ export const metadata = { title: "Change password" };
 
 export default async function PasswordPage() {
   const u = await requireUser();
+  const reset = u.mustChangePassword ? await db.user.findUnique({ where: { id: u.id }, select: { passwordResetAt: true, passwordResetBy: true } }) : null;
   return (
     <main className="mx-auto max-w-md px-4 py-12">
       <p className="eyebrow">Both Hands on the Wheel</p>
@@ -16,6 +19,11 @@ export default async function PasswordPage() {
           ? "You signed in with a temporary password. Pick one that only you know before you go on."
           : `Signed in as ${u.email}.`}
       </p>
+      {reset?.passwordResetAt && (
+        <p className="mt-4 rounded-xl border border-brass bg-brass-soft/40 p-3 text-sm">
+          Your password was reset by {reset.passwordResetBy ?? "your coach"} on {fmt(reset.passwordResetAt, { month: "long", day: "numeric", year: "numeric" })}. If you did not ask for that, tell them right away.
+        </p>
+      )}
       <div className="card mt-6">
         <PasswordForm first={u.mustChangePassword} />
       </div>

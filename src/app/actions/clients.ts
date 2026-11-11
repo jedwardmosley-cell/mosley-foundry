@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
-import { audit } from "@/lib/access";
+import { audit, isActiveCoachOf } from "@/lib/access";
 import { hashPassword } from "@/lib/password";
 
 export type ClientState = { error?: string; ok?: string; temp?: { email: string; password: string }; values?: { name: string; email: string } } | undefined;
@@ -59,4 +59,26 @@ export async function removeClient(fd: FormData) {
   await audit(coach, "coach.remove_client", participantId);
   revalidatePath("/coach");
   redirect("/coach");
+}
+
+export type ResetState = { error?: string; temp?: string } | undefined;
+
+/**
+ * A coach resets a current client's password. The client is signed out everywhere, must choose
+ * a new password at next sign-in, and is told who reset it and when. The reset is audited.
+ */
+export async function resetClientPassword(_: ResetState, fd: FormData): Promise<ResetState> {
+  const coach = await requireUser("COACH");
+  const participantId = String(fd.get("participantId") ?? "");
+  if (!(await isActiveCoachOf(coach.id, participantId))) return { error: "This person is not on your client list." };
+  const target = await db.user.findUnique({ where: { id: participantId } });
+  if (!target || target.role !== "PARTICIPANT") return { error: "Only client accounts can be reset here." };
+  const temp = randomBytes(9).toString("base64url");
+  await db.user.update({
+    where: { id: target.id },
+    data: { passwordHash: hashPassword(temp), mustChangePassword: true, passwordResetAt: new Date(), passwordResetBy: coach.name },
+  });
+  await db.session.deleteMany({ where: { userId: target.id } });
+  await audit(coach, "coach.reset_password", target.id);
+  return { temp };
 }
