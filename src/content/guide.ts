@@ -125,7 +125,8 @@ export const CLIENT_GUIDE: GuideSection[] = [
     intro: "Some people want to strengthen who they are. Some are stepping into a new role. Some want to reinvent how they show up. Identity Shift lets you say which one fits, and the coaching adjusts.",
     steps: [
       "Open Identity Shift from your FORGE Plan, your FORGE results, or More.",
-      "Answer three questions: who you are becoming, why now, and the behavior that would show it.",
+      "Finish your I am statement, then answer two short questions: why now, and the behavior that would show it. Tap a starter if you want one.",
+      "Read your statement out loud. It is in the present tense on purpose. You are claiming it.",
       "Tap each level on the spectrum to read about it, then choose one. No level ranks above another, and your FORGE scores do not decide it.",
       "At Level 3 you can create a performance identity: a name, standards and an activation cue you use to prepare for demanding situations. It is a practice tool and it is still you.",
       "Your FORGE Plan, Blueprint, 30-day cycle and daily check-in then show prompts that fit your level. Everything stays optional.",
@@ -209,7 +210,7 @@ export const COACH_GUIDE: GuideSection[] = [
       "Clients choose their own level. You cannot set it for them.",
       "To suggest identity work, assign one of the Identity Shift exercises from the program list.",
       "You see a client's statement, level and behavior only if they turn on Identity Shift in Sharing. You see their performance identity only if they also tick that box.",
-      "You see how often they answered yes to acting like the person they are becoming. Their written notes on that question stay private.",
+      "You see how often they answered yes to showing up as who they are. Their written notes on that question stay private.",
     ],
   },
   {

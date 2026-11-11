@@ -115,7 +115,7 @@ export async function participantContext(userId: string) {
   if (id && id.aiUse) {
     const level = { CORE: "Level 1, Core Alignment", ROLE: "Level 2, Role Transition", REINVENT: "Level 3, Identity Reinvention" }[id.level as "CORE"] ?? id.level;
     lines.push(`Identity Shift (participant's own choice of scope, not a ranking): ${level}`);
-    if (id.becoming) lines.push(`Who they are becoming (their words): ${id.becoming}`);
+    if (id.becoming) lines.push(`Identity statement, a present-tense claim in their words: ${id.becoming}`);
     if (id.behavior) lines.push(`Behavior that would show it (their words): ${id.behavior}`);
     if (id.level === "REINVENT" && id.aiUsePersona) {
       if (id.personaName) lines.push(`Performance identity they chose, a practice tool: ${id.personaName}`);
@@ -171,6 +171,7 @@ export function systemPrompt(mode: AiMode, context: string, sources: Chunk[], to
     "- FORGE scores are self-ratings for development, not a validated psychometric measure, and not equivalent to EQ-i scores. Never invent or estimate scores or assessment results.",
     "- You are not a therapist and do not diagnose. If the participant describes a mental health crisis, self-harm, abuse or danger, respond with care, encourage them to contact a qualified professional or local emergency services (in the US, call or text 988), and suggest they tell their coach.",
     "- Push toward real-world action and human accountability: a specific behavior, a date, and a person who will know.",
+    "- Identity statements are claimed in the present tense: \"I am a leader who operates with integrity.\" When you quote, draft or suggest one, write it as an I am statement. Never rewrite it as \"I'm becoming\" or \"I want to be.\"",
     "",
     `MODE: ${MODES[mode]}`,
     ...(tone ? ["", tone] : []),
@@ -221,7 +222,7 @@ export type DraftKind = "destination" | "why" | "forgeStatement";
 const DRAFT_ASK: Record<DraftKind, { query: string; ask: string }> = {
   destination: {
     query: "Future Focused destination paragraph picture of the leader you are becoming Road Test",
-    ask: "Draft the participant's Destination Paragraph: one short paragraph, first person, present tense, describing the leader they are becoming and the future they are building toward. A picture of a person, not a goal list or metrics.",
+    ask: "Draft the participant's Destination Paragraph: one short paragraph, first person, present tense, describing, as true today, the leader they are and the future they are building toward. A picture of a person, not a goal list or metrics.",
   },
   why: {
     query: "Reason Rooted why sentence generous reason holds when results disappear",
@@ -229,7 +230,7 @@ const DRAFT_ASK: Record<DraftKind, { query: string; ask: string }> = {
   },
   forgeStatement: {
     query: "FORGE Statement one paragraph leader becoming destination discipline committing",
-    ask: "Draft the participant's FORGE Statement: one paragraph, first person, present tense. The leader they are becoming, the destination they are driving toward, and the discipline they are committing to build.",
+    ask: "Draft the participant's FORGE Statement: one paragraph, first person, present tense. Who they are as a leader, claimed as true today, the destination they are driving toward, and the discipline they are committing to build.",
   },
 };
 
