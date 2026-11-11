@@ -27,6 +27,12 @@ export default async function Dashboard() {
   const dueRels = d.relationships.slice(0, 3);
   const pathway = PATHWAYS[d.profile.pathway as keyof typeof PATHWAYS];
 
+  // Items the coach has put in front of this person. They live on the Coaching page; this makes them hard to miss.
+  const now = new Date();
+  const openExercises = d.exercises.filter((x) => x.status !== "DONE").slice(0, 5);
+  const nextSession = [...d.sessions].reverse().find((x) => x.scheduledAt >= now) ?? null;
+  const lastCommitments = d.sessions.find((x) => x.scheduledAt < now && x.commitments) ?? null;
+
   const steps = [
     { done: !!d.assessment, label: "Take the FORGE self-assessment", href: "/assessment" },
     { done: !!d.profile.priorityPillar, label: "Choose your development priority", href: d.assessment ? `/assessment/${d.assessment.id}` : "/assessment" },
@@ -42,6 +48,35 @@ export default async function Dashboard() {
         <p className="eyebrow">{fmt(new Date(), { weekday: "long", month: "long", day: "numeric" })} · {pathway?.name}</p>
         <h1 className="h1 mt-2">Good to see you, {u.name.split(" ")[0]}.</h1>
       </header>
+
+      {(openExercises.length > 0 || nextSession || lastCommitments) && (
+        <Card className="border-brass/60">
+          <div className="flex items-baseline justify-between">
+            <p className="eyebrow">From your coach</p>
+            <Link href="/coaching" className="text-sm btn-link">Open Coaching</Link>
+          </div>
+          <ul className="mt-3 divide-y divide-line">
+            {nextSession && (
+              <li className="py-2.5">
+                <p className="text-[15px]"><span className="font-medium">Session with {nextSession.coach.name.split(" (")[0]}</span> on {fmt(nextSession.scheduledAt, { weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" })}</p>
+                {nextSession.agenda && <p className="text-sm text-ink-soft">Agenda: {nextSession.agenda}</p>}
+                {!nextSession.participantPrep && <Link href="/coaching" className="text-sm btn-link">Add your prep note</Link>}
+              </li>
+            )}
+            {openExercises.map((x) => (
+              <li key={x.id} className="py-2.5 flex items-baseline justify-between gap-3">
+                <Link href="/coaching" className="text-[15px]"><span className="font-medium">Exercise:</span> {x.title}</Link>
+                <span className="text-sm muted whitespace-nowrap">{x.dueOn ? `Due ${fmt(x.dueOn)}` : x.status === "ASSIGNED" ? "New" : "In progress"}</span>
+              </li>
+            ))}
+            {lastCommitments && (
+              <li className="py-2.5">
+                <p className="text-[15px]"><span className="font-medium">What you agreed on {fmt(lastCommitments.scheduledAt)}:</span> {lastCommitments.commitments}</p>
+              </li>
+            )}
+          </ul>
+        </Card>
+      )}
 
       {remaining.length > 0 && (
         <Card className="bg-navy-deep border-navy-deep text-white">
