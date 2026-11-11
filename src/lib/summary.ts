@@ -28,7 +28,7 @@ export async function developmentSummary(userId: string, name: string) {
       const s = scoresFrom(a);
       L.push(`| ${fmt(a.completedAt, { month: "short", day: "numeric", year: "numeric" })} | ${s.F} | ${s.O} | ${s.R} | ${s.G} | ${s.E} | ${total(s)} |`);
     }
-    L.push("", "_Self-rated development scores. Not a validated psychometric measure._");
+    L.push("", "_These are self-ratings for personal development. They have not been validated as a psychometric measure._");
   }
   if (d.goals.length) {
     L.push("", "## FORGE Action Plan");
@@ -40,7 +40,7 @@ export async function developmentSummary(userId: string, name: string) {
   }
   if (d.relationships.length) {
     L.push("", "## Accountability network");
-    for (const r of d.relationships) L.push(`- ${r.name}, ${RELATIONSHIP_ROLES[r.role as keyof typeof RELATIONSHIP_ROLES]}, every ${r.cadenceDays} days; check-ins held: ${r.checkIns.filter((c) => c.happened).length}`);
+    for (const r of d.relationships) L.push(`- ${r.name}, ${RELATIONSHIP_ROLES[r.role as keyof typeof RELATIONSHIP_ROLES]}, every ${r.cadenceDays} days; check-ins done: ${r.checkIns.filter((c) => c.happened).length}`);
   }
   if (cycles.length) {
     L.push("", "## 30-day cycles");

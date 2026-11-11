@@ -40,7 +40,7 @@ export default async function NetworkPage() {
 
       <div className="grid gap-5 md:grid-cols-[1.2fr_1fr]">
         <Card>
-          {rels.length ? <RelationshipMap name={u.name} rels={withState} /> : <p className="muted py-10 text-center">Your map is empty. Start with one name.</p>}
+          {rels.length ? <RelationshipMap name={u.name} rels={withState} /> : <p className="muted py-10 text-center">Your map is empty. Add one person to get started.</p>}
         </Card>
         <Card>
           <p className="eyebrow">Structure health</p>

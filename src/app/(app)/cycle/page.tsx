@@ -21,7 +21,7 @@ export default async function CyclePage() {
     return (
       <>
         <PageHeader eyebrow="30-day development cycle" title="No active cycle" />
-        <Empty title="Start a 30-day cycle" href="/cycle/new" cta="Start">One pillar. One behavior. Four weeks.</Empty>
+        <Empty title="Start a 30-day cycle" href="/cycle/new" cta="Start">Pick one pillar and one behavior, then work on it for four weeks.</Empty>
         {past.length > 0 && <PastCycles past={past} />}
       </>
     );

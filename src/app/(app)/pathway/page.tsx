@@ -93,7 +93,7 @@ export default async function PathwayPage() {
 
       {profile.pathway === "PERSONAL" && (
         <Card>
-          <p className="text-[15px]">Your pathway runs on the core: the FORGE assessment, your Action Plan, the Discipline by Design Blueprint, your people, and 30-day cycles. The <Link href="/library" className="btn-link">Road Library</Link> holds the book&apos;s Road Tests and the workbook exercises.</p>
+          <p className="text-[15px]">Your pathway runs on the core: the FORGE assessment, your Action Plan, the Discipline by Design Blueprint, your people, and 30-day cycles. The <Link href="/library" className="btn-link">Road Library</Link> has the book&apos;s Road Tests and the workbook exercises.</p>
         </Card>
       )}
 

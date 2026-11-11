@@ -12,7 +12,7 @@ export default async function JournalPage() {
   const entries = await db.journalEntry.findMany({ where: { userId: u.id }, orderBy: { createdAt: "desc" } });
   return (
     <>
-      <PageHeader eyebrow="Only you" title="Private Journal">
+      <PageHeader eyebrow="Private to you" title="Private Journal">
         Nothing here can be shared. Coaches, administrators and the AI Companion have no access to it.
       </PageHeader>
       <Card>

@@ -23,7 +23,7 @@ export default async function HistoryPage() {
   return (
     <>
       <PageHeader eyebrow="Evidence over time" title="Development history">
-        Not what you know. What you practiced, who you checked in with, and what changed.
+        This is a record of what you practiced, who you checked in with, and what changed over time.
       </PageHeader>
       <div className="flex flex-wrap gap-3 mb-6">
         <a href="/export" className="btn-primary">Download development summary</a>

@@ -30,11 +30,11 @@ export const ONE_MOVE: Record<PillarKey, OptionList> = {
   R: { status: "draft", basis: "workbook", options: [
     "Write my why in full and read it back after a hard day",
     "Share my why with one person who will challenge it",
-    "Rewrite my why around who it serves, not what it gets me",
-    "Revisit my why at the end of the week and note if it held",
+    "Rewrite my why around the people it serves",
+    "Reread my why at the end of the week and note if it still feels true",
   ] },
   G: { status: "draft", basis: "workbook", options: [
-    "Treat one small setback this week as information, not a verdict",
+    "Treat one small setback this week as something to learn from",
     "Go back to one piece of feedback I brushed off and act on it",
     "Ask where I am the one who needs to recalculate",
     "Show my team how I handle being wrong, out loud",
@@ -55,7 +55,7 @@ export const CYCLE_FOCUS: Record<PillarKey, OptionList> = {
     "Saying no to opportunities outside my lane",
   ] },
   O: { status: "draft", basis: "workbook", options: [
-    "Reading my early signals every week, not just the final numbers",
+    "Reading my early signals every week, before the final numbers come in",
     "Acting on an early signal before the results confirm it",
     "Asking my team what they are seeing before the numbers arrive",
   ] },
@@ -71,7 +71,7 @@ export const CYCLE_FOCUS: Record<PillarKey, OptionList> = {
   ] },
   E: { status: "draft", basis: "workbook", options: [
     "Pausing before I answer when a decision gets challenged",
-    "Staying steady in conversations that used to set me off",
+    "Staying calm in conversations that used to set me off",
     "Recovering quickly after I react, and repairing it",
   ] },
 };
@@ -84,13 +84,13 @@ export const CHECKIN_TAGS: OptionList = { status: "draft", options: [
 /** Quick picks for each Blueprint area. */
 export const BLUEPRINT_PICKS: Record<string, OptionList> = {
   ROUTINES: { status: "draft", basis: "ch10", options: ["Fifteen minutes before the day starts", "Reading", "Journaling", "Prayer or quiet reflection", "Moving my body", "Reading my FORGE Statement"] },
-  WEEKLY: { status: "draft", basis: "ch10", options: ["Plan the week before Monday", "Look back: did I do what I said?", "Check my three signals"] },
+  WEEKLY: { status: "draft", basis: "ch10", options: ["Plan the week ahead", "Look back: did I do what I said?", "Check my three signals"] },
   ACCOUNTABILITY: { status: "draft", options: ["Share my FORGE Statement with my partner", "Every-other-week check-in call", "Text my partner my one move each Monday"] },
   MENTORING: { status: "draft", basis: "ch10", options: ["Monthly call with my mentor", "Regular session with my coach", "Bring one crossroads decision to my mentor"] },
   MENTEES: { status: "draft", basis: "ch10", options: ["Weekly time with someone I am developing", "Teach one thing I am practicing", "Name the potential I see in someone, out loud"] },
   GROUPS: { status: "draft", basis: "ch10", options: ["Weekly peer group", "Mastermind", "A class or cohort", "Community of practice"] },
   RELATIONSHIPS: { status: "draft", options: ["Reach out to one person in my circle each week", "Coffee conversation, nothing to ask for", "Thank-you note to someone who helped me"] },
-  LEARNING: { status: "draft", basis: "ch10", options: ["A book I am actually working through", "A course or certification", "A podcast worth becoming like", "Audit my feed"] },
+  LEARNING: { status: "draft", basis: "ch10", options: ["A book I am working through right now", "A course or certification", "A podcast worth becoming like", "Audit my feed"] },
   LEADERSHIP: { status: "draft", options: ["Every commitment gets an owner, a date, and a follow-up", "Follow up on what my team said they would do", "Delegate one task I am still doing myself"] },
   REVIEW: { status: "draft", options: ["Quarterly destination check", "Monthly look at my Blueprint", "Re-take the FORGE assessment every 90 days"] },
 };
@@ -98,7 +98,7 @@ export const BLUEPRINT_PICKS: Record<string, OptionList> = {
 /** Purpose quick picks per relationship role. */
 export const RELATIONSHIP_PURPOSE: Record<string, OptionList> = {
   MENTOR: { status: "draft", basis: "ch10", options: ["Perspective from further up the road", "Tells me the truth at a crossroads"] },
-  COACH: { status: "draft", basis: "ch10", options: ["Watches my blind spots", "Holds me to what I said I would do"] },
+  COACH: { status: "draft", basis: "ch10", options: ["Watches my blind spots", "Checks that I do what I said I would do"] },
   ACCOUNTABILITY_PARTNER: { status: "draft", options: ["Checks on my FORGE Statement", "Checks on my one move each week", "Won't let me manage around my blind spots"] },
   MENTEE: { status: "draft", basis: "ch10", options: ["Someone I am pouring into", "Developing them for a bigger role"] },
   GROUP: { status: "draft", basis: "ch10", options: ["Peers pointed toward growth", "Study and accountability"] },
