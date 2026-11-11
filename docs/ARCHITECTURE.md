@@ -67,7 +67,7 @@ Taps first, writing optional. The assessment, daily check-in, FORGE Plan, Bluepr
 3. Free-text reflections require both the scope and the individual entry marked shared.
 4. Journal entries and AI conversations have no sharing path. The AI companion does not read the journal.
 5. Admins and sponsors see enrollment, schedules, attendance and aggregate percentages. Percentages are hidden for groups under 5. They cannot open participant development records.
-6. EQ-i: manual entry of the participant's own priorities only; a coach interpretation returns to the participant for approval before it is visible again.
+6. EQ-i: manual entry of the participant's own priorities only; a coach interpretation returns to the participant for approval before it is visible again. The EQ-i section is optional on every pathway (`Profile.eqiEnabled`). The participant links each priority to a FORGE pillar of their choice, and from there can start a 30-day cycle, add the practice to the Blueprint, or share it with their coach in one step. No scores, reports or EQ-i scale names are stored.
 7. Coach reads are audited. Accepted invitations link accounts but share nothing.
 
 **Production hardening (next step):** on PostgreSQL, add row-level security policies mirroring `access.ts` (owner-only on development tables; coach read through `share_grant`; no policy at all for `journal_entry` other than owner) and connect with a role that cannot bypass RLS. Add rate limiting on sign-in, email verification, password reset, and CSRF origin checks beyond Next.js defaults.

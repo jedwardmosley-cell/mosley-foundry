@@ -79,6 +79,9 @@ export default async function Dashboard() {
                 </div>
               </div>
               {goal?.oneMove && <p className="mt-4 text-[15px]"><span className="text-ink-mute">One move this week: </span>{goal.oneMove}</p>}
+              {d.profile.eqiEnabled && d.eqi.filter((e) => e.pillar === p.key).map((e) => (
+                <p key={e.id} className="mt-2 text-sm"><span className="text-ink-mute">From my EQ-i debrief: </span><Link href="/pathway/eqi" className="btn-link">{e.label}</Link></p>
+              ))}
             </div>
           ) : (
             <p className="mt-3 muted">Choose a development priority after your assessment.</p>

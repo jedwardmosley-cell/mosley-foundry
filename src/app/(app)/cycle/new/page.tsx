@@ -12,7 +12,9 @@ import type { PillarKey } from "@/content/types";
 
 export const metadata = { title: "Start a 30-day cycle" };
 
-export default async function NewCycle() {
+export default async function NewCycle({ searchParams }: { searchParams: Promise<{ pillar?: string; focus?: string }> }) {
+  const sp = await searchParams;
+  const fromLink = ["F", "O", "R", "G", "E"].includes(sp.pillar ?? "") ? (sp.pillar as PillarKey) : null;
   const u = await requireUser("PARTICIPANT");
   const { pack } = await getContent();
   const profile = await db.profile.findUnique({ where: { userId: u.id } });
@@ -25,7 +27,7 @@ export default async function NewCycle() {
       </PageHeader>
       <Card>
         <form action={startCycle} className="space-y-5">
-          <CycleFocusFields pillars={pack.pillars.map((p) => ({ key: p.key, name: p.name }))} initial={(profile?.priorityPillar ?? "F") as PillarKey} />
+          <CycleFocusFields pillars={pack.pillars.map((p) => ({ key: p.key, name: p.name }))} initial={fromLink ?? ((profile?.priorityPillar ?? "F") as PillarKey)} initialFocus={(sp.focus ?? "").slice(0, 500)} />
           <fieldset>
             <legend className="label">Structure</legend>
             <div className="space-y-3">

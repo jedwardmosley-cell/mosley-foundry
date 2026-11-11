@@ -84,6 +84,7 @@ model Profile {
   remindersOn     Boolean  @default(false)
   aiEnabled       Boolean  @default(true)
   aiRetentionDays Int      @default(90)
+  eqiEnabled      Boolean  @default(false) // participant opted in to the EQ-i layer
   onboardedAt     DateTime?
   updatedAt       DateTime @updatedAt
 }
@@ -296,6 +297,7 @@ model EqiPriority {
   userId              String
   user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   label               String   // participant's own words for the development priority
+  pillar              String?  // FORGE pillar the participant links this priority to (their choice)
   note                String   @default("")
   practice            String   @default("")
   coachInterpretation String   @default("") // recorded by a qualified coach

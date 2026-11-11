@@ -87,7 +87,7 @@ export async function participantContext(userId: string) {
     db.developmentCycle.findFirst({ where: { userId, status: "ACTIVE" } }),
     db.dailyCheckIn.findMany({ where: { userId }, orderBy: { date: "desc" }, take: 7, select: { date: true, status: true } }),
     db.coachingSession.findMany({ where: { participantId: userId }, orderBy: { scheduledAt: "desc" }, take: 2, select: { scheduledAt: true, agenda: true, commitments: true } }),
-    db.eqiPriority.findMany({ where: { userId }, select: { label: true, practice: true } }),
+    db.eqiPriority.findMany({ where: { userId }, select: { label: true, practice: true, pillar: true } }),
     db.relationship.findMany({ where: { ownerId: userId, active: true }, select: { name: true, role: true, purpose: true, nextCheckIn: true } }),
   ]);
   const lines: string[] = [];
@@ -106,7 +106,7 @@ export async function participantContext(userId: string) {
   if (cycle) lines.push(`Active 30-day cycle started ${cycle.startDate.toDateString()} on pillar ${cycle.pillar}${cycle.focus ? `, focus: ${cycle.focus}` : ""}`);
   if (checkIns.length) lines.push(`Recent check-ins: ${checkIns.map((c) => `${c.date} ${c.status}`).join(", ")}`);
   for (const s of sessions) if (s.commitments) lines.push(`Coaching commitments from ${s.scheduledAt.toDateString()}: ${s.commitments}`);
-  for (const e of eqi) lines.push(`EQ-i development priority (participant-entered): ${e.label}${e.practice ? `; practice: ${e.practice}` : ""}`);
+  for (const e of eqi) lines.push(`EQ-i development priority (participant's own words, no scores): ${e.label}${e.pillar ? `; linked by the participant to FORGE ${e.pillar}` : ""}${e.practice ? `; practice: ${e.practice}` : ""}`);
   for (const r of rels) lines.push(`Relationship: ${r.name} (${r.role})${r.purpose ? `, purpose: ${r.purpose}` : ""}`);
   return lines.join("\n");
 }
