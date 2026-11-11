@@ -9,6 +9,7 @@ import { DAY30_DECISIONS, CHECKIN_STATUS } from "@/content/program";
 import { fmt } from "@/lib/dates";
 import { PILLAR_KEYS } from "@/content/types";
 import { PageHeader, Card, Privacy } from "@/components/ui";
+import { CHECKIN_IDENTITY } from "@/content/identity";
 
 export const metadata = { title: "History & Export" };
 
@@ -17,7 +18,7 @@ export default async function HistoryPage() {
   const d = await loadParticipant(u.id);
   const { pack } = await getContent();
   const cycles = await db.developmentCycle.findMany({ where: { userId: u.id }, orderBy: { startDate: "desc" }, include: { checkIns: true } });
-  const reflections = await db.dailyCheckIn.findMany({ where: { userId: u.id, OR: [{ reflection: { not: "" } }, { note: { not: "" } }] }, orderBy: { date: "desc" }, take: 40 });
+  const reflections = await db.dailyCheckIn.findMany({ where: { userId: u.id, OR: [{ reflection: { not: "" } }, { note: { not: "" } }, { identityActed: { not: "" } }] }, orderBy: { date: "desc" }, take: 40 });
   const hasCoach = d.coaches.length > 0;
 
   return (
@@ -92,6 +93,7 @@ export default async function HistoryPage() {
                   )}
                 </span>
               </div>
+              {r.identityActed && <p className="mt-1 text-sm text-ink-soft">Acted like the person I&apos;m becoming: {CHECKIN_IDENTITY.answers[r.identityActed as keyof typeof CHECKIN_IDENTITY.answers]}{r.identityNote ? `. ${r.identityNote}` : ""}</p>}
               {r.note && <p className="mt-1 text-[15px]">{r.note}</p>}
               {r.reflection && <p className="mt-1 text-[15px] text-ink-soft whitespace-pre-wrap">{r.reflection}</p>}
             </li>

@@ -115,8 +115,11 @@ test("an admin who also coaches gets coach access only: assigned people, granted
 test("identity statements and performance identities never appear in the coach view", async () => {
   await db.identityProfile.create({ data: { userId: dana.id, level: "REINVENT", becoming: "IDENTITY-SECRET-STATEMENT", behavior: "IDENTITY-SECRET-BEHAVIOR", personaName: "IDENTITY-SECRET-PERSONA", personaCue: "IDENTITY-SECRET-CUE" } });
   try {
+    const today = await db.dailyCheckIn.findFirstOrThrow({ where: { userId: dana.id, shared: true } });
+    await db.dailyCheckIn.update({ where: { id: today.id }, data: { identityActed: "YES", identityNote: "IDENTITY-SECRET-NOTE" } });
     const v = JSON.stringify(await getCoachView(coach, dana.id));
-    assert.ok(!v.includes("IDENTITY-SECRET"));
+    assert.ok(!v.includes("IDENTITY-SECRET"), "not even on a check-in the client shared");
+    await db.dailyCheckIn.update({ where: { id: today.id }, data: { identityActed: "", identityNote: "" } });
     const r = JSON.stringify(await cohortReport((await db.cohort.findFirstOrThrow({ where: { isDemo: true } })).id));
     assert.ok(!r.includes("IDENTITY-SECRET"));
   } finally {

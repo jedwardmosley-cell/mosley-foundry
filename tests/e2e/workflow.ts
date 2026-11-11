@@ -217,6 +217,37 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal(priority.priorityPillar, "E", "choosing a level never changes the FORGE priority");
   });
 
+  await check("7f. the level shapes the FORGE Plan, Blueprint, cycle and check-in, all optional", async () => {
+    const me = await db.user.findUniqueOrThrow({ where: { email } });
+    await page.goto(`${BASE}/plan`);
+    await page.waitForSelector("text=For Identity Reinvention:");
+    await page.waitForSelector("text=Use your activation cue to prepare before a demanding situation.");
+    await page.goto(`${BASE}/blueprint`);
+    const card = page.locator("section", { hasText: "Identity practice" }).first();
+    await card.waitFor();
+    await card.locator("text=Write your activation cue first").waitFor(); // no cue written yet, so nothing is added for them
+    const before = await db.commitment.count({ where: { userId: me.id } });
+    await Promise.all([page.waitForLoadState("networkidle"), card.locator('button:has-text("Add a weekly review against my standards")').click()]);
+    await card.locator("text=In your Blueprint").waitFor();
+    assert.equal(await db.commitment.count({ where: { userId: me.id } }), before + 1, "only the one the person tapped is added");
+    const added = await db.commitment.findFirstOrThrow({ where: { userId: me.id, detail: "Identity Shift" } });
+    assert.equal(added.cadence, "WEEKLY");
+    await page.goto(`${BASE}/cycle/new`);
+    await page.locator('button:has-text("I close every open commitment by Friday noon.")').click();
+    assert.equal(await page.inputValue('input[name="focus"]'), "I close every open commitment by Friday noon.");
+    await page.goto(`${BASE}/dashboard`);
+    await page.waitForSelector("text=Did you act like the person you're becoming today?");
+    await page.waitForSelector("text=Where did you meet your standard today, and where did you fall short?");
+    // the question is optional: saving without it still works
+    await submitAndWait(page, 'button:has-text("Update today")');
+    assert.equal((await db.dailyCheckIn.findFirstOrThrow({ where: { userId: me.id } })).identityActed, "");
+    await page.locator('label:has(input[name="identityActed"][value="PARTLY"])').click();
+    await submitAndWait(page, 'button:has-text("Update today")');
+    const ci = await db.dailyCheckIn.findFirstOrThrow({ where: { userId: me.id } });
+    assert.equal(ci.identityActed, "PARTLY");
+    assert.equal(ci.status, "DONE", "Done / Partial / Not yet is unchanged");
+  });
+
   await check("1b/7d. sign out, sign back in, saved progress and reflection retrieved", async () => {
     await logout(page);
     await login(page, email, "e2e-password-123");

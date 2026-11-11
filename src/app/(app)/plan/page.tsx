@@ -9,7 +9,7 @@ import { Submit } from "@/components/Submit";
 import { Picks, DictationHint } from "@/components/Picks";
 import { HelpMeWrite } from "@/components/HelpMeWrite";
 import Link from "next/link";
-import { LEVELS, type IdentityLevel } from "@/content/identity";
+import { LEVELS, PILLAR_PROMPTS, PILLAR_PROMPTS_STATUS, type IdentityLevel } from "@/content/identity";
 
 export const metadata = { title: "FORGE Plan" };
 
@@ -85,6 +85,13 @@ export default async function PlanPage() {
                   <input name="oneMove" defaultValue={g?.oneMove} className="input" maxLength={1000} />
                 </Field>
                 <Picks list={ONE_MOVE[p.key]} target="oneMove" />
+                {identity && (
+                  <p className="rounded-xl bg-paper p-3 text-sm">
+                    <span className="font-medium">For {LEVELS[identity.level as IdentityLevel].name}: </span>
+                    {PILLAR_PROMPTS[p.key][identity.level as IdentityLevel]}
+                    {PILLAR_PROMPTS_STATUS === "draft" && <span className="ml-2 draft !text-[10px]">Draft</span>}
+                  </p>
+                )}
                 <details open={!!(g?.whereNow || g?.whereWant)}>
                   <summary className="cursor-pointer text-sm text-navy">Where I am now and where I want to be <span className="text-ink-mute">(optional)</span></summary>
                   <div className="mt-3 grid gap-4 sm:grid-cols-2">

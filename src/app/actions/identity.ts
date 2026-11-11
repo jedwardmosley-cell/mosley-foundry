@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { parse, text } from "@/lib/validation";
+import { PRACTICE, type IdentityLevel } from "@/content/identity";
 
 const schema = z.object({
   level: z.enum(["CORE", "ROLE", "REINVENT"], { errorMap: () => ({ message: "Choose a level" }) }),
@@ -56,4 +57,29 @@ export async function removeIdentity() {
   }
   revalidatePath("/identity");
   revalidatePath("/dashboard");
+}
+
+/**
+ * Adds one identity practice to the Blueprint from the participant's own words.
+ * The participant can change or remove it like any other commitment.
+ */
+export async function addIdentityPractice(fd: FormData) {
+  const u = await requireUser("PARTICIPANT");
+  const { index } = parse(z.object({ index: z.coerce.number().int().min(0).max(10) }), fd);
+  const id = await db.identityProfile.findUnique({ where: { userId: u.id } });
+  if (!id) redirect("/identity");
+  const item = PRACTICE[id.level as IdentityLevel]?.[index];
+  if (!item || item.action.kind !== "commit") throw new Error("Not found");
+  const a = item.action;
+  const firstLine = (t: string) => t.split("\n")[0].trim().slice(0, 200);
+  const title =
+    a.from === "behavior" ? firstLine(id.behavior)
+    : a.from === "cue" ? firstLine(id.personaCue)
+    : a.from === "standards" ? "Read my standards"
+    : "Review my week against my standards";
+  if (!title) redirect("/identity");
+  const detail = "Identity Shift";
+  const exists = await db.commitment.findFirst({ where: { userId: u.id, active: true, title, detail } });
+  if (!exists) await db.commitment.create({ data: { userId: u.id, area: a.area, title, detail, cadence: a.cadence } });
+  revalidatePath("/blueprint");
 }

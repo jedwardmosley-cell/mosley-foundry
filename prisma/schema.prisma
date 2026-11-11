@@ -209,6 +209,8 @@ model DailyCheckIn {
   note       String   @default("")
   reflection String   @default("")
   tags       String   @default("[]") // JSON array of quick tags (where the practice showed up)
+  identityActed String @default("") // enum: "" | YES | PARTLY | NOT_YET (optional identity question)
+  identityNote  String @default("") // optional one-line answer; private to the participant
   shared     Boolean  @default(false) // reflection text visible to coach only when true AND reflections scope granted
   createdAt  DateTime @default(now())
 
