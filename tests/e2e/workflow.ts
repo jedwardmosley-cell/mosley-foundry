@@ -290,6 +290,22 @@ const submitAndWait = async (page: Page, selector: string) => {
     await c3.close();
     await cp.goto(`${BASE}/sharing`);
     await cp.waitForSelector("text=Avery Lin");
+    // the coach resets the client's password: the client is signed out, told who did it, and must choose a new one
+    await page.goto(`${BASE}/coach/${client.id}`);
+    await page.locator("summary", { hasText: "Reset Casey Client" }).click();
+    await page.click('button:has-text("Reset password")');
+    await page.waitForSelector("text=New temporary password");
+    const temp2 = await page.locator("code").first().innerText();
+    const kicked = await cp.goto(`${BASE}/dashboard`);
+    assert.ok(kicked?.url().includes("/login"), "client was signed out by the reset");
+    await cp.fill('input[name="email"]', clientEmail);
+    await cp.fill('input[name="password"]', "casey-new-password-1");
+    await cp.click('button:has-text("Sign in")');
+    await cp.waitForSelector("text=don't match");
+    await login(cp, clientEmail, temp2);
+    await cp.waitForURL("**/account/password");
+    await cp.waitForSelector("text=Your password was reset by Avery Lin");
+    assert.equal(await db.auditEvent.count({ where: { action: "coach.reset_password", targetUserId: client.id } }), 1);
     await c2.close();
     // adding an existing email again does not create a second account
     await page.goto(`${BASE}/coach`);
