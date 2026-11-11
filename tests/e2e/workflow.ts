@@ -177,6 +177,46 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.waitForSelector("text=From my EQ-i debrief");
   });
 
+  await check("7e. Identity Shift: explore all three levels, choose one, change it later, history kept", async () => {
+    await page.goto(`${BASE}/dashboard`);
+    assert.equal(await page.locator("text=Who I'm becoming").count(), 0, "no identity card until the person opts in");
+    await page.goto(`${BASE}/identity`);
+    await page.fill('textarea[name="becoming"]', "Someone who follows through on what I say.");
+    await page.fill('textarea[name="behavior"]', "I close every open commitment by Friday noon.");
+    for (const name of ["Core Alignment", "Role Transition", "Identity Reinvention"]) {
+      await page.locator("label", { hasText: name }).click();
+    }
+    await page.waitForSelector("text=Deliberately construct a new performance identity.");
+    await page.locator("label", { hasText: "Core Alignment" }).click();
+    await page.waitForSelector("text=Strengthen who I am.");
+    assert.ok(!(await page.locator('input[name="personaName"]').isVisible()), "persona fields hidden outside Level 3");
+    await Promise.all([page.waitForURL("**/identity?saved=1"), page.click('button:has-text("Save my identity shift")')]);
+    const me = await db.user.findUniqueOrThrow({ where: { email } });
+    assert.equal((await db.identityProfile.findUniqueOrThrow({ where: { userId: me.id } })).level, "CORE");
+    await page.goto(`${BASE}/dashboard`);
+    const card = page.locator("section", { hasText: "Who I'm becoming" }).first();
+    assert.ok((await card.innerText()).includes("Level 1 · Core Alignment"));
+    assert.ok((await card.innerText()).includes("Emotionally Anchored"));
+    // change to Level 3 with an optional performance identity
+    await page.goto(`${BASE}/identity`);
+    await page.locator("label", { hasText: "Identity Reinvention" }).click();
+    await page.locator("summary", { hasText: "Create a performance identity" }).click();
+    await page.fill('input[name="personaName"]', "The Closer");
+    await page.fill('textarea[name="personaStandards"]', "I finish what I start.");
+    await Promise.all([page.waitForURL("**/identity?saved=1"), page.click('button:has-text("Save changes")')]);
+    await page.waitForSelector("text=Earlier versions");
+    const hist = await db.identityHistory.findMany({ where: { userId: me.id } });
+    assert.equal(hist.length, 1);
+    assert.equal(hist[0].level, "CORE");
+    assert.equal(await db.assessment.count({ where: { userId: me.id } }), 1, "FORGE records untouched");
+    assert.equal(await db.developmentCycle.count({ where: { userId: me.id } }), 1);
+    await page.goto(`${BASE}/dashboard`);
+    await page.waitForSelector("text=The Closer");
+    await page.screenshot({ path: `${shots}/06e-identity-card.png` });
+    const priority = await db.profile.findUniqueOrThrow({ where: { userId: me.id } });
+    assert.equal(priority.priorityPillar, "E", "choosing a level never changes the FORGE priority");
+  });
+
   await check("1b/7d. sign out, sign back in, saved progress and reflection retrieved", async () => {
     await logout(page);
     await login(page, email, "e2e-password-123");

@@ -12,6 +12,7 @@ const PARTICIPANT_NAV = [
   { href: "/more", label: "More", mobile: true, desktop: false },
   { href: "/assessment", label: "FORGE Assessment" },
   { href: "/blueprint", label: "Blueprint" },
+  { href: "/identity", label: "Identity Shift" },
   { href: "/reflect", label: "Weekly Reflection" },
   { href: "/pathway", label: "My Pathway" },
   { href: "/library", label: "Road Library" },
