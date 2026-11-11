@@ -230,6 +230,36 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.screenshot({ path: `${shots}/09-coach-participant.png`, fullPage: true });
   });
 
+  await check("9c. what the coach assigns shows on the client's Today screen", async () => {
+    const assign = page.locator("form", { hasText: "From the program" });
+    await assign.locator('select[name="exerciseRef"]').selectOption({ index: 1 });
+    await assign.locator('button:has-text("Assign")').click();
+    await page.waitForSelector("text=assigned >> nth=0");
+    const sched = page.locator("form", { has: page.locator('input[name="scheduledAt"]') });
+    const when = new Date(Date.now() + 5 * 864e5); when.setHours(10, 0, 0, 0);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    await sched.locator('input[name="scheduledAt"]').fill(`${when.getFullYear()}-${pad(when.getMonth() + 1)}-${pad(when.getDate())}T10:00`);
+    await sched.locator('textarea[name="agenda"]').fill("E2E agenda: review the pause");
+    await sched.locator('button:has-text("Schedule")').click();
+    await page.waitForSelector("text=E2E agenda: review the pause");
+    const dc = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const dp: Page = await dc.newPage();
+    await login(dp, "dana@demo.bothhands.app");
+    await dp.goto(`${BASE}/dashboard`);
+    const box = dp.locator("section", { hasText: "From your coach" });
+    await box.waitFor();
+    assert.ok((await box.innerText()).includes("Exercise:"));
+    assert.ok((await box.innerText()).includes("Session with Avery Lin"));
+    assert.ok((await box.innerText()).includes("What you agreed on"));
+    await box.screenshot({ path: `${shots}/09c-from-coach.png` });
+    // a client with no coach items sees no box
+    await dp.context().clearCookies();
+    await login(dp, "marcus@demo.bothhands.app");
+    await dp.goto(`${BASE}/dashboard`);
+    assert.equal(await dp.locator("text=From your coach").count(), 0);
+    await dc.close();
+  });
+
   await check("10b. private material stays inaccessible to the coach", async () => {
     const html = await page.content();
     assert.ok(!html.includes("PRIVATE DEMO JOURNAL"), "journal leaked");
