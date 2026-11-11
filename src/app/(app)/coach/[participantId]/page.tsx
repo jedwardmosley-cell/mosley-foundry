@@ -152,7 +152,7 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
               {(() => {
                 const a = v.practice.filter((p) => p.identityActed);
                 const yes = a.filter((p) => p.identityActed === "YES").length, partly = a.filter((p) => p.identityActed === "PARTLY").length;
-                return a.length ? <p className="mt-3 text-sm">Acted like the person they are becoming, last {a.length} answers: {yes} yes · {partly} partly · {a.length - yes - partly} not yet</p> : null;
+                return a.length ? <p className="mt-3 text-sm">Showed up as who they are, last {a.length} answers: {yes} yes · {partly} partly · {a.length - yes - partly} not yet</p> : null;
               })()}
             </>
           ) : <p className="mt-2 text-sm muted">Sharing is on, but the client has not set up an Identity Shift.</p>}

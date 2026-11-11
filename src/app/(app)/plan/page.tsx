@@ -57,7 +57,7 @@ export default async function PlanPage() {
           <h2 className="h3">Identity Shift</h2>
           <span className="chip">{identity ? `Level ${LEVELS[identity.level as IdentityLevel].n} · ${LEVELS[identity.level as IdentityLevel].name}` : "Optional"}</span>
         </div>
-        <p className="text-sm muted mt-1">{identity ? identity.becoming : "Who are you becoming, and how big a change is it? Answer four questions and the coaching adjusts to fit."}</p>
+        <p className="text-sm muted mt-1">{identity ? identity.becoming : "Who are you? Claim it in an I am statement, choose how big a change it is, and the coaching adjusts to fit."}</p>
       </Link>
 
       <p className="mt-6 mb-3 text-sm muted">

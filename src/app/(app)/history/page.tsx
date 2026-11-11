@@ -93,7 +93,7 @@ export default async function HistoryPage() {
                   )}
                 </span>
               </div>
-              {r.identityActed && <p className="mt-1 text-sm text-ink-soft">Acted like the person I&apos;m becoming: {CHECKIN_IDENTITY.answers[r.identityActed as keyof typeof CHECKIN_IDENTITY.answers]}{r.identityNote ? `. ${r.identityNote}` : ""}</p>}
+              {r.identityActed && <p className="mt-1 text-sm text-ink-soft">Showed up as who I am: {CHECKIN_IDENTITY.answers[r.identityActed as keyof typeof CHECKIN_IDENTITY.answers]}{r.identityNote ? `. ${r.identityNote}` : ""}</p>}
               {r.note && <p className="mt-1 text-[15px]">{r.note}</p>}
               {r.reflection && <p className="mt-1 text-[15px] text-ink-soft whitespace-pre-wrap">{r.reflection}</p>}
             </li>

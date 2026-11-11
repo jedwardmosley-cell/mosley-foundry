@@ -13,7 +13,7 @@ export function IdentityCard({ id, priority }: { id: Id; priority?: Pillar | nul
     <section className="card relative overflow-hidden">
       <span aria-hidden className="absolute inset-y-0 left-0 w-1.5" style={{ background: l.color }} />
       <div className="flex items-baseline justify-between gap-3">
-        <p className="eyebrow">Who I&apos;m becoming</p>
+        <p className="eyebrow">Who I am</p>
         <Link href="/identity" className="text-sm btn-link">Edit</Link>
       </div>
       <p className="mt-2 font-serif text-lg leading-relaxed">{id.becoming}</p>

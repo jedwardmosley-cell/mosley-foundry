@@ -62,8 +62,12 @@ export const FIRST_EXAMPLE: Record<PathwayKey, Partial<Record<IdentityLevel, num
   ENTREPRENEURIAL: { ROLE: 2, REINVENT: 1 },
 };
 
+/**
+ * Identity statements are claimed in the present tense: "I am a leader who operates with integrity."
+ * Never "I'm becoming..." The statement box starts with a fixed "I am".
+ */
 export const QUESTIONS = {
-  becoming: "Who are you becoming?",
+  becoming: "Who are you? Claim it.",
   situation: "What situation or chapter of life makes this change important?",
   behavior: "What behavior would demonstrate that you've become this person?",
   level: "How substantial a shift do you want to pursue?",
@@ -91,7 +95,7 @@ export const PERSONA_NOTE = "A performance identity is a practice tool you choos
 export const PILLAR_PROMPTS_STATUS: "draft" | "approved" = "draft";
 export const PILLAR_PROMPTS: Record<"F" | "O" | "R" | "G" | "E", Record<IdentityLevel, string>> = {
   F: {
-    CORE: "Describe what the person you are becoming looks like on an ordinary day.",
+    CORE: "Describe what you do on an ordinary day as the person you claimed.",
     ROLE: "List the decisions and responsibilities your new role asks of you.",
     REINVENT: "Write the standards of the performance identity you chose.",
   },
@@ -147,8 +151,8 @@ export const PRACTICE: Record<IdentityLevel, { text: string; action: PracticeAct
 
 /** Daily check-in wording (brief, section 7). Always optional. */
 export const CHECKIN_IDENTITY = {
-  question: "Did you act like the person you're becoming today?",
-  followUp: "What did you do that demonstrates it?",
+  question: "Did you show up as who you are today?",
+  followUp: "What did you do that shows it?",
   level3: "Where did you meet your standard today, and where did you fall short?",
   answers: { YES: "Yes", PARTLY: "Partly", NOT_YET: "Not yet" } as const,
 };
@@ -158,8 +162,61 @@ export const CHECKIN_IDENTITY = {
  * coach can suggest identity work without choosing a level for the client.
  */
 export const IDENTITY_EXERCISES: { title: string; text: string }[] = [
-  { title: "Who you are becoming", text: "Open Identity Shift and answer the first three questions. Choose the level that fits the size of change you want. It is your call, and you can change it later." },
+  { title: "Claim who you are", text: "Open Identity Shift and write your statement as a present-tense claim that starts with I am. Read it out loud. Then choose the level that fits the size of change you want. It is your call, and you can change it later." },
   { title: "The behavior that shows it", text: "Write one behavior another person could see you do if you had already become this person. Then do it once this week and write what happened." },
-  { title: "Evidence of the week", text: "Look back at your check-ins this week. Where did you act like the person you are becoming? Write two moments, and one where you did not." },
-  { title: "Prepare for a demanding situation", text: "Pick one demanding situation coming up. Write how the person you are becoming would prepare for it, and the first thing they would do when it starts." },
+  { title: "Evidence of the week", text: "Look back at your check-ins this week. Where did you show up as who you said you are? Write two moments, and one where you did not." },
+  { title: "Prepare for a demanding situation", text: "Pick one demanding situation coming up. Read your I am statement, then write how you will prepare for it and the first thing you will do when it starts." },
+];
+
+// ---------- Quick picks for the Identity Shift page. DRAFT FOR AUTHOR REVIEW ----------
+// Each statement starter finishes the fixed "I am". Lists are ordered to fit the pathway.
+
+export const PICKS_STATUS: "draft" | "approved" = "draft";
+
+export const STATEMENT_STARTERS: Record<PathwayKey, string[]> = {
+  PERSONAL: [
+    "a person who does what I say I will do",
+    "a leader who operates with integrity",
+    "someone who shows up prepared",
+    "a person who stays calm when things get hard",
+  ],
+  LEADING_OTHERS: [
+    "a leader who operates with integrity",
+    "a manager who sets clear expectations and follows up",
+    "a leader who makes hard calls on time",
+    "a manager my team trusts with bad news",
+  ],
+  ENTREPRENEURIAL: [
+    "a business owner who builds what runs without me",
+    "an owner who decides and commits",
+    "a leader who operates with integrity",
+    "a founder who keeps one direction for ninety days",
+  ],
+};
+
+export const SITUATION_PICKS: Record<PathwayKey, string[]> = {
+  PERSONAL: ["I keep falling short of my own word", "Something big changed in my life", "I want my days to match what I value", "I am starting a new chapter"],
+  LEADING_OTHERS: ["I was promoted to lead my former peers", "I am new to managing people", "I took on a bigger team or role", "My team needs more from me than before"],
+  ENTREPRENEURIAL: ["I am moving from doing the work to owning the business", "The business has outgrown how I run it", "I am starting something new", "I do everything myself and it shows"],
+};
+
+export const BEHAVIOR_PICKS: Record<PathwayKey, string[]> = {
+  PERSONAL: ["I finish what I commit to by the date I set", "I tell the truth when it is uncomfortable", "I do my morning routine before I check my phone"],
+  LEADING_OTHERS: ["I follow up on every commitment by the date we set", "I make the call in the meeting and say it out loud", "I address problems in the first week"],
+  ENTREPRENEURIAL: ["I write down how a task is done the first time I do it", "I say no to work outside my lane", "I hand off one task each week"],
+};
+
+export const QUALITY_PICKS = ["Decisive", "Calm", "Direct", "Prepared", "Disciplined", "Present", "Confident", "Generous", "Clear"];
+export const PERSONA_SITUATION_PICKS = ["Hard conversations", "Leadership meetings", "Presentations", "Sales calls", "Negotiations", "Conflict", "Big decisions"];
+export const CUE_PICKS = [
+  "Two slow breaths before I walk in",
+  "I read my standards out loud before it starts",
+  "I say my performance identity's name to myself",
+  "I stand up, roll my shoulders back, and set my feet",
+];
+export const STANDARD_PICKS = [
+  "I decide in the room.",
+  "I prepare before every hard conversation.",
+  "I do what I said by the time I said.",
+  "I speak once, clearly.",
 ];

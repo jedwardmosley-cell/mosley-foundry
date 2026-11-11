@@ -3,12 +3,12 @@ import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { saveIdentity, removeIdentity, saveIdentityControls } from "@/app/actions/identity";
 import { TONE_LABELS, type ToneSetting } from "@/lib/identityTone";
-import { LEVELS, QUESTIONS, PATHWAY_CONTEXT, FIRST_EXAMPLE, NO_RANK_NOTE, type IdentityLevel } from "@/content/identity";
+import { LEVELS, QUESTIONS, PATHWAY_CONTEXT, FIRST_EXAMPLE, NO_RANK_NOTE, PICKS_STATUS, STATEMENT_STARTERS, SITUATION_PICKS, BEHAVIOR_PICKS, type IdentityLevel } from "@/content/identity";
 import type { PathwayKey } from "@/content/program";
 import { fmt } from "@/lib/dates";
 import { PageHeader, Card, Field } from "@/components/ui";
 import { Submit } from "@/components/Submit";
-import { DictationHint } from "@/components/Picks";
+import { Picks } from "@/components/Picks";
 import { IdentitySpectrum } from "@/components/IdentitySpectrum";
 
 export const metadata = { title: "Identity Shift" };
@@ -22,27 +22,39 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
     db.identityHistory.findMany({ where: { userId: u.id }, orderBy: { endedAt: "desc" }, take: 10 }),
   ]);
   const pathway = (profile?.pathway ?? "PERSONAL") as PathwayKey;
+  const claimText = (id?.becoming ?? "").replace(/^(i am|i'm)\s+/i, "");
 
   return (
     <>
       <PageHeader eyebrow="Optional" title="Identity Shift Spectrum">
-        People are not always trying to make the same size of change. Some want to strengthen who they are. Others are stepping into a new role. Others want to reinvent how they show up. Tell the app which one fits you, and the coaching adjusts. Your FORGE scores and plan stay as they are.
+        Your identity is something you claim, out loud and in the present tense. People are not always trying to make the same size of change. Some want to strengthen who they are. Others are stepping into a new role. Others want to reinvent how they show up. Tell the app which one fits you, and the coaching adjusts. Your FORGE scores and plan stay as they are.
       </PageHeader>
 
       {saved && <p role="status" className="mb-4 rounded-xl border border-sage/40 bg-sage-soft px-4 py-2.5 text-sm text-sage">Saved. <Link href="/dashboard" className="underline">See it on your Today screen</Link>.</p>}
 
       <Card>
         <form action={saveIdentity} className="space-y-6">
-          <Field label={`1. ${QUESTIONS.becoming}`} hint="One or two sentences. Describe the person, in the present tense if you can.">
-            <textarea name="becoming" required defaultValue={id?.becoming} maxLength={1500} className="textarea !min-h-[72px]" />
-          </Field>
-          <Field label={`2. ${QUESTIONS.situation}`}>
-            <textarea name="situation" defaultValue={id?.situation} maxLength={1500} className="textarea !min-h-[64px]" />
-          </Field>
-          <Field label={`3. ${QUESTIONS.behavior}`} hint="Something another person could see you do.">
-            <textarea name="behavior" defaultValue={id?.behavior} maxLength={1500} className="textarea !min-h-[64px]" />
-          </Field>
-          <DictationHint />
+          <div>
+            <label htmlFor="claim" className="label">1. {QUESTIONS.becoming}</label>
+            <p className="text-sm text-ink-soft mb-2">Write it the way you would say it out loud. It starts with &quot;I am&quot; and it is in the present tense, because you are claiming it today.</p>
+            <div className="flex items-start rounded-xl border border-line bg-white focus-within:ring-2 focus-within:ring-navy/30 focus-within:border-navy">
+              <span className="pl-3.5 pr-1.5 py-2.5 font-serif text-[17px] leading-6 text-navy-deep select-none">I am</span>
+              <textarea id="claim" name="claim" required rows={2} maxLength={1500} defaultValue={claimText} placeholder="a leader who operates with integrity" className="flex-1 min-w-0 resize-none bg-transparent py-2.5 pr-3 text-[15px] leading-6 focus:outline-none" />
+            </div>
+            <Picks list={{ status: PICKS_STATUS, options: STATEMENT_STARTERS[pathway] }} target="claim" label="Tap one to start, then make it yours" />
+          </div>
+          <div>
+            <Field label={`2. ${QUESTIONS.situation}`}>
+              <input name="situation" defaultValue={id?.situation} maxLength={1500} className="input" />
+            </Field>
+            <Picks list={{ status: PICKS_STATUS, options: SITUATION_PICKS[pathway] }} target="situation" />
+          </div>
+          <div>
+            <Field label={`3. ${QUESTIONS.behavior}`} hint="Something another person could see you do.">
+              <input name="behavior" defaultValue={id?.behavior} maxLength={1500} className="input" />
+            </Field>
+            <Picks list={{ status: PICKS_STATUS, options: BEHAVIOR_PICKS[pathway] }} target="behavior" />
+          </div>
 
           <fieldset>
             <legend className="label">4. {QUESTIONS.level}</legend>

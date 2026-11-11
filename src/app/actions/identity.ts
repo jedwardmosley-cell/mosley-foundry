@@ -1,4 +1,5 @@
 "use server";
+import { toClaim } from "@/lib/claim";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -9,7 +10,7 @@ import { PRACTICE, type IdentityLevel } from "@/content/identity";
 
 const schema = z.object({
   level: z.enum(["CORE", "ROLE", "REINVENT"], { errorMap: () => ({ message: "Choose a level" }) }),
-  becoming: z.string().trim().min(1, "Write who you are becoming").max(1500),
+  claim: z.string().trim().min(1, "Finish your I am statement").max(1500),
   situation: text(1500),
   behavior: text(1500),
   personaName: text(120),
@@ -26,7 +27,12 @@ const schema = z.object({
  */
 export async function saveIdentity(fd: FormData) {
   const u = await requireUser("PARTICIPANT");
-  const d = parse(schema, fd);
+  const { claim, ...rest } = parse(schema, fd);
+  // Chips post several values; join them with anything typed in the "other" box.
+  const join = (picks: FormDataEntryValue[], other: string) => [...picks.map(String), ...other.split(",")].map((x) => x.trim()).filter(Boolean).join(", ");
+  rest.personaQualities = join(fd.getAll("qualityPick"), rest.personaQualities);
+  rest.personaSituations = join(fd.getAll("situationPick"), rest.personaSituations);
+  const d = { ...rest, becoming: toClaim(claim) };
   const prior = await db.identityProfile.findUnique({ where: { userId: u.id } });
   const now = new Date();
   if (!prior) {

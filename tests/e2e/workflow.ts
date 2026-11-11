@@ -179,10 +179,10 @@ const submitAndWait = async (page: Page, selector: string) => {
 
   await check("7e. Identity Shift: explore all three levels, choose one, change it later, history kept", async () => {
     await page.goto(`${BASE}/dashboard`);
-    assert.equal(await page.locator("text=Who I'm becoming").count(), 0, "no identity card until the person opts in");
+    assert.equal(await page.locator("text=Who I am").count(), 0, "no identity card until the person opts in");
     await page.goto(`${BASE}/identity`);
-    await page.fill('textarea[name="becoming"]', "Someone who follows through on what I say.");
-    await page.fill('textarea[name="behavior"]', "I close every open commitment by Friday noon.");
+    await page.fill('textarea[name="claim"]', "someone who follows through on what I say.");
+    await page.fill('input[name="behavior"]', "I close every open commitment by Friday noon.");
     for (const name of ["Core Alignment", "Role Transition", "Identity Reinvention"]) {
       await page.locator("label", { hasText: name }).click();
     }
@@ -194,8 +194,9 @@ const submitAndWait = async (page: Page, selector: string) => {
     const me = await db.user.findUniqueOrThrow({ where: { email } });
     assert.equal((await db.identityProfile.findUniqueOrThrow({ where: { userId: me.id } })).level, "CORE");
     await page.goto(`${BASE}/dashboard`);
-    const card = page.locator("section", { hasText: "Who I'm becoming" }).first();
+    const card = page.locator("section", { hasText: "Who I am" }).first();
     assert.ok((await card.innerText()).includes("Level 1 · Core Alignment"));
+    assert.ok((await card.innerText()).includes("I am someone who follows through on what I say."), "statement saved as an I am claim");
     assert.ok((await card.innerText()).includes("Emotionally Anchored"));
     // change to Level 3 with an optional performance identity
     await page.goto(`${BASE}/identity`);
@@ -236,7 +237,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.locator('button:has-text("I close every open commitment by Friday noon.")').click();
     assert.equal(await page.inputValue('input[name="focus"]'), "I close every open commitment by Friday noon.");
     await page.goto(`${BASE}/dashboard`);
-    await page.waitForSelector("text=Did you act like the person you're becoming today?");
+    await page.waitForSelector("text=Did you show up as who you are today?");
     await page.waitForSelector("text=Where did you meet your standard today, and where did you fall short?");
     // the question is optional: saving without it still works
     await submitAndWait(page, 'button:has-text("Update today")');
@@ -336,7 +337,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     const dp: Page = await dc.newPage();
     await login(dp, "dana@demo.bothhands.app");
     await dp.goto(`${BASE}/identity`);
-    await dp.fill('textarea[name="becoming"]', "E2E-ID: a manager who makes hard calls on time.");
+    await dp.fill('textarea[name="claim"]', "E2E-ID: a manager who makes hard calls on time.");
     await dp.locator("label", { hasText: "Identity Reinvention" }).click();
     await dp.locator("summary", { hasText: "Create a performance identity" }).click();
     await dp.fill('input[name="personaName"]', "E2E-PERSONA");
