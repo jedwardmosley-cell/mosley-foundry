@@ -30,7 +30,7 @@ export default async function AdminHome() {
         <h2 className="h3">Coaching</h2>
         <p className="text-sm muted mt-1">
           {a.alsoCoach
-            ? "You are set up as a coach too. Assign yourself to people on a cohort page. You will see only what each person chooses to share with you, the same as any coach."
+            ? "You are set up as a coach too. Add clients on the My clients page, or assign yourself to people on a cohort page. You will see only what each person chooses to share with you, the same as any coach."
             : "Do you coach people yourself? Turn this on to get the coach screens. You will see only what each person chooses to share with you, the same as any coach."}
         </p>
         <form action={setAlsoCoach} className="mt-3">

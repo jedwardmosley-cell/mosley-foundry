@@ -12,6 +12,7 @@ import type { PillarKey } from "@/content/types";
 import { PILLAR_KEYS } from "@/content/types";
 import { PageHeader, Card, PillarMark, Gauge, Field } from "@/components/ui";
 import { Submit } from "@/components/Submit";
+import { removeClient } from "@/app/actions/clients";
 
 function NotShared({ scope }: { scope: ShareScope }) {
   return <p className="text-sm text-ink-mute">Not shared: {SHARE_SCOPES[scope].toLowerCase()}.</p>;
@@ -197,6 +198,14 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
           ))}
         </div>
       )}
+      <details className="mt-10">
+        <summary className="cursor-pointer text-sm text-ink-mute">Stop coaching {v.participant.name.split(" (")[0]}</summary>
+        <form action={removeClient} className="mt-3">
+          <input type="hidden" name="participantId" value={participantId} />
+          <p className="text-sm muted mb-2">This takes them off your client list and clears what they shared with you. Their own records are kept. You can add them again later.</p>
+          <Submit className="btn-quiet !text-clay">Remove from my clients</Submit>
+        </form>
+      </details>
     </>
   );
 }
