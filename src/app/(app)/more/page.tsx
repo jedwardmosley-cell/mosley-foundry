@@ -10,7 +10,7 @@ const LINKS = [
   ["/library", "Road Library", "Book prompts, Road Tests and workbook exercises."],
   ["/companion", "AI Companion", "Reflect, practice a hard conversation, prepare for coaching."],
   ["/coaching", "Coaching", "Sessions and exercises from your coach."],
-  ["/journal", "Private Journal", "Only you. Never shared."],
+  ["/journal", "Private Journal", "Private to you and never shared."],
   ["/history", "History & Export", "Your development over time."],
   ["/sharing", "Sharing", "Choose what your coach can see."],
   ["/settings", "Settings", "Reminders and AI retention."],

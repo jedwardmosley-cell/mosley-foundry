@@ -127,7 +127,7 @@ export default async function Dashboard() {
               })}
             </ul>
           ) : (
-            <Empty title="Nobody named yet" href="/network" cta="Name your people">If the answer is nobody, that is your first design decision.</Empty>
+            <Empty title="No one added yet" href="/network" cta="Add your people">If you can't think of anyone yet, start there. It's your first design decision.</Empty>
           )}
         </Card>
 
@@ -139,7 +139,7 @@ export default async function Dashboard() {
           <dl className="mt-3 grid grid-cols-3 gap-3 text-center">
             <Stat n={practice.practiced} label="days practiced (30d)" />
             <Stat n={d.weekly.length} label="weekly reviews" />
-            <Stat n={d.relationships.reduce((n, r) => n + r.checkIns.filter((c) => c.happened).length, 0)} label="check-ins held" />
+            <Stat n={d.relationships.reduce((n, r) => n + r.checkIns.filter((c) => c.happened).length, 0)} label="check-ins done" />
           </dl>
           <PracticeStrip checkIns={d.checkIns} />
           {d.assessment && (
@@ -177,7 +177,7 @@ function PracticeStrip({ checkIns }: { checkIns: { date: string; status: string 
       <div className="flex gap-1" role="img" aria-label="Last 14 days of practice">
         {days.map((d) => <span key={d.key} title={`${d.key}: ${d.s ?? "no entry"}`} className={`h-5 flex-1 rounded ${tone(d.s)}`} />)}
       </div>
-      <p className="mt-2 text-[11px] text-ink-mute">Last 14 days · navy done · brass partial · grey not yet. A missed day is information, not a verdict.</p>
+      <p className="mt-2 text-[11px] text-ink-mute">Last 14 days · navy done · brass partial · grey not yet. A missed day is just information.</p>
     </div>
   );
 }

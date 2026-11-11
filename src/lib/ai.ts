@@ -111,6 +111,16 @@ export async function participantContext(userId: string) {
   return lines.join("\n");
 }
 
+/** House writing style for everything the AI writes. Set by the author. */
+export const HOUSE_STYLE = [
+  "WRITING STYLE (follow exactly):",
+  "- Write like a plain-spoken person talking to a colleague. Be direct and specific. Short sentences, everyday words. Plain and warm, as if writing for a sharp seventh grader.",
+  "- No em dashes. Use straight quotes, not curly quotes.",
+  "- Never use these words: steady, drift, rhythm, navigate, resonate, lean into, under pressure, accumulate, compound. Do not use hold or held in an abstract sense (a reason that holds, a commitment that held). Do not use beat as a stage direction.",
+  "- Avoid these patterns: stacks of fragments like \"Not X. Not Y.\"; runs of two- or three-word sentences; comma-form contrasts like \"X, not Y\"; template closers like \"That's what...\" or \"That's why...\"; leaning on actually, honestly or genuinely; describing a cost as \"a bill\"; using a day of the week as shorthand for ordinary life; sweeping claims with nobody or everybody; vague callbacks to \"the thing\"; repeating \"name it\"; and calling something \"X with a nicer name\" or \"X dressed up as Y\".",
+  "- If a sentence is a little rough but sounds like a real person, keep it. If you are unsure of something, say so instead of guessing.",
+].join("\n");
+
 // ---------- System prompt ----------
 
 const MODES = {
@@ -120,11 +130,18 @@ const MODES = {
 } as const;
 export type AiMode = keyof typeof MODES;
 
+/** Safety net for the style rules: straight quotes and no em dashes, even if the model slips. */
+export function plainPunctuation(t: string) {
+  return t.replace(/\s*\u2014\s*/g, ", ").replace(/[\u201C\u201D]/g, '"').replace(/[\u2018\u2019]/g, "'");
+}
+
 export function systemPrompt(mode: AiMode, context: string, sources: Chunk[]) {
   return [
     "You are the Coaching Companion inside Both Hands on the Wheel, a personal leadership platform created by Jason Mosley of Mosley Foundry. You reinforce human coaching. You do not replace it.",
     "",
-    "Voice: direct, warm, practical, conversational. Short paragraphs. No hype, no generic encouragement, no em dashes. Formatting: plain text, with **bold** only for short labels and simple numbered or dash lists. No headings, tables or other markup. Use the road and driving language of the program where it fits naturally, never as decoration.",
+    HOUSE_STYLE,
+    "Use the road and driving language of the program where it fits naturally, never as decoration. No hype and no generic encouragement.",
+    "Formatting: plain text, with **bold** only for short labels and simple numbered or dash lists. No headings, tables or other markup.",
     "",
     "Grounding rules:",
     "- The framework is FORGE: Future Focused (know your destination), Outcome Aware (watch the signs), Reason Rooted (know why the trip matters), Growth Oriented (recalculate without ego), Emotionally Anchored (be fit to drive). Discipline by Design is the accountability system.",
@@ -166,7 +183,7 @@ export async function generateReply(opts: { userId: string; mode: AiMode; histor
   }
   const text = msg.content.filter((b) => b.type === "text").map((b) => (b as { text: string }).text).join("\n").trim();
   const cited = sources.filter((s) => text.includes(`[${s.id}]`));
-  return { text, citations: cited };
+  return { text: plainPunctuation(text), citations: cited };
 }
 
 /** Retention: removes this user's expired conversations. Server-only (not a server action). */
@@ -208,7 +225,8 @@ export async function draftField(userId: string, kind: DraftKind) {
     system: [
       "You write first drafts inside Both Hands on the Wheel, a personal leadership app by Jason Mosley. The participant will edit your draft until it is true for them.",
       "Use only what the participant has recorded. Do not invent facts, names, numbers or achievements. If the records are thin, write a short, plain draft and keep it general rather than making things up.",
-      "Plain, direct, warm language. No em dashes. No hype. Return only the draft text, with no introduction, quotation marks or citations.",
+      HOUSE_STYLE,
+      "Return only the draft text, with no introduction, quotation marks or citations.",
       "",
       "PARTICIPANT RECORDS:",
       context || "(none)",
@@ -220,5 +238,5 @@ export async function draftField(userId: string, kind: DraftKind) {
   });
   const msg = await stream.finalMessage();
   if (msg.stop_reason === "refusal") return null;
-  return msg.content.filter((b) => b.type === "text").map((b) => (b as { text: string }).text).join("\n").trim().replace(/\u2014/g, ", ");
+  return msg.content.filter((b) => b.type === "text").map((b) => (b as { text: string }).text).join("\n").trim().replace(/\u2014/g, ", ").replace(/[\u201C\u201D]/g, '"').replace(/[\u2018\u2019]/g, "'");
 }

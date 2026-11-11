@@ -26,7 +26,7 @@ export const publicPack: ContentPack = {
       key: "F", name: "Future Focused", short: "Know your destination.",
       definition: "Know your destination.",
       brief: { "1": "No clear destination guides daily choices.", "3": "A destination exists but urgency crowds it out.", "5": "Decisions are filtered through the destination." },
-      reflection: "Where are you actually going?",
+      reflection: "Where are you going?",
       anchors: draftAnchors("No clear destination guides daily choices.", "A destination exists but urgency crowds it out.", "Decisions are filtered through the destination."),
       lowest: [{ min: 1, max: 5, text: "Draft guidance. Install the licensed content pack for the author's guidance." }],
     },
@@ -41,9 +41,9 @@ export const publicPack: ContentPack = {
     {
       key: "R", name: "Reason Rooted", short: "Know why the trip matters.",
       definition: "Understand why the journey matters.",
-      brief: { "1": "Commitment fades when the work gets hard.", "3": "The reason holds in good conditions.", "5": "The reason holds when the road is hard." },
+      brief: { "1": "Commitment fades when the work gets hard.", "3": "The reason lasts when things are easy.", "5": "The reason lasts when the road is hard." },
       reflection: "Why does this journey matter?",
-      anchors: draftAnchors("Commitment fades when the work gets hard.", "The reason holds in good conditions.", "The reason holds when the road is hard."),
+      anchors: draftAnchors("Commitment fades when the work gets hard.", "The reason lasts when things are easy.", "The reason lasts when the road is hard."),
       lowest: [{ min: 1, max: 5, text: "Draft guidance. Install the licensed content pack for the author's guidance." }],
     },
     {
@@ -57,9 +57,9 @@ export const publicPack: ContentPack = {
     {
       key: "E", name: "Emotionally Anchored", short: "Be fit to drive.",
       definition: "Develop the emotional awareness and regulation necessary to lead effectively under pressure.",
-      brief: { "1": "Reactions drive decisions.", "3": "Generally steady with predictable triggers.", "5": "Steady under pressure and steadying for others." },
+      brief: { "1": "Reactions drive decisions.", "3": "Usually calm, with triggers you can predict.", "5": "Calm in hard moments, and calming for others." },
       reflection: "What reliably takes the wheel from you?",
-      anchors: draftAnchors("Reactions drive decisions.", "Generally steady with predictable triggers.", "Steady under pressure and steadying for others."),
+      anchors: draftAnchors("Reactions drive decisions.", "Usually calm, with triggers you can predict.", "Calm in hard moments, and calming for others."),
       lowest: [{ min: 1, max: 5, text: "Draft guidance. Install the licensed content pack for the author's guidance." }],
     },
   ],

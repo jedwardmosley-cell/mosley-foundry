@@ -51,7 +51,7 @@ export default async function AssessmentResult({ params, searchParams }: { param
             ))}
           </ul>
           <p className="mt-5 border-t border-line pt-4 flex justify-between"><span className="muted">Total</span><span className="font-serif text-xl">{r.total} / 25</span></p>
-          <p className="mt-2 text-xs text-ink-mute">Self-rated. FORGE is a development tool, not a validated psychometric instrument, and not comparable to EQ-i scores.</p>
+          <p className="mt-2 text-xs text-ink-mute">These are your own ratings. FORGE is a development tool. It has not been validated as a psychometric instrument, and its scores can't be compared to EQ-i scores.</p>
         </Card>
 
         <Card>

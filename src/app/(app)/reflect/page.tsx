@@ -22,8 +22,8 @@ export default async function ReflectPage() {
   const weekly = pack.discipline.inventory.find((i) => i.label === "Weekly")?.text;
   return (
     <>
-      <PageHeader eyebrow={`Week of ${fmt(weekOf, { month: "long", day: "numeric" })}`} title="Look back. Look ahead.">
-        {weekly ?? "One appointment to decide what matters before Monday does, one to look back."}
+      <PageHeader eyebrow={`Week of ${fmt(weekOf, { month: "long", day: "numeric" })}`} title="Look back at your week and plan the next one">
+        {weekly ?? "One appointment at the start of the week to decide what matters, and one at the end to look back."}
       </PageHeader>
       <Card>
         <form action={saveWeekly} className="space-y-4">
@@ -38,7 +38,7 @@ export default async function ReflectPage() {
           </fieldset>
           {commitments.length > 0 && (
             <fieldset>
-              <legend className="label">Which commitments held this week?</legend>
+              <legend className="label">Which commitments did you keep this week?</legend>
               <div className="space-y-2">
                 {commitments.map((c) => (
                   <label key={c.id} className="flex items-start gap-2.5 text-[15px] cursor-pointer">
@@ -71,7 +71,7 @@ export default async function ReflectPage() {
               {w.built && <p className="mt-2 text-[15px]"><span className="text-ink-mute">Built: </span>{w.built}</p>}
               {w.avoided && <p className="mt-1 text-[15px]"><span className="text-ink-mute">Avoided: </span>{w.avoided}</p>}
               {w.nextWeek && <p className="mt-1 text-[15px]"><span className="text-ink-mute">Next: </span>{w.nextWeek}</p>}
-              {JSON.parse(w.held || "[]").length > 0 && <p className="mt-1 text-sm muted">{JSON.parse(w.held).length} commitment{JSON.parse(w.held).length === 1 ? "" : "s"} held</p>}
+              {JSON.parse(w.held || "[]").length > 0 && <p className="mt-1 text-sm muted">{JSON.parse(w.held).length} commitment{JSON.parse(w.held).length === 1 ? "" : "s"} kept</p>}
             </Card>
           ))}
         </div>

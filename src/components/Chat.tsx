@@ -37,7 +37,7 @@ export function Chat({ id, messages, starter }: { id: string; messages: Msg[]; s
         <input type="hidden" name="id" value={id} />
         <label className="sr-only" htmlFor="msg">Message</label>
         <div className="flex gap-2 items-end">
-          <textarea id="msg" name="content" required maxLength={6000} rows={2} className="textarea !min-h-[52px]" placeholder="Write honestly. Answer with the exit closed."
+          <textarea id="msg" name="content" required maxLength={6000} rows={2} className="textarea !min-h-[52px]" placeholder="Answer with the exit closed."
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); formRef.current?.requestSubmit(); } }} />
           <button className="btn-primary shrink-0" disabled={pending}>Send</button>
         </div>

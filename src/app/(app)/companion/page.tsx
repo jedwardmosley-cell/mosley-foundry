@@ -24,7 +24,7 @@ export default async function CompanionHome() {
   const on = aiAvailable() && profile?.aiEnabled !== false;
   return (
     <>
-      <PageHeader eyebrow="Reinforcement, not replacement" title="AI Coaching Companion">
+      <PageHeader eyebrow="Backs up your human coach" title="AI Coaching Companion">
         Grounded in the book, the workbook and your own recorded goals. It cites where its program content comes from, keeps what you recorded separate from its suggestions, and points you back to the people in your corner. It cannot see your private journal. It is not a therapist.
       </PageHeader>
       {!aiAvailable() && <Card className="mb-5"><p className="text-sm">The companion is not configured on this server. An administrator needs to set <code>ANTHROPIC_API_KEY</code>.</p></Card>}
