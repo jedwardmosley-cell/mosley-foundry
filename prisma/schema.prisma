@@ -56,6 +56,8 @@ model User {
   cohortMemberships CohortMember[]
   attendance        Attendance[]
   eqiPriorities     EqiPriority[]
+  identity          IdentityProfile?
+  identityHistory   IdentityHistory[]
   conversations     AiConversation[]
   exercisesAssigned AssignedExercise[]   @relation("ExerciseParticipant")
   exercisesGiven    AssignedExercise[]   @relation("ExerciseCoach")
@@ -403,4 +405,45 @@ model ContentPack {
   key       String   @id // "pack" | "entrepreneur"
   json      String
   updatedAt DateTime @updatedAt
+}
+
+// ---------- Identity Shift Spectrum (optional layer beside the FORGE Plan) ----------
+
+// The participant's current identity statement and chosen level. Never set from FORGE scores.
+model IdentityProfile {
+  userId            String   @id
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  level             String   // enum: CORE | ROLE | REINVENT (scope of change, not a ranking)
+  becoming          String   @default("") // Who are you becoming?
+  situation         String   @default("") // What situation or chapter makes this change important?
+  behavior          String   @default("") // What behavior would show it?
+  // Optional performance identity (Level 3). A practice tool, not a separate personality.
+  personaName       String   @default("")
+  personaQualities  String   @default("")
+  personaStandards  String   @default("")
+  personaSituations String   @default("")
+  personaCue        String   @default("")
+  personaBehaviors  String   @default("")
+  // AI and sharing controls (used from part 3 of the build)
+  tone              String   @default("AUTO") // enum: AUTO | SUPPORTIVE | DIRECT | DEMANDING
+  aiUse             Boolean  @default(true)   // send level and statement to the AI Companion
+  aiUsePersona      Boolean  @default(false)  // also send the performance identity details
+  sharePersona      Boolean  @default(false)  // include the performance identity when Identity is shared with a coach
+  versionStartedAt  DateTime @default(now())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+// A dated snapshot of each earlier version, so changing level loses nothing.
+model IdentityHistory {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  level       String
+  becoming    String   @default("")
+  situation   String   @default("")
+  behavior    String   @default("")
+  personaName String   @default("")
+  startedAt   DateTime
+  endedAt     DateTime @default(now())
 }

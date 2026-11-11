@@ -5,7 +5,7 @@ import { ymd, addDays } from "./dates";
 /** Everything the dashboard and history views need for the signed-in participant. Owner-only queries. */
 export async function loadParticipant(userId: string) {
   const since = ymd(addDays(new Date(), -29));
-  const [profile, assessment, assessments, goals, cycle, checkIns, todayCheckIn, relationships, commitments, weekly, coaches, exercises, sessions, eqi] = await Promise.all([
+  const [profile, assessment, assessments, goals, cycle, checkIns, todayCheckIn, relationships, commitments, weekly, coaches, exercises, sessions, eqi, identity] = await Promise.all([
     db.profile.findUnique({ where: { userId } }),
     db.assessment.findFirst({ where: { userId, isSecondOpinion: false }, orderBy: { completedAt: "desc" } }),
     db.assessment.findMany({ where: { userId, isSecondOpinion: false }, orderBy: { completedAt: "asc" } }),
@@ -20,6 +20,7 @@ export async function loadParticipant(userId: string) {
     db.assignedExercise.findMany({ where: { participantId: userId }, orderBy: { createdAt: "desc" } }),
     db.coachingSession.findMany({ where: { participantId: userId }, orderBy: { scheduledAt: "desc" }, include: { coach: { select: { name: true } } } }),
     db.eqiPriority.findMany({ where: { userId }, orderBy: { createdAt: "asc" }, select: { id: true, label: true, pillar: true } }),
+    db.identityProfile.findUnique({ where: { userId } }),
   ]);
-  return { profile, assessment, assessments, goals, cycle, checkIns, todayCheckIn, relationships, commitments, weekly, coaches, exercises, sessions, eqi };
+  return { profile, assessment, assessments, goals, cycle, checkIns, todayCheckIn, relationships, commitments, weekly, coaches, exercises, sessions, eqi, identity };
 }

@@ -10,6 +10,7 @@ import { RELATIONSHIP_ROLES, PATHWAYS } from "@/content/program";
 import type { PillarKey } from "@/content/types";
 import { Card, PillarMark, Empty } from "@/components/ui";
 import { CheckInForm } from "@/components/CheckInForm";
+import { IdentityCard } from "@/components/IdentityCard";
 
 export const metadata = { title: "Today" };
 
@@ -92,6 +93,8 @@ export default async function Dashboard() {
           <p className="mt-4 text-sm text-white/70">New here? <Link href="/guide" className="underline underline-offset-4 decoration-brass">Read the guide</Link>. It takes a few minutes.</p>
         </Card>
       )}
+
+      {d.identity && <IdentityCard id={d.identity} priority={p} />}
 
       <div className="grid gap-5 md:grid-cols-2">
         <Card>

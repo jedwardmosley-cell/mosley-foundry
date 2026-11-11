@@ -112,6 +112,18 @@ test("an admin who also coaches gets coach access only: assigned people, granted
   }
 });
 
+test("identity statements and performance identities never appear in the coach view", async () => {
+  await db.identityProfile.create({ data: { userId: dana.id, level: "REINVENT", becoming: "IDENTITY-SECRET-STATEMENT", behavior: "IDENTITY-SECRET-BEHAVIOR", personaName: "IDENTITY-SECRET-PERSONA", personaCue: "IDENTITY-SECRET-CUE" } });
+  try {
+    const v = JSON.stringify(await getCoachView(coach, dana.id));
+    assert.ok(!v.includes("IDENTITY-SECRET"));
+    const r = JSON.stringify(await cohortReport((await db.cohort.findFirstOrThrow({ where: { isDemo: true } })).id));
+    assert.ok(!r.includes("IDENTITY-SECRET"));
+  } finally {
+    await db.identityProfile.delete({ where: { userId: dana.id } });
+  }
+});
+
 test("aggregate report thresholds small groups", async () => {
   const c = await db.cohort.findFirstOrThrow({ where: { isDemo: true } });
   const r = await cohortReport(c.id);

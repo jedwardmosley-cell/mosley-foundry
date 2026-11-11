@@ -8,6 +8,8 @@ import { PageHeader, Card, PillarMark, Source, Field } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 import { Picks, DictationHint } from "@/components/Picks";
 import { HelpMeWrite } from "@/components/HelpMeWrite";
+import Link from "next/link";
+import { LEVELS, type IdentityLevel } from "@/content/identity";
 
 export const metadata = { title: "FORGE Plan" };
 
@@ -18,6 +20,7 @@ export default async function PlanPage() {
     db.profile.findUnique({ where: { userId: u.id } }),
     db.developmentGoal.findMany({ where: { userId: u.id, status: "ACTIVE", segmentKey: null } }),
   ]);
+  const identity = await db.identityProfile.findUnique({ where: { userId: u.id }, select: { level: true, becoming: true } });
   const entre = profile?.pathway === "ENTREPRENEURIAL" && entrepreneur;
   const roadTest = pack.chapters.find((c) => c.number === 9)?.roadTest ?? [];
   const rt = (k: string) => roadTest.find((l) => l.startsWith(`${k}:`))?.slice(3);
@@ -48,6 +51,14 @@ export default async function PlanPage() {
         </form>
         <Source>Both Hands on the Wheel, Ch. 9 Road Test; Personal Application Workbook, Section Six</Source>
       </Card>
+
+      <Link href="/identity" className="card block mt-5 hover:border-navy/40">
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 className="h3">Identity Shift</h2>
+          <span className="chip">{identity ? `Level ${LEVELS[identity.level as IdentityLevel].n} · ${LEVELS[identity.level as IdentityLevel].name}` : "Optional"}</span>
+        </div>
+        <p className="text-sm muted mt-1">{identity ? identity.becoming : "Who are you becoming, and how big a change is it? Answer four questions and the coaching adjusts to fit."}</p>
+      </Link>
 
       <p className="mt-6 mb-3 text-sm muted">
         {priority ? "Start with your priority. Open the others when you are ready; one pillar with real attention beats five with divided attention." : "Choose a development priority from your assessment results to focus this plan."}

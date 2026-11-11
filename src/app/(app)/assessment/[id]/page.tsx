@@ -91,6 +91,12 @@ export default async function AssessmentResult({ params, searchParams }: { param
         <Source>Personal Application Workbook, Section Two</Source>
       </Card>
 
+      <a href="/identity" className="card block mt-5 hover:border-navy/40">
+        <p className="eyebrow">Optional next step</p>
+        <h2 className="h2 mt-1">Identity Shift Spectrum</h2>
+        <p className="mt-2 text-[15px] muted">Your scores show where you are. This asks who you are becoming and how big a change you want to make. You choose the level. Your scores do not decide it.</p>
+      </a>
+
       {nearest && pack.profiles.length > 0 && (
         <Card className="mt-5">
           <p className="eyebrow">FORGE in the Wild · closest pattern</p>
