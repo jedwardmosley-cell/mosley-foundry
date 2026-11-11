@@ -24,7 +24,7 @@ const PARTICIPANT_NAV = [
 ];
 
 const COACH_NAV = [
-  { href: "/coach", label: "Participants", mobile: true },
+  { href: "/coach", label: "My clients", mobile: true },
   { href: "/coach/cohorts", label: "Cohorts", mobile: true },
 ];
 const ADMIN_NAV = [

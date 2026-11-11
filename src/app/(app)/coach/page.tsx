@@ -8,8 +8,9 @@ import { getContent } from "@/content";
 import { fmt } from "@/lib/dates";
 import { PageHeader, Card, PillarMark, Empty } from "@/components/ui";
 import type { PillarKey } from "@/content/types";
+import { AddClientForm } from "@/components/AddClientForm";
 
-export const metadata = { title: "Participants" };
+export const metadata = { title: "My clients" };
 
 export default async function CoachHome() {
   const coach = await requireUser("COACH");
@@ -20,8 +21,8 @@ export default async function CoachHome() {
 
   return (
     <>
-      <PageHeader eyebrow="Coach" title="Your participants">
-        You see only what each participant has chosen to share with you. Journals and AI conversations are never visible.
+      <PageHeader eyebrow="Coach" title="My clients">
+        You see only what each client has chosen to share with you. Journals and AI conversations are never visible to you.
       </PageHeader>
       {upcoming.length > 0 && (
         <Card className="mb-5">
@@ -31,7 +32,7 @@ export default async function CoachHome() {
           </ul>
         </Card>
       )}
-      {views.length === 0 && <Empty title="No participants assigned yet" />}
+      {views.length === 0 && <Empty title="No clients yet">Add your first client below.</Empty>}
       <div className="grid gap-4 md:grid-cols-2">
         {views.map((v) => {
           const flags = attentionFlags(v);
@@ -52,6 +53,11 @@ export default async function CoachHome() {
           );
         })}
       </div>
+      <Card className="mt-6">
+        <h2 className="h3">Add a client</h2>
+        <p className="text-sm muted mt-1 mb-4">Enter their name and email. If they are new, the app creates their account and gives you a temporary password to send them. Adding someone shares nothing with you. They choose what you can see.</p>
+        <AddClientForm />
+      </Card>
     </>
   );
 }

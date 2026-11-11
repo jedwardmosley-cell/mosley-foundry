@@ -240,6 +240,48 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal(r?.status(), 404, "unassigned participant hidden");
   });
 
+  await check("10b2. coach adds a client directly; the client signs in; nothing is shared by default", async () => {
+    const clientEmail = `client-${Date.now()}@example.test`;
+    await page.goto(`${BASE}/coach`);
+    await page.fill('input[name="name"]', "Casey Client (E2E)");
+    await page.fill('input[name="email"]', clientEmail);
+    await page.click('button:has-text("Add client")');
+    await page.waitForSelector("text=Temporary password");
+    const temp = await page.locator("code").first().innerText();
+    assert.ok(temp.length >= 10);
+    await page.waitForSelector("text=Casey Client (E2E)");
+    const client = await db.user.findUniqueOrThrow({ where: { email: clientEmail } });
+    assert.equal(client.role, "PARTICIPANT");
+    await page.goto(`${BASE}/coach/${client.id}`);
+    await page.waitForSelector("text=nothing yet");
+    // the client can sign in with the temporary password and lands on onboarding
+    const c2 = await browser.newContext();
+    const cp: Page = await c2.newPage();
+    await login(cp, clientEmail, temp);
+    await cp.waitForURL("**/onboarding");
+    await cp.goto(`${BASE}/sharing`);
+    await cp.waitForSelector("text=Avery Lin");
+    await c2.close();
+    // adding an existing email again does not create a second account
+    await page.goto(`${BASE}/coach`);
+    await page.fill('input[name="name"]', "Casey Again");
+    await page.fill('input[name="email"]', clientEmail);
+    await page.click('button:has-text("Add client")');
+    await page.waitForSelector("text=already had an account");
+    assert.equal(await db.user.count({ where: { email: clientEmail } }), 1);
+    // a coach cannot add a coach or admin account as a client
+    await page.fill('input[name="name"]', "Admin");
+    await page.fill('input[name="email"]', "admin@demo.bothhands.app");
+    await page.click('button:has-text("Add client")');
+    await page.waitForSelector("text=belongs to a coach or administrator");
+    // remove
+    await page.goto(`${BASE}/coach/${client.id}`);
+    await page.locator("summary", { hasText: "Stop coaching" }).click();
+    await Promise.all([page.waitForURL(/\/coach$/), page.click('button:has-text("Remove from my clients")')]);
+    const gone = await page.goto(`${BASE}/coach/${client.id}`);
+    assert.equal(gone?.status(), 404);
+  });
+
   await check("10c. admin sees aggregate reports, not individual records", async () => {
     await logout(page);
     await login(page, "admin@demo.bothhands.app");
