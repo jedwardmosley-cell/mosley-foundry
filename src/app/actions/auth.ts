@@ -2,7 +2,7 @@
 import { z } from "zod";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { createSession, destroySession } from "@/lib/auth";
+import { createSession, destroySession, requireUser } from "@/lib/auth";
 import { hashPassword, verifyPassword } from "@/lib/password";
 import { parse } from "@/lib/validation";
 
@@ -43,4 +43,28 @@ export async function signIn(_: AuthState, fd: FormData): Promise<AuthState> {
 export async function signOut() {
   await destroySession();
   redirect("/login");
+}
+
+export type PasswordState = { error?: string; ok?: boolean } | undefined;
+
+const passwordSchema = z.object({
+  current: z.string().min(1, "Enter your current password"),
+  next: z.string().min(10, "Use at least 10 characters for the new password").max(200),
+  confirm: z.string(),
+});
+
+/** Changes the signed-in person's password and signs out every other device. */
+export async function changePassword(_: PasswordState, fd: FormData): Promise<PasswordState> {
+  const u = await requireUser();
+  const r = passwordSchema.safeParse(Object.fromEntries(fd));
+  if (!r.success) return { error: r.error.issues[0].message };
+  const { current, next, confirm } = r.data;
+  if (next !== confirm) return { error: "The two new passwords don't match." };
+  if (next === current) return { error: "Choose a new password that is different from the current one." };
+  const row = await db.user.findUniqueOrThrow({ where: { id: u.id } });
+  if (!verifyPassword(current, row.passwordHash)) return { error: "The current password is wrong." };
+  await db.user.update({ where: { id: u.id }, data: { passwordHash: hashPassword(next), mustChangePassword: false } });
+  await db.session.deleteMany({ where: { userId: u.id } });
+  await createSession(u.id);
+  return { ok: true };
 }

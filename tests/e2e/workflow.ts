@@ -258,7 +258,36 @@ const submitAndWait = async (page: Page, selector: string) => {
     const c2 = await browser.newContext();
     const cp: Page = await c2.newPage();
     await login(cp, clientEmail, temp);
-    await cp.waitForURL("**/onboarding");
+    await cp.waitForURL("**/account/password");
+    await cp.goto(`${BASE}/dashboard`);
+    await cp.waitForURL("**/account/password"); // cannot skip it
+    await cp.fill('input[name="current"]', "wrong-password-000");
+    await cp.fill('input[name="next"]', "casey-new-password-1");
+    await cp.fill('input[name="confirm"]', "casey-new-password-1");
+    await cp.click('button:has-text("Change password")');
+    await cp.waitForSelector("text=The current password is wrong.");
+    await cp.fill('input[name="current"]', temp);
+    await cp.fill('input[name="next"]', "casey-new-password-1");
+    await cp.fill('input[name="confirm"]', "casey-new-password-2");
+    await cp.click('button:has-text("Change password")');
+    await cp.waitForSelector("text=don't match");
+    await cp.fill('input[name="current"]', temp);
+    await cp.fill('input[name="next"]', "casey-new-password-1");
+    await cp.fill('input[name="confirm"]', "casey-new-password-1");
+    await cp.click('button:has-text("Change password")');
+    await cp.waitForSelector("text=Your password is changed");
+    await Promise.all([cp.waitForURL("**/onboarding"), cp.click('a:has-text("Continue")')]);
+    // the temporary password no longer works; the new one does
+    const c3 = await browser.newContext();
+    const tp: Page = await c3.newPage();
+    await tp.goto(`${BASE}/login`);
+    await tp.fill('input[name="email"]', clientEmail);
+    await tp.fill('input[name="password"]', temp);
+    await tp.click('button:has-text("Sign in")');
+    await tp.waitForSelector("text=don't match");
+    await login(tp, clientEmail, "casey-new-password-1");
+    await tp.waitForURL("**/onboarding");
+    await c3.close();
     await cp.goto(`${BASE}/sharing`);
     await cp.waitForSelector("text=Avery Lin");
     await c2.close();

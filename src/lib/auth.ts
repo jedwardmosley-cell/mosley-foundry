@@ -9,7 +9,7 @@ const COOKIE = "bhow_session";
 const SESSION_DAYS = 14;
 
 export type Role = "PARTICIPANT" | "COACH" | "ADMIN";
-export type CurrentUser = { id: string; email: string; name: string; role: Role; orgId: string | null; isDemo: boolean; alsoCoach: boolean };
+export type CurrentUser = { id: string; email: string; name: string; role: Role; orgId: string | null; isDemo: boolean; alsoCoach: boolean; mustChangePassword: boolean };
 
 
 const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
@@ -41,7 +41,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   const s = await db.session.findUnique({ where: { tokenHash: sha256(token) }, include: { user: true } });
   if (!s || s.expiresAt < new Date()) return null;
   const u = s.user;
-  return { id: u.id, email: u.email, name: u.name, role: u.role as Role, orgId: u.orgId, isDemo: u.isDemo, alsoCoach: u.alsoCoach };
+  return { id: u.id, email: u.email, name: u.name, role: u.role as Role, orgId: u.orgId, isDemo: u.isDemo, alsoCoach: u.alsoCoach, mustChangePassword: u.mustChangePassword };
 }
 
 /** Use at the top of every page and server action. Redirects when not signed in or wrong role. */
