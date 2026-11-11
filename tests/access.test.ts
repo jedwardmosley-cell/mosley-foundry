@@ -85,6 +85,17 @@ test("EQ-i items are visible only when approved", async () => {
   }
 });
 
+test("EQ-i items never reach an assigned coach without the EQI scope", async () => {
+  const item = await db.eqiPriority.create({ data: { userId: marcus.id, label: "E2E private EQ-i item", participantApproved: true } });
+  try {
+    const v = await getCoachView(coach, marcus.id);
+    assert.equal(v.eqi.length, 0);
+    assert.ok(!JSON.stringify(v).includes("E2E private EQ-i item"));
+  } finally {
+    await db.eqiPriority.delete({ where: { id: item.id } });
+  }
+});
+
 test("aggregate report thresholds small groups", async () => {
   const c = await db.cohort.findFirstOrThrow({ where: { isDemo: true } });
   const r = await cohortReport(c.id);

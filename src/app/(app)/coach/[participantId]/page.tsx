@@ -134,7 +134,7 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
           {v.eqi.length === 0 && <p className="mt-2 text-sm muted">None approved.</p>}
           {v.eqi.map((e) => (
             <div key={e.id} className="mt-4 rounded-xl bg-paper p-3">
-              <p className="font-medium">{e.label}</p>
+              <p className="font-medium flex items-center gap-2">{e.pillar && <PillarMark k={e.pillar as PillarKey} size="sm" />}{e.label}</p>
               {e.practice && <p className="text-sm">Practice: {e.practice}</p>}
               <form action={recordEqiInterpretation} className="mt-3 space-y-2">
                 <input type="hidden" name="id" value={e.id} /><input type="hidden" name="participantId" value={participantId} />

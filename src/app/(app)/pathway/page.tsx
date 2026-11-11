@@ -19,6 +19,7 @@ export default async function PathwayPage() {
     include: { cohort: { include: { sessions: { orderBy: { startsAt: "asc" }, include: { attendance: { where: { userId: u.id } } } } } } },
   });
   const goals = await db.developmentGoal.findMany({ where: { userId: u.id, segmentKey: { not: null } } });
+  const eqiCount = await db.eqiPriority.count({ where: { userId: u.id } });
 
   return (
     <>
@@ -64,10 +65,6 @@ export default async function PathwayPage() {
               );
             })}
           </div>
-          <Link href="/pathway/eqi" className="card block mt-5 hover:border-navy/40">
-            <h2 className="h3">EQ-i development priorities</h2>
-            <p className="text-sm muted mt-1">Optional. For participants who have completed an authorized EQ-i 2.0 assessment and debrief.</p>
-          </Link>
         </>
       )}
 
@@ -96,6 +93,18 @@ export default async function PathwayPage() {
           <p className="text-[15px]">Your pathway runs on the core: the FORGE assessment, your Action Plan, the Discipline by Design Blueprint, your people, and 30-day cycles. The <Link href="/library" className="btn-link">Road Library</Link> has the book&apos;s Road Tests and the workbook exercises.</p>
         </Card>
       )}
+
+      <Link href="/pathway/eqi" className="card block mt-5 hover:border-navy/40">
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 className="h3">EQ-i priorities</h2>
+          <span className="chip">{profile.eqiEnabled ? `${eqiCount} added` : "Optional"}</span>
+        </div>
+        <p className="text-sm muted mt-1">
+          {profile.eqiEnabled
+            ? "Connect what you learned in your EQ-i debrief to a FORGE pillar, a practice and a 30-day cycle."
+            : "If you have taken the EQ-i 2.0 and had a debrief, you can connect it to your FORGE work here. If you have not, skip this."}
+        </p>
+      </Link>
 
       <Card className="mt-8">
         <p className="eyebrow">Change pathway</p>

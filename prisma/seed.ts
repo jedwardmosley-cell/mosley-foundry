@@ -59,6 +59,7 @@ async function main() {
     where: { userId: dana.id },
     data: {
       priorityPillar: "E",
+      eqiEnabled: true,
       destination: "A manager my team brings bad news to early, because they know I will stay steady and help them fix it. Calm in the budget meeting, curious in the one-on-one, and home for dinner.",
       why: "The people on my team deserve a leader who makes hard days easier, not harder.",
       forgeStatement: "I am becoming a leader who settles the room instead of heating it. I am driving toward a team that raises problems early. I am building one practice: when a decision of mine gets challenged, I pause, ask one question, and answer second. I read this every Monday and my accountability partner checks on it every other Friday.",
@@ -97,7 +98,7 @@ async function main() {
   }
   await db.weeklyReflection.create({ data: { userId: dana.id, weekOf: monday(-1), didIt: "PARTIAL", built: "The pause, five times out of seven", avoided: "The conversation with Reggie", nextWeek: "Book Reggie. Try the pause with my director.", shared: true } });
   await db.journalEntry.create({ data: { userId: dana.id, title: "Private", body: "PRIVATE DEMO JOURNAL: this text must never appear to a coach or admin." } });
-  await db.eqiPriority.create({ data: { userId: dana.id, label: "Impulse control when challenged in meetings", practice: "One breath and one question before responding", participantApproved: true } });
+  await db.eqiPriority.create({ data: { userId: dana.id, label: "Impulse control when challenged in meetings", pillar: "E", practice: "One breath and one question before responding", participantApproved: true } });
   for (const scope of ["GOALS", "PRACTICE", "REFLECTIONS", "NETWORK", "EQI"]) await db.shareGrant.create({ data: { ownerId: dana.id, granteeId: coach.id, scope } });
   await db.coachingSession.create({ data: { coachId: coach.id, participantId: dana.id, scheduledAt: day(3), agenda: "Week 2: Interrupt It. Where does the pause break down?", participantPrep: "The pause works with peers. Not yet with my director." } });
   await db.coachingSession.create({ data: { coachId: coach.id, participantId: dana.id, scheduledAt: day(-11), agenda: "Debrief FORGE profile", commitments: "Start a 30-day cycle on E. Name an accountability partner.", coachNotes: "Coach-private note (demo)." } });

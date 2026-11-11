@@ -7,6 +7,7 @@ const LINKS = [
   ["/blueprint", "Discipline by Design Blueprint", "Routines, people, learning and review."],
   ["/reflect", "Weekly Reflection", "Did I do what I said I was going to do?"],
   ["/pathway", "My Pathway", "Program segments and pathway-specific work."],
+  ["/pathway/eqi", "EQ-i priorities", "Optional. For people who have had an EQ-i debrief."],
   ["/library", "Road Library", "Book prompts, Road Tests and workbook exercises."],
   ["/companion", "AI Companion", "Reflect, practice a hard conversation, prepare for coaching."],
   ["/coaching", "Coaching", "Sessions and exercises from your coach."],

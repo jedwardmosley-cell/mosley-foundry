@@ -154,7 +154,30 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.screenshot({ path: `${shots}/06b-plan.png`, fullPage: false });
   });
 
-  await check("1b/7c. sign out, sign back in, saved progress and reflection retrieved", async () => {
+  await check("7c. EQ-i is optional: opt in, link a priority to a pillar, put it to work", async () => {
+    await page.goto(`${BASE}/pathway/eqi`);
+    await page.waitForSelector("text=you can skip this");
+    await submitAndWait(page, 'button:has-text("I have had my EQ-i debrief")');
+    const add = page.locator("form", { hasText: "Priority from my debrief" });
+    await add.locator('input[name="label"]').fill("Impulse control in budget meetings");
+    await add.locator('select[name="pillar"]').selectOption("E");
+    await add.locator("summary").click();
+    await add.locator('input[name="practice"]').fill("One breath before I answer");
+    await Promise.all([page.waitForLoadState("networkidle"), add.locator('button:has-text("Add priority")').click()]);
+    await page.waitForSelector("text=Start a 30-day cycle on Emotionally Anchored");
+    assert.equal(await page.locator('button:has-text("Share with")').count(), 0, "no share button without a coach");
+    await page.screenshot({ path: `${shots}/06c-eqi.png`, fullPage: true });
+    await Promise.all([page.waitForURL("**/blueprint"), page.click('button:has-text("Add the practice to my Blueprint")')]);
+    await page.waitForSelector("text=One breath before I answer");
+    await page.goto(`${BASE}/pathway/eqi`);
+    await Promise.all([page.waitForURL(/\/cycle\/new\?pillar=E/), page.click('a:has-text("Start a 30-day cycle on Emotionally Anchored")')]);
+    assert.equal(await page.inputValue('input[name="focus"]'), "One breath before I answer");
+    assert.ok(await page.locator('input[name="pillar"][value="E"]').isChecked());
+    await page.goto(`${BASE}/dashboard`);
+    await page.waitForSelector("text=From my EQ-i debrief");
+  });
+
+  await check("1b/7d. sign out, sign back in, saved progress and reflection retrieved", async () => {
     await logout(page);
     await login(page, email, "e2e-password-123");
     await page.goto(`${BASE}/dashboard`);
@@ -203,6 +226,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.waitForSelector("text=FORGE reading");
     await page.waitForSelector("text=Total 16 / 25");
     await page.waitForSelector("text=The question bought me five seconds");
+    await page.waitForSelector("text=Impulse control when challenged in meetings");
     await page.screenshot({ path: `${shots}/09-coach-participant.png`, fullPage: true });
   });
 

@@ -355,11 +355,63 @@ export async function saveSettings(fd: FormData) {
 
 // ---------- EQ-i development priorities (manual entry only) ----------
 
+/** Opting in or out of the EQ-i layer. Opting out hides it and keeps the entries. */
+export async function setEqiEnabled(fd: FormData) {
+  const u = await participant();
+  const { on } = parse(z.object({ on: bool }), fd);
+  await db.profile.update({ where: { userId: u.id }, data: { eqiEnabled: on } });
+  revalidatePath("/pathway/eqi");
+  revalidatePath("/pathway");
+  revalidatePath("/dashboard");
+}
+
+const eqiPillar = z.enum(["F", "O", "R", "G", "E", ""]).default("");
+
 export async function addEqi(fd: FormData) {
   const u = await participant();
-  const d = parse(z.object({ label: z.string().trim().min(1).max(200), note: text(1500), practice: text(1500) }), fd);
-  await db.eqiPriority.create({ data: { ...d, userId: u.id } });
+  const d = parse(z.object({ label: z.string().trim().min(1).max(200), note: text(1500), practice: text(1500), pillar: eqiPillar }), fd);
+  await db.eqiPriority.create({ data: { label: d.label, note: d.note, practice: d.practice, pillar: d.pillar || null, userId: u.id } });
+  await db.profile.update({ where: { userId: u.id }, data: { eqiEnabled: true } });
   revalidatePath("/pathway/eqi");
+}
+
+export async function updateEqi(fd: FormData) {
+  const u = await participant();
+  const d = parse(z.object({ id: z.string(), practice: text(1500), pillar: eqiPillar }), fd);
+  await db.eqiPriority.updateMany({ where: { id: d.id, userId: u.id }, data: { practice: d.practice, pillar: d.pillar || null } });
+  revalidatePath("/pathway/eqi");
+  revalidatePath("/dashboard");
+}
+
+/** Puts the practice for an EQ-i priority into the Blueprint as a daily routine. */
+export async function addEqiToBlueprint(fd: FormData) {
+  const u = await participant();
+  const { id } = parse(z.object({ id: z.string() }), fd);
+  const e = await db.eqiPriority.findFirst({ where: { id, userId: u.id } });
+  if (!e || !e.practice) throw new Error("Add a practice first.");
+  const detail = `From my EQ-i priority: ${e.label}`;
+  const exists = await db.commitment.findFirst({ where: { userId: u.id, active: true, title: e.practice, detail } });
+  if (!exists) await db.commitment.create({ data: { userId: u.id, area: "ROUTINES", title: e.practice, detail, cadence: "DAILY" } });
+  redirect("/blueprint");
+}
+
+/** One step to share an EQ-i priority: approves the item and turns on EQ-i sharing for the assigned coach. */
+export async function shareEqi(fd: FormData) {
+  const u = await participant();
+  const { id } = parse(z.object({ id: z.string() }), fd);
+  const coaches = await db.coachAssignment.findMany({ where: { participantId: u.id, active: true } });
+  if (!coaches.length) throw new Error("No coach is assigned to you yet.");
+  const n = await db.eqiPriority.updateMany({ where: { id, userId: u.id }, data: { participantApproved: true } });
+  if (!n.count) throw new Error("Not found");
+  for (const c of coaches) {
+    await db.shareGrant.upsert({
+      where: { ownerId_granteeId_scope: { ownerId: u.id, granteeId: c.coachId, scope: "EQI" } },
+      create: { ownerId: u.id, granteeId: c.coachId, scope: "EQI" },
+      update: {},
+    });
+  }
+  revalidatePath("/pathway/eqi");
+  revalidatePath("/sharing");
 }
 
 export async function approveEqiInterpretation(fd: FormData) {

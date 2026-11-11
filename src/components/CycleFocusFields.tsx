@@ -6,7 +6,7 @@ import { PillarMark } from "./ui";
 import { Picks } from "./Picks";
 
 /** Pillar choice plus pillar-specific starter behaviors for the 30-day cycle. */
-export function CycleFocusFields({ pillars, initial }: { pillars: { key: PillarKey; name: string }[]; initial: PillarKey }) {
+export function CycleFocusFields({ pillars, initial, initialFocus = "" }: { pillars: { key: PillarKey; name: string }[]; initial: PillarKey; initialFocus?: string }) {
   const [pillar, setPillar] = useState<PillarKey>(initial);
   return (
     <>
@@ -26,7 +26,7 @@ export function CycleFocusFields({ pillars, initial }: { pillars: { key: PillarK
       <div>
         <label className="block">
           <span className="label">The behavior you are working on</span>
-          <input name="focus" className="input" maxLength={500} />
+          <input name="focus" className="input" maxLength={500} defaultValue={initialFocus} />
           <span className="mt-1 block text-xs text-ink-mute">Specific. The situation and what you do in it.</span>
         </label>
         <Picks key={pillar} list={CYCLE_FOCUS[pillar]} target="focus" label="Starting points for this pillar. Tap one, then make it yours." />
