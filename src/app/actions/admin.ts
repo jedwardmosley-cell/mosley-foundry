@@ -94,7 +94,7 @@ export async function assignCoach(fd: FormData) {
   const d = parse(z.object({ cohortId: z.string(), coachId: z.string(), participantId: z.string() }), fd);
   await cohortInOrg(d.cohortId, a.orgId);
   const [coach, p] = await Promise.all([
-    db.user.findFirst({ where: { id: d.coachId, role: "COACH", orgId: a.orgId } }),
+    db.user.findFirst({ where: { id: d.coachId, orgId: a.orgId, OR: [{ role: "COACH" }, { role: "ADMIN", alsoCoach: true }] } }),
     db.cohortMember.findFirst({ where: { cohortId: d.cohortId, userId: d.participantId, role: "PARTICIPANT" } }),
   ]);
   if (!coach || !p) throw new Error("Not found");
@@ -104,4 +104,12 @@ export async function assignCoach(fd: FormData) {
     update: { active: true },
   });
   revalidatePath(`/admin/cohorts/${d.cohortId}`);
+}
+
+/** Lets the signed-in administrator also act as a coach. Coach privacy rules still apply to them. */
+export async function setAlsoCoach(fd: FormData) {
+  const a = await admin();
+  const { on } = parse(z.object({ on: z.enum(["true", "false"]) }), fd);
+  await db.user.update({ where: { id: a.id }, data: { alsoCoach: on === "true" } });
+  revalidatePath("/", "layout");
 }

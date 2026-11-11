@@ -33,7 +33,7 @@ const ADMIN_NAV = [
 ];
 
 export function Shell({ user, children }: { user: CurrentUser; children: ReactNode }) {
-  const nav = user.role === "COACH" ? COACH_NAV : user.role === "ADMIN" ? ADMIN_NAV : PARTICIPANT_NAV;
+  const nav = user.role === "COACH" ? COACH_NAV : user.role === "ADMIN" ? (user.alsoCoach ? [...ADMIN_NAV, ...COACH_NAV] : ADMIN_NAV) : PARTICIPANT_NAV;
   return (
     <div className="min-h-screen md:flex">
       <aside className="hidden md:flex md:w-64 md:flex-col md:border-r md:border-line md:bg-card md:px-5 md:py-6 md:sticky md:top-0 md:h-screen">
@@ -81,7 +81,7 @@ function UserBox({ user }: { user: CurrentUser }) {
   return (
     <div className="border-t border-line pt-4 text-sm">
       <p className="font-medium text-ink truncate">{user.name}</p>
-      <p className="text-ink-mute text-xs capitalize">{user.role.toLowerCase()}</p>
+      <p className="text-ink-mute text-xs capitalize">{user.role === "ADMIN" && user.alsoCoach ? "Administrator and coach" : user.role.toLowerCase()}</p>
       <form action={signOut} className="mt-2"><button className="text-ink-soft hover:text-ink text-sm">Sign out</button></form>
     </div>
   );

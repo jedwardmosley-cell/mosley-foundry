@@ -1,6 +1,7 @@
 import "server-only";
 import { db } from "./db";
 import type { CurrentUser } from "./auth";
+import { canCoach } from "./roles";
 
 /**
  * Authorization rules. Every read of another person's data goes through this file.
@@ -11,6 +12,7 @@ import type { CurrentUser } from "./auth";
  *  3. Free-text reflections need BOTH the REFLECTIONS scope AND the individual entry marked shared.
  *  4. Journal entries and AI conversations have no sharing path at all.
  *  5. Admins and sponsors see aggregate program data and attendance, never development records.
+ *     An admin who also coaches gets coach access only: assigned participants, granted scopes.
  */
 export const SHARE_SCOPES = {
   GOALS: "Development priority, goals, FORGE Statement and destination",
@@ -39,7 +41,7 @@ export async function isActiveCoachOf(coachId: string, participantId: string) {
 /** Scopes the participant has granted to this viewer. Empty set when not an active coach. */
 export async function grantedScopes(viewer: CurrentUser, participantId: string): Promise<Set<ShareScope>> {
   if (viewer.id === participantId) return new Set(Object.keys(SHARE_SCOPES) as ShareScope[]);
-  if (viewer.role !== "COACH") return new Set();
+  if (!canCoach(viewer)) return new Set();
   if (!(await isActiveCoachOf(viewer.id, participantId))) return new Set();
   const grants = await db.shareGrant.findMany({ where: { ownerId: participantId, granteeId: viewer.id } });
   return new Set(grants.map((g) => g.scope as ShareScope));
@@ -54,7 +56,7 @@ export async function audit(actor: CurrentUser, action: string, targetUserId?: s
  * Each field is loaded only if its scope is granted, so unshared data never leaves the database query.
  */
 export async function getCoachView(coach: CurrentUser, participantId: string) {
-  if (coach.role !== "COACH" || !(await isActiveCoachOf(coach.id, participantId))) {
+  if (!canCoach(coach) || !(await isActiveCoachOf(coach.id, participantId))) {
     throw new ForbiddenError("You are not this participant's coach.");
   }
   const scopes = await grantedScopes(coach, participantId);

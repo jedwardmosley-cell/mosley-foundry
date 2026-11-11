@@ -96,6 +96,22 @@ test("EQ-i items never reach an assigned coach without the EQI scope", async () 
   }
 });
 
+test("an admin who also coaches gets coach access only: assigned people, granted scopes", async () => {
+  const both = { ...admin, alsoCoach: true } as CurrentUser;
+  await assert.rejects(() => getCoachView(both, dana.id), ForbiddenError, "not assigned, so no access");
+  assert.equal((await grantedScopes(both, dana.id)).size, 0);
+  const a = await db.coachAssignment.create({ data: { coachId: admin.id, participantId: dana.id } });
+  try {
+    const v = await getCoachView(both, dana.id);
+    assert.equal(v.scopes.length, 0, "assigned, but Dana shared nothing with this coach");
+    assert.equal(v.profile, null);
+    assert.ok(!JSON.stringify(v).includes("PRIVATE DEMO JOURNAL"));
+    await assert.rejects(() => getCoachView(admin, dana.id), ForbiddenError, "coaching switched off means no access");
+  } finally {
+    await db.coachAssignment.delete({ where: { id: a.id } });
+  }
+});
+
 test("aggregate report thresholds small groups", async () => {
   const c = await db.cohort.findFirstOrThrow({ where: { isDemo: true } });
   const r = await cohortReport(c.id);

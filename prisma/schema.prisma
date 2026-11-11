@@ -29,6 +29,7 @@ model User {
   name         String
   passwordHash String
   role         String   @default("PARTICIPANT") // enum: PARTICIPANT | COACH | ADMIN
+  alsoCoach    Boolean  @default(false) // an administrator who also coaches; coach access rules still apply
   orgId        String?
   org          Organization? @relation(fields: [orgId], references: [id])
   isDemo       Boolean  @default(false)
