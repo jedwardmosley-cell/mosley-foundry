@@ -152,3 +152,14 @@ export const CHECKIN_IDENTITY = {
   level3: "Where did you meet your standard today, and where did you fall short?",
   answers: { YES: "Yes", PARTLY: "Partly", NOT_YET: "Not yet" } as const,
 };
+
+/**
+ * Identity exercises a coach can assign. DRAFT FOR AUTHOR REVIEW. They work at any level, so a
+ * coach can suggest identity work without choosing a level for the client.
+ */
+export const IDENTITY_EXERCISES: { title: string; text: string }[] = [
+  { title: "Who you are becoming", text: "Open Identity Shift and answer the first three questions. Choose the level that fits the size of change you want. It is your call, and you can change it later." },
+  { title: "The behavior that shows it", text: "Write one behavior another person could see you do if you had already become this person. Then do it once this week and write what happened." },
+  { title: "Evidence of the week", text: "Look back at your check-ins this week. Where did you act like the person you are becoming? Write two moments, and one where you did not." },
+  { title: "Prepare for a demanding situation", text: "Pick one demanding situation coming up. Write how the person you are becoming would prepare for it, and the first thing they would do when it starts." },
+];

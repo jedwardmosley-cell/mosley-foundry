@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { saveIdentity, removeIdentity } from "@/app/actions/identity";
+import { saveIdentity, removeIdentity, saveIdentityControls } from "@/app/actions/identity";
+import { TONE_LABELS, type ToneSetting } from "@/lib/identityTone";
 import { LEVELS, QUESTIONS, PATHWAY_CONTEXT, FIRST_EXAMPLE, NO_RANK_NOTE, type IdentityLevel } from "@/content/identity";
 import type { PathwayKey } from "@/content/program";
 import { fmt } from "@/lib/dates";
@@ -57,6 +58,50 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
           <Submit>{id ? "Save changes" : "Save my identity shift"}</Submit>
         </form>
       </Card>
+
+      {id && (
+        <Card className="mt-6">
+          <h2 className="h3">AI Companion and sharing</h2>
+          <form action={saveIdentityControls} className="mt-4 space-y-5">
+            <fieldset>
+              <legend className="label">Coaching tone in the AI Companion</legend>
+              <p className="text-xs text-ink-mute mb-2">By default the tone matches your level. You can pick a different one at any time.</p>
+              <div className="space-y-1.5">
+                {(Object.entries(TONE_LABELS) as [ToneSetting, string][]).map(([v, label]) => (
+                  <label key={v} className="flex items-start gap-2 text-[15px]">
+                    <input type="radio" name="tone" value={v} defaultChecked={id.tone === v} className="mt-1 accent-navy" />
+                    <span>{label}{v === "AUTO" && <span className="block text-ink-mute text-sm">Right now: {TONE_LABELS[({ CORE: "SUPPORTIVE", ROLE: "DIRECT", REINVENT: "DEMANDING" } as const)[id.level as IdentityLevel]].toLowerCase()}</span>}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            <fieldset className="space-y-2">
+              <legend className="label">What the AI Companion can use</legend>
+              <label className="flex items-start gap-2 text-[15px]">
+                <input type="checkbox" name="aiUse" defaultChecked={id.aiUse} className="mt-1 h-4 w-4 accent-navy" />
+                <span>Use my level, my statement and my behavior. <span className="text-ink-mute text-sm">To adjust its tone and prompts, the companion sends these to Anthropic, the AI provider, when you chat. Turn this off and it coaches you without them.</span></span>
+              </label>
+              {id.level === "REINVENT" && (
+                <label className="flex items-start gap-2 text-[15px]">
+                  <input type="checkbox" name="aiUsePersona" defaultChecked={id.aiUsePersona} className="mt-1 h-4 w-4 accent-navy" />
+                  <span>Also use my performance identity: its name, standards and activation cue.</span>
+                </label>
+              )}
+            </fieldset>
+            <fieldset>
+              <legend className="label">What my coach can see</legend>
+              <p className="text-sm text-ink-soft">Your coach sees your statement, level and behavior only if you turn on <Link href="/sharing" className="btn-link">Identity Shift in Sharing</Link>. Your written check-in notes stay private either way.</p>
+              {id.level === "REINVENT" && (
+                <label className="mt-2 flex items-start gap-2 text-[15px]">
+                  <input type="checkbox" name="sharePersona" defaultChecked={id.sharePersona} className="mt-1 h-4 w-4 accent-navy" />
+                  <span>When Identity Shift is shared, include my performance identity too.</span>
+                </label>
+              )}
+            </fieldset>
+            <Submit className="btn-quiet">Save these settings</Submit>
+          </form>
+        </Card>
+      )}
 
       {history.length > 0 && (
         <Card className="mt-6">

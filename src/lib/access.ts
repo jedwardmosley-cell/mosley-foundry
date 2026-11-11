@@ -22,6 +22,7 @@ export const SHARE_SCOPES = {
   BLUEPRINT: "Discipline by Design Blueprint",
   NETWORK: "Accountability relationships (names, roles, check-in cadence)",
   EQI: "EQ-i development priorities I approve",
+  IDENTITY: "Identity Shift: who I'm becoming, my level and my defining behavior",
 } as const;
 export type ShareScope = keyof typeof SHARE_SCOPES;
 
@@ -79,9 +80,9 @@ export async function getCoachView(coach: CurrentUser, participantId: string) {
       ? db.developmentCycle.findFirst({ where: { userId: participantId }, orderBy: { startDate: "desc" },
           select: { id: true, template: true, pillar: true, focus: true, startDate: true, status: true, weekStatus: true, decision: true, completedAt: true } })
       : null,
-    has("PRACTICE") || has("REFLECTIONS")
+    has("PRACTICE") || has("REFLECTIONS") || has("IDENTITY")
       ? db.dailyCheckIn.findMany({ where: { userId: participantId }, orderBy: { date: "desc" }, take: 30,
-          select: { date: true, status: true, shared: true, reflection: true, note: true, tags: true } })
+          select: { date: true, status: true, shared: true, reflection: true, note: true, tags: true, identityActed: true } })
       : [],
     has("REFLECTIONS")
       ? db.weeklyReflection.findMany({ where: { userId: participantId, shared: true }, orderBy: { weekOf: "desc" }, take: 6 })
@@ -94,17 +95,30 @@ export async function getCoachView(coach: CurrentUser, participantId: string) {
     has("EQI") ? db.eqiPriority.findMany({ where: { userId: participantId, participantApproved: true } }) : [],
   ]);
 
+  // Identity Shift: statement, level and behavior need the IDENTITY scope.
+  // The performance identity needs that scope AND the participant's own "share my performance identity" choice.
+  const idRow = has("IDENTITY") ? await db.identityProfile.findUnique({ where: { userId: participantId } }) : null;
+  const identity = idRow
+    ? {
+        level: idRow.level, becoming: idRow.becoming, situation: idRow.situation, behavior: idRow.behavior,
+        persona: idRow.sharePersona && idRow.level === "REINVENT"
+          ? { name: idRow.personaName, qualities: idRow.personaQualities, standards: idRow.personaStandards, situations: idRow.personaSituations, cue: idRow.personaCue, behaviors: idRow.personaBehaviors }
+          : null,
+      }
+    : null;
+
   // Rule 3: strip reflection text unless REFLECTIONS granted and the entry is marked shared.
   const practice = checkIns.map((c) => ({
     date: c.date,
     status: has("PRACTICE") ? c.status : null,
     tags: has("PRACTICE") ? (JSON.parse(c.tags || "[]") as string[]) : [],
+    identityActed: has("IDENTITY") ? c.identityActed : "", // the one-tap answer only; the written note stays private
     reflection: has("REFLECTIONS") && c.shared ? c.reflection : null,
     note: has("REFLECTIONS") && c.shared ? c.note : null,
   }));
 
   await audit(coach, "coach.view", participantId, [...scopes].join(","));
-  return { participant, scopes: [...scopes], profile, goals, assessment, cycle, practice, weekly, commitments, relationships, eqi };
+  return { participant, scopes: [...scopes], profile, goals, assessment, cycle, practice, weekly, commitments, relationships, eqi, identity };
 }
 
 /** Coach-side data the coach created: sessions and assigned exercises. Participant responses honor responseShared. */

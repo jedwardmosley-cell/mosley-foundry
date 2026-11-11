@@ -83,3 +83,17 @@ export async function addIdentityPractice(fd: FormData) {
   if (!exists) await db.commitment.create({ data: { userId: u.id, area: a.area, title, detail, cadence: a.cadence } });
   revalidatePath("/blueprint");
 }
+
+/** The participant's controls for tone, AI use and coach sharing of the performance identity. */
+export async function saveIdentityControls(fd: FormData) {
+  const u = await requireUser("PARTICIPANT");
+  const d = parse(z.object({
+    tone: z.enum(["AUTO", "SUPPORTIVE", "DIRECT", "DEMANDING"]),
+    aiUse: z.preprocess((v) => v === "on", z.boolean()),
+    aiUsePersona: z.preprocess((v) => v === "on", z.boolean()),
+    sharePersona: z.preprocess((v) => v === "on", z.boolean()),
+  }), fd);
+  const n = await db.identityProfile.updateMany({ where: { userId: u.id }, data: { ...d, aiUsePersona: d.aiUse && d.aiUsePersona } });
+  if (!n.count) redirect("/identity");
+  revalidatePath("/identity");
+}
