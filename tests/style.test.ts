@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { plainPunctuation, HOUSE_STYLE } from "../src/lib/ai";
 import * as options from "../src/content/options";
+import * as guide from "../src/content/guide";
 
 const BANNED = /\b(steady|steadi\w*|drift\w*|rhythm\w*|navigat\w*|resonat\w*|lean into|under pressure|accumulat\w*|compound\w*|holds?|held|actually|honestly|genuinely|nobody|everybody)\b/i;
 
@@ -14,7 +15,7 @@ test("house style is part of the AI instructions", () => {
   assert.match(HOUSE_STYLE, /steady, drift, rhythm/);
 });
 
-test("quick-pick options follow the house style", () => {
+test("quick-pick options and the guide follow the house style", () => {
   const all: string[] = [];
   const walk = (v: unknown) => {
     if (typeof v === "string") all.push(v);
@@ -22,6 +23,7 @@ test("quick-pick options follow the house style", () => {
     else if (v && typeof v === "object") Object.values(v).forEach(walk);
   };
   walk(options);
+  walk(guide);
   const texts = all.filter((s) => s.includes(" "));
   assert.ok(texts.length > 50);
   for (const t of texts) {
