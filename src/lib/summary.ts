@@ -20,7 +20,7 @@ export async function developmentSummary(userId: string, name: string) {
     L.push(`**Pathway:** ${PATHWAYS[d.profile.pathway as keyof typeof PATHWAYS]?.name}`);
     if (d.profile.priorityPillar) L.push(`**Development priority:** ${pName(d.profile.priorityPillar)}`);
     const lines = FORGE_LINES.filter((l) => d.profile?.[l.field]);
-    if (lines.length) L.push("", "## My FORGE lines", ...lines.map((l) => `- **${l.pillar}, ${l.label}:** ${d.profile![l.field]}`));
+    if (lines.length) L.push("", "## My FORGE identity", ...lines.map((l) => `- **${l.pillar}, ${l.label}:** ${d.profile![l.field]}`));
     if (d.profile.forgeStatement) L.push("", "## FORGE Statement", d.profile.forgeStatement);
   }
   if (d.identity) {

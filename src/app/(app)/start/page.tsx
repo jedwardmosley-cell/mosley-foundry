@@ -14,15 +14,17 @@ import { ForgeLinesFields } from "@/components/ForgeLinesFields";
 import { RelationshipFields } from "@/components/RelationshipFields";
 import { LEVELS, IDENTITY_LEVELS, PICKS_STATUS, STATEMENT_STARTERS, type IdentityLevel } from "@/content/identity";
 import { BLUEPRINT_PICKS } from "@/content/options";
+import { FORGE_IDENTITY_INTRO } from "@/content/forgeIdentityIntro";
+import { PRACTICE_STARTERS } from "@/content/forgeLines";
 import { RELATIONSHIP_ROLES, type PathwayKey } from "@/content/program";
 
 export const metadata = { title: "Your first session" };
 
 const STEP_COPY = [
   { title: "Claim who you are", intro: "Start with who you are. Write it as true today, the way you would say it out loud." },
-  { title: "Write your five FORGE lines", intro: "I am, plus what I do. One line for each letter. Start with F. If you get stuck, save what you have and finish the rest during your first week." },
+  { title: "Write your FORGE Identity", intro: `${FORGE_IDENTITY_INTRO} Start with F. If you get stuck, save what you have and finish the rest during your first week.` },
   { title: "See where you are today", intro: "Score yourself on the five pillars against the person you just described. Then pick one pillar to work on first." },
-  { title: "Design your road", intro: "Discipline by Design. Add one routine that supports who you are, and one person who will know whether you did it." },
+  { title: "Design your road", intro: "Discipline by Design turns your identity into practice. Add one routine that reinforces who you are, and one person who will know whether you did it." },
   { title: "Start your 30 days", intro: "Practice one behavior for 30 days, with a two-minute check-in each day. On day 30 you decide what comes next." },
 ];
 
@@ -166,7 +168,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
               <Field label={commitments.length ? "Add another (optional)" : "What will you do?"}>
                 <input name="title" required maxLength={200} className="input" />
               </Field>
-              <Picks list={BLUEPRINT_PICKS.ROUTINES} target="title" />
+              <Picks list={priority ? { status: "draft", options: [...PRACTICE_STARTERS[priority.key][pathway], ...BLUEPRINT_PICKS.ROUTINES.options] } : BLUEPRINT_PICKS.ROUTINES} target="title" label={priority ? `Practices that reinforce your ${priority.name} identity, then others` : undefined} />
               <Field label="When">
                 <select name="whenDays" className="input" defaultValue="Every day">
                   {["Every day", "Weekdays", "Weekends"].map((d) => <option key={d}>{d}</option>)}

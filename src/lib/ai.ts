@@ -171,7 +171,8 @@ export function systemPrompt(mode: AiMode, context: string, sources: Chunk[], to
     "- FORGE scores are self-ratings for development, not a validated psychometric measure, and not equivalent to EQ-i scores. Never invent or estimate scores or assessment results.",
     "- You are not a therapist and do not diagnose. If the participant describes a mental health crisis, self-harm, abuse or danger, respond with care, encourage them to contact a qualified professional or local emergency services (in the US, call or text 988), and suggest they tell their coach.",
     "- Push toward real-world action and human accountability: a specific behavior, a date, and a person who will know.",
-    "- Identity statements are claimed in the present tense: \"I am a leader who operates with integrity.\" When you quote, draft or suggest one, write it as an I am statement. Never rewrite it as \"I'm becoming\" or \"I want to be.\"",
+    "- FORGE is identity formation, and it comes first. Discipline by Design comes after: it turns the identity into routines, relationships and accountability. Keep them apart. A FORGE statement describes who the person is and how they understand themselves. A habit, task or technique belongs in their Blueprint.",
+    "- Identity statements are claimed in the present tense, in the person's own words: \"I am a leader who operates with integrity.\" Never pressure someone to claim something they do not believe. If they are not there yet, \"I am becoming a courageous leader who speaks up when something matters\" is honest and fine.",
     "",
     `MODE: ${MODES[mode]}`,
     ...(tone ? ["", tone] : []),
@@ -231,14 +232,14 @@ function draftAsk(kind: DraftKind): { query: string; ask: string } {
   if (kind === "forgeStatement") {
     return {
       query: "FORGE Statement one paragraph leader destination discipline committing",
-      ask: "Draft the participant's FORGE Statement: one short paragraph that pulls their five FORGE lines together. It starts with \"I am\", stays in the present tense, and keeps their own words where it can. If some lines are missing, use their identity statement and what else they have recorded. Never use \"becoming\" or \"will\".",
+      ask: "Draft the participant's FORGE Statement: one short paragraph that pulls their five FORGE identity statements together into one description of who they are. It starts with \"I am\", stays in the present tense, and keeps their own words where it can. It describes the person. It does not list habits, schedules or tasks. If they wrote \"I am becoming\" somewhere, keep that honesty. If some statements are missing, use their identity statement and what else they have recorded.",
     };
   }
   const l = LINE_BY_FIELD[kind];
   const start = l.prefix ? `It must start with the words "${l.prefix}".` : "It is one sentence in the first person.";
   return {
     query: LINE_QUERY[kind],
-    ask: `Draft the participant's FORGE line for ${l.pillar}, "${l.label}". The question is: ${l.question} Write one sentence, present tense, first person. ${start} It describes who they are or what they do now, never "becoming" or "will". Fit it to their identity statement if they have one.`,
+    ask: `Draft the participant's FORGE identity statement for ${l.pillar}, ${l.label}. The question is: ${l.question} Write one sentence, present tense, first person. ${start} It describes who they are and how they understand themselves. It is never a habit, schedule or task. Fit it to their identity statement if they have one.`,
   };
 }
 
@@ -272,4 +273,71 @@ export async function draftField(userId: string, kind: DraftKind) {
   const msg = await stream.finalMessage();
   if (msg.stop_reason === "refusal") return null;
   return msg.content.filter((b) => b.type === "text").map((b) => (b as { text: string }).text).join("\n").trim().replace(/\u2014/g, ", ").replace(/[\u201C\u201D]/g, '"').replace(/[\u2018\u2019]/g, "'");
+}
+
+// ---------- Identity coach for the five FORGE statements ----------
+
+export type CoachReply = { kind: "goal" | "habit" | "value" | "identity" | "empty"; note: string; question: string; suggestion: string };
+
+/**
+ * Helps the participant find the identity under what they wrote. It names whether the text is a
+ * goal, a habit, a value or an identity, asks one question, and offers one statement to edit.
+ * Saves nothing.
+ */
+export async function coachIdentityLine(userId: string, field: LineField, written: string): Promise<CoachReply | null> {
+  const l = LINE_BY_FIELD[field];
+  const client = new Anthropic();
+  const sources = await retrieve(LINE_QUERY[field], 3);
+  const context = await participantContext(userId);
+  const stream = client.beta.messages.stream({
+    model: AI_MODEL,
+    max_tokens: 2000,
+    thinking: { type: "adaptive" },
+    output_config: { effort: "low" },
+    betas: ["server-side-fallback-2026-07-01"],
+    fallbacks: "default",
+    system: [
+      "You are an identity coach inside Both Hands on the Wheel, a personal leadership app by Jason Mosley.",
+      "FORGE is identity formation. It answers who is behind the wheel. Discipline by Design comes later and turns that identity into routines, relationships and accountability.",
+      `The participant is writing their ${l.pillar}, ${l.label} identity statement. The question is: ${l.question} The statement starts with "I am".`,
+      "Your job is to help them tell apart a goal, a habit, a value and an identity, and to work at the identity level.",
+      "- A goal is an outcome they want. A habit is an action or schedule. A value is something they care about. An identity describes who they are and how they understand themselves.",
+      "- If they wrote a goal or a habit: say so kindly, ask one question about what it represents about the person they are becoming, and offer one identity statement built from their words. Mention that the habit itself can go in their Blueprint.",
+      "- If they wrote a value: ask what kind of person lives by it, and offer one identity statement.",
+      "- If they wrote an identity: say what is strong about it in one sentence. Offer a clearer version only if it would help. Otherwise leave the suggestion empty.",
+      "- If they wrote nothing: ask one opening question tied to their I am statement or records, and offer one example statement.",
+      "Rules: suggestions start with \"I am\" and stay in the present tense. Never push them to claim something they do not believe. \"I am becoming\" is fine when that is more honest. Use only what they have recorded. Do not invent facts.",
+      HOUSE_STYLE,
+      'Return only JSON, with no other text: {"kind": "goal" | "habit" | "value" | "identity" | "empty", "note": "one or two sentences", "question": "one question, or empty", "suggestion": "I am ..., or empty"}',
+      "",
+      "PARTICIPANT RECORDS:",
+      context || "(none)",
+      "",
+      "PROGRAM GUIDANCE:",
+      sources.map((x) => `${x.ref}: ${x.text}`).join("\n\n") || "(none)",
+    ].join("\n"),
+    messages: [{ role: "user", content: written.trim() ? `What I wrote: I am ${written.trim()}` : "I have not written anything yet." }],
+  });
+  const msg = await stream.finalMessage();
+  if (msg.stop_reason === "refusal") return null;
+  const raw = msg.content.filter((b) => b.type === "text").map((b) => (b as { text: string }).text).join("\n");
+  return parseCoachReply(raw);
+}
+
+/** Reads the coach's JSON. Exported for tests. */
+export function parseCoachReply(raw: string): CoachReply | null {
+  const m = raw.match(/\{[\s\S]*\}/);
+  if (!m) return null;
+  try {
+    const j = JSON.parse(m[0]);
+    const kinds = ["goal", "habit", "value", "identity", "empty"];
+    return {
+      kind: kinds.includes(j.kind) ? j.kind : "identity",
+      note: plainPunctuation(String(j.note ?? "")).trim(),
+      question: plainPunctuation(String(j.question ?? "")).trim(),
+      suggestion: plainPunctuation(String(j.suggestion ?? "")).trim(),
+    };
+  } catch {
+    return null;
+  }
 }

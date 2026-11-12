@@ -30,7 +30,7 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
         Your identity is something you claim, out loud and in the present tense. People are not always trying to make the same size of change. Some want to strengthen who they are. Others are stepping into a new role. Others want to reinvent how they show up. Tell the app which one fits you, and the coaching adjusts. Your FORGE scores and plan stay as they are.
       </PageHeader>
 
-      {saved && <p role="status" className="mb-4 rounded-xl border border-sage/40 bg-sage-soft px-4 py-2.5 text-sm text-sage">Saved. Next, <Link href="/plan" className="underline">write your five FORGE lines</Link> so the rest of your plan builds on who you are.</p>}
+      {saved && <p role="status" className="mb-4 rounded-xl border border-sage/40 bg-sage-soft px-4 py-2.5 text-sm text-sage">Saved. Next, <Link href="/plan" className="underline">write your FORGE identity</Link> so the rest of your plan builds on who you are.</p>}
 
       <Card>
         <form action={saveIdentity} className="space-y-6">

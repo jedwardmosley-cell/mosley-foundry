@@ -15,7 +15,7 @@ import { canCoach } from "./roles";
  *     An admin who also coaches gets coach access only: assigned participants, granted scopes.
  */
 export const SHARE_SCOPES = {
-  GOALS: "Development priority, goals, my five FORGE lines and FORGE Statement",
+  GOALS: "Development priority, goals, my FORGE identity statements and FORGE Statement",
   ASSESSMENT: "FORGE scores",
   PRACTICE: "Practice completion (Done / Partial / Not yet) and cycle progress",
   REFLECTIONS: "Reflections I mark as shared",

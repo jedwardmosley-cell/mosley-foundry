@@ -102,7 +102,7 @@ export default async function Dashboard() {
           {d.profile.forgeStatement || d.profile.destination ? (
             <p className="mt-3 font-serif text-lg leading-relaxed text-ink line-clamp-5">{d.profile.forgeStatement || d.profile.destination}</p>
           ) : (
-            <p className="mt-3 muted">Your five FORGE lines are not written yet. <Link className="btn-link" href="/plan">Write them</Link></p>
+            <p className="mt-3 muted">Your FORGE identity is not written yet. <Link className="btn-link" href="/plan">Write them</Link></p>
           )}
         </Card>
 
