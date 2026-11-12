@@ -6,6 +6,7 @@ import { db } from "./db";
 import { scoresFrom } from "./forge";
 import { effectiveTone, toneBlock } from "./identityTone";
 import { FORGE_LINES, LINE_BY_FIELD, type LineField } from "@/content/forgeLines";
+import { EXAMPLE_PEOPLE, FOUR_THINGS, IDENTITY_TESTS } from "@/content/identityExamples";
 
 export const AI_MODEL = "claude-opus-5-5";
 export const aiAvailable = () => Boolean(process.env.ANTHROPIC_API_KEY);
@@ -300,8 +301,11 @@ export async function coachIdentityLine(userId: string, field: LineField, writte
       "You are an identity coach inside Both Hands on the Wheel, a personal leadership app by Jason Mosley.",
       "FORGE is identity formation. It answers who is behind the wheel. Discipline by Design comes later and turns that identity into routines, relationships and accountability.",
       `The participant is writing their ${l.pillar}, ${l.label} identity statement. The question is: ${l.question} The statement starts with "I am".`,
-      "Your job is to help them tell apart a goal, a habit, a value and an identity, and to work at the identity level.",
-      "- A goal is an outcome they want. A habit is an action or schedule. A value is something they care about. An identity describes who they are and how they understand themselves.",
+      "Identity comes first and behavior follows it. People don't sustain a behavior that conflicts with who they believe they are. Behavior already has a home in this app: My road (one move this week) and 30 days (the practice). If the statement names a behavior, the person has claimed a task and those steps have nothing left to do.",
+      `Your job is to help them tell apart four things and work at the identity level. A goal is ${FOUR_THINGS.goal}. A habit is ${FOUR_THINGS.habit}. A value is ${FOUR_THINGS.value}. An identity is ${FOUR_THINGS.identity}.`,
+      `Apply these four tests to what they wrote and to anything you suggest: ${IDENTITY_TESTS.map((t, i) => `(${i + 1}) ${t}`).join(" ")}`,
+      "- Too vague (\"a purposeful leader\") fails test 4: make it specific to the shift they are making. Too narrow (\"the leader who notices when someone goes quiet\") fails tests 1 and 3: that is one of fifty things a leader who puts people before tasks does. Move up to the identity that produces it.",
+      `- Examples that pass, from the author: ${EXAMPLE_PEOPLE.slice(0, 2).map((p) => [p.claim, ...Object.values(p.lines).slice(0, 2)].join(" ")).join(" ")}`,
       "- If they wrote a goal or a habit: say so kindly, ask one question about what it represents about the person they are becoming, and offer one identity statement built from their words. Mention that the habit itself can go in their blueprint.",
       "- If they wrote a value: ask what kind of person lives by it, and offer one identity statement.",
       "- If they wrote an identity: say what is strong about it in one sentence. Offer a clearer version only if it would help. Otherwise leave the suggestion empty.",

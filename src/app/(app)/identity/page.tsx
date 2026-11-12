@@ -3,7 +3,8 @@ import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { saveIdentity, removeIdentity, saveIdentityControls } from "@/app/actions/identity";
 import { TONE_LABELS, type ToneSetting } from "@/lib/identityTone";
-import { LEVELS, QUESTIONS, PATHWAY_CONTEXT, FIRST_EXAMPLE, NO_RANK_NOTE, PICKS_STATUS, STATEMENT_STARTERS, SITUATION_PICKS, BEHAVIOR_PICKS, type IdentityLevel } from "@/content/identity";
+import { LEVELS, QUESTIONS, PATHWAY_CONTEXT, FIRST_EXAMPLE, NO_RANK_NOTE, PICKS_STATUS, SITUATION_PICKS, BEHAVIOR_PICKS, type IdentityLevel } from "@/content/identity";
+import { exampleGroups, examplePlaceholder, IDENTITY_EXAMPLES_STATUS } from "@/content/identityExamples";
 import type { PathwayKey } from "@/content/program";
 import { fmt } from "@/lib/dates";
 import { PageHeader, Card, Field } from "@/components/ui";
@@ -36,9 +37,9 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
             <label htmlFor="claim" className="label">1. {QUESTIONS.becoming} <span className="font-normal text-ink-mute">Say it out loud.</span></label>
             <div className="flex items-start rounded-xl border border-line bg-white focus-within:ring-2 focus-within:ring-navy/30 focus-within:border-navy">
               <span className="pl-3.5 pr-1.5 py-2.5 font-serif text-[17px] leading-6 text-navy-deep select-none">I am</span>
-              <textarea id="claim" name="claim" required rows={Math.min(6, Math.max(2, Math.ceil(claimText.length / 34)))} maxLength={1500} defaultValue={claimText} placeholder="a leader who operates with integrity" className="flex-1 min-w-0 resize-none bg-transparent py-2.5 pr-3 text-[15px] leading-6 focus:outline-none" />
+              <textarea id="claim" name="claim" required rows={Math.min(6, Math.max(2, Math.ceil(claimText.length / 34)))} maxLength={1500} defaultValue={claimText} placeholder={examplePlaceholder("claim", pathway)} className="flex-1 min-w-0 resize-none bg-transparent py-2.5 pr-3 text-[15px] leading-6 focus:outline-none" />
             </div>
-            <Picks list={{ status: PICKS_STATUS, options: STATEMENT_STARTERS[pathway] }} target="claim" folded="Examples" />
+            <Picks list={{ status: IDENTITY_EXAMPLES_STATUS, options: [] }} groups={exampleGroups("claim", pathway)} target="claim" folded="Examples" />
           </div>
           <div>
             <Field label={`2. ${QUESTIONS.situation}`}>

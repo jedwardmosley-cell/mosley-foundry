@@ -173,26 +173,6 @@ export const IDENTITY_EXERCISES: { title: string; text: string }[] = [
 
 export const PICKS_STATUS: "draft" | "approved" = "draft";
 
-export const STATEMENT_STARTERS: Record<PathwayKey, string[]> = {
-  PERSONAL: [
-    "a person who does what I say I will do",
-    "a leader who operates with integrity",
-    "someone who shows up prepared",
-    "a person who stays calm when things get hard",
-  ],
-  LEADING_OTHERS: [
-    "a leader who operates with integrity",
-    "a manager who sets clear expectations and follows up",
-    "a leader who makes hard calls on time",
-    "a manager my team trusts with bad news",
-  ],
-  ENTREPRENEURIAL: [
-    "a business owner who builds what runs without me",
-    "an owner who decides and commits",
-    "a leader who operates with integrity",
-    "a founder who keeps one direction for ninety days",
-  ],
-};
 
 export const SITUATION_PICKS: Record<PathwayKey, string[]> = {
   PERSONAL: ["I keep falling short of my own word", "Something big changed in my life", "I want my days to match what I value", "I am starting a new chapter"],

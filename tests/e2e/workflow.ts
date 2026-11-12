@@ -301,12 +301,13 @@ const submitAndWait = async (page: Page, selector: string) => {
     await Promise.all([g.waitForURL("**/onboarding"), g.click('button:has-text("Create account")')]);
     await Promise.all([g.waitForURL("**/start"), g.locator('form:has(input[value="LEADING_OTHERS"]) button').click()]);
     // 1. who I am
-    await g.locator('button:has-text("a leader who operates with integrity")').first().click();
+    await g.locator('summary:has-text("Examples")').first().click();
+    await g.locator('button:has-text("a leader now. My results come through other people.")').first().click();
     await g.locator("label", { hasText: "Role transition" }).click();
     await Promise.all([g.waitForURL("**/start?step=2"), g.click('button:has-text("Save and continue")')]);
     // 2. FORGE identity: the identity is offered as the first F example
     await g.locator('summary:has-text("Examples")').first().click();
-    await g.locator('button:has-text("a leader who operates with integrity")').first().click();
+    await g.locator('button:has-text("a leader now. My results come through other people.")').first().click();
     await Promise.all([g.waitForURL("**/start?step=3"), g.click('button:has-text("Save and continue")')]);
     // 3. where I am: the assessment and the priority bring the client back
     await Promise.all([g.waitForURL("**/assessment?next=start"), g.click('a:has-text("Take the FORGE assessment")')]);
@@ -321,7 +322,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await g.click('button:has-text("Add person")');
     await g.waitForSelector("text=✓ Pat Partner");
     await Promise.all([g.waitForURL("**/start?step=5"), g.click('a:has-text("Next: start your 30 days")')]);
-    await g.waitForSelector("text=I am a leader who operates with integrity");
+    await g.waitForSelector("text=I am a leader now. My results come through other people.");
     // 5. the 30 days
     await Promise.all([g.waitForURL(/\/cycle\/new\?pillar=E/), g.click('a:has-text("start my 30 days")')]);
     await g.fill('input[name="focus"]', "Pause before I answer");

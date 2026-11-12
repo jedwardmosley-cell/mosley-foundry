@@ -60,12 +60,12 @@ async function main() {
     data: {
       priorityPillar: "E",
       eqiEnabled: true,
-      destination: "I am a manager my team brings bad news to early, because they know I stay calm and help them fix it.",
-      lineO: "I am a leader who notices when my voice gets sharp, and what it does to the room.",
-      lineG: "I am a developing leader who can hear a challenge without needing to win it.",
-      lineE: "I am becoming a leader who chooses my response instead of reacting.",
-      why: "I am a leader who believes the people on my team deserve a boss who makes hard days easier.",
-      forgeStatement: "I am a leader who settles the room instead of heating it. I am driving toward a team that raises problems early. I am building one practice: when a decision of mine gets challenged, I pause, ask one question, and answer second. I read this every Monday and my accountability partner checks on it every other Friday.",
+      destination: "I am a manager my team trusts with bad news.",
+      lineO: "I am a leader who cares how my people are doing as much as what they get done.",
+      lineG: "I am still learning to lead, and I am fine saying so.",
+      lineE: "I am the calm one in the room, even when my decision gets challenged.",
+      why: "I am the boss who makes hard days easier for the people on my team.",
+      forgeStatement: "I am a manager my team trusts with bad news. I care how my people are doing as much as what they get done. I am still learning to lead, and I am fine saying so. On hard days I am the calm one in the room.",
     },
   });
   await db.assessment.create({ data: { userId: dana.id, instrument: "FORGE_PERSONAL", f: 4, o: 3, r: 4, g: 3, e: 2, revisedE: 2, revisedO: 3, completedAt: day(-20), reflections: JSON.stringify({ E: "When a peer questions my numbers in front of my director, I get sharp and defend instead of listen." }) } });

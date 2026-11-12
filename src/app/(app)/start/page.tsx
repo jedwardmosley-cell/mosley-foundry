@@ -12,7 +12,8 @@ import { Picks, DictationHint } from "@/components/Picks";
 import { PrefixedBox } from "@/components/PrefixedBox";
 import { ForgeLinesFields } from "@/components/ForgeLinesFields";
 import { RelationshipFields } from "@/components/RelationshipFields";
-import { LEVELS, IDENTITY_LEVELS, PICKS_STATUS, STATEMENT_STARTERS, type IdentityLevel } from "@/content/identity";
+import { LEVELS, IDENTITY_LEVELS, type IdentityLevel } from "@/content/identity";
+import { exampleGroups, examplePlaceholder, IDENTITY_EXAMPLES_STATUS } from "@/content/identityExamples";
 import { BLUEPRINT_PICKS } from "@/content/options";
 import { FORGE_IDENTITY_INTRO } from "@/content/forgeIdentityIntro";
 import { PRACTICE_STARTERS } from "@/content/forgeLines";
@@ -97,8 +98,8 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
             <input type="hidden" name="next" value="/start" />
             <div>
               <label htmlFor="claim" className="label">Who are you? Claim it.</label>
-              <PrefixedBox name="claim" prefix="I am" saved="" placeholder="a leader who operates with integrity" />
-              <Picks list={{ status: PICKS_STATUS, options: STATEMENT_STARTERS[pathway] }} target="claim" label="Tap one to start, then make it yours" />
+              <PrefixedBox name="claim" prefix="I am" saved="" placeholder={examplePlaceholder("claim", pathway)} />
+              <Picks list={{ status: IDENTITY_EXAMPLES_STATUS, options: [] }} groups={exampleGroups("claim", pathway)} target="claim" folded="Examples" />
             </div>
             <fieldset>
               <legend className="label">How big a change is this?</legend>
