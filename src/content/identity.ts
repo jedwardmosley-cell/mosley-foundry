@@ -1,7 +1,7 @@
 import type { PathwayKey } from "./program";
 
 /**
- * Identity Shift Spectrum. Level names, purposes, examples, coaching characteristics and
+ * Identity shift spectrum. Level names, purposes, examples, coaching characteristics and
  * emphasis come from the author's build brief ("brief"). The three levels describe how big
  * a change someone wants to make. None ranks above another.
  */
@@ -14,7 +14,7 @@ export const LEVELS: Record<IdentityLevel, {
 }> = {
   CORE: {
     n: 1,
-    name: "Core Alignment",
+    name: "Core alignment",
     line: "Strengthen who I am.",
     forWhom: "For people seeking greater consistency between their values, aspirations, and everyday behaviors.",
     examples: ["I want to become someone who consistently follows through."],
@@ -24,7 +24,7 @@ export const LEVELS: Record<IdentityLevel, {
   },
   ROLE: {
     n: 2,
-    name: "Role Transition",
+    name: "Role transition",
     line: "Become effective in a new role.",
     forWhom: "For people transitioning into a new set of responsibilities, expectations, or circumstances.",
     examples: ["Individual contributor to manager", "Peer to supervisor", "Employee to entrepreneur", "New executive responsibilities"],
@@ -34,7 +34,7 @@ export const LEVELS: Record<IdentityLevel, {
   },
   REINVENT: {
     n: 3,
-    name: "Identity Reinvention",
+    name: "Identity reinvention",
     line: "Deliberately construct a new performance identity.",
     forWhom: "For people pursuing a significant personal or professional transformation.",
     examples: [
@@ -85,7 +85,7 @@ export const PERSONA_FIELDS: { key: "personaName" | "personaQualities" | "person
 export const NO_RANK_NOTE = "These three levels describe how big a change you want to make. They say nothing about your worth, your health, or how far along you are. Level 3 does not rank above Level 1 or 2.";
 export const PERSONA_NOTE = "A performance identity is a practice tool you choose on purpose. It is a way to prepare for demanding situations. It is still you, and it makes no claim about changing your psychology.";
 
-// ---------- Part 2: how the level shapes FORGE, the Blueprint and the daily check-in ----------
+// ---------- Part 2: how the level shapes FORGE, the blueprint and the daily check-in ----------
 
 /**
  * One prompt per FORGE pillar per level. DRAFT FOR AUTHOR REVIEW.
@@ -162,37 +162,17 @@ export const CHECKIN_IDENTITY = {
  * coach can suggest identity work without choosing a level for the client.
  */
 export const IDENTITY_EXERCISES: { title: string; text: string }[] = [
-  { title: "Claim who you are", text: "Open Identity Shift and write your statement as a present-tense claim that starts with I am. Read it out loud. Then choose the level that fits the size of change you want. It is your call, and you can change it later." },
+  { title: "Claim who you are", text: "Open identity shift and write your statement as a present-tense claim that starts with I am. Read it out loud. Then choose the level that fits the size of change you want. It is your call, and you can change it later." },
   { title: "The behavior that shows it", text: "Write one behavior another person could see you do if you had already become this person. Then do it once this week and write what happened." },
   { title: "Evidence of the week", text: "Look back at your check-ins this week. Where did you show up as who you said you are? Write two moments, and one where you did not." },
   { title: "Prepare for a demanding situation", text: "Pick one demanding situation coming up. Read your I am statement, then write how you will prepare for it and the first thing you will do when it starts." },
 ];
 
-// ---------- Quick picks for the Identity Shift page. DRAFT FOR AUTHOR REVIEW ----------
+// ---------- Quick picks for the identity shift page. DRAFT FOR AUTHOR REVIEW ----------
 // Each statement starter finishes the fixed "I am". Lists are ordered to fit the pathway.
 
 export const PICKS_STATUS: "draft" | "approved" = "draft";
 
-export const STATEMENT_STARTERS: Record<PathwayKey, string[]> = {
-  PERSONAL: [
-    "a person who does what I say I will do",
-    "a leader who operates with integrity",
-    "someone who shows up prepared",
-    "a person who stays calm when things get hard",
-  ],
-  LEADING_OTHERS: [
-    "a leader who operates with integrity",
-    "a manager who sets clear expectations and follows up",
-    "a leader who makes hard calls on time",
-    "a manager my team trusts with bad news",
-  ],
-  ENTREPRENEURIAL: [
-    "a business owner who builds what runs without me",
-    "an owner who decides and commits",
-    "a leader who operates with integrity",
-    "a founder who keeps one direction for ninety days",
-  ],
-};
 
 export const SITUATION_PICKS: Record<PathwayKey, string[]> = {
   PERSONAL: ["I keep falling short of my own word", "Something big changed in my life", "I want my days to match what I value", "I am starting a new chapter"],

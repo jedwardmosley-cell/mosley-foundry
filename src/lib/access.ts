@@ -15,14 +15,14 @@ import { canCoach } from "./roles";
  *     An admin who also coaches gets coach access only: assigned participants, granted scopes.
  */
 export const SHARE_SCOPES = {
-  GOALS: "Development priority, goals, my FORGE identity statements and FORGE Statement",
+  GOALS: "Development priority, goals, my FORGE identity statements and FORGE statement",
   ASSESSMENT: "FORGE scores",
   PRACTICE: "Practice completion (Done / Partial / Not yet) and cycle progress",
   REFLECTIONS: "Reflections I mark as shared",
-  BLUEPRINT: "Discipline by Design Blueprint",
+  BLUEPRINT: "Discipline by Design blueprint",
   NETWORK: "Accountability relationships (names, roles, check-in cadence)",
   EQI: "EQ-i development priorities I approve",
-  IDENTITY: "Identity Shift: my I am statement, my level and my defining behavior",
+  IDENTITY: "Identity shift: my I am statement, my level and my defining behavior",
 } as const;
 export type ShareScope = keyof typeof SHARE_SCOPES;
 
@@ -95,7 +95,7 @@ export async function getCoachView(coach: CurrentUser, participantId: string) {
     has("EQI") ? db.eqiPriority.findMany({ where: { userId: participantId, participantApproved: true } }) : [],
   ]);
 
-  // Identity Shift: statement, level and behavior need the IDENTITY scope.
+  // Identity shift: statement, level and behavior need the IDENTITY scope.
   // The performance identity needs that scope AND the participant's own "share my performance identity" choice.
   const idRow = has("IDENTITY") ? await db.identityProfile.findUnique({ where: { userId: participantId } }) : null;
   const identity = idRow

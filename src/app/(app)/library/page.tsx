@@ -2,7 +2,7 @@ import { requireUser } from "@/lib/auth";
 import { getContent } from "@/content";
 import { PageHeader, Card, PillarMark, Source, Empty } from "@/components/ui";
 
-export const metadata = { title: "Road Library" };
+export const metadata = { title: "Road library" };
 
 export default async function LibraryPage() {
   await requireUser();
@@ -10,15 +10,15 @@ export default async function LibraryPage() {
   if (pack.kind !== "licensed") {
     return (
       <>
-        <PageHeader title="Road Library" />
+        <PageHeader title="Road library" />
         <Empty title="Content pack not installed">Book passages and workbook exercises appear here once the licensed content pack is installed on this server.</Empty>
       </>
     );
   }
   return (
     <>
-      <PageHeader eyebrow="Both Hands on the Wheel" title="Road Library">
-        Reflection prompts, Road Tests and exercises from the book and the Personal Application Workbook. Pick one that hits close and do it this week.
+      <PageHeader eyebrow="Both Hands on the Wheel" title="Road library">
+        Reflection prompts, road tests and exercises from the book and the Personal Application Workbook. Pick one that hits close and do it this week.
       </PageHeader>
 
       <h2 className="h2 mb-3">The Rules of the Road</h2>
@@ -40,7 +40,7 @@ export default async function LibraryPage() {
             {c.lessons.length > 0 && <ul className="mt-3 text-sm text-ink-soft space-y-0.5">{c.lessons.map((l) => <li key={l}>{l}</li>)}</ul>}
             {(["refuel", "reflect", "roadTest"] as const).map((k) => c[k].length > 0 && (
               <div key={k} className="mt-4">
-                <p className="eyebrow">{k === "roadTest" ? "Road Test" : k === "refuel" ? "Refuel" : "Reflect"}</p>
+                <p className="eyebrow">{k === "roadTest" ? "Road test" : k === "refuel" ? "Refuel" : "Reflect"}</p>
                 <p className="mt-1 text-sm text-ink-soft">{c[k][0]}</p>
                 <ul className="mt-2 space-y-2 list-disc pl-5 text-[15px]">{c[k].slice(1).map((t) => <li key={t}>{t}</li>)}</ul>
               </div>

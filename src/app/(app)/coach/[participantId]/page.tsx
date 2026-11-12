@@ -142,7 +142,7 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
 
       {s.has("IDENTITY") && (
         <Card className="mt-5">
-          <p className="eyebrow">Identity Shift</p>
+          <p className="eyebrow">Identity shift</p>
           {v.identity ? (
             <>
               <p className="mt-2 text-sm"><span className="chip">Level {LEVELS[v.identity.level as IdentityLevel].n} · {LEVELS[v.identity.level as IdentityLevel].name}</span> <span className="text-ink-mute">The client chose this level.</span></p>
@@ -163,7 +163,7 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
                 return a.length ? <p className="mt-3 text-sm">Showed up as who they are, last {a.length} answers: {yes} yes · {partly} partly · {a.length - yes - partly} not yet</p> : null;
               })()}
             </>
-          ) : <p className="mt-2 text-sm muted">Sharing is on, but the client has not set up an Identity Shift.</p>}
+          ) : <p className="mt-2 text-sm muted">Sharing is on, but the client has not set up an identity shift.</p>}
         </Card>
       )}
 

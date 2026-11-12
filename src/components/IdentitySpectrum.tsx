@@ -21,7 +21,7 @@ export function IdentitySpectrum({ initial, firstExample, persona }: { initial?:
     <div>
       <div className="relative pt-2">
         <div aria-hidden className="absolute left-[16.6%] right-[16.6%] top-[22px] h-1.5 rounded-full" style={{ background: `linear-gradient(90deg, ${LEVELS.CORE.color}, ${LEVELS.ROLE.color}, ${LEVELS.REINVENT.color})` }} />
-        <div role="radiogroup" aria-label="Identity Shift Spectrum" className="relative grid grid-cols-3">
+        <div role="radiogroup" aria-label="Identity shift spectrum" className="relative grid grid-cols-3">
           {IDENTITY_LEVELS.map((k) => {
             const x = LEVELS[k];
             const on = level === k;
@@ -37,17 +37,19 @@ export function IdentitySpectrum({ initial, firstExample, persona }: { initial?:
         </div>
       </div>
 
-      {!l && <p className="mt-4 text-sm muted text-center">Tap a position to see what it means. You can look at all three before you choose.</p>}
+      {!l && <p className="mt-4 text-sm muted text-center">Tap each one to read about it.</p>}
 
       {l && level && (
         <div className="mt-5 rounded-2xl border p-4" style={{ borderColor: l.color }} aria-live="polite">
           <p className="font-serif text-xl text-navy-deep">{l.line}</p>
           <p className="mt-1 text-[15px] text-ink-soft">{l.forWhom}</p>
-          <p className="mt-3 text-xs uppercase tracking-wider text-ink-mute">For example</p>
-          <ul className="mt-1 space-y-0.5 text-[15px]">{examples.map((e) => <li key={e}>{e}</li>)}</ul>
-          <p className="mt-3 text-xs uppercase tracking-wider text-ink-mute">How the coaching feels</p>
-          <div className="mt-1.5 flex flex-wrap gap-1.5">{l.coaching.map((c) => <span key={c} className="chip">{c}</span>)}</div>
-          <p className="mt-3 text-sm"><span className="text-ink-mute">The work centers on: </span>{l.emphasis}</p>
+          <div className="mt-2 flex flex-wrap gap-1.5">{l.coaching.map((c) => <span key={c} className="chip">{c}</span>)}</div>
+          <details className="mt-3 text-sm">
+            <summary className="cursor-pointer text-navy">More about this level</summary>
+            <p className="mt-2 text-xs uppercase tracking-wider text-ink-mute">For example</p>
+            <ul className="mt-1 space-y-0.5 text-[15px]">{examples.map((e) => <li key={e}>{e}</li>)}</ul>
+            <p className="mt-2"><span className="text-ink-mute">The work centers on: </span>{l.emphasis}</p>
+          </details>
         </div>
       )}
 
@@ -65,7 +67,7 @@ export function IdentitySpectrum({ initial, firstExample, persona }: { initial?:
               <label className="block"><span className="label">{label("personaStandards")}</span>
                 <textarea name="personaStandards" defaultValue={persona.personaStandards} maxLength={1500} className="textarea !min-h-[64px]" placeholder="Write each one as an I statement" />
               </label>
-              <Picks list={{ status: PICKS_STATUS, options: STANDARD_PICKS }} target="personaStandards" label="Tap one to start, then add your own" />
+              <Picks list={{ status: PICKS_STATUS, options: STANDARD_PICKS }} target="personaStandards" folded="Examples" />
             </div>
             <div>
               <TagChoices name="situationPick" list={{ status: PICKS_STATUS, options: PERSONA_SITUATION_PICKS }} legend={label("personaSituations")} selected={split(persona.personaSituations)} />
@@ -73,7 +75,7 @@ export function IdentitySpectrum({ initial, firstExample, persona }: { initial?:
             </div>
             <div>
               <label className="block"><span className="label">{label("personaCue")}</span><input name="personaCue" defaultValue={persona.personaCue} maxLength={600} className="input" /></label>
-              <Picks list={{ status: PICKS_STATUS, options: CUE_PICKS }} target="personaCue" />
+              <Picks list={{ status: PICKS_STATUS, options: CUE_PICKS }} target="personaCue" folded="Examples" />
             </div>
             <details open={!!persona.personaBehaviors}>
               <summary className="cursor-pointer text-sm text-navy">{label("personaBehaviors")} <span className="text-ink-mute">(optional)</span></summary>

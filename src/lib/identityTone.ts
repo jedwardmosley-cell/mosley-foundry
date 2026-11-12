@@ -1,6 +1,6 @@
 import type { IdentityLevel } from "@/content/identity";
 
-/** How the AI Companion's tone is chosen. Pure functions, so they can be tested without the AI. */
+/** How the AI companion's tone is chosen. Pure functions, so they can be tested without the AI. */
 export type Tone = "SUPPORTIVE" | "DIRECT" | "DEMANDING";
 export type ToneSetting = "AUTO" | Tone;
 

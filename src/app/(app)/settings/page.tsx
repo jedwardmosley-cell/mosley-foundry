@@ -22,8 +22,8 @@ export default async function SettingsPage() {
           <Field label="Time"><input type="time" name="reminderTime" defaultValue={p.reminderTime} className="input max-w-[160px]" /></Field>
           <ReminderDays days={days} />
           <p className="text-xs text-ink-mute">Preferences are saved now. Delivery by email or push needs a mail or notification provider configured on the server (see docs/ARCHITECTURE.md).</p>
-          <h2 className="h3 pt-4 border-t border-line">AI Companion</h2>
-          <label className="flex items-center gap-2 text-[15px]"><input type="checkbox" name="aiEnabled" defaultChecked={p.aiEnabled} className="h-4 w-4 accent-navy" /> Use the AI Companion</label>
+          <h2 className="h3 pt-4 border-t border-line">AI companion</h2>
+          <label className="flex items-center gap-2 text-[15px]"><input type="checkbox" name="aiEnabled" defaultChecked={p.aiEnabled} className="h-4 w-4 accent-navy" /> Use the AI companion</label>
           <Field label="Keep conversations for (days)" hint="Conversations older than this are deleted automatically.">
             <input type="number" name="aiRetentionDays" min={1} max={365} defaultValue={p.aiRetentionDays} className="input max-w-[160px]" />
           </Field>

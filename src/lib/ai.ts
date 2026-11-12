@@ -6,6 +6,7 @@ import { db } from "./db";
 import { scoresFrom } from "./forge";
 import { effectiveTone, toneBlock } from "./identityTone";
 import { FORGE_LINES, LINE_BY_FIELD, type LineField } from "@/content/forgeLines";
+import { EXAMPLE_PEOPLE, FOUR_THINGS, IDENTITY_TESTS } from "@/content/identityExamples";
 
 export const AI_MODEL = "claude-opus-5-5";
 export const aiAvailable = () => Boolean(process.env.ANTHROPIC_API_KEY);
@@ -97,7 +98,7 @@ export async function participantContext(userId: string) {
     lines.push(`Pathway: ${PATHWAYS[profile.pathway as keyof typeof PATHWAYS]?.name ?? profile.pathway}`);
     if (profile.priorityPillar) lines.push(`Chosen development priority: FORGE ${profile.priorityPillar}`);
     for (const l of FORGE_LINES) if (profile[l.field]) lines.push(`FORGE line ${l.pillar}, ${l.label} (their words): ${profile[l.field]}`);
-    if (profile.forgeStatement) lines.push(`FORGE Statement (their words): ${profile.forgeStatement}`);
+    if (profile.forgeStatement) lines.push(`FORGE statement (their words): ${profile.forgeStatement}`);
   }
   if (assessment) {
     const s = scoresFrom(assessment);
@@ -109,12 +110,12 @@ export async function participantContext(userId: string) {
   for (const s of sessions) if (s.commitments) lines.push(`Coaching commitments from ${s.scheduledAt.toDateString()}: ${s.commitments}`);
   for (const e of eqi) lines.push(`EQ-i development priority (participant's own words, no scores): ${e.label}${e.pillar ? `; linked by the participant to FORGE ${e.pillar}` : ""}${e.practice ? `; practice: ${e.practice}` : ""}`);
   for (const r of rels) lines.push(`Relationship: ${r.name} (${r.role})${r.purpose ? `, purpose: ${r.purpose}` : ""}`);
-  // Identity Shift: sent only if the participant left "use with the AI Companion" on.
+  // Identity shift: sent only if the participant left "use with the AI companion" on.
   // The performance identity is sent only if they also ticked that box.
   const id = await db.identityProfile.findUnique({ where: { userId } });
   if (id && id.aiUse) {
-    const level = { CORE: "Level 1, Core Alignment", ROLE: "Level 2, Role Transition", REINVENT: "Level 3, Identity Reinvention" }[id.level as "CORE"] ?? id.level;
-    lines.push(`Identity Shift (participant's own choice of scope, not a ranking): ${level}`);
+    const level = { CORE: "Level 1, core alignment", ROLE: "Level 2, role transition", REINVENT: "Level 3, identity reinvention" }[id.level as "CORE"] ?? id.level;
+    lines.push(`Identity shift (participant's own choice of scope, not a ranking): ${level}`);
     if (id.becoming) lines.push(`Identity statement, a present-tense claim in their words: ${id.becoming}`);
     if (id.behavior) lines.push(`Behavior that would show it (their words): ${id.behavior}`);
     if (id.level === "REINVENT" && id.aiUsePersona) {
@@ -171,7 +172,7 @@ export function systemPrompt(mode: AiMode, context: string, sources: Chunk[], to
     "- FORGE scores are self-ratings for development, not a validated psychometric measure, and not equivalent to EQ-i scores. Never invent or estimate scores or assessment results.",
     "- You are not a therapist and do not diagnose. If the participant describes a mental health crisis, self-harm, abuse or danger, respond with care, encourage them to contact a qualified professional or local emergency services (in the US, call or text 988), and suggest they tell their coach.",
     "- Push toward real-world action and human accountability: a specific behavior, a date, and a person who will know.",
-    "- FORGE is identity formation, and it comes first. Discipline by Design comes after: it turns the identity into routines, relationships and accountability. Keep them apart. A FORGE statement describes who the person is and how they understand themselves. A habit, task or technique belongs in their Blueprint.",
+    "- FORGE is identity formation, and it comes first. Discipline by Design comes after: it turns the identity into routines, relationships and accountability. Keep them apart. A FORGE statement describes who the person is and how they understand themselves. A habit, task or technique belongs in their blueprint.",
     "- Identity statements are claimed in the present tense, in the person's own words: \"I am a leader who operates with integrity.\" Never pressure someone to claim something they do not believe. If they are not there yet, \"I am becoming a courageous leader who speaks up when something matters\" is honest and fine.",
     "",
     `MODE: ${MODES[mode]}`,
@@ -221,7 +222,7 @@ export async function purgeExpired(userId: string) {
 export type DraftKind = LineField | "forgeStatement";
 
 const LINE_QUERY: Record<LineField, string> = {
-  destination: "Future Focused destination picture of the leader you are Road Test",
+  destination: "Future Focused destination picture of the leader you are road test",
   lineO: "Outcome Aware signs pay attention early warning feedback",
   why: "Reason Rooted why sentence generous reason when results are slow",
   lineG: "Growth Oriented distance between here and there recalculate practice skill",
@@ -231,8 +232,8 @@ const LINE_QUERY: Record<LineField, string> = {
 function draftAsk(kind: DraftKind): { query: string; ask: string } {
   if (kind === "forgeStatement") {
     return {
-      query: "FORGE Statement one paragraph leader destination discipline committing",
-      ask: "Draft the participant's FORGE Statement: one short paragraph that pulls their five FORGE identity statements together into one description of who they are. It starts with \"I am\", stays in the present tense, and keeps their own words where it can. It describes the person. It does not list habits, schedules or tasks. If they wrote \"I am becoming\" somewhere, keep that honesty. If some statements are missing, use their identity statement and what else they have recorded.",
+      query: "FORGE statement one paragraph leader destination discipline committing",
+      ask: "Draft the participant's FORGE statement: one short paragraph that pulls their five FORGE identity statements together into one description of who they are. It starts with \"I am\", stays in the present tense, and keeps their own words where it can. It describes the person. It does not list habits, schedules or tasks. If they wrote \"I am becoming\" somewhere, keep that honesty. If some statements are missing, use their identity statement and what else they have recorded.",
     };
   }
   const l = LINE_BY_FIELD[kind];
@@ -300,9 +301,12 @@ export async function coachIdentityLine(userId: string, field: LineField, writte
       "You are an identity coach inside Both Hands on the Wheel, a personal leadership app by Jason Mosley.",
       "FORGE is identity formation. It answers who is behind the wheel. Discipline by Design comes later and turns that identity into routines, relationships and accountability.",
       `The participant is writing their ${l.pillar}, ${l.label} identity statement. The question is: ${l.question} The statement starts with "I am".`,
-      "Your job is to help them tell apart a goal, a habit, a value and an identity, and to work at the identity level.",
-      "- A goal is an outcome they want. A habit is an action or schedule. A value is something they care about. An identity describes who they are and how they understand themselves.",
-      "- If they wrote a goal or a habit: say so kindly, ask one question about what it represents about the person they are becoming, and offer one identity statement built from their words. Mention that the habit itself can go in their Blueprint.",
+      "Identity comes first and behavior follows it. People don't sustain a behavior that conflicts with who they believe they are. Behavior already has a home in this app: My road (one move this week) and 30 days (the practice). If the statement names a behavior, the person has claimed a task and those steps have nothing left to do.",
+      `Your job is to help them tell apart four things and work at the identity level. A goal is ${FOUR_THINGS.goal}. A habit is ${FOUR_THINGS.habit}. A value is ${FOUR_THINGS.value}. An identity is ${FOUR_THINGS.identity}.`,
+      `Apply these four tests to what they wrote and to anything you suggest: ${IDENTITY_TESTS.map((t, i) => `(${i + 1}) ${t}`).join(" ")}`,
+      "- Too vague (\"a purposeful leader\") fails test 4: make it specific to the shift they are making. Too narrow (\"the leader who notices when someone goes quiet\") fails tests 1 and 3: that is one of fifty things a leader who puts people before tasks does. Move up to the identity that produces it.",
+      `- Examples that pass, from the author: ${EXAMPLE_PEOPLE.slice(0, 2).map((p) => [p.claim, ...Object.values(p.lines).slice(0, 2)].join(" ")).join(" ")}`,
+      "- If they wrote a goal or a habit: say so kindly, ask one question about what it represents about the person they are becoming, and offer one identity statement built from their words. Mention that the habit itself can go in their blueprint.",
       "- If they wrote a value: ask what kind of person lives by it, and offer one identity statement.",
       "- If they wrote an identity: say what is strong about it in one sentence. Offer a clearer version only if it would help. Otherwise leave the suggestion empty.",
       "- If they wrote nothing: ask one opening question tied to their I am statement or records, and offer one example statement.",

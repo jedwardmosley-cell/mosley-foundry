@@ -2,7 +2,7 @@
 import { useRef } from "react";
 import { FORGE_LINES, withPrefix, combineLines } from "@/content/forgeLines";
 
-/** Puts the five FORGE identity statements together in the FORGE Statement box, as a starting point. No AI needed. */
+/** Puts the five FORGE identity statements together in the FORGE statement box, as a starting point. No AI needed. */
 export function CombineLines({ target }: { target: string }) {
   const ref = useRef<HTMLButtonElement>(null);
   const run = () => {

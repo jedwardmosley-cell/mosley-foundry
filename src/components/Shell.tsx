@@ -7,15 +7,15 @@ import { signOut } from "@/app/actions/auth";
 // Client menu, in journey order. The phone tab bar keeps five tabs; everything else is under More.
 const PARTICIPANT_NAV: NavItem[] = [
   { href: "/dashboard", label: "Today", mobile: true },
-  { href: "/identity", label: "1. Who I am", group: "My journey" },
-  { href: "/plan", label: "2. FORGE identity", tab: "Plan", mobile: true, group: "My journey" },
-  { href: "/assessment", label: "3. Where I am", group: "My journey" },
-  { href: "/blueprint", label: "4. My road", group: "My journey" },
-  { href: "/cycle", label: "5. 30 days", group: "My journey" },
-  { href: "/reflect", label: "Weekly reflection", group: "My journey" },
+  { href: "/identity", label: "1. Who I am", group: "FORGE" },
+  { href: "/plan", label: "2. FORGE identity", tab: "Plan", mobile: true, group: "FORGE" },
+  { href: "/assessment", label: "3. Where I am", group: "FORGE" },
+  { href: "/blueprint", label: "4. My road", group: "Discipline by Design" },
+  { href: "/cycle", label: "5. 30 days", group: "Discipline by Design" },
+  { href: "/reflect", label: "Weekly reflection", group: "Discipline by Design" },
   { href: "/network", label: "People", mobile: true, group: "Support" },
   { href: "/coaching", label: "Coaching", tab: "Coach", mobile: true, group: "Support" },
-  { href: "/companion", label: "AI Companion", group: "Support" },
+  { href: "/companion", label: "AI companion", group: "Support" },
   { href: "/more", label: "More", mobile: true, desktop: false },
   { href: "/more", label: "More", group: "Support" },
 ];
@@ -40,7 +40,7 @@ export function Shell({ user, children, journey }: { user: CurrentUser; children
         <nav className="mt-8 flex-1 space-y-0.5 overflow-y-auto" aria-label="Main">
           {(nav as NavItem[]).filter((n) => n.desktop !== false).map((n, i, all) => (
             <div key={n.href + n.label}>
-              {n.group && n.group !== all[i - 1]?.group && <p className="mt-5 mb-1 px-3 text-[11px] uppercase tracking-[0.12em] text-ink-mute">{n.group}</p>}
+              {n.group && n.group !== all[i - 1]?.group && <p className={`mt-5 mb-1 px-3 text-[11px] uppercase tracking-[0.12em] ${n.group === "Support" ? "text-ink-mute" : "font-semibold text-navy-deep"}`}>{n.group}</p>}
               <NavLink href={n.href} variant="side">{n.label}</NavLink>
             </div>
           ))}

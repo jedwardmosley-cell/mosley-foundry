@@ -77,9 +77,9 @@ export default async function EqiPage() {
                     <span className="text-sm text-ink-mute self-center">Choose a pillar to start a 30-day cycle.</span>
                   )}
                   {e.practice ? (
-                    <form action={addEqiToBlueprint}><input type="hidden" name="id" value={e.id} /><button className="btn-quiet">Add the practice to my Blueprint</button></form>
+                    <form action={addEqiToBlueprint}><input type="hidden" name="id" value={e.id} /><button className="btn-quiet">Add the practice to my blueprint</button></form>
                   ) : (
-                    <span className="text-sm text-ink-mute self-center">Add a practice to put it in your Blueprint.</span>
+                    <span className="text-sm text-ink-mute self-center">Add a practice to put it in your blueprint.</span>
                   )}
                   {coaches.length > 0 && !shared && (
                     <form action={shareEqi}><input type="hidden" name="id" value={e.id} /><button className="btn-quiet">Share with {coaches[0].coach.name.split(" (")[0]}</button></form>
@@ -131,7 +131,7 @@ export default async function EqiPage() {
         <input type="hidden" name="on" value="false" />
         <button className="text-sm text-ink-mute hover:text-ink">Turn off the EQ-i section. Your entries are kept.</button>
       </form>
-      <p className="mt-4 text-xs text-ink-mute max-w-2xl">EQ-i 2.0 is an assessment published by MHS. This app does not store EQ-i reports or scores, and the AI Companion does not interpret EQ-i results. FORGE self-ratings and EQ-i scores measure different things, so one cannot stand in for the other. Your coach sees a priority only after you share it.</p>
+      <p className="mt-4 text-xs text-ink-mute max-w-2xl">EQ-i 2.0 is an assessment published by MHS. This app does not store EQ-i reports or scores, and the AI companion does not interpret EQ-i results. FORGE self-ratings and EQ-i scores measure different things, so one cannot stand in for the other. Your coach sees a priority only after you share it.</p>
     </>
   );
 }

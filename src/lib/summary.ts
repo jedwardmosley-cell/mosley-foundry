@@ -15,17 +15,17 @@ export async function developmentSummary(userId: string, name: string) {
   const { pack } = await getContent();
   const L: string[] = [];
   const pName = (k: string) => pack.pillars.find((p) => p.key === k)?.name ?? k;
-  L.push(`# Development Summary: ${name}`, `Both Hands on the Wheel · generated ${fmt(new Date(), { month: "long", day: "numeric", year: "numeric" })}`, "");
+  L.push(`# Development summary: ${name}`, `Both Hands on the Wheel · generated ${fmt(new Date(), { month: "long", day: "numeric", year: "numeric" })}`, "");
   if (d.profile) {
     L.push(`**Pathway:** ${PATHWAYS[d.profile.pathway as keyof typeof PATHWAYS]?.name}`);
     if (d.profile.priorityPillar) L.push(`**Development priority:** ${pName(d.profile.priorityPillar)}`);
     const lines = FORGE_LINES.filter((l) => d.profile?.[l.field]);
     if (lines.length) L.push("", "## My FORGE identity", ...lines.map((l) => `- **${l.pillar}, ${l.label}:** ${d.profile![l.field]}`));
-    if (d.profile.forgeStatement) L.push("", "## FORGE Statement", d.profile.forgeStatement);
+    if (d.profile.forgeStatement) L.push("", "## FORGE statement", d.profile.forgeStatement);
   }
   if (d.identity) {
-    const lv = { CORE: "Level 1, Core Alignment", ROLE: "Level 2, Role Transition", REINVENT: "Level 3, Identity Reinvention" }[d.identity.level as "CORE"];
-    L.push("", "## Identity Shift", `**Level:** ${lv}`, "", d.identity.becoming);
+    const lv = { CORE: "Level 1, core alignment", ROLE: "Level 2, role transition", REINVENT: "Level 3, identity reinvention" }[d.identity.level as "CORE"];
+    L.push("", "## Identity shift", `**Level:** ${lv}`, "", d.identity.becoming);
     if (d.identity.behavior) L.push("", `**Behavior that shows it:** ${d.identity.behavior}`);
     if (d.identity.personaName) L.push(`**Performance identity:** ${d.identity.personaName}`);
   }
@@ -38,11 +38,11 @@ export async function developmentSummary(userId: string, name: string) {
     L.push("", "_These are self-ratings for personal development. They have not been validated as a psychometric measure._");
   }
   if (d.goals.length) {
-    L.push("", "## FORGE Action Plan");
+    L.push("", "## FORGE plan");
     for (const g of d.goals) L.push(`- **${pName(g.pillar)}${g.segmentKey ? ` (segment ${g.segmentKey})` : ""}**: now: ${g.whereNow || "-"}; want: ${g.whereWant || "-"}; one move: ${g.oneMove || "-"}`);
   }
   if (d.commitments.length) {
-    L.push("", "## Discipline by Design Blueprint");
+    L.push("", "## Discipline by Design blueprint");
     for (const c of d.commitments) L.push(`- ${BLUEPRINT_AREAS.find((a) => a.key === c.area)?.label}: ${c.title}${c.when ? ` (${c.when})` : ""}`);
   }
   if (d.relationships.length) {

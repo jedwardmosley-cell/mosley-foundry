@@ -11,7 +11,7 @@ import { PILLAR_KEYS } from "@/content/types";
 import { PageHeader, Card, Privacy } from "@/components/ui";
 import { CHECKIN_IDENTITY } from "@/content/identity";
 
-export const metadata = { title: "History & Export" };
+export const metadata = { title: "History & export" };
 
 export default async function HistoryPage() {
   const u = await requireUser("PARTICIPANT");
