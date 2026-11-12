@@ -26,45 +26,46 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
 
   return (
     <>
-      <PageHeader eyebrow="Optional" title="Identity Shift Spectrum">
-        Your identity is something you claim, out loud and in the present tense. People are not always trying to make the same size of change. Some want to strengthen who they are. Others are stepping into a new role. Others want to reinvent how they show up. Tell the app which one fits you, and the coaching adjusts. Your FORGE scores and plan stay as they are.
-      </PageHeader>
+      <PageHeader eyebrow="Identity Shift · optional" title="Who I am">Claim who you are, and choose how big a change it is. Your FORGE scores and plan stay as they are.</PageHeader>
 
       {saved && <p role="status" className="mb-4 rounded-xl border border-sage/40 bg-sage-soft px-4 py-2.5 text-sm text-sage">Saved. Next, <Link href="/plan" className="underline">write your FORGE identity</Link> so the rest of your plan builds on who you are.</p>}
 
       <Card>
         <form action={saveIdentity} className="space-y-6">
           <div>
-            <label htmlFor="claim" className="label">1. {QUESTIONS.becoming}</label>
-            <p className="text-sm text-ink-soft mb-2">Write it the way you would say it out loud. It starts with &quot;I am&quot; and it is in the present tense, because you are claiming it today.</p>
+            <label htmlFor="claim" className="label">1. {QUESTIONS.becoming} <span className="font-normal text-ink-mute">Say it out loud.</span></label>
             <div className="flex items-start rounded-xl border border-line bg-white focus-within:ring-2 focus-within:ring-navy/30 focus-within:border-navy">
               <span className="pl-3.5 pr-1.5 py-2.5 font-serif text-[17px] leading-6 text-navy-deep select-none">I am</span>
               <textarea id="claim" name="claim" required rows={Math.min(6, Math.max(2, Math.ceil(claimText.length / 34)))} maxLength={1500} defaultValue={claimText} placeholder="a leader who operates with integrity" className="flex-1 min-w-0 resize-none bg-transparent py-2.5 pr-3 text-[15px] leading-6 focus:outline-none" />
             </div>
-            <Picks list={{ status: PICKS_STATUS, options: STATEMENT_STARTERS[pathway] }} target="claim" label="Tap one to start, then make it yours" />
+            <Picks list={{ status: PICKS_STATUS, options: STATEMENT_STARTERS[pathway] }} target="claim" folded="Examples" />
           </div>
           <div>
             <Field label={`2. ${QUESTIONS.situation}`}>
               <input name="situation" defaultValue={id?.situation} maxLength={1500} className="input" />
             </Field>
-            <Picks list={{ status: PICKS_STATUS, options: SITUATION_PICKS[pathway] }} target="situation" />
+            <Picks list={{ status: PICKS_STATUS, options: SITUATION_PICKS[pathway] }} target="situation" folded="Examples" />
           </div>
           <div>
-            <Field label={`3. ${QUESTIONS.behavior}`} hint="Something another person could see you do.">
+            <Field label={`3. ${QUESTIONS.behavior}`}>
               <input name="behavior" defaultValue={id?.behavior} maxLength={1500} className="input" />
             </Field>
-            <Picks list={{ status: PICKS_STATUS, options: BEHAVIOR_PICKS[pathway] }} target="behavior" />
+            <Picks list={{ status: PICKS_STATUS, options: BEHAVIOR_PICKS[pathway] }} target="behavior" folded="Examples" note="Something another person could see you do." />
           </div>
 
           <fieldset>
             <legend className="label">4. {QUESTIONS.level}</legend>
-            <p className="text-sm text-ink-soft mb-3">{PATHWAY_CONTEXT[pathway]}</p>
             <IdentitySpectrum
               initial={id?.level as IdentityLevel | undefined}
               firstExample={FIRST_EXAMPLE[pathway]}
               persona={{ personaName: id?.personaName, personaQualities: id?.personaQualities, personaStandards: id?.personaStandards, personaSituations: id?.personaSituations, personaCue: id?.personaCue, personaBehaviors: id?.personaBehaviors }}
             />
-            <p className="mt-4 text-xs text-ink-mute">{NO_RANK_NOTE} The choice is yours. The app never picks a level from your FORGE scores, and you can change it later without losing anything.</p>
+            <p className="mt-4 text-sm text-ink-soft">No level ranks above another. You choose, and you can change it later.</p>
+            <details className="mt-1 text-xs text-ink-mute">
+              <summary className="cursor-pointer text-navy text-sm">More about the levels</summary>
+              <p className="mt-1">{PATHWAY_CONTEXT[pathway]}</p>
+              <p className="mt-1">{NO_RANK_NOTE} The app never picks a level from your FORGE scores, and you can change it later without losing anything.</p>
+            </details>
           </fieldset>
 
           <Submit>{id ? "Save changes" : "Save my identity shift"}</Submit>
@@ -72,13 +73,12 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
       </Card>
 
       {id && (
-        <Card className="mt-6">
-          <h2 className="h3">AI Companion and sharing</h2>
+        <details className="card mt-6">
+          <summary className="cursor-pointer h3">AI Companion and sharing</summary>
           <form action={saveIdentityControls} className="mt-4 space-y-5">
             <fieldset>
               <legend className="label">Coaching tone in the AI Companion</legend>
-              <p className="text-xs text-ink-mute mb-2">By default the tone matches your level. You can pick a different one at any time.</p>
-              <div className="space-y-1.5">
+                            <div className="space-y-1.5">
                 {(Object.entries(TONE_LABELS) as [ToneSetting, string][]).map(([v, label]) => (
                   <label key={v} className="flex items-start gap-2 text-[15px]">
                     <input type="radio" name="tone" value={v} defaultChecked={id.tone === v} className="mt-1 accent-navy" />
@@ -91,7 +91,7 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
               <legend className="label">What the AI Companion can use</legend>
               <label className="flex items-start gap-2 text-[15px]">
                 <input type="checkbox" name="aiUse" defaultChecked={id.aiUse} className="mt-1 h-4 w-4 accent-navy" />
-                <span>Use my level, my statement and my behavior. <span className="text-ink-mute text-sm">To adjust its tone and prompts, the companion sends these to Anthropic, the AI provider, when you chat. Turn this off and it coaches you without them.</span></span>
+                <span>Use my level, my statement and my behavior. <span className="text-ink-mute text-sm">They are sent to Anthropic, the AI provider, when you chat.</span></span>
               </label>
               {id.level === "REINVENT" && (
                 <label className="flex items-start gap-2 text-[15px]">
@@ -102,7 +102,7 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
             </fieldset>
             <fieldset>
               <legend className="label">What my coach can see</legend>
-              <p className="text-sm text-ink-soft">Your coach sees your statement, level and behavior only if you turn on <Link href="/sharing" className="btn-link">Identity Shift in Sharing</Link>. Your written check-in notes stay private either way.</p>
+              <p className="text-sm text-ink-soft">Only if you turn on <Link href="/sharing" className="btn-link">Identity Shift in Sharing</Link>. Check-in notes stay private.</p>
               {id.level === "REINVENT" && (
                 <label className="mt-2 flex items-start gap-2 text-[15px]">
                   <input type="checkbox" name="sharePersona" defaultChecked={id.sharePersona} className="mt-1 h-4 w-4 accent-navy" />
@@ -112,7 +112,7 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
             </fieldset>
             <Submit className="btn-quiet">Save these settings</Submit>
           </form>
-        </Card>
+        </details>
       )}
 
       {history.length > 0 && (
@@ -132,7 +132,7 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
 
       {id && (
         <form action={removeIdentity} className="mt-6">
-          <button className="text-sm text-ink-mute hover:text-ink">Turn off the Identity Shift section. Your current version is saved under Earlier versions.</button>
+          <button className="text-sm text-ink-mute hover:text-ink">Turn off Identity Shift (your version is kept)</button>
         </form>
       )}
     </>

@@ -408,6 +408,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.waitForSelector("text=E2E-ID: a manager who makes hard calls on time.");
     assert.ok(!(await page.content()).includes("E2E-PERSONA"), "persona needs its own tick");
     await dp.goto(`${BASE}/identity`);
+    await dp.locator("summary", { hasText: "AI Companion and sharing" }).click();
     await dp.locator('input[name="sharePersona"]').check();
     await dp.locator('input[value="SUPPORTIVE"]').check();
     await Promise.all([dp.waitForLoadState("networkidle"), dp.click('button:has-text("Save these settings")')]);
