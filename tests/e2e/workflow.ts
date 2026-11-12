@@ -76,7 +76,8 @@ const submitAndWait = async (page: Page, selector: string) => {
   });
 
   await check("3. identify a development priority", async () => {
-    await Promise.all([page.waitForURL("**/plan"), page.click('button:has-text("my development priority")')]);
+    await Promise.all([page.waitForURL(/\/blueprint(#one-move)?$/), page.click('button:has-text("my development priority")')]);
+    await page.goto(`${BASE}/plan`);
     const p = await db.profile.findFirst({ where: { user: { email } } });
     assert.equal(p?.priorityPillar, "E");
     await page.fill('textarea[name="destination"]', "a leader my team trusts with bad news");
@@ -126,7 +127,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await Promise.all([page.waitForURL("**/cycle"), page.click('button:has-text("Start the cycle")')]);
     await page.waitForSelector("text=Day 1 of 30");
     // the journey bar follows: steps 2 to 5 done, Who I am still open, and the 30 days under way
-    await page.goto(`${BASE}/dashboard`);
+    await page.goto(`${BASE}/blueprint`);
     const bar = page.locator('nav[aria-label="Your journey"]');
     await bar.locator("text=Day 1 of 30").waitFor();
     assert.equal(await bar.locator("text=(done)").count(), 4, "four steps done before Identity Shift");
@@ -135,9 +136,9 @@ const submitAndWait = async (page: Page, selector: string) => {
   await check("7. record a daily reflection", async () => {
     await page.goto(`${BASE}/dashboard`);
     await page.locator('input[name="status"][value="DONE"]').check({ force: true });
+    await page.locator("summary:has-text('Add detail')").click();
     await page.locator('label:has(input[name="tags"][value="In a meeting"])').click();
     assert.ok(await page.locator('input[name="tags"][value="In a meeting"]').isChecked());
-    await page.locator("summary:has-text('Add a note or reflection')").click();
     await page.fill('input[name="note"]', "Paused in the 10 am review");
     await page.fill('textarea[name="reflection"]', "E2E-REFLECTION-TEXT: the pause gave me room.");
     await submitAndWait(page, 'button:has-text("Log today")');
@@ -156,8 +157,9 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.deepEqual(JSON.parse(c.tags), ["In a meeting"]);
   });
 
-  await check("7b. FORGE Plan: priority open, one-move suggestion fills the field", async () => {
-    await page.goto(`${BASE}/plan`);
+  await check("7b. Blueprint: one move this week, priority open, suggestion fills the field", async () => {
+    await page.goto(`${BASE}/blueprint`);
+    assert.equal(await (await page.request.get(`${BASE}/plan`)).text().then((t) => t.includes('name="oneMove"')), false, "one move is no longer on the FORGE Plan");
     const pri = page.locator("details[open]", { hasText: "Emotionally Anchored" });
     await pri.locator('button:has-text("one breath, one question")').click();
     assert.match(await pri.locator('input[name="oneMove"]').inputValue(), /one breath/);
@@ -187,13 +189,11 @@ const submitAndWait = async (page: Page, selector: string) => {
     await Promise.all([page.waitForURL(/\/cycle\/new\?pillar=E/), page.click('a:has-text("Start a 30-day cycle on Emotionally Anchored")')]);
     assert.equal(await page.inputValue('input[name="focus"]'), "One breath before I answer");
     assert.ok(await page.locator('input[name="pillar"][value="E"]').isChecked());
-    await page.goto(`${BASE}/dashboard`);
-    await page.waitForSelector("text=From my EQ-i debrief");
   });
 
   await check("7e. Identity Shift: explore all three levels, choose one, change it later, history kept", async () => {
     await page.goto(`${BASE}/dashboard`);
-    assert.equal(await page.locator("section", { hasText: "Who I am" }).count(), 0, "no identity card until the person opts in");
+    assert.ok(!(await page.locator("main").innerText()).includes("follows through"), "no identity statement until the person writes one");
     await page.goto(`${BASE}/identity`);
     await page.fill('textarea[name="claim"]', "someone who follows through on what I say.");
     await page.fill('input[name="behavior"]', "I close every open commitment by Friday noon.");
@@ -208,10 +208,8 @@ const submitAndWait = async (page: Page, selector: string) => {
     const me = await db.user.findUniqueOrThrow({ where: { email } });
     assert.equal((await db.identityProfile.findUniqueOrThrow({ where: { userId: me.id } })).level, "CORE");
     await page.goto(`${BASE}/dashboard`);
-    const card = page.locator("section", { hasText: "Who I am" }).first();
-    assert.ok((await card.innerText()).includes("Level 1 · Core Alignment"));
-    assert.ok((await card.innerText()).includes("I am someone who follows through on what I say."), "statement saved as an I am claim");
-    assert.ok((await card.innerText()).includes("Emotionally Anchored"));
+    // the I am statement leads the Today card
+    await page.waitForSelector("main section >> text=I am someone who follows through on what I say.");
     // change to Level 3 with an optional performance identity
     await page.goto(`${BASE}/identity`);
     await page.locator("label", { hasText: "Identity Reinvention" }).click();
@@ -234,7 +232,7 @@ const submitAndWait = async (page: Page, selector: string) => {
 
   await check("7f. the level shapes the FORGE Plan, Blueprint, cycle and check-in, all optional", async () => {
     const me = await db.user.findUniqueOrThrow({ where: { email } });
-    await page.goto(`${BASE}/plan`);
+    await page.goto(`${BASE}/blueprint`);
     await page.waitForSelector("text=For Identity Reinvention:");
     await page.waitForSelector("text=Use your activation cue to prepare before a demanding situation.");
     await page.goto(`${BASE}/blueprint`);
@@ -251,8 +249,8 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.locator('button:has-text("I close every open commitment by Friday noon.")').click();
     assert.equal(await page.inputValue('input[name="focus"]'), "I close every open commitment by Friday noon.");
     await page.goto(`${BASE}/dashboard`);
-    await page.waitForSelector("text=Did you show up as who you are today?");
-    await page.waitForSelector("text=Where did you meet your standard today, and where did you fall short?");
+    await page.waitForSelector("text=Showed up as who I am?");
+    await page.waitForSelector('input[placeholder="Where did you meet your standard today, and where did you fall short?"]', { state: "attached" });
     // the question is optional: saving without it still works
     await submitAndWait(page, 'button:has-text("Update today")');
     assert.equal((await db.dailyCheckIn.findFirstOrThrow({ where: { userId: me.id } })).identityActed, "");
@@ -305,7 +303,8 @@ const submitAndWait = async (page: Page, selector: string) => {
     await g.locator('button:has-text("a leader who operates with integrity")').first().click();
     await g.locator("label", { hasText: "Role Transition" }).click();
     await Promise.all([g.waitForURL("**/start?step=2"), g.click('button:has-text("Save and continue")')]);
-    // 2. FORGE lines: the identity is offered as the first F starter
+    // 2. FORGE identity: the identity is offered as the first F example
+    await g.locator('summary:has-text("Examples")').first().click();
     await g.locator('button:has-text("a leader who operates with integrity")').first().click();
     await Promise.all([g.waitForURL("**/start?step=3"), g.click('button:has-text("Save and continue")')]);
     // 3. where I am: the assessment and the priority bring the client back
@@ -377,9 +376,9 @@ const submitAndWait = async (page: Page, selector: string) => {
     await dp.goto(`${BASE}/dashboard`);
     const box = dp.locator("section", { hasText: "From your coach" });
     await box.waitFor();
-    assert.ok((await box.innerText()).includes("Exercise:"));
     assert.ok((await box.innerText()).includes("Session with Avery Lin"));
-    assert.ok((await box.innerText()).includes("What you agreed on"));
+    assert.ok((await box.innerText()).includes("Agreed"));
+    assert.ok((await box.innerText()).includes("Due"), "the exercise shows with its due date");
     await box.screenshot({ path: `${shots}/09c-from-coach.png` });
     // a client with no coach items sees no box
     await dp.context().clearCookies();

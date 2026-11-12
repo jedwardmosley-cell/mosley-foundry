@@ -92,7 +92,7 @@ export async function setPriority(fd: FormData) {
   const existing = await db.developmentGoal.findFirst({ where: { userId: u.id, pillar, status: "ACTIVE" } });
   if (existing) await db.developmentGoal.update({ where: { id: existing.id }, data: { isPriority: true } });
   else await db.developmentGoal.create({ data: { userId: u.id, pillar, isPriority: true } });
-  redirect(fromStart(fd) ? "/start?step=4" : "/plan");
+  redirect(fromStart(fd) ? "/start?step=4" : "/blueprint#one-move");
 }
 
 // ---------- FORGE Action Plan (development goals) ----------
@@ -110,6 +110,7 @@ export async function saveGoal(fd: FormData) {
   if (existing) await db.developmentGoal.update({ where: { id: existing.id }, data: d });
   else await db.developmentGoal.create({ data: { ...d, userId: u.id } });
   revalidatePath("/plan");
+  revalidatePath("/blueprint");
   revalidatePath("/pathway");
 }
 
