@@ -10,6 +10,7 @@ import { BLUEPRINT_PICKS } from "@/content/options";
 import { LEVELS, PRACTICE, type IdentityLevel } from "@/content/identity";
 import { addIdentityPractice } from "@/app/actions/identity";
 import { Picks } from "@/components/Picks";
+import { OneMoveCards } from "@/components/OneMoveCards";
 import { FORGE_LINES, PRACTICE_STARTERS } from "@/content/forgeLines";
 import type { PathwayKey } from "@/content/program";
 import type { PillarKey } from "@/content/types";
@@ -28,6 +29,7 @@ export default async function BlueprintPage() {
   ]);
   const identity = await db.identityProfile.findUnique({ where: { userId: u.id } });
   const profile = await db.profile.findUnique({ where: { userId: u.id } });
+  const goals = await db.developmentGoal.findMany({ where: { userId: u.id, status: "ACTIVE", segmentKey: null } });
   const pathway = (profile?.pathway ?? "PERSONAL") as PathwayKey;
   const focus = profile?.priorityPillar as PillarKey | null | undefined;
   const statements = FORGE_LINES.filter((l) => profile?.[l.field]);
@@ -66,6 +68,14 @@ export default async function BlueprintPage() {
           <p className="mt-2 text-sm text-ink-soft">Your FORGE identity says who is behind the wheel. Each routine and relationship below is a way to reinforce it. <Link href="/plan" className="btn-link">Edit my FORGE identity</Link></p>
         </Card>
       )}
+
+      <section id="one-move" className="mb-6 scroll-mt-20">
+        <h2 className="h2">One move this week</h2>
+        <p className="mt-1 mb-3 text-sm muted">
+          {focus ? "Turn your identity into one move for your focus pillar. Open the others when you are ready; one pillar with real attention beats five with divided attention." : "Pick a focus pillar from your assessment results, then choose one move for it here."}
+        </p>
+        <OneMoveCards pack={pack} goals={goals} priority={focus} level={identity?.level} />
+      </section>
 
       {d.whosChecking.length > 0 && (
         <Card className="mb-6 bg-navy-deep border-navy-deep text-white">

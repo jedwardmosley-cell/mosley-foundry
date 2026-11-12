@@ -76,7 +76,8 @@ const submitAndWait = async (page: Page, selector: string) => {
   });
 
   await check("3. identify a development priority", async () => {
-    await Promise.all([page.waitForURL("**/plan"), page.click('button:has-text("my development priority")')]);
+    await Promise.all([page.waitForURL(/\/blueprint(#one-move)?$/), page.click('button:has-text("my development priority")')]);
+    await page.goto(`${BASE}/plan`);
     const p = await db.profile.findFirst({ where: { user: { email } } });
     assert.equal(p?.priorityPillar, "E");
     await page.fill('textarea[name="destination"]', "a leader my team trusts with bad news");
@@ -156,8 +157,9 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.deepEqual(JSON.parse(c.tags), ["In a meeting"]);
   });
 
-  await check("7b. FORGE Plan: priority open, one-move suggestion fills the field", async () => {
-    await page.goto(`${BASE}/plan`);
+  await check("7b. Blueprint: one move this week, priority open, suggestion fills the field", async () => {
+    await page.goto(`${BASE}/blueprint`);
+    assert.equal(await (await page.request.get(`${BASE}/plan`)).text().then((t) => t.includes('name="oneMove"')), false, "one move is no longer on the FORGE Plan");
     const pri = page.locator("details[open]", { hasText: "Emotionally Anchored" });
     await pri.locator('button:has-text("one breath, one question")').click();
     assert.match(await pri.locator('input[name="oneMove"]').inputValue(), /one breath/);
@@ -234,7 +236,7 @@ const submitAndWait = async (page: Page, selector: string) => {
 
   await check("7f. the level shapes the FORGE Plan, Blueprint, cycle and check-in, all optional", async () => {
     const me = await db.user.findUniqueOrThrow({ where: { email } });
-    await page.goto(`${BASE}/plan`);
+    await page.goto(`${BASE}/blueprint`);
     await page.waitForSelector("text=For Identity Reinvention:");
     await page.waitForSelector("text=Use your activation cue to prepare before a demanding situation.");
     await page.goto(`${BASE}/blueprint`);
