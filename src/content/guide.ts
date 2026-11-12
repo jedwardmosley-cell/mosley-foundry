@@ -19,6 +19,19 @@ export type GuideSection = {
 
 export const CLIENT_GUIDE: GuideSection[] = [
   {
+    id: "journey",
+    title: "How it fits together",
+    intro: "Everything in the app follows one path. The bar at the top of each screen shows the five steps, what is done, and what comes next.",
+    steps: [
+      "Who I am. Claim your identity in an I am statement and choose how big a change it is.",
+      "FORGE lines. Write one line for each letter: I am, plus what I do. Then put them together in your FORGE Statement.",
+      "Where I am. Score the five pillars to see how close you are today, and pick one pillar to work on.",
+      "My road. Use Discipline by Design to set up the routines and the people that support who you are.",
+      "30 days. Practice one behavior for 30 days with a two-minute daily check-in. On day 30, decide what comes next.",
+    ],
+    note: "Every step can be skipped and finished later. The bar keeps track for you.",
+  },
+  {
     id: "first",
     title: "Your first 10 minutes",
     time: "10 minutes, one time",
