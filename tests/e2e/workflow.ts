@@ -315,6 +315,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await Promise.all([g.waitForURL(/\/assessment\/[a-z0-9]+\?next=start$/), g.click('button:has-text("See my profile")')]);
     await Promise.all([g.waitForURL("**/start?step=4"), g.click('button:has-text("my development priority")')]);
     // 4. my road: one routine and one person
+    await g.locator('summary:has-text("Ideas")').click();
     await g.locator('button:has-text("Journaling")').click();
     await Promise.all([g.waitForURL("**/start?step=4"), g.click('button:has-text("Add routine")')]);
     await g.waitForSelector("text=✓ Journaling");
