@@ -11,6 +11,7 @@ import { HelpMeWrite } from "@/components/HelpMeWrite";
 import Link from "next/link";
 import { LEVELS, PILLAR_PROMPTS, PILLAR_PROMPTS_STATUS, type IdentityLevel } from "@/content/identity";
 import { FORGE_LINES_STATUS } from "@/content/forgeLines";
+import { FORGE_IDENTITY_TITLE, FORGE_IDENTITY_INTRO } from "@/content/forgeIdentityIntro";
 import { ForgeLinesFields } from "@/components/ForgeLinesFields";
 import type { PathwayKey } from "@/content/program";
 
@@ -49,23 +50,24 @@ export default async function PlanPage() {
         <Link href="/identity" className="card block border-navy/40 ring-1 ring-navy/10 hover:border-navy">
           <p className="eyebrow">Start here</p>
           <h2 className="h3 mt-1">Claim who you are</h2>
-          <p className="text-sm muted mt-1">Write your I am statement and choose how big a change it is. Your five FORGE lines build on it.</p>
+          <p className="text-sm muted mt-1">Write your I am statement and choose how big a change it is. Your FORGE identity builds on it.</p>
         </Link>
       )}
 
       <Card className="mt-5">
         <form action={saveStatement} className="space-y-6">
           <div>
-            <h2 className="h3">Your five FORGE lines</h2>
-            <p className="text-sm muted mt-1">I am, plus what I do. One line for each letter, all in the present tense. Tap a starter, then make it yours.</p>
+            <h2 className="h3">{FORGE_IDENTITY_TITLE}</h2>
+            <p className="text-sm muted mt-1">{FORGE_IDENTITY_INTRO}</p>
+            <p className="text-xs text-ink-mute mt-2">Habits and routines come next, in your <Link href="/blueprint" className="btn-link">Blueprint</Link>. That is where this identity turns into practice.</p>
             {FORGE_LINES_STATUS === "draft" && <span className="draft !text-[10px] mt-2 inline-block">Draft wording</span>}
           </div>
           <ForgeLinesFields profile={profile} pathway={pathway} claim={claim} ai={ai} statementHint={entre ? entrepreneur.forgeStatementPrompt : pack.forgeStatementPrompt} />
           <DictationHint />
           {pack.holdYourself && <p className="quote text-[15px]">{pack.holdYourself}</p>}
-          <Submit>Save my FORGE lines</Submit>
+          <Submit>Save my FORGE identity</Submit>
         </form>
-        <Source>FORGE pillars: Both Hands on the Wheel. Line wording and starters: build team draft. FORGE Statement: Personal Application Workbook, Section Six</Source>
+        <Source>FORGE pillars, questions and instruction: Jason Mosley. Hints and examples: build team draft. FORGE Statement: Personal Application Workbook, Section Six</Source>
       </Card>
 
       <p className="mt-6 mb-3 text-sm muted">

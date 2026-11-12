@@ -80,13 +80,13 @@ const submitAndWait = async (page: Page, selector: string) => {
     const p = await db.profile.findFirst({ where: { user: { email } } });
     assert.equal(p?.priorityPillar, "E");
     await page.fill('textarea[name="destination"]', "a leader my team trusts with bad news");
-    await page.fill('textarea[name="lineO"]', "when someone goes quiet, and I ask about it that day");
-    await page.locator('button:has-text("Put my five lines together")').click();
-    assert.equal(await page.inputValue('textarea[name="forgeStatement"]'), "I am a leader my team trusts with bad news. I notice when someone goes quiet, and I ask about it that day.");
+    await page.fill('textarea[name="lineO"]', "a discerning leader who sees what my team needs");
+    await page.locator('button:has-text("Put my five statements together")').click();
+    assert.equal(await page.inputValue('textarea[name="forgeStatement"]'), "I am a leader my team trusts with bad news. I am a discerning leader who sees what my team needs.");
     await submitAndWait(page, 'form:has(textarea[name="destination"]) button[type="submit"]');
     const saved = await db.profile.findFirstOrThrow({ where: { user: { email } } });
     assert.equal(saved.destination, "I am a leader my team trusts with bad news");
-    assert.equal(saved.lineO, "I notice when someone goes quiet, and I ask about it that day");
+    assert.equal(saved.lineO, "I am a discerning leader who sees what my team needs");
   });
 
   await check("4. create a Discipline by Design Blueprint", async () => {
@@ -292,7 +292,7 @@ const submitAndWait = async (page: Page, selector: string) => {
   });
   void assessmentUrl;
 
-  await check("1c. guided first session: who I am, FORGE lines, assessment, road, 30 days", async () => {
+  await check("1c. guided first session: who I am, FORGE identity, assessment, road, 30 days", async () => {
     const gc = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const g: Page = await gc.newPage();
     await g.goto(`${BASE}/signup`);
@@ -331,7 +331,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await g.goto(`${BASE}/dashboard`);
     // only the F line was written, so the bar keeps FORGE lines open as a nudge for the first week
     assert.equal(await g.locator('nav[aria-label="Your journey"] >> text=(done)').count(), 4);
-    await g.waitForSelector('nav[aria-label="Your journey"] >> text=Still open: FORGE lines');
+    await g.waitForSelector('nav[aria-label="Your journey"] >> text=Still open: FORGE identity');
     await gc.close();
   });
 

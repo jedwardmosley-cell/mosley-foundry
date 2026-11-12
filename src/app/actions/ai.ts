@@ -7,7 +7,7 @@ import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { parse } from "@/lib/validation";
 import { addDays } from "@/lib/dates";
-import { aiAvailable, generateReply, draftField, type AiMode } from "@/lib/ai";
+import { aiAvailable, generateReply, draftField, coachIdentityLine, type AiMode, type CoachReply } from "@/lib/ai";
 
 export type ChatState = { error?: string } | undefined;
 
@@ -79,6 +79,25 @@ export async function draftWithAI(kind: DraftKind): Promise<{ text: string } | {
   } catch (err) {
     if (err instanceof Anthropic.RateLimitError) return { error: "The AI is busy right now. Try again in a minute." };
     if (err instanceof Anthropic.APIError) return { error: "The AI service could not draft this right now." };
+    throw err;
+  }
+}
+
+const LINE_FIELDS = ["destination", "lineO", "why", "lineG", "lineE"] as const;
+
+/** The identity coach for one FORGE statement. Saves nothing. */
+export async function coachLine(field: string, written: string): Promise<CoachReply | { error: string }> {
+  const u = await requireUser("PARTICIPANT");
+  if (!(LINE_FIELDS as readonly string[]).includes(field)) return { error: "Unknown field." };
+  if (!aiAvailable()) return { error: "The AI Companion is not turned on for this site yet." };
+  const profile = await db.profile.findUnique({ where: { userId: u.id } });
+  if (profile && !profile.aiEnabled) return { error: "You turned the AI Companion off in Settings." };
+  try {
+    const r = await coachIdentityLine(u.id, field as (typeof LINE_FIELDS)[number], String(written ?? "").slice(0, 1500));
+    return r ?? { error: "No answer this time. Try again in a moment." };
+  } catch (err) {
+    if (err instanceof Anthropic.RateLimitError) return { error: "The AI is busy right now. Try again in a minute." };
+    if (err instanceof Anthropic.APIError) return { error: "The AI service could not answer right now." };
     throw err;
   }
 }

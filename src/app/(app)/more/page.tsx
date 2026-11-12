@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/ui";
 const GROUPS: [string, [string, string, string][]][] = [
   ["My journey", [
     ["/identity", "1. Who I am", "Claim it in an I am statement and choose how big a change it is."],
-    ["/plan", "2. FORGE lines", "I am, plus what I do. One line for each letter, then your FORGE Statement."],
+    ["/plan", "2. FORGE identity", "Five I am statements, one for each letter, then your FORGE Statement."],
     ["/assessment", "3. Where I am today", "Score the five pillars and pick one to work on."],
     ["/blueprint", "4. My road", "Discipline by Design: your routines, your people, your learning."],
     ["/cycle", "5. 30 days", "Practice one behavior for 30 days, then decide what is next."],

@@ -2,13 +2,14 @@ import type { PathwayKey } from "./program";
 import type { PillarKey } from "./types";
 
 /**
- * The five FORGE lines: "I am" plus "I do".
+ * FORGE IDENTITY: five identity statements, one per pillar.
  *
- * The questions follow how the book describes each letter:
- *   F the destination, O paying attention to the signs, R why you are going there,
- *   G the distance between here and there, E being emotionally fit to drive.
- * The labels, prefixes, hints and starters were written by the build team: DRAFT FOR AUTHOR REVIEW.
- * To approve, change FORGE_LINES_STATUS to "approved".
+ * The questions and the example statements (used as placeholders) are the author's.
+ * FORGE describes who is behind the wheel. Habits, tasks and techniques belong downstream,
+ * in Discipline by Design (see PRACTICE_STARTERS below).
+ *
+ * The hints and the tap-to-fill starters were written by the build team: DRAFT FOR AUTHOR REVIEW.
+ * They are illustrations, not statements to prescribe. To approve, change FORGE_LINES_STATUS to "approved".
  *
  * F and R are stored in the old Destination and Why fields, so earlier answers carry over.
  */
@@ -21,7 +22,7 @@ export type ForgeLine = {
   field: LineField;
   label: string;
   question: string;
-  /** Fixed words the line starts with. The client finishes the sentence. */
+  /** Fixed words the statement starts with. The client finishes the sentence. */
   prefix: string;
   hint: string;
   placeholder: string;
@@ -32,134 +33,167 @@ export const FORGE_LINES: ForgeLine[] = [
   {
     pillar: "F",
     field: "destination",
-    label: "My destination",
-    question: "Where am I going? Picture yourself there, as true today.",
+    label: "Future Focused",
+    question: "Who am I becoming?",
     prefix: "I am",
-    hint: "This is your destination, claimed in the present tense.",
-    placeholder: "a leader who builds a team that runs well without me in every meeting",
+    hint: "Describe the person you are choosing to be and where that person is headed. Plans and tasks go in your Blueprint.",
+    placeholder: "a purposeful leader who knows where I am going and takes ownership of my direction",
     starters: {
       PERSONAL: [
-        "a person who does what I say I will do, at work and at home",
-        "someone people can count on when plans change",
-        "a person who spends my time on what matters most to me",
+        "a purposeful person who knows where I am going and owns my direction",
+        "a person who lives my life on purpose",
+        "becoming someone who lives by my own priorities instead of other people's urgency",
       ],
       LEADING_OTHERS: [
-        "a leader who builds a team that runs well without me in every meeting",
-        "a manager my team brings problems to early",
-        "a leader who makes hard calls on time and explains them",
+        "a purposeful leader who knows where we are going and takes ownership of our direction",
+        "a leader people can follow because I know what I am building",
+        "becoming a leader who builds people as well as results",
       ],
       ENTREPRENEURIAL: [
-        "an owner who runs the business instead of doing every job in it",
-        "a founder who builds systems other people can run",
-        "an owner my people trust to tell them where we are headed",
+        "an owner who leads the business toward a clear future",
+        "a builder of something that lasts beyond my own effort",
+        "becoming a founder who leads the company instead of carrying it",
       ],
     },
   },
   {
     pillar: "O",
     field: "lineO",
-    label: "What I notice",
-    question: "What signs do I pay attention to?",
-    prefix: "I notice",
-    hint: "The early signs that tell you whether you are on the road you chose.",
-    placeholder: "when someone goes quiet, and I ask about it that day",
+    label: "Outcome Aware",
+    question: "What does someone with my identity pay attention to?",
+    prefix: "I am",
+    hint: "Describe the kind of attention this person brings. The signals you will track go in your Blueprint.",
+    placeholder: "a discerning leader who recognizes what moves me toward my purpose and what pulls me away",
     starters: {
       PERSONAL: [
-        "when I start saying yes to things I do not have time for",
-        "when I put off the hard task, and I do it first the next morning",
-        "how I feel at the end of the day, and what drained me",
+        "a discerning person who recognizes what moves me toward my purpose and what pulls me away",
+        "an honest observer of my own life, willing to see what is happening",
+        "becoming a person who notices the early signs before they turn into problems",
       ],
       LEADING_OTHERS: [
-        "when someone goes quiet, and I ask about it that day",
-        "when the same problem comes back twice, and I look for the cause",
-        "when I am doing work my team could do",
+        "a discerning leader who sees what my team needs before they have to ask",
+        "a leader who pays attention to people as closely as results",
+        "becoming a leader who listens for what is not being said",
       ],
       ENTREPRENEURIAL: [
-        "when I am the bottleneck, and I hand that decision to someone",
-        "the numbers every week, before they surprise me",
-        "when a customer complaint repeats, and I fix the system behind it",
+        "an owner who sees the business clearly, the numbers and the people",
+        "a founder who pays attention to what customers are telling me",
+        "becoming an owner who notices when I am the bottleneck",
       ],
     },
   },
   {
     pillar: "R",
     field: "why",
-    label: "Why I go there",
-    question: "Why am I going there?",
-    prefix: "",
-    hint: "Say who it is for. A good reason is still true when the results are slow.",
-    placeholder: "I serve my team because they deserve a boss who has their back and tells them the truth.",
+    label: "Reason Rooted",
+    question: "What makes this identity meaningful to me?",
+    prefix: "I am",
+    hint: "Name the values underneath this identity, and who it is for.",
+    placeholder: "a person whose decisions reflect my deepest values and commitments",
     starters: {
       PERSONAL: [
-        "I do this because the people I love deserve the best version of me.",
-        "I do this because I want my word to mean something.",
-        "I do this because I want to look back and know I chose my life on purpose.",
+        "a person whose decisions reflect my deepest values and commitments",
+        "a person who lives for something bigger than my own comfort",
+        "someone whose word means something to the people I love",
       ],
       LEADING_OTHERS: [
-        "I serve my team because they deserve a boss who has their back and tells them the truth.",
-        "I lead this way because my people should go home better than they came in.",
-        "I do this because my team's growth matters more than my comfort.",
+        "a leader who serves because my people deserve my best",
+        "a leader whose choices reflect what I believe about people",
+        "a leader who cares more about my team's growth than my own recognition",
       ],
       ENTREPRENEURIAL: [
-        "I build this because my people and their families count on it.",
-        "I do this because I want a business that works without burning me out.",
-        "I build this because my customers deserve the same quality every time.",
+        "an owner who builds because the people who count on this business matter to me",
+        "a founder whose business reflects what I value",
+        "an owner who measures success by the lives the business makes better",
       ],
     },
   },
   {
     pillar: "G",
     field: "lineG",
-    label: "What I practice",
-    question: "What is the distance between here and there, and how do I close it?",
-    prefix: "I practice",
-    hint: "One skill you work on now. It says what you do today to close the gap.",
-    placeholder: "one coaching conversation each week, so my people grow",
+    label: "Growth Oriented",
+    question: "Who am I when I encounter my limitations?",
+    prefix: "I am",
+    hint: "Describe who you are when you hit a limit. The skills you will practice go in your Blueprint.",
+    placeholder: "a developing leader who embraces challenges as opportunities to become more capable",
     starters: {
       PERSONAL: [
-        "planning my week before it starts, before I open my email",
-        "keeping one promise to myself each day, even a small one",
-        "asking for feedback once a week and saying thank you",
+        "a developing person who treats challenges as chances to become more capable",
+        "a learner who is honest about where I fall short and keeps growing",
+        "a person who can be corrected without being crushed",
       ],
       LEADING_OTHERS: [
-        "one coaching conversation each week, so my people grow",
-        "asking a question before I give an answer",
-        "giving clear feedback within a day of seeing something",
+        "a developing leader who embraces challenges as opportunities to become more capable",
+        "a leader who learns out loud, so my team can too",
+        "a leader secure enough to ask for feedback and use it",
       ],
       ENTREPRENEURIAL: [
-        "writing down one process each week so someone else can run it",
-        "handing off one task a week and not taking it back",
-        "reviewing my numbers every week with someone who will ask hard questions",
+        "an owner who grows as fast as the business needs me to",
+        "a founder who learns from failure without being defined by it",
+        "becoming an owner who develops people who can do what I do",
       ],
     },
   },
   {
     pillar: "E",
     field: "lineE",
-    label: "How I respond",
-    question: "Am I fit to drive? How do I respond when it gets hard?",
-    prefix: "When",
-    hint: "Say what shows up and what you do. Courage and confidence take the place of fear.",
-    placeholder: "fear shows up, I name it and act anyway",
+    label: "Emotionally Anchored",
+    question: "Who am I when emotions challenge my identity?",
+    prefix: "I am",
+    hint: "Describe who you are when emotions run high. Techniques, like a pause or a breath, go in your Blueprint.",
+    placeholder: "a courageous, emotionally grounded leader who stays intentional when things get hard",
     starters: {
       PERSONAL: [
-        "fear shows up, I name it and take the next step anyway",
-        "I get frustrated, I pause and take one breath before I answer",
-        "I fall short, I own it and start again the next day",
+        "a courageous, grounded person who stays intentional when things get hard",
+        "a person who feels fear fully and still chooses who I am",
+        "becoming a person whose emotions inform me without running me",
       ],
       LEADING_OTHERS: [
-        "fear shows up, I name it and act anyway",
-        "someone challenges my decision, I ask one question before I answer",
-        "the day goes sideways, I stay calm so my team can too",
+        "a courageous, emotionally grounded leader who stays intentional when things get hard",
+        "a calm presence my team can count on in a hard moment",
+        "becoming a leader who chooses my response instead of reacting",
       ],
       ENTREPRENEURIAL: [
-        "money gets tight, I look at the numbers and make one clear decision",
-        "a deal falls through, I take a short walk and then call the next person",
-        "I feel the urge to do it all myself, I stop and ask who else can",
+        "an owner who stays clear-headed when money or deals get tight",
+        "a founder whose confidence comes from who I am more than how the month went",
+        "becoming an owner who leads with courage when the stakes are high",
       ],
     },
   },
 ];
+
+/**
+ * Practices that REINFORCE a FORGE identity. These are habits and actions, so they live in
+ * Discipline by Design (the Blueprint and the guided session's "My road" step), never in FORGE.
+ * Build-team draft, for author review.
+ */
+export const PRACTICE_STARTERS: Record<PillarKey, Record<PathwayKey, string[]>> = {
+  F: {
+    PERSONAL: ["Plan my week before it starts", "Read my FORGE identity each morning"],
+    LEADING_OTHERS: ["Share where we are headed at the start of each week", "Read my FORGE identity each morning"],
+    ENTREPRENEURIAL: ["Spend one hour a week on the business instead of in it", "Read my FORGE identity each morning"],
+  },
+  O: {
+    PERSONAL: ["Look back at the end of each day: what moved me forward?", "Notice when I say yes to things I do not have time for"],
+    LEADING_OTHERS: ["Ask about it the same day when someone goes quiet", "Look for the cause when a problem comes back twice"],
+    ENTREPRENEURIAL: ["Review my numbers every week", "Fix the system behind any complaint that repeats"],
+  },
+  R: {
+    PERSONAL: ["Keep one promise to myself each day", "Write down why this matters once a week"],
+    LEADING_OTHERS: ["Weekly one-on-one with each person on my team", "Tell my team why our work matters"],
+    ENTREPRENEURIAL: ["Thank one customer or team member each week", "Check big decisions against what I value"],
+  },
+  G: {
+    PERSONAL: ["Ask for feedback once a week and say thank you", "Learn one new thing each week"],
+    LEADING_OTHERS: ["One coaching conversation each week", "Ask a question before I give an answer"],
+    ENTREPRENEURIAL: ["Write down one process each week so someone else can run it", "Hand off one task a week"],
+  },
+  E: {
+    PERSONAL: ["Pause and take one breath before I answer when I am frustrated", "Name the fear, then take the next step"],
+    LEADING_OTHERS: ["Ask one question before I answer a challenge", "Stay calm when the day goes sideways so my team can too"],
+    ENTREPRENEURIAL: ["Take a short walk before a hard call", "Stop and ask who else can when I want to do it all myself"],
+  },
+};
 
 export const LINE_BY_FIELD = Object.fromEntries(FORGE_LINES.map((l) => [l.field, l])) as Record<LineField, ForgeLine>;
 

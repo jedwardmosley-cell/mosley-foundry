@@ -8,7 +8,7 @@ import { signOut } from "@/app/actions/auth";
 const PARTICIPANT_NAV: NavItem[] = [
   { href: "/dashboard", label: "Today", mobile: true },
   { href: "/identity", label: "1. Who I am", group: "My journey" },
-  { href: "/plan", label: "2. FORGE lines", tab: "Plan", mobile: true, group: "My journey" },
+  { href: "/plan", label: "2. FORGE identity", tab: "Plan", mobile: true, group: "My journey" },
   { href: "/assessment", label: "3. Where I am", group: "My journey" },
   { href: "/blueprint", label: "4. My road", group: "My journey" },
   { href: "/cycle", label: "5. 30 days", group: "My journey" },

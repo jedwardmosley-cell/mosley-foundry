@@ -10,6 +10,9 @@ import { BLUEPRINT_PICKS } from "@/content/options";
 import { LEVELS, PRACTICE, type IdentityLevel } from "@/content/identity";
 import { addIdentityPractice } from "@/app/actions/identity";
 import { Picks } from "@/components/Picks";
+import { FORGE_LINES, PRACTICE_STARTERS } from "@/content/forgeLines";
+import type { PathwayKey } from "@/content/program";
+import type { PillarKey } from "@/content/types";
 
 export const metadata = { title: "Discipline by Design Blueprint" };
 
@@ -24,6 +27,16 @@ export default async function BlueprintPage() {
     db.relationship.findMany({ where: { ownerId: u.id, active: true } }),
   ]);
   const identity = await db.identityProfile.findUnique({ where: { userId: u.id } });
+  const profile = await db.profile.findUnique({ where: { userId: u.id } });
+  const pathway = (profile?.pathway ?? "PERSONAL") as PathwayKey;
+  const focus = profile?.priorityPillar as PillarKey | null | undefined;
+  const statements = FORGE_LINES.filter((l) => profile?.[l.field]);
+  // Practices for the focus pillar come first in the routine picks: this is where the identity turns into habits.
+  const picksFor = (area: string) => {
+    const base = BLUEPRINT_PICKS[area];
+    if (area !== "ROUTINES" || !focus) return base;
+    return { status: "draft" as const, options: [...PRACTICE_STARTERS[focus][pathway], ...(base?.options ?? [])] };
+  };
   const d = pack.discipline;
   const inv = (label: string | null) => (label ? d.inventory.find((i) => i.label === label)?.text : undefined);
   // The four people areas (accountability partners, mentors and coaches, mentees, groups) show as one card.
@@ -43,6 +56,16 @@ export default async function BlueprintPage() {
       <PageHeader eyebrow="Chapter 10" title="Discipline by Design Blueprint">
         {d.intro[0] ? <><p>{d.intro.find((t) => t.startsWith("It's the deliberate construction"))}</p><p className="mt-2">{d.intro.find((t) => t.startsWith("The question isn't"))}</p></> : "The deliberate construction of the routines, relationships, environments, and accountability structures that support sustained development."}
       </PageHeader>
+
+      {(statements.length > 0 || profile?.forgeStatement) && (
+        <Card className="mb-6">
+          <p className="eyebrow">Who this road reinforces</p>
+          {profile?.forgeStatement
+            ? <p className="mt-2 font-serif text-[17px] leading-relaxed">{profile.forgeStatement}</p>
+            : <ul className="mt-2 space-y-1.5">{statements.map((l) => <li key={l.field} className="text-[15px]"><span className="text-ink-mute">{l.pillar}. </span>{profile![l.field]}</li>)}</ul>}
+          <p className="mt-2 text-sm text-ink-soft">Your FORGE identity says who is behind the wheel. Each routine and relationship below is a way to reinforce it. <Link href="/plan" className="btn-link">Edit my FORGE identity</Link></p>
+        </Card>
+      )}
 
       {d.whosChecking.length > 0 && (
         <Card className="mb-6 bg-navy-deep border-navy-deep text-white">
@@ -147,7 +170,7 @@ export default async function BlueprintPage() {
                   <form action={addCommitment} className="mt-3 space-y-3">
                     <input type="hidden" name="area" value={area.key} />
                     <Field label="What"><input name="title" required maxLength={200} className="input" /></Field>
-                    {BLUEPRINT_PICKS[area.key] && <Picks list={BLUEPRINT_PICKS[area.key]} target="title" />}
+                    {picksFor(area.key) && <Picks list={picksFor(area.key)!} target="title" />}
                     <div className="grid gap-3 grid-cols-2 sm:grid-cols-3">
                       <Field label="How often">
                         <select name="cadence" className="input" defaultValue={area.key === "ROUTINES" ? "DAILY" : area.key === "REVIEW" ? "QUARTERLY" : area.key === "LEARNING" ? "MONTHLY" : "WEEKLY"}>
