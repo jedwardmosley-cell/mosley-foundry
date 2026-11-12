@@ -55,7 +55,10 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.fill('input[name="password"]', "e2e-password-123");
     await Promise.all([page.waitForURL("**/onboarding"), page.click('button:has-text("Create account")')]);
     await page.screenshot({ path: `${shots}/01-onboarding.png`, fullPage: true });
-    await Promise.all([page.waitForURL("**/assessment"), page.locator('form:has(input[value="PERSONAL"]) button').click()]);
+    // a new client goes straight into the guided first session; this run takes the full pages instead
+    await Promise.all([page.waitForURL("**/start"), page.locator('form:has(input[value="PERSONAL"]) button').click()]);
+    await page.waitForSelector("text=Claim who you are");
+    await page.goto(`${BASE}/assessment`);
   });
 
   let assessmentUrl = "";
@@ -288,6 +291,49 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.ok(!coachPage?.url().includes("/coach/"), "participant is redirected away from coach pages");
   });
   void assessmentUrl;
+
+  await check("1c. guided first session: who I am, FORGE lines, assessment, road, 30 days", async () => {
+    const gc = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const g: Page = await gc.newPage();
+    await g.goto(`${BASE}/signup`);
+    await g.fill('input[name="name"]', "Guided Driver (E2E)");
+    await g.fill('input[name="email"]', `e2e-guided-${Date.now()}@example.test`);
+    await g.fill('input[name="password"]', "e2e-password-123");
+    await Promise.all([g.waitForURL("**/onboarding"), g.click('button:has-text("Create account")')]);
+    await Promise.all([g.waitForURL("**/start"), g.locator('form:has(input[value="LEADING_OTHERS"]) button').click()]);
+    // 1. who I am
+    await g.locator('button:has-text("a leader who operates with integrity")').first().click();
+    await g.locator("label", { hasText: "Role Transition" }).click();
+    await Promise.all([g.waitForURL("**/start?step=2"), g.click('button:has-text("Save and continue")')]);
+    // 2. FORGE lines: the identity is offered as the first F starter
+    await g.locator('button:has-text("a leader who operates with integrity")').first().click();
+    await Promise.all([g.waitForURL("**/start?step=3"), g.click('button:has-text("Save and continue")')]);
+    // 3. where I am: the assessment and the priority bring the client back
+    await Promise.all([g.waitForURL("**/assessment?next=start"), g.click('a:has-text("Take the FORGE assessment")')]);
+    for (const [k, v] of Object.entries({ F: 4, O: 3, R: 4, G: 3, E: 2 })) await g.locator(`input[name="${k}"][value="${v}"]`).check({ force: true });
+    await Promise.all([g.waitForURL(/\/assessment\/[a-z0-9]+\?next=start$/), g.click('button:has-text("See my profile")')]);
+    await Promise.all([g.waitForURL("**/start?step=4"), g.click('button:has-text("my development priority")')]);
+    // 4. my road: one routine and one person
+    await g.locator('button:has-text("Journaling")').click();
+    await Promise.all([g.waitForURL("**/start?step=4"), g.click('button:has-text("Add routine")')]);
+    await g.waitForSelector("text=✓ Journaling");
+    await g.fill('input[name="name"]', "Pat Partner");
+    await g.click('button:has-text("Add person")');
+    await g.waitForSelector("text=✓ Pat Partner");
+    await Promise.all([g.waitForURL("**/start?step=5"), g.click('a:has-text("Next: start your 30 days")')]);
+    await g.waitForSelector("text=I am a leader who operates with integrity");
+    // 5. the 30 days
+    await Promise.all([g.waitForURL(/\/cycle\/new\?pillar=E/), g.click('a:has-text("start my 30 days")')]);
+    await g.fill('input[name="focus"]', "Pause before I answer");
+    await Promise.all([g.waitForURL("**/cycle"), g.click('button:has-text("Start the cycle")')]);
+    await g.goto(`${BASE}/start`);
+    await g.waitForSelector("text=You are set up");
+    await g.goto(`${BASE}/dashboard`);
+    // only the F line was written, so the bar keeps FORGE lines open as a nudge for the first week
+    assert.equal(await g.locator('nav[aria-label="Your journey"] >> text=(done)').count(), 4);
+    await g.waitForSelector('nav[aria-label="Your journey"] >> text=Still open: FORGE lines');
+    await gc.close();
+  });
 
   console.log("Sharing and coach access");
   const dana = await db.user.findUniqueOrThrow({ where: { email: "dana@demo.bothhands.app" } });

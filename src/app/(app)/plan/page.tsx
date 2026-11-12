@@ -10,9 +10,8 @@ import { Picks, DictationHint } from "@/components/Picks";
 import { HelpMeWrite } from "@/components/HelpMeWrite";
 import Link from "next/link";
 import { LEVELS, PILLAR_PROMPTS, PILLAR_PROMPTS_STATUS, type IdentityLevel } from "@/content/identity";
-import { FORGE_LINES, FORGE_LINES_STATUS } from "@/content/forgeLines";
-import { PrefixedBox } from "@/components/PrefixedBox";
-import { CombineLines } from "@/components/CombineLines";
+import { FORGE_LINES_STATUS } from "@/content/forgeLines";
+import { ForgeLinesFields } from "@/components/ForgeLinesFields";
 import type { PathwayKey } from "@/content/program";
 
 export const metadata = { title: "FORGE Plan" };
@@ -61,31 +60,7 @@ export default async function PlanPage() {
             <p className="text-sm muted mt-1">I am, plus what I do. One line for each letter, all in the present tense. Tap a starter, then make it yours.</p>
             {FORGE_LINES_STATUS === "draft" && <span className="draft !text-[10px] mt-2 inline-block">Draft wording</span>}
           </div>
-          {FORGE_LINES.map((l) => {
-            const starters = l.field === "destination" && claim ? [claim, ...l.starters[pathway]] : l.starters[pathway];
-            return (
-              <div key={l.field}>
-                <label htmlFor={l.field} className="flex items-center gap-2.5">
-                  <PillarMark k={l.pillar} />
-                  <span><span className="label !mb-0 block">{l.label}</span><span className="text-sm text-ink-soft">{l.question}</span></span>
-                </label>
-                <p className="text-xs text-ink-mute mt-2 mb-1.5">{l.hint}</p>
-                <PrefixedBox name={l.field} prefix={l.prefix} saved={profile?.[l.field] ?? ""} placeholder={l.placeholder} />
-                <Picks list={{ status: FORGE_LINES_STATUS, options: starters }} target={l.field} label="Tap one to start, then make it yours" />
-                {ai && <div className="mt-2"><HelpMeWrite kind={l.field} target={l.field} strip={l.prefix} /></div>}
-              </div>
-            );
-          })}
-          <div className="border-t border-line pt-5">
-            <Field label="FORGE Statement" hint={entre ? entrepreneur.forgeStatementPrompt : pack.forgeStatementPrompt}>
-              <textarea name="forgeStatement" defaultValue={profile?.forgeStatement} className="textarea min-h-[140px]" maxLength={3000} />
-            </Field>
-            <p className="text-xs text-ink-mute mt-1 mb-2">Your five lines in one paragraph. It starts with I am. Read it out loud at the start of each week.</p>
-            <div className="flex flex-wrap gap-x-6 gap-y-2">
-              <CombineLines target="forgeStatement" />
-              {ai && <HelpMeWrite kind="forgeStatement" target="forgeStatement" />}
-            </div>
-          </div>
+          <ForgeLinesFields profile={profile} pathway={pathway} claim={claim} ai={ai} statementHint={entre ? entrepreneur.forgeStatementPrompt : pack.forgeStatementPrompt} />
           <DictationHint />
           {pack.holdYourself && <p className="quote text-[15px]">{pack.holdYourself}</p>}
           <Submit>Save my FORGE lines</Submit>

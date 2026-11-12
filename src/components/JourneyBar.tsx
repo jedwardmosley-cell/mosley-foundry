@@ -13,7 +13,7 @@ type Props = {
 /** Five steps, shown at the top of every client screen: what is done, where you are, and what comes next. */
 export function JourneyBar({ steps, done, current, cycle }: Props) {
   const path = usePathname();
-  if (path.startsWith("/onboarding") || path.startsWith("/account")) return null;
+  if (path.startsWith("/onboarding") || path.startsWith("/account") || path.startsWith("/start")) return null;
   const here = steps.find((s) => path === s.href || path.startsWith(s.href + "/"))?.key;
   const next = steps.find((s) => s.key === current);
   const n = next ? steps.indexOf(next) + 1 : 0;
@@ -26,7 +26,7 @@ export function JourneyBar({ steps, done, current, cycle }: Props) {
       : <Link href="/dashboard" className="hover:text-navy">Day {cycle.day} of 30 · Week {cycle.week}{cycle.phase ? `, ${cycle.phase}` : ""} · <span className="btn-link">Check in today</span></Link>;
     if (open && !cycle.finished) line = <>{line} <span className="block sm:inline mt-1 sm:mt-0 text-ink-mute">Still open: <Link href={open.href} className="btn-link">{open.label}</Link></span></>;
   } else if (next) {
-    line = <>Step {n} of 5 · <Link href={next.href} className="btn-link">{next.next}</Link></>;
+    line = <>Step {n} of 5 · <Link href={`/start?step=${n}`} className="btn-link">{next.next}</Link></>;
   }
 
   return (

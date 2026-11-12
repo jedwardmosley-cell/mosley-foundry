@@ -48,7 +48,7 @@ export async function saveIdentity(fd: FormData) {
   }
   revalidatePath("/identity");
   revalidatePath("/dashboard");
-  redirect("/identity?saved=1");
+  redirect(fd.get("next") === "/start" ? "/start?step=2" : "/identity?saved=1");
 }
 
 /** Turns the identity layer off. The current version moves to history, so nothing is lost. */
