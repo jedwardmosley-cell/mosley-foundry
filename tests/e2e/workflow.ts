@@ -75,9 +75,14 @@ const submitAndWait = async (page: Page, selector: string) => {
     await Promise.all([page.waitForURL("**/plan"), page.click('button:has-text("my development priority")')]);
     const p = await db.profile.findFirst({ where: { user: { email } } });
     assert.equal(p?.priorityPillar, "E");
-    await page.fill('textarea[name="destination"]', "A leader my team trusts with bad news.");
-    await page.fill('textarea[name="forgeStatement"]', "I am becoming a steadier leader.");
+    await page.fill('textarea[name="destination"]', "a leader my team trusts with bad news");
+    await page.fill('textarea[name="lineO"]', "when someone goes quiet, and I ask about it that day");
+    await page.locator('button:has-text("Put my five lines together")').click();
+    assert.equal(await page.inputValue('textarea[name="forgeStatement"]'), "I am a leader my team trusts with bad news. I notice when someone goes quiet, and I ask about it that day.");
     await submitAndWait(page, 'form:has(textarea[name="destination"]) button[type="submit"]');
+    const saved = await db.profile.findFirstOrThrow({ where: { user: { email } } });
+    assert.equal(saved.destination, "I am a leader my team trusts with bad news");
+    assert.equal(saved.lineO, "I notice when someone goes quiet, and I ask about it that day");
   });
 
   await check("4. create a Discipline by Design Blueprint", async () => {

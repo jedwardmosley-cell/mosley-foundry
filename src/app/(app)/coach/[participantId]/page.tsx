@@ -1,3 +1,4 @@
+import { FORGE_LINES } from "@/content/forgeLines";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { getCoachView, getCoachWork, ForbiddenError, SHARE_SCOPES, type ShareScope } from "@/lib/access";
@@ -63,6 +64,13 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
             <>
               {pk ? <p className="mt-3 flex items-center gap-2 h3"><PillarMark k={pk} /> {pack.pillars.find((p) => p.key === pk)?.name}</p> : <p className="mt-2 muted">No priority chosen.</p>}
               {v.profile?.forgeStatement && <p className="mt-3 font-serif text-[16px] leading-relaxed">{v.profile.forgeStatement}</p>}
+              {FORGE_LINES.some((l) => v.profile?.[l.field]) && (
+                <ul className="mt-3 space-y-1.5">
+                  {FORGE_LINES.filter((l) => v.profile?.[l.field]).map((l) => (
+                    <li key={l.field} className="text-sm"><span className="text-ink-mute">{l.pillar}, {l.label}: </span>{v.profile![l.field]}</li>
+                  ))}
+                </ul>
+              )}
               {v.goals.filter((g) => g.oneMove).map((g) => <p key={g.id} className="mt-2 text-sm"><span className="text-ink-mute">{g.pillar}{g.segmentKey ? ` (seg. ${g.segmentKey})` : ""} one move: </span>{g.oneMove}</p>)}
             </>
           ) : <div className="mt-3"><NotShared scope="GOALS" /></div>}

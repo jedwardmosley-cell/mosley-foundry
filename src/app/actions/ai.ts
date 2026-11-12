@@ -64,12 +64,12 @@ export async function deleteAllConversations() {
   revalidatePath("/settings");
 }
 
-export type DraftKind = "destination" | "why" | "forgeStatement";
+export type DraftKind = "destination" | "lineO" | "why" | "lineG" | "lineE" | "forgeStatement";
 
 /** "Help me write this": returns draft text for the participant to edit. Saves nothing. */
 export async function draftWithAI(kind: DraftKind): Promise<{ text: string } | { error: string }> {
   const u = await requireUser("PARTICIPANT");
-  if (!["destination", "why", "forgeStatement"].includes(kind)) return { error: "Unknown field." };
+  if (!["destination", "lineO", "why", "lineG", "lineE", "forgeStatement"].includes(kind)) return { error: "Unknown field." };
   if (!aiAvailable()) return { error: "The AI Companion is not turned on for this site yet." };
   const profile = await db.profile.findUnique({ where: { userId: u.id } });
   if (profile && !profile.aiEnabled) return { error: "You turned the AI Companion off in Settings." };

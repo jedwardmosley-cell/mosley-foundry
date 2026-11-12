@@ -48,8 +48,11 @@ export const CLIENT_GUIDE: GuideSection[] = [
     id: "plan",
     title: "Your FORGE Plan",
     time: "10 to 15 minutes, then a quick look each week",
+    intro: "Your plan starts with who you are. Claim it in Identity Shift first, then write one line for each FORGE letter: I am, plus what I do.",
     steps: [
-      "Write your destination, your why, and your FORGE Statement. If the AI Companion is on, Help me write this gives you a first draft to edit.",
+      "Write your five FORGE lines. F is who I am and where I am going. O is what I notice. R is why I go there. G is what I practice. E is how I respond when it gets hard.",
+      "Each line starts for you, with words like I am or I notice. Tap a starter, then make it yours. If the AI Companion is on, Help me write this gives you a first draft to edit.",
+      "Tap Put my five lines together to start your FORGE Statement, then edit it into one paragraph that sounds like you.",
       "Open your priority pillar and pick one move for this week. Tap a suggestion or write your own.",
       "Open the other pillars later, when you are ready for them.",
       "Read your FORGE Statement at the start of each week.",

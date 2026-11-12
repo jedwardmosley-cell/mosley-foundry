@@ -5,6 +5,7 @@ import * as options from "../src/content/options";
 import * as guide from "../src/content/guide";
 import * as identity from "../src/content/identity";
 import * as tone from "../src/lib/identityTone";
+import { FORGE_LINES } from "../src/content/forgeLines";
 
 const BANNED = /\b(steady|steadi\w*|drift\w*|rhythm\w*|navigat\w*|resonat\w*|lean into|under pressure|accumulat\w*|compound\w*|holds?|held|actually|honestly|genuinely|nobody|everybody)\b/i;
 
@@ -28,6 +29,7 @@ test("quick-pick options and the guide follow the house style", () => {
   walk(guide);
   walk(identity);
   walk(tone);
+  walk(FORGE_LINES);
   const texts = all.filter((s) => s.includes(" "));
   assert.ok(texts.length > 50);
   for (const t of texts) {

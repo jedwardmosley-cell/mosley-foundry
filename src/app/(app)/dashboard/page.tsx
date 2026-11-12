@@ -98,11 +98,11 @@ export default async function Dashboard() {
 
       <div className="grid gap-5 md:grid-cols-2">
         <Card>
-          <p className="eyebrow">Where am I going?</p>
-          {d.profile.destination || d.profile.forgeStatement ? (
-            <p className="mt-3 font-serif text-lg leading-relaxed text-ink line-clamp-5">{d.profile.destination || d.profile.forgeStatement}</p>
+          <p className="eyebrow">My FORGE Statement</p>
+          {d.profile.forgeStatement || d.profile.destination ? (
+            <p className="mt-3 font-serif text-lg leading-relaxed text-ink line-clamp-5">{d.profile.forgeStatement || d.profile.destination}</p>
           ) : (
-            <p className="mt-3 muted">Your destination is not written yet. <Link className="btn-link" href="/plan">Write it</Link></p>
+            <p className="mt-3 muted">Your five FORGE lines are not written yet. <Link className="btn-link" href="/plan">Write them</Link></p>
           )}
         </Card>
 

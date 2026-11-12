@@ -1,4 +1,5 @@
 "use server";
+import { FORGE_LINES, withPrefix } from "@/content/forgeLines";
 import { z } from "zod";
 import { randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
@@ -28,7 +29,9 @@ export async function choosePathway(fd: FormData) {
 
 export async function saveStatement(fd: FormData) {
   const u = await participant();
-  const d = parse(z.object({ destination: text(3000), why: text(1000), forgeStatement: text(3000) }), fd);
+  const d = parse(z.object({ destination: text(3000), lineO: text(1500), why: text(1500), lineG: text(1500), lineE: text(1500), forgeStatement: text(3000) }), fd);
+  // Each line's fixed start ("I am", "I notice", ...) is added here. An older answer that never had it is saved as written.
+  for (const l of FORGE_LINES) if (fd.get(`${l.field}__p`) === "1") d[l.field] = withPrefix(l.prefix, d[l.field]);
   await db.profile.update({ where: { userId: u.id }, data: d });
   revalidatePath("/plan");
   revalidatePath("/dashboard");
