@@ -10,8 +10,7 @@ import type { LineField } from "./forgeLines";
  * FORGE letter. Every example must pass the four tests below. Behavior has its own home in
  * My road (one move this week) and 30 days (the practice).
  *
- * Banned words are checked by tests/style.test.ts. The "X, not Y" pattern appears in several lines.
- * It is on the house style list and is kept here pending the author's decision.
+ * Banned words and the "X, not Y" pattern are checked by tests/style.test.ts.
  */
 export const IDENTITY_EXAMPLES_STATUS: "draft" | "approved" = "draft";
 
@@ -44,13 +43,13 @@ export const EXAMPLE_PEOPLE: ExamplePerson[] = [
     key: "owner",
     who: "Owner",
     level: "REINVENT",
-    claim: "I am the owner of this business, not its hardest-working employee.",
+    claim: "I am the owner of this business. My job is to lead it.",
     lines: {
       destination: "I am a builder of something that can run without me in the room.",
-      lineO: "I am an owner who sees the whole business, not just today's customer.",
+      lineO: "I am an owner who sees the whole business.",
       why: "I am a provider building something that outlasts a paycheck.",
       lineG: "I am in charge without being the expert on everything.",
-      lineE: "I am calm when money is tight. Fear gets a seat, not the wheel.",
+      lineE: "I am calm when money is tight. Fear can ride along, but I keep the wheel.",
     },
   },
   {
@@ -59,7 +58,7 @@ export const EXAMPLE_PEOPLE: ExamplePerson[] = [
     level: "ROLE",
     claim: "I am a leader now. My results come through other people.",
     lines: {
-      destination: "I am a leader measured by what my team can do, not what I can do.",
+      destination: "I am a leader measured by what my team can do.",
       lineO: "I am a leader who puts people before tasks.",
       why: "I am the boss I needed when I was coming up.",
       lineG: "I am new at this and not ashamed of it. I can lead while I learn.",
@@ -73,21 +72,21 @@ export const EXAMPLE_PEOPLE: ExamplePerson[] = [
     claim: "I am the right person for this, and I belong in the seat.",
     lines: {
       destination: "I am a leader who brings order to hard things.",
-      lineO: "I am someone who wants the truth about the project, not the comfortable version.",
+      lineO: "I am someone who wants the truth about the project, even when it's uncomfortable.",
       why: "I am the one people trust with the hard thing.",
       lineG: "I am not the smartest person here and don't need to be. I get smart people pulling the same way.",
-      lineE: "I am calm under a deadline. Pressure tells me what matters, not who I am.",
+      lineE: "I am calm under a deadline. Pressure tells me what matters. It doesn't get to tell me who I am.",
     },
   },
   {
     key: "pastor",
     who: "Pastor stepping into the lead role",
     level: "ROLE",
-    claim: "I am called to lead this church, not only to preach in it.",
+    claim: "I am called to lead this church, and preaching is one part of that.",
     lines: {
       destination: "I am a shepherd of the whole house, including the parts I didn't build.",
-      lineO: "I am a pastor who watches the health of the people, not the size of the room.",
-      why: "I am here because I was called, not because I was next.",
+      lineO: "I am a pastor who watches the health of the people more than the size of the room.",
+      why: "I am here because I was called.",
       lineG: "I am a leader who depends on God and the people He put around me.",
       lineE: "I am secure in my calling when I'm criticized.",
     },
