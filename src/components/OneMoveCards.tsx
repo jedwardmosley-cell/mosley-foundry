@@ -12,10 +12,7 @@ type Goal = { pillar: string; whereNow: string; whereWant: string; oneMove: stri
 export function OneMoveCards({ pack, goals, priority, level }: { pack: ContentPack; goals: Goal[]; priority?: string | null; level?: string | null }) {
   const roadTest = pack.chapters.find((c) => c.number === 9)?.roadTest ?? [];
   const rt = (k: string) => roadTest.find((l) => l.startsWith(`${k}:`))?.slice(3);
-  return (
-    <>
-      <div className="space-y-3">
-        {[...pack.pillars].sort((a, b) => Number(b.key === priority) - Number(a.key === priority)).map((p) => {
+  const one = (p: ContentPack["pillars"][number]) => {
           const g = goals.find((x) => x.pillar === p.key);
           const isPriority = priority === p.key;
           const filled = !!(g?.whereNow || g?.whereWant || g?.oneMove);
@@ -32,10 +29,10 @@ export function OneMoveCards({ pack, goals, priority, level }: { pack: ContentPa
               </summary>
               <form action={saveGoal} className="mt-5 space-y-4">
                 <input type="hidden" name="pillar" value={p.key} />
-                <Field label="One move this week">
+                <Field label="My move">
                   <input name="oneMove" defaultValue={g?.oneMove} className="input" maxLength={1000} />
                 </Field>
-                <Picks list={ONE_MOVE[p.key]} target="oneMove" />
+                <Picks list={ONE_MOVE[p.key]} target="oneMove" folded="Ideas" />
                 {level && (
                   <p className="rounded-xl bg-paper p-3 text-sm">
                     <span className="font-medium">For {LEVELS[level as IdentityLevel].name}: </span>
@@ -44,19 +41,34 @@ export function OneMoveCards({ pack, goals, priority, level }: { pack: ContentPa
                   </p>
                 )}
                 <details open={!!(g?.whereNow || g?.whereWant)}>
-                  <summary className="cursor-pointer text-sm text-navy">Where I am now and where I want to be <span className="text-ink-mute">(optional)</span></summary>
+                  <summary className="cursor-pointer text-sm text-navy">Where I am now and where I want to be</summary>
                   <div className="mt-3 grid gap-4 sm:grid-cols-2">
                     <Field label="Where I am now"><textarea name="whereNow" defaultValue={g?.whereNow} className="textarea !min-h-[80px]" maxLength={1500} /></Field>
                     <Field label="Where I want to be"><textarea name="whereWant" defaultValue={g?.whereWant} className="textarea !min-h-[80px]" maxLength={1500} /></Field>
                   </div>
                 </details>
-                {rt(p.key) && <p className="text-sm text-ink-soft"><span className="font-medium">Road Test. </span>{rt(p.key)}</p>}
+                {rt(p.key) && (
+                  <details className="text-sm">
+                    <summary className="cursor-pointer text-navy">Road Test from the book</summary>
+                    <p className="mt-1 text-ink-soft">{rt(p.key)}</p>
+                  </details>
+                )}
                 <Submit className="btn-quiet">Save {p.key}</Submit>
               </form>
             </details>
           );
-        })}
-      </div>
-    </>
+  };
+  const first = priority ? pack.pillars.filter((p) => p.key === priority) : pack.pillars;
+  const rest = priority ? pack.pillars.filter((p) => p.key !== priority) : [];
+  return (
+    <div className="space-y-3">
+      {first.map(one)}
+      {rest.length > 0 && (
+        <details className="group/other">
+          <summary className="cursor-pointer text-sm text-navy">Other pillars ({rest.length})</summary>
+          <div className="mt-3 space-y-3">{rest.map(one)}</div>
+        </details>
+      )}
+    </div>
   );
 }
