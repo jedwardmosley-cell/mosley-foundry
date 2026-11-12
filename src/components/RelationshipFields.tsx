@@ -5,7 +5,7 @@ import { RELATIONSHIP_PURPOSE, CADENCES } from "@/content/options";
 import { Picks } from "./Picks";
 
 /** Role, purpose and cadence for a new relationship, with role-aware purpose suggestions. */
-export function RelationshipFields({ initialRole }: { initialRole?: string }) {
+export function RelationshipFields({ initialRole, purposeFolded = false }: { initialRole?: string; purposeFolded?: boolean }) {
   const [role, setRole] = useState(initialRole ?? "ACCOUNTABILITY_PARTNER");
   return (
     <>
@@ -21,13 +21,14 @@ export function RelationshipFields({ initialRole }: { initialRole?: string }) {
           {CADENCES.map((c) => <option key={c.days} value={c.days}>{c.label}</option>)}
         </select>
       </label>
-      <div className="sm:col-span-2">
+      <details className="sm:col-span-2" open={!purposeFolded}>
+        <summary className={purposeFolded ? "cursor-pointer text-sm text-navy" : "hidden"}>Purpose (optional)</summary>
         <label className="block">
           <span className="label">Purpose <span className="text-ink-mute font-normal">(what is this relationship for?)</span></span>
           <input name="purpose" maxLength={1000} className="input" />
         </label>
         {RELATIONSHIP_PURPOSE[role] && <Picks key={role} list={RELATIONSHIP_PURPOSE[role]} target="purpose" />}
-      </div>
+      </details>
     </>
   );
 }
