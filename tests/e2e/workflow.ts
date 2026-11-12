@@ -161,6 +161,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.goto(`${BASE}/blueprint`);
     assert.equal(await (await page.request.get(`${BASE}/plan`)).text().then((t) => t.includes('name="oneMove"')), false, "one move is no longer on the FORGE Plan");
     const pri = page.locator("details[open]", { hasText: "Emotionally Anchored" });
+    await pri.locator('summary:has-text("Ideas")').click();
     await pri.locator('button:has-text("one breath, one question")').click();
     assert.match(await pri.locator('input[name="oneMove"]').inputValue(), /one breath/);
     await Promise.all([page.waitForLoadState("networkidle"), pri.locator('button:has-text("Save E")').click()]);

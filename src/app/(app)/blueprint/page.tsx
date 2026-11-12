@@ -55,33 +55,28 @@ export default async function BlueprintPage() {
 
   return (
     <>
-      <PageHeader eyebrow="Chapter 10" title="Discipline by Design Blueprint">
+      <PageHeader eyebrow="Discipline by Design" title="My road" />
+      <FromBook label="From the book, Chapter 10">
         {d.intro[0] ? <><p>{d.intro.find((t) => t.startsWith("It's the deliberate construction"))}</p><p className="mt-2">{d.intro.find((t) => t.startsWith("The question isn't"))}</p></> : "The deliberate construction of the routines, relationships, environments, and accountability structures that support sustained development."}
-      </PageHeader>
+      </FromBook>
 
       {(statements.length > 0 || profile?.forgeStatement) && (
-        <Card className="mb-6">
-          <p className="eyebrow">Who this road reinforces</p>
-          {profile?.forgeStatement
-            ? <p className="mt-2 font-serif text-[17px] leading-relaxed">{profile.forgeStatement}</p>
-            : <ul className="mt-2 space-y-1.5">{statements.map((l) => <li key={l.field} className="text-[15px]"><span className="text-ink-mute">{l.pillar}. </span>{profile![l.field]}</li>)}</ul>}
-          <p className="mt-2 text-sm text-ink-soft">Your FORGE identity says who is behind the wheel. Each routine and relationship below is a way to reinforce it. <Link href="/plan" className="btn-link">Edit my FORGE identity</Link></p>
-        </Card>
+        <Link href="/plan" className="mb-6 block rounded-2xl bg-navy-deep p-5 text-white hover:bg-navy">
+          <p className="text-xs uppercase tracking-[0.14em] text-white/60">This road reinforces</p>
+          <p className="mt-2 font-serif text-[18px] leading-snug line-clamp-3">{identity?.becoming || profile?.destination || profile?.forgeStatement}</p>
+        </Link>
       )}
 
       <section id="one-move" className="mb-6 scroll-mt-20">
-        <h2 className="h2">One move this week</h2>
-        <p className="mt-1 mb-3 text-sm muted">
-          {focus ? "Turn your identity into one move for your focus pillar. Open the others when you are ready; one pillar with real attention beats five with divided attention." : "Pick a focus pillar from your assessment results, then choose one move for it here."}
-        </p>
+        <h2 className="h3 mb-3">One move this week</h2>
+        {!focus && <p className="mb-3 text-sm muted">Pick a focus pillar from your assessment results first.</p>}
         <OneMoveCards pack={pack} goals={goals} priority={focus} level={identity?.level} />
       </section>
 
       {d.whosChecking.length > 0 && (
-        <Card className="mb-6 bg-navy-deep border-navy-deep text-white">
-          <p className="eyebrow !text-white/60">So who&apos;s checking?</p>
-          <p className="mt-2 font-serif text-xl leading-snug">{d.whosChecking[0]}</p>
-          <p className="mt-3 text-white/80 text-[15px]">{d.whosChecking[2]}</p>
+        <Card className="mb-6 border-brass/50">
+          <p className="font-serif text-lg leading-snug">{d.whosChecking[0]}</p>
+          <FromBook label="So who's checking?" className="mt-2 !mb-0">{d.whosChecking[2]}</FromBook>
         </Card>
       )}
 
@@ -91,7 +86,6 @@ export default async function BlueprintPage() {
             <h2 className="h3">Identity practice</h2>
             <Link href="/identity" className="chip whitespace-nowrap" style={{ borderColor: LEVELS[identity.level as IdentityLevel].color, color: LEVELS[identity.level as IdentityLevel].color }}>Level {LEVELS[identity.level as IdentityLevel].n} · {LEVELS[identity.level as IdentityLevel].name}</Link>
           </div>
-          <p className="mt-1 text-sm text-ink-soft">How practice is built at your level. Add the ones you want. You set every commitment and how often, and you can remove any of them below.</p>
           <ul className="mt-3 divide-y divide-line">
             {PRACTICE[identity.level as IdentityLevel].map((item, i) => {
               const a = item.action;
@@ -126,7 +120,6 @@ export default async function BlueprintPage() {
                   <h2 className="h3">My people</h2>
                   <span className="text-xs muted">{peopleNamed} of {peopleRows.length} named</span>
                 </div>
-                <p className="mt-1 text-sm text-ink-soft">A life built around growth needs people built around growth. Name one person for each role.</p>
                 <ul className="mt-3 divide-y divide-line">
                   {peopleRows.map((row) => {
                     const named = rels.filter((x) => row.roles.includes(x.role));
@@ -136,7 +129,7 @@ export default async function BlueprintPage() {
                           <p className="text-[15px] font-medium">{row.label}</p>
                           {named.length > 0
                             ? <p className="text-[15px]">{named.map((x) => x.name).join(", ")}</p>
-                            : row.line && <p className="text-sm text-ink-soft">{row.line}</p>}
+                            : <p className="text-sm text-ink-mute">Not named yet</p>}
                         </div>
                         {named.length > 0
                           ? <Link href="/network" className="text-sm btn-link shrink-0">Check-ins</Link>
@@ -156,9 +149,8 @@ export default async function BlueprintPage() {
             <Card key={area.key}>
               <div className="flex items-baseline justify-between gap-3">
                 <h2 className="h3">{area.label}</h2>
-                <span className="text-xs muted">{mine.length + people.length || "Not designed yet"}</span>
+                <span className="text-xs muted">{mine.length + people.length || ""}</span>
               </div>
-              <p className="mt-1 text-sm text-ink-soft">{text ?? area.hint}</p>
               {(mine.length > 0 || people.length > 0) && (
                 <ul className="mt-3 divide-y divide-line">
                   {people.map((r) => (
@@ -177,6 +169,7 @@ export default async function BlueprintPage() {
               )}
                 <details className="mt-3">
                   <summary className="cursor-pointer text-sm text-navy">Add to this area</summary>
+                  <p className="mt-2 text-sm text-ink-soft">{text ?? area.hint}</p>
                   <form action={addCommitment} className="mt-3 space-y-3">
                     <input type="hidden" name="area" value={area.key} />
                     <Field label="What"><input name="title" required maxLength={200} className="input" /></Field>
@@ -209,14 +202,23 @@ export default async function BlueprintPage() {
         })}
       </div>
       {d.inventory.length > 0 && (
-        <Card className="mt-6">
-          <p className="eyebrow">Also in the Design Inventory</p>
+        <FromBook label="From the book: your coach, your feed, your engine" className="mt-6">
           {d.inventory.filter((i) => ["Your coach", "Your feed", "Your engine"].includes(i.label)).map((i) => (
-            <p key={i.label} className="mt-3 text-[15px] leading-relaxed"><span className="font-medium">{i.label}. </span>{i.text}</p>
+            <p key={i.label} className="mt-2"><span className="font-medium text-ink">{i.label}. </span>{i.text}</p>
           ))}
           <Source>Both Hands on the Wheel, Ch. 10 Discipline by Design, Your Design Inventory</Source>
-        </Card>
+        </FromBook>
       )}
     </>
+  );
+}
+
+/** Book passages fold under one small line, so the page shows the client's own road first. */
+function FromBook({ label, children, className = "" }: { label: string; children: React.ReactNode; className?: string }) {
+  return (
+    <details className={`mb-5 text-sm ${className}`}>
+      <summary className="cursor-pointer text-navy">{label}</summary>
+      <div className="mt-2 text-ink-soft leading-relaxed">{children}</div>
+    </details>
   );
 }
