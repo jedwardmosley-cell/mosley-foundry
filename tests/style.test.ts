@@ -31,10 +31,13 @@ test("quick-pick options and the guide follow the house style", () => {
   walk(identity);
   walk(tone);
   walk(FORGE_LINES);
-  // The author's identity examples: banned words are checked. The "X, not Y" pattern is the author's call.
+  // The author's identity examples get the same banned-word and "X, not Y" checks.
   const ex: string[] = [];
   JSON.stringify(examples, (_k, v) => { if (typeof v === "string") ex.push(v); return v; });
-  for (const t of ex) assert.ok(!BANNED.test(t), `banned word in: ${t}`);
+  for (const t of ex) {
+    assert.ok(!BANNED.test(t), `banned word in: ${t}`);
+    assert.ok(!/, not /.test(t), `"X, not Y" pattern in: ${t}`);
+  }
   const texts = all.filter((s) => s.includes(" "));
   assert.ok(texts.length > 50);
   for (const t of texts) {
