@@ -25,12 +25,11 @@ export function CycleFocusFields({ pillars, initial, initialFocus = "", identity
       </fieldset>
       <div>
         <label className="block">
-          <span className="label">The behavior you are working on</span>
-          <input name="focus" className="input" maxLength={500} defaultValue={initialFocus} />
-          <span className="mt-1 block text-xs text-ink-mute">Specific. The situation and what you do in it.</span>
+          <span className="label">The behavior you will practice</span>
+          <input name="focus" className="input" maxLength={500} defaultValue={initialFocus} placeholder="The situation and what you do in it" />
         </label>
-        {identityBehavior && <Picks list={{ status: "approved", options: [identityBehavior] }} target="focus" label="From your identity shift. Tap to use it." />}
-        <Picks key={pillar} list={CYCLE_FOCUS[pillar]} target="focus" label="Starting points for this pillar. Tap one, then make it yours." />
+        {identityBehavior && <Picks list={{ status: "approved", options: [identityBehavior] }} target="focus" label="From who I am" />}
+        <Picks key={pillar} list={CYCLE_FOCUS[pillar]} target="focus" label="Ideas for this pillar" />
       </div>
     </>
   );

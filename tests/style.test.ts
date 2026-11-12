@@ -6,6 +6,7 @@ import * as guide from "../src/content/guide";
 import * as identity from "../src/content/identity";
 import * as tone from "../src/lib/identityTone";
 import { FORGE_LINES } from "../src/content/forgeLines";
+import * as examples from "../src/content/identityExamples";
 
 const BANNED = /\b(steady|steadi\w*|drift\w*|rhythm\w*|navigat\w*|resonat\w*|lean into|under pressure|accumulat\w*|compound\w*|holds?|held|actually|honestly|genuinely|nobody|everybody)\b/i;
 
@@ -30,6 +31,10 @@ test("quick-pick options and the guide follow the house style", () => {
   walk(identity);
   walk(tone);
   walk(FORGE_LINES);
+  // The author's identity examples: banned words are checked. The "X, not Y" pattern is the author's call.
+  const ex: string[] = [];
+  JSON.stringify(examples, (_k, v) => { if (typeof v === "string") ex.push(v); return v; });
+  for (const t of ex) assert.ok(!BANNED.test(t), `banned word in: ${t}`);
   const texts = all.filter((s) => s.includes(" "));
   assert.ok(texts.length > 50);
   for (const t of texts) {
