@@ -1,4 +1,5 @@
 import "server-only";
+import { FORGE_LINES } from "@/content/forgeLines";
 import { getContent } from "@/content";
 import { PATHWAYS, RELATIONSHIP_ROLES, BLUEPRINT_AREAS, DAY30_DECISIONS } from "@/content/program";
 import { loadParticipant } from "./participant";
@@ -18,8 +19,8 @@ export async function developmentSummary(userId: string, name: string) {
   if (d.profile) {
     L.push(`**Pathway:** ${PATHWAYS[d.profile.pathway as keyof typeof PATHWAYS]?.name}`);
     if (d.profile.priorityPillar) L.push(`**Development priority:** ${pName(d.profile.priorityPillar)}`);
-    if (d.profile.destination) L.push("", "## Destination", d.profile.destination);
-    if (d.profile.why) L.push("", "## Why", d.profile.why);
+    const lines = FORGE_LINES.filter((l) => d.profile?.[l.field]);
+    if (lines.length) L.push("", "## My FORGE lines", ...lines.map((l) => `- **${l.pillar}, ${l.label}:** ${d.profile![l.field]}`));
     if (d.profile.forgeStatement) L.push("", "## FORGE Statement", d.profile.forgeStatement);
   }
   if (d.identity) {

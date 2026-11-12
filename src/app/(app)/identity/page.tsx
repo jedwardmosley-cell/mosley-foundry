@@ -30,7 +30,7 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
         Your identity is something you claim, out loud and in the present tense. People are not always trying to make the same size of change. Some want to strengthen who they are. Others are stepping into a new role. Others want to reinvent how they show up. Tell the app which one fits you, and the coaching adjusts. Your FORGE scores and plan stay as they are.
       </PageHeader>
 
-      {saved && <p role="status" className="mb-4 rounded-xl border border-sage/40 bg-sage-soft px-4 py-2.5 text-sm text-sage">Saved. <Link href="/dashboard" className="underline">See it on your Today screen</Link>.</p>}
+      {saved && <p role="status" className="mb-4 rounded-xl border border-sage/40 bg-sage-soft px-4 py-2.5 text-sm text-sage">Saved. Next, <Link href="/plan" className="underline">write your five FORGE lines</Link> so the rest of your plan builds on who you are.</p>}
 
       <Card>
         <form action={saveIdentity} className="space-y-6">
@@ -39,7 +39,7 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
             <p className="text-sm text-ink-soft mb-2">Write it the way you would say it out loud. It starts with &quot;I am&quot; and it is in the present tense, because you are claiming it today.</p>
             <div className="flex items-start rounded-xl border border-line bg-white focus-within:ring-2 focus-within:ring-navy/30 focus-within:border-navy">
               <span className="pl-3.5 pr-1.5 py-2.5 font-serif text-[17px] leading-6 text-navy-deep select-none">I am</span>
-              <textarea id="claim" name="claim" required rows={2} maxLength={1500} defaultValue={claimText} placeholder="a leader who operates with integrity" className="flex-1 min-w-0 resize-none bg-transparent py-2.5 pr-3 text-[15px] leading-6 focus:outline-none" />
+              <textarea id="claim" name="claim" required rows={Math.min(6, Math.max(2, Math.ceil(claimText.length / 34)))} maxLength={1500} defaultValue={claimText} placeholder="a leader who operates with integrity" className="flex-1 min-w-0 resize-none bg-transparent py-2.5 pr-3 text-[15px] leading-6 focus:outline-none" />
             </div>
             <Picks list={{ status: PICKS_STATUS, options: STATEMENT_STARTERS[pathway] }} target="claim" label="Tap one to start, then make it yours" />
           </div>

@@ -5,6 +5,7 @@ import { SEGMENTS, PATHWAYS } from "@/content/program";
 import { db } from "./db";
 import { scoresFrom } from "./forge";
 import { effectiveTone, toneBlock } from "./identityTone";
+import { FORGE_LINES, LINE_BY_FIELD, type LineField } from "@/content/forgeLines";
 
 export const AI_MODEL = "claude-opus-5-5";
 export const aiAvailable = () => Boolean(process.env.ANTHROPIC_API_KEY);
@@ -95,8 +96,7 @@ export async function participantContext(userId: string) {
   if (profile) {
     lines.push(`Pathway: ${PATHWAYS[profile.pathway as keyof typeof PATHWAYS]?.name ?? profile.pathway}`);
     if (profile.priorityPillar) lines.push(`Chosen development priority: FORGE ${profile.priorityPillar}`);
-    if (profile.destination) lines.push(`Destination (their words): ${profile.destination}`);
-    if (profile.why) lines.push(`Why sentence (their words): ${profile.why}`);
+    for (const l of FORGE_LINES) if (profile[l.field]) lines.push(`FORGE line ${l.pillar}, ${l.label} (their words): ${profile[l.field]}`);
     if (profile.forgeStatement) lines.push(`FORGE Statement (their words): ${profile.forgeStatement}`);
   }
   if (assessment) {
@@ -217,27 +217,36 @@ export async function purgeExpired(userId: string) {
 
 // ---------- "Help me write this" drafts ----------
 
-export type DraftKind = "destination" | "why" | "forgeStatement";
+export type DraftKind = LineField | "forgeStatement";
 
-const DRAFT_ASK: Record<DraftKind, { query: string; ask: string }> = {
-  destination: {
-    query: "Future Focused destination paragraph picture of the leader you are becoming Road Test",
-    ask: "Draft the participant's Destination Paragraph: one short paragraph, first person, present tense, describing, as true today, the leader they are and the future they are building toward. A picture of a person, not a goal list or metrics.",
-  },
-  why: {
-    query: "Reason Rooted why sentence generous reason holds when results disappear",
-    ask: "Draft the participant's Why Sentence: one sentence, first person, the reason behind the trip that would still be true if the results disappeared tomorrow. Generous rather than self-serving.",
-  },
-  forgeStatement: {
-    query: "FORGE Statement one paragraph leader becoming destination discipline committing",
-    ask: "Draft the participant's FORGE Statement: one paragraph, first person, present tense. Who they are as a leader, claimed as true today, the destination they are driving toward, and the discipline they are committing to build.",
-  },
+const LINE_QUERY: Record<LineField, string> = {
+  destination: "Future Focused destination picture of the leader you are Road Test",
+  lineO: "Outcome Aware signs pay attention early warning feedback",
+  why: "Reason Rooted why sentence generous reason when results are slow",
+  lineG: "Growth Oriented distance between here and there recalculate practice skill",
+  lineE: "Emotionally Anchored fit to drive respond fear courage confidence",
 };
+
+function draftAsk(kind: DraftKind): { query: string; ask: string } {
+  if (kind === "forgeStatement") {
+    return {
+      query: "FORGE Statement one paragraph leader destination discipline committing",
+      ask: "Draft the participant's FORGE Statement: one short paragraph that pulls their five FORGE lines together. It starts with \"I am\", stays in the present tense, and keeps their own words where it can. If some lines are missing, use their identity statement and what else they have recorded. Never use \"becoming\" or \"will\".",
+    };
+  }
+  const l = LINE_BY_FIELD[kind];
+  const start = l.prefix ? `It must start with the words "${l.prefix}".` : "It is one sentence in the first person.";
+  return {
+    query: LINE_QUERY[kind],
+    ask: `Draft the participant's FORGE line for ${l.pillar}, "${l.label}". The question is: ${l.question} Write one sentence, present tense, first person. ${start} It describes who they are or what they do now, never "becoming" or "will". Fit it to their identity statement if they have one.`,
+  };
+}
 
 /** Returns a first draft only. Uses the participant's own records; the participant edits and saves it themselves. */
 export async function draftField(userId: string, kind: DraftKind) {
   const client = new Anthropic();
-  const sources = await retrieve(DRAFT_ASK[kind].query, 4);
+  const { query, ask } = draftAsk(kind);
+  const sources = await retrieve(query, 4);
   const context = await participantContext(userId);
   const stream = client.beta.messages.stream({
     model: AI_MODEL,
@@ -258,7 +267,7 @@ export async function draftField(userId: string, kind: DraftKind) {
       "PROGRAM GUIDANCE:",
       sources.map((s) => `${s.ref}: ${s.text}`).join("\n\n") || "(none)",
     ].join("\n"),
-    messages: [{ role: "user", content: DRAFT_ASK[kind].ask }],
+    messages: [{ role: "user", content: ask }],
   });
   const msg = await stream.finalMessage();
   if (msg.stop_reason === "refusal") return null;

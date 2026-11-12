@@ -10,6 +10,10 @@ import { Picks, DictationHint } from "@/components/Picks";
 import { HelpMeWrite } from "@/components/HelpMeWrite";
 import Link from "next/link";
 import { LEVELS, PILLAR_PROMPTS, PILLAR_PROMPTS_STATUS, type IdentityLevel } from "@/content/identity";
+import { FORGE_LINES, FORGE_LINES_STATUS } from "@/content/forgeLines";
+import { PrefixedBox } from "@/components/PrefixedBox";
+import { CombineLines } from "@/components/CombineLines";
+import type { PathwayKey } from "@/content/program";
 
 export const metadata = { title: "FORGE Plan" };
 
@@ -26,39 +30,68 @@ export default async function PlanPage() {
   const rt = (k: string) => roadTest.find((l) => l.startsWith(`${k}:`))?.slice(3);
   const ai = aiAvailable() && profile?.aiEnabled !== false;
   const priority = profile?.priorityPillar;
+  const pathway = (profile?.pathway ?? "PERSONAL") as PathwayKey;
+  const claim = identity?.becoming.replace(/^(i am|i'm)\s+/i, "") ?? "";
 
   return (
     <>
       <PageHeader eyebrow="Section Six" title="Your FORGE Action Plan">{pack.actionPlanIntro}</PageHeader>
 
-      <Card>
-        <form action={saveStatement} className="space-y-5">
-          <Field label="Destination" hint={rt("F") ?? "Picture the leader you are becoming."}>
-            <textarea name="destination" defaultValue={profile?.destination} className="textarea" maxLength={3000} />
-          </Field>
-          {ai && <HelpMeWrite kind="destination" target="destination" />}
-          <Field label="Why" hint={rt("R") ?? "Why does the trip matter?"}>
-            <textarea name="why" defaultValue={profile?.why} className="textarea !min-h-[64px]" maxLength={1000} />
-          </Field>
-          {ai && <HelpMeWrite kind="why" target="why" />}
-          <Field label="FORGE Statement" hint={entre ? entrepreneur.forgeStatementPrompt : pack.forgeStatementPrompt}>
-            <textarea name="forgeStatement" defaultValue={profile?.forgeStatement} className="textarea min-h-[140px]" maxLength={3000} />
-          </Field>
-          {ai && <HelpMeWrite kind="forgeStatement" target="forgeStatement" />}
+      {identity ? (
+        <Link href="/identity" className="card block hover:border-navy/40">
+          <div className="flex items-baseline justify-between gap-3">
+            <p className="eyebrow">Who I am</p>
+            <span className="chip">Level {LEVELS[identity.level as IdentityLevel].n} · {LEVELS[identity.level as IdentityLevel].name}</span>
+          </div>
+          <p className="mt-2 font-serif text-lg leading-relaxed">{identity.becoming}</p>
+          <p className="mt-1 text-xs text-ink-mute">Tap to change it in Identity Shift.</p>
+        </Link>
+      ) : (
+        <Link href="/identity" className="card block border-navy/40 ring-1 ring-navy/10 hover:border-navy">
+          <p className="eyebrow">Start here</p>
+          <h2 className="h3 mt-1">Claim who you are</h2>
+          <p className="text-sm muted mt-1">Write your I am statement and choose how big a change it is. Your five FORGE lines build on it.</p>
+        </Link>
+      )}
+
+      <Card className="mt-5">
+        <form action={saveStatement} className="space-y-6">
+          <div>
+            <h2 className="h3">Your five FORGE lines</h2>
+            <p className="text-sm muted mt-1">I am, plus what I do. One line for each letter, all in the present tense. Tap a starter, then make it yours.</p>
+            {FORGE_LINES_STATUS === "draft" && <span className="draft !text-[10px] mt-2 inline-block">Draft wording</span>}
+          </div>
+          {FORGE_LINES.map((l) => {
+            const starters = l.field === "destination" && claim ? [claim, ...l.starters[pathway]] : l.starters[pathway];
+            return (
+              <div key={l.field}>
+                <label htmlFor={l.field} className="flex items-center gap-2.5">
+                  <PillarMark k={l.pillar} />
+                  <span><span className="label !mb-0 block">{l.label}</span><span className="text-sm text-ink-soft">{l.question}</span></span>
+                </label>
+                <p className="text-xs text-ink-mute mt-2 mb-1.5">{l.hint}</p>
+                <PrefixedBox name={l.field} prefix={l.prefix} saved={profile?.[l.field] ?? ""} placeholder={l.placeholder} />
+                <Picks list={{ status: FORGE_LINES_STATUS, options: starters }} target={l.field} label="Tap one to start, then make it yours" />
+                {ai && <div className="mt-2"><HelpMeWrite kind={l.field} target={l.field} strip={l.prefix} /></div>}
+              </div>
+            );
+          })}
+          <div className="border-t border-line pt-5">
+            <Field label="FORGE Statement" hint={entre ? entrepreneur.forgeStatementPrompt : pack.forgeStatementPrompt}>
+              <textarea name="forgeStatement" defaultValue={profile?.forgeStatement} className="textarea min-h-[140px]" maxLength={3000} />
+            </Field>
+            <p className="text-xs text-ink-mute mt-1 mb-2">Your five lines in one paragraph. It starts with I am. Read it out loud at the start of each week.</p>
+            <div className="flex flex-wrap gap-x-6 gap-y-2">
+              <CombineLines target="forgeStatement" />
+              {ai && <HelpMeWrite kind="forgeStatement" target="forgeStatement" />}
+            </div>
+          </div>
           <DictationHint />
           {pack.holdYourself && <p className="quote text-[15px]">{pack.holdYourself}</p>}
-          <Submit>Save</Submit>
+          <Submit>Save my FORGE lines</Submit>
         </form>
-        <Source>Both Hands on the Wheel, Ch. 9 Road Test; Personal Application Workbook, Section Six</Source>
+        <Source>FORGE pillars: Both Hands on the Wheel. Line wording and starters: build team draft. FORGE Statement: Personal Application Workbook, Section Six</Source>
       </Card>
-
-      <Link href="/identity" className="card block mt-5 hover:border-navy/40">
-        <div className="flex items-baseline justify-between gap-3">
-          <h2 className="h3">Identity Shift</h2>
-          <span className="chip">{identity ? `Level ${LEVELS[identity.level as IdentityLevel].n} · ${LEVELS[identity.level as IdentityLevel].name}` : "Optional"}</span>
-        </div>
-        <p className="text-sm muted mt-1">{identity ? identity.becoming : "Who are you? Claim it in an I am statement, choose how big a change it is, and the coaching adjusts to fit."}</p>
-      </Link>
 
       <p className="mt-6 mb-3 text-sm muted">
         {priority ? "Start with your priority. Open the others when you are ready; one pillar with real attention beats five with divided attention." : "Choose a development priority from your assessment results to focus this plan."}

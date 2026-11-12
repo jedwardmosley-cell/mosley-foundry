@@ -60,9 +60,12 @@ async function main() {
     data: {
       priorityPillar: "E",
       eqiEnabled: true,
-      destination: "A manager my team brings bad news to early, because they know I will stay steady and help them fix it. Calm in the budget meeting, curious in the one-on-one, and home for dinner.",
-      why: "The people on my team deserve a leader who makes hard days easier, not harder.",
-      forgeStatement: "I am becoming a leader who settles the room instead of heating it. I am driving toward a team that raises problems early. I am building one practice: when a decision of mine gets challenged, I pause, ask one question, and answer second. I read this every Monday and my accountability partner checks on it every other Friday.",
+      destination: "I am a manager my team brings bad news to early, because they know I stay calm and help them fix it.",
+      lineO: "I notice when my voice gets sharp in a meeting, and I slow down.",
+      lineG: "I practice asking one question before I answer a challenge.",
+      lineE: "When a decision of mine gets challenged, I pause, ask one question, and answer second.",
+      why: "I lead this way because the people on my team deserve a leader who makes hard days easier.",
+      forgeStatement: "I am a leader who settles the room instead of heating it. I am driving toward a team that raises problems early. I am building one practice: when a decision of mine gets challenged, I pause, ask one question, and answer second. I read this every Monday and my accountability partner checks on it every other Friday.",
     },
   });
   await db.assessment.create({ data: { userId: dana.id, instrument: "FORGE_PERSONAL", f: 4, o: 3, r: 4, g: 3, e: 2, revisedE: 2, revisedO: 3, completedAt: day(-20), reflections: JSON.stringify({ E: "When a peer questions my numbers in front of my director, I get sharp and defend instead of listen." }) } });
