@@ -20,7 +20,10 @@ export function JourneyBar({ steps, done, current, cycle }: Props) {
 
   const open = steps.find((s) => !done[s.key] && s.key !== "drive");
   let line: React.ReactNode;
-  if (cycle) {
+  // On Today the big card already shows the day, so the bar only nudges about a skipped step.
+  if (cycle && path === "/dashboard") {
+    line = open && !cycle.finished ? <span className="text-ink-mute">Still open: <Link href={open.href} className="btn-link">{open.label}</Link></span> : null;
+  } else if (cycle) {
     line = cycle.finished
       ? <Link href="/cycle" className="btn-link">Your 30 days are up. Open your day 30 review</Link>
       : <Link href="/dashboard" className="hover:text-navy">Day {cycle.day} of 30 · Week {cycle.week}{cycle.phase ? `, ${cycle.phase}` : ""} · <span className="btn-link">Check in today</span></Link>;

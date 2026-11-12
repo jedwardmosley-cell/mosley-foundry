@@ -5,7 +5,6 @@ import { aiAvailable } from "@/lib/ai";
 import { saveStatement } from "@/app/actions/participant";
 import { PageHeader, Card, Source } from "@/components/ui";
 import { Submit } from "@/components/Submit";
-import { DictationHint } from "@/components/Picks";
 import Link from "next/link";
 import { LEVELS, type IdentityLevel } from "@/content/identity";
 import { FORGE_LINES_STATUS } from "@/content/forgeLines";
@@ -27,7 +26,13 @@ export default async function PlanPage() {
 
   return (
     <>
-      <PageHeader eyebrow="Section Six" title="Your FORGE Action Plan">{pack.actionPlanIntro}</PageHeader>
+      <PageHeader title="Your FORGE Plan" />
+      {pack.actionPlanIntro && (
+        <details className="mb-5 text-sm">
+          <summary className="cursor-pointer text-navy">From the workbook, Section Six</summary>
+          <p className="mt-2 text-ink-soft">{pack.actionPlanIntro}</p>
+        </details>
+      )}
 
       {identity ? (
         <Link href="/identity" className="card block hover:border-navy/40">
@@ -51,11 +56,9 @@ export default async function PlanPage() {
           <div>
             <h2 className="h3">{FORGE_IDENTITY_TITLE}</h2>
             <p className="text-sm muted mt-1">{FORGE_IDENTITY_INTRO}</p>
-            <p className="text-xs text-ink-mute mt-2">Habits and routines come next, in your <Link href="/blueprint" className="btn-link">Blueprint</Link>. That is where this identity turns into practice.</p>
-            {FORGE_LINES_STATUS === "draft" && <span className="draft !text-[10px] mt-2 inline-block">Draft wording</span>}
+                        {FORGE_LINES_STATUS === "draft" && <span className="draft !text-[10px] mt-2 inline-block">Draft wording</span>}
           </div>
           <ForgeLinesFields profile={profile} pathway={pathway} claim={claim} ai={ai} statementHint={entre ? entrepreneur.forgeStatementPrompt : pack.forgeStatementPrompt} />
-          <DictationHint />
           {pack.holdYourself && <p className="quote text-[15px]">{pack.holdYourself}</p>}
           <Submit>Save my FORGE identity</Submit>
         </form>

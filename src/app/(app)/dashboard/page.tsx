@@ -4,13 +4,10 @@ import { requireUser } from "@/lib/auth";
 import { loadParticipant } from "@/lib/participant";
 import { getContent } from "@/content";
 import { cycleWeeks, cyclePosition, practiceSummary } from "@/lib/cycle";
-import { scoresFrom } from "@/lib/forge";
 import { fmt, daysBetween } from "@/lib/dates";
-import { RELATIONSHIP_ROLES, PATHWAYS } from "@/content/program";
 import type { PillarKey } from "@/content/types";
-import { Card, PillarMark, Empty } from "@/components/ui";
+import { Card, PillarMark } from "@/components/ui";
 import { CheckInForm } from "@/components/CheckInForm";
-import { IdentityCard } from "@/components/IdentityCard";
 
 export const metadata = { title: "Today" };
 
@@ -25,8 +22,6 @@ export default async function Dashboard() {
   const pos = d.cycle ? cyclePosition(d.cycle.startDate) : null;
   const week = d.cycle && pos ? cycleWeeks(d.cycle.template, pack).weeks[pos.week - 1] : null;
   const practice = practiceSummary(d.checkIns);
-  const dueRels = d.relationships.slice(0, 3);
-  const pathway = PATHWAYS[d.profile.pathway as keyof typeof PATHWAYS];
 
   // Items the coach has put in front of this person. They live on the Coaching page; this makes them hard to miss.
   const now = new Date();
@@ -34,162 +29,98 @@ export default async function Dashboard() {
   const nextSession = [...d.sessions].reverse().find((x) => x.scheduledAt >= now) ?? null;
   const lastCommitments = d.sessions.find((x) => x.scheduledAt < now && x.commitments) ?? null;
 
-  const steps = [
-    { done: !!d.assessment, label: "Take the FORGE self-assessment", href: "/assessment" },
-    { done: !!d.profile.priorityPillar, label: "Choose your development priority", href: d.assessment ? `/assessment/${d.assessment.id}` : "/assessment" },
-    { done: d.commitments.length > 0, label: "Design your Blueprint", href: "/blueprint" },
-    { done: d.relationships.length > 0, label: "Name your people", href: "/network" },
-    { done: !!d.cycle, label: "Start a 30-day cycle", href: "/cycle/new" },
-  ];
-  const remaining = steps.filter((s) => !s.done);
+
+  const statement = d.identity?.becoming || d.profile.destination || "";
+  const dueSoon = d.relationships.filter((r) => r.nextCheckIn && daysBetween(new Date(), r.nextCheckIn) <= 2).slice(0, 3);
+  const coachItems = [
+    nextSession && { key: "s", href: "/coaching", icon: "◷", text: `${fmt(nextSession.scheduledAt, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })} · Session with ${nextSession.coach.name.split(" (")[0]}`, side: nextSession.participantPrep ? "" : "Add prep" },
+    ...openExercises.map((x) => ({ key: x.id, href: "/coaching", icon: "✎", text: x.title, side: x.dueOn ? `Due ${fmt(x.dueOn)}` : "New" })),
+    lastCommitments && { key: "c", href: "/coaching", icon: "✓", text: lastCommitments.commitments, side: "Agreed" },
+  ].filter(Boolean) as { key: string; href: string; icon: string; text: string; side: string }[];
 
   return (
-    <div className="space-y-5">
-      <header>
-        <p className="eyebrow">{fmt(new Date(), { weekday: "long", month: "long", day: "numeric" })} · {pathway?.name}</p>
-        <h1 className="h1 mt-2">Good to see you, {u.name.split(" ")[0]}.</h1>
+    <div className="space-y-4">
+      <header className="flex items-baseline justify-between gap-3">
+        <h1 className="h2">Hi, {u.name.split(" ")[0]}</h1>
+        <p className="text-sm text-ink-mute">{fmt(new Date(), { weekday: "short", month: "short", day: "numeric" })}</p>
       </header>
 
-      {(openExercises.length > 0 || nextSession || lastCommitments) && (
-        <Card className="border-brass/60">
-          <div className="flex items-baseline justify-between">
-            <p className="eyebrow">From your coach</p>
-            <Link href="/coaching" className="text-sm btn-link">Open Coaching</Link>
+      {/* The one thing to do today */}
+      <section className="rounded-2xl bg-navy-deep p-5 text-white shadow-sm">
+        {statement && (
+          <Link href={d.identity ? "/identity" : "/plan"} className="block font-serif text-[19px] leading-snug line-clamp-2 hover:text-brass-soft">{statement}</Link>
+        )}
+        {d.identity?.level === "REINVENT" && d.identity.personaName && (
+          <p className="mt-1.5 text-sm text-white/70">Performance identity: <span className="text-white">{d.identity.personaName}</span></p>
+        )}
+        {d.cycle && week && pos ? (
+          <>
+            <div className={`${statement ? "mt-4 border-t border-white/15 pt-4" : ""} flex items-center justify-between gap-3`}>
+              <p className="text-xs uppercase tracking-[0.14em] text-white/60">Day {pos.day} of 30 · {week.phase}</p>
+              {p && <PillarMark k={p.key} size="sm" />}
+            </div>
+            <Link href="/cycle" className="mt-1.5 block text-xl font-medium leading-snug">{d.cycle.focus || week.work}</Link>
+            {pos.finished
+              ? <Link href="/cycle" className="mt-4 btn w-full bg-brass text-navy-deep hover:bg-white">Open my day 30 review</Link>
+              : <div className="mt-4"><CheckInForm existing={d.todayCheckIn} hasCoach={d.coaches.length > 0} identityLevel={d.identity?.level} dark /></div>}
+          </>
+        ) : (
+          <div className={statement ? "mt-4 border-t border-white/15 pt-4" : ""}>
+            <p className="text-xl font-medium">Start your 30 days</p>
+            <Link href="/start" className="mt-4 btn w-full bg-brass text-navy-deep hover:bg-white">Pick up where I left off</Link>
           </div>
-          <ul className="mt-3 divide-y divide-line">
-            {nextSession && (
-              <li className="py-2.5">
-                <p className="text-[15px]"><span className="font-medium">Session with {nextSession.coach.name.split(" (")[0]}</span> on {fmt(nextSession.scheduledAt, { weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" })}</p>
-                {nextSession.agenda && <p className="text-sm text-ink-soft">Agenda: {nextSession.agenda}</p>}
-                {!nextSession.participantPrep && <Link href="/coaching" className="text-sm btn-link">Add your prep note</Link>}
-              </li>
-            )}
-            {openExercises.map((x) => (
-              <li key={x.id} className="py-2.5 flex items-baseline justify-between gap-3">
-                <Link href="/coaching" className="text-[15px]"><span className="font-medium">Exercise:</span> {x.title}</Link>
-                <span className="text-sm muted whitespace-nowrap">{x.dueOn ? `Due ${fmt(x.dueOn)}` : x.status === "ASSIGNED" ? "New" : "In progress"}</span>
+        )}
+      </section>
+
+      {coachItems.length > 0 && (
+        <Card className="!p-0">
+          <div className="flex items-center justify-between px-5 pt-4">
+            <p className="eyebrow">From your coach</p>
+            <Link href="/coaching" className="text-sm btn-link">Open</Link>
+          </div>
+          <ul className="mt-2 divide-y divide-line">
+            {coachItems.map((x) => (
+              <li key={x.key}>
+                <Link href={x.href} className="flex items-center gap-3 px-5 py-3 hover:bg-paper">
+                  <span aria-hidden className="w-5 text-center text-brass">{x.icon}</span>
+                  <span className="flex-1 text-[15px] line-clamp-1">{x.text}</span>
+                  {x.side && <span className="text-xs text-ink-mute whitespace-nowrap">{x.side}</span>}
+                </Link>
               </li>
             ))}
-            {lastCommitments && (
-              <li className="py-2.5">
-                <p className="text-[15px]"><span className="font-medium">What you agreed on {fmt(lastCommitments.scheduledAt)}:</span> {lastCommitments.commitments}</p>
-              </li>
-            )}
           </ul>
         </Card>
       )}
 
-      {remaining.length > 0 && (
-        <Card className="bg-navy-deep border-navy-deep text-white">
-          <p className="eyebrow !text-white/60">Set up your road</p>
-          <ol className="mt-3 space-y-2">
-            {steps.map((s, i) => (
-              <li key={s.label} className="flex items-center gap-3">
-                <span className={`h-6 w-6 shrink-0 rounded-full text-xs flex items-center justify-center ${s.done ? "bg-brass text-white" : "border border-white/40"}`}>{s.done ? "✓" : i + 1}</span>
-                {s.done ? <span className="text-white/60 line-through">{s.label}</span> : <Link href={s.href} className="underline underline-offset-4 decoration-brass">{s.label}</Link>}
-              </li>
-            ))}
-          </ol>
-          <p className="mt-4 text-sm text-white/70">New here? <Link href="/guide" className="underline underline-offset-4 decoration-brass">Read the guide</Link>. It takes a few minutes.</p>
-        </Card>
-      )}
-
-      {d.identity && <IdentityCard id={d.identity} priority={p} />}
-
-      <div className="grid gap-5 md:grid-cols-2">
-        <Card>
-          <p className="eyebrow">My FORGE Statement</p>
-          {d.profile.forgeStatement || d.profile.destination ? (
-            <p className="mt-3 font-serif text-lg leading-relaxed text-ink line-clamp-5">{d.profile.forgeStatement || d.profile.destination}</p>
-          ) : (
-            <p className="mt-3 muted">Your FORGE identity is not written yet. <Link className="btn-link" href="/plan">Write them</Link></p>
-          )}
-        </Card>
-
-        <Card>
-          <p className="eyebrow">What am I working on?</p>
-          {p ? (
-            <div className="mt-3">
-              <div className="flex items-center gap-3">
-                <PillarMark k={p.key} />
-                <div>
-                  <p className="h3">{p.name}</p>
-                  <p className="text-sm muted">{p.short}</p>
-                </div>
-              </div>
-              {goal?.oneMove && <p className="mt-4 text-[15px]"><span className="text-ink-mute">One move this week: </span>{goal.oneMove}</p>}
-              {d.profile.eqiEnabled && d.eqi.filter((e) => e.pillar === p.key).map((e) => (
-                <p key={e.id} className="mt-2 text-sm"><span className="text-ink-mute">From my EQ-i debrief: </span><Link href="/pathway/eqi" className="btn-link">{e.label}</Link></p>
-              ))}
-            </div>
-          ) : (
-            <p className="mt-3 muted">Choose a development priority after your assessment.</p>
-          )}
-        </Card>
-      </div>
-
       <Card>
-        <p className="eyebrow">What must I do today?</p>
-        {d.cycle && week && pos ? (
-          <>
-            <div className="mt-3 flex flex-wrap items-baseline gap-x-3">
-              <h2 className="h2">Day {pos.day} · {week.phase}</h2>
-              <Link href="/cycle" className="text-sm btn-link">Cycle</Link>
-            </div>
-            <p className="mt-2 text-[15px] leading-relaxed">{d.cycle.focus ? <><span className="font-medium">{d.cycle.focus}. </span></> : null}{week.work}</p>
-            {pos.finished && <p className="mt-3 text-sm text-clay">Your 30 days are up. <Link className="btn-link" href="/cycle">Complete your Day 30 review</Link>.</p>}
-          </>
-        ) : (
-          <p className="mt-3 muted">No active cycle. <Link className="btn-link" href="/cycle/new">Start one</Link> and you will get one specific practice each day.</p>
-        )}
-        <div className="mt-5 border-t border-line pt-5">
-          <CheckInForm existing={d.todayCheckIn} hasCoach={d.coaches.length > 0} identityLevel={d.identity?.level} />
+        <div className="flex items-center justify-between">
+          <p className="eyebrow">Last 14 days</p>
+          <Link href="/history" className="text-sm btn-link">History</Link>
         </div>
+        <PracticeStrip checkIns={d.checkIns} />
+        <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
+          <Stat n={practice.practiced} label="days practiced" />
+          <Stat n={d.weekly.length} label="weekly reviews" />
+          <Stat n={d.relationships.reduce((n, r) => n + r.checkIns.filter((c) => c.happened).length, 0)} label="people check-ins" />
+        </dl>
       </Card>
 
-      <div className="grid gap-5 md:grid-cols-2">
-        <Card>
-          <div className="flex items-baseline justify-between">
-            <p className="eyebrow">Who is helping me?</p>
-            <Link href="/network" className="text-sm btn-link">All people</Link>
-          </div>
-          {dueRels.length || d.coaches.length ? (
-            <ul className="mt-3 divide-y divide-line">
-              {d.coaches.map((c) => (
-                <li key={c.id} className="py-2.5 flex justify-between gap-3"><span>{c.coach.name}</span><span className="text-sm muted">Coach (program)</span></li>
-              ))}
-              {dueRels.map((r) => {
-                const overdue = r.nextCheckIn && daysBetween(new Date(), r.nextCheckIn) < 0;
-                return (
-                  <li key={r.id} className="py-2.5 flex justify-between gap-3">
-                    <span>{r.name} <span className="text-sm muted">· {RELATIONSHIP_ROLES[r.role as keyof typeof RELATIONSHIP_ROLES]}</span></span>
-                    <span className={`text-sm whitespace-nowrap ${overdue ? "text-clay" : "muted"}`}>{r.nextCheckIn ? `${overdue ? "Was due" : "Next"} ${fmt(r.nextCheckIn)}` : ""}</span>
-                  </li>
-                );
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Link href="/network" className="card block hover:border-navy/40">
+          <p className="eyebrow">People</p>
+          {dueSoon.length ? (
+            <ul className="mt-2 space-y-1">
+              {dueSoon.map((r) => {
+                const overdue = daysBetween(new Date(), r.nextCheckIn!) < 0;
+                return <li key={r.id} className="flex justify-between gap-2 text-[15px]"><span>{r.name.split(" (")[0]}</span><span className={`text-xs ${overdue ? "text-clay" : "text-ink-mute"}`}>{overdue ? "Overdue" : "Due"}</span></li>;
               })}
             </ul>
-          ) : (
-            <Empty title="No one added yet" href="/network" cta="Add your people">If you can't think of anyone yet, start there. It's your first design decision.</Empty>
-          )}
-        </Card>
-
-        <Card>
-          <div className="flex items-baseline justify-between">
-            <p className="eyebrow">How am I progressing?</p>
-            <Link href="/history" className="text-sm btn-link">History</Link>
-          </div>
-          <dl className="mt-3 grid grid-cols-3 gap-3 text-center">
-            <Stat n={practice.practiced} label="days practiced (30d)" />
-            <Stat n={d.weekly.length} label="weekly reviews" />
-            <Stat n={d.relationships.reduce((n, r) => n + r.checkIns.filter((c) => c.happened).length, 0)} label="check-ins done" />
-          </dl>
-          <PracticeStrip checkIns={d.checkIns} />
-          {d.assessment && (
-            <p className="mt-4 text-sm muted">
-              Latest FORGE reading: {Object.entries(scoresFrom(d.assessment)).map(([k, v]) => `${k} ${v}`).join(" · ")}
-            </p>
-          )}
-        </Card>
+          ) : <p className="mt-2 text-[15px] text-ink-soft">{d.relationships.length ? "All caught up" : "Add your first person"}</p>}
+        </Link>
+        <Link href={goal?.oneMove ? "/blueprint#one-move" : "/blueprint"} className="card block hover:border-navy/40">
+          <p className="eyebrow">This week</p>
+          <p className="mt-2 text-[15px] line-clamp-2">{goal?.oneMove || "Pick one move"}</p>
+        </Link>
       </div>
     </div>
   );
@@ -215,11 +146,11 @@ function PracticeStrip({ checkIns }: { checkIns: { date: string; status: string 
   });
   const tone = (s?: string) => (s === "DONE" ? "bg-navy" : s === "PARTIAL" ? "bg-brass" : s === "NOT_YET" ? "bg-line border border-ink-mute/30" : "bg-transparent border border-line");
   return (
-    <div className="mt-4">
+    <div className="mt-3">
       <div className="flex gap-1" role="img" aria-label="Last 14 days of practice">
         {days.map((d) => <span key={d.key} title={`${d.key}: ${d.s ?? "no entry"}`} className={`h-5 flex-1 rounded ${tone(d.s)}`} />)}
       </div>
-      <p className="mt-2 text-[11px] text-ink-mute">Last 14 days · navy done · brass partial · grey not yet. A missed day is just information.</p>
+      <div className="mt-2 flex gap-4 text-[11px] text-ink-mute"><span><span className="inline-block h-2 w-2 rounded-sm bg-navy mr-1" />Done</span><span><span className="inline-block h-2 w-2 rounded-sm bg-brass mr-1" />Partial</span><span><span className="inline-block h-2 w-2 rounded-sm bg-line mr-1" />Not yet</span></div>
     </div>
   );
 }

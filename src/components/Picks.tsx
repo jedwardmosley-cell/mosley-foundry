@@ -6,7 +6,7 @@ import type { OptionList } from "@/content/options";
  * Tap-to-fill suggestions for a text field in the same form.
  * The field stays editable; without JavaScript the chips simply do nothing.
  */
-export function Picks({ list, target, label = "Tap to use one, then edit if you like" }: { list: OptionList; target: string; label?: string }) {
+export function Picks({ list, target, label = "Tap to use one, then edit if you like", folded, note }: { list: OptionList; target: string; label?: string; folded?: string; note?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const fill = (text: string) => {
     const form = ref.current?.closest("form");
@@ -16,6 +16,25 @@ export function Picks({ list, target, label = "Tap to use one, then edit if you 
     el.dispatchEvent(new Event("input", { bubbles: true }));
     el.focus();
   };
+  if (folded) {
+    // Folded: one small "Examples" toggle instead of a block of text and buttons.
+    return (
+      <div ref={ref} className="mt-1.5">
+        <details>
+          <summary className="cursor-pointer text-sm text-navy">{folded}{list.status === "draft" && <span className="ml-2 draft !text-[10px]">Draft</span>}</summary>
+          {note && <p className="mt-2 text-xs text-ink-mute">{note}</p>}
+          <div className="mt-2 flex flex-wrap gap-2">
+            {list.options.map((o) => (
+              <button key={o} type="button" onClick={() => fill(o)}
+                className="rounded-full border border-line bg-white px-3 py-1.5 text-[13px] text-ink-soft hover:border-navy hover:text-navy active:bg-paper text-left">
+                {o}
+              </button>
+            ))}
+          </div>
+        </details>
+      </div>
+    );
+  }
   return (
     <div ref={ref} className="mt-2">
       <p className="text-xs text-ink-mute mb-1.5">

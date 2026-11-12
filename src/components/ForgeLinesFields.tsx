@@ -17,23 +17,26 @@ export function ForgeLinesFields({ profile, pathway, claim, ai, statementHint }:
         const starters = l.field === "destination" && claim ? [claim, ...l.starters[pathway]] : l.starters[pathway];
         return (
           <div key={l.field}>
-            <label htmlFor={l.field} className="flex items-center gap-2.5">
+            <label htmlFor={l.field} className="flex items-center gap-2.5 mb-2">
               <PillarMark k={l.pillar} />
-              <span><span className="label !mb-0 block">{l.label}</span><span className="text-sm text-ink-soft">{l.question}</span></span>
+              <span className="font-medium text-[15px] leading-snug">{l.question}<span className="sr-only"> ({l.label})</span></span>
             </label>
-            <p className="text-xs text-ink-mute mt-2 mb-1.5">{l.hint}</p>
             <PrefixedBox name={l.field} prefix={l.prefix} saved={profile?.[l.field] ?? ""} placeholder={l.placeholder} />
-            <Picks list={{ status: FORGE_LINES_STATUS, options: starters }} target={l.field} label="Examples to start from. Make it yours." />
+            <Picks list={{ status: FORGE_LINES_STATUS, options: starters }} target={l.field} folded="Examples" note={l.hint} />
             {ai && <IdentityCoach field={l.field} prefix={l.prefix} />}
           </div>
         );
       })}
       <div className="border-t border-line pt-5">
-        <Field label="FORGE Statement" hint={statementHint}>
-          <textarea name="forgeStatement" defaultValue={profile?.forgeStatement ?? ""} className="textarea min-h-[140px]" maxLength={3000} />
-        </Field>
-        <p className="text-xs text-ink-mute mt-1 mb-2">Your five identity statements in one paragraph. It describes who you are. Read it out loud at the start of each week.</p>
-        <div className="flex flex-wrap gap-x-6 gap-y-2">
+        <label htmlFor="forgeStatement" className="label">FORGE Statement</label>
+        {statementHint && (
+          <details className="mb-2 text-sm">
+            <summary className="cursor-pointer text-navy">What to write</summary>
+            <p className="mt-1 text-ink-soft">{statementHint}</p>
+          </details>
+        )}
+        <textarea id="forgeStatement" name="forgeStatement" defaultValue={profile?.forgeStatement ?? ""} className="textarea min-h-[140px]" maxLength={3000} />
+        <div className="mt-2 flex flex-wrap gap-x-6 gap-y-2">
           <CombineLines target="forgeStatement" />
           {ai && <HelpMeWrite kind="forgeStatement" target="forgeStatement" />}
         </div>
