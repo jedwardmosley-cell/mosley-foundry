@@ -10,9 +10,8 @@ import type { LineField } from "./forgeLines";
  * FORGE letter. Every example must pass the four tests below. Behavior has its own home in
  * My road (one move this week) and 30 days (the practice).
  *
- * Note for the author: "steady" and the "X, not Y" pattern appear here. Both are on the house
- * style list. They are kept because these are the author's own words. This file is not part of
- * the automatic style check.
+ * Banned words are checked by tests/style.test.ts. The "X, not Y" pattern appears in several lines.
+ * It is on the house style list and is kept here pending the author's decision.
  */
 export const IDENTITY_EXAMPLES_STATUS: "draft" | "approved" = "draft";
 
@@ -28,7 +27,7 @@ export const IDENTITY_TESTS = [
 export const FOUR_THINGS = {
   goal: "something you reach and finish",
   habit: "something you do on a schedule",
-  value: "something you hold",
+  value: "something you believe in",
   identity: "who you are. It can't be completed, only lived or abandoned",
 };
 
@@ -51,7 +50,7 @@ export const EXAMPLE_PEOPLE: ExamplePerson[] = [
       lineO: "I am an owner who sees the whole business, not just today's customer.",
       why: "I am a provider building something that outlasts a paycheck.",
       lineG: "I am in charge without being the expert on everything.",
-      lineE: "I am steady when money is tight. Fear gets a seat, not the wheel.",
+      lineE: "I am calm when money is tight. Fear gets a seat, not the wheel.",
     },
   },
   {
