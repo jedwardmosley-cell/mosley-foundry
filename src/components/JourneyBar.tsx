@@ -34,6 +34,10 @@ export function JourneyBar({ steps, done, current, cycle }: Props) {
 
   return (
     <nav aria-label="Your journey" className="mb-6 rounded-2xl border border-line bg-card px-4 py-3">
+      <div aria-hidden className="grid grid-cols-5 gap-1.5 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-navy-deep">
+        <span className="col-span-3">FORGE</span>
+        <span className="col-span-2 border-l border-line pl-1.5">Discipline by Design</span>
+      </div>
       <ol className="grid grid-cols-5 gap-1.5">
         {steps.map((s, i) => {
           const isDone = done[s.key];

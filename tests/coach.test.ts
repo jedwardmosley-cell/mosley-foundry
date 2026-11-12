@@ -18,6 +18,6 @@ test("FORGE statements are identities, and practices live in Discipline by Desig
     for (const list of Object.values(l.starters)) for (const s of list) {
       assert.ok(!/^(planning|keeping|asking|writing|handing|reviewing|one |when )/i.test(s), `${l.pillar} starter reads like a habit: ${s}`);
     }
-    assert.ok(Object.values(PRACTICE_STARTERS[l.pillar]).every((x) => x.length > 0), `${l.pillar} has practices for the Blueprint`);
+    assert.ok(Object.values(PRACTICE_STARTERS[l.pillar]).every((x) => x.length > 0), `${l.pillar} has practices for the blueprint`);
   }
 });

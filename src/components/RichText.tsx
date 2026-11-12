@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 /**
- * Renders the small subset of Markdown the AI Companion uses: paragraphs, **bold**,
+ * Renders the small subset of Markdown the AI companion uses: paragraphs, **bold**,
  * and "-" or "1." lists. Builds React elements only (no HTML injection).
  */
 function inline(text: string, key: string): ReactNode[] {

@@ -15,7 +15,7 @@ import { FORGE_LINES, PRACTICE_STARTERS } from "@/content/forgeLines";
 import type { PathwayKey } from "@/content/program";
 import type { PillarKey } from "@/content/types";
 
-export const metadata = { title: "Discipline by Design Blueprint" };
+export const metadata = { title: "Discipline by Design blueprint" };
 
 const CADENCES = { DAILY: "Daily", WEEKLY: "Weekly", MONTHLY: "Monthly", QUARTERLY: "Quarterly", ONCE: "One time" };
 const DAY_CHOICES = ["", "Every day", "Weekdays", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -91,14 +91,14 @@ export default async function BlueprintPage() {
               const a = item.action;
               const source = a.kind === "commit" ? (a.from === "behavior" ? identity.behavior : a.from === "cue" ? identity.personaCue : a.from === "standards" ? identity.personaStandards : "ok") : "ok";
               const title = a.kind === "commit" ? (a.from === "behavior" ? identity.behavior.split("\n")[0].trim().slice(0, 200) : a.from === "cue" ? identity.personaCue.split("\n")[0].trim().slice(0, 200) : a.from === "standards" ? "Read my standards" : "Review my week against my standards") : "";
-              const added = a.kind === "commit" && items.some((c) => c.title === title && c.detail === "Identity Shift");
+              const added = a.kind === "commit" && items.some((c) => c.title === title && c.detail === "Identity shift");
               return (
                 <li key={item.text} className="py-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5">
                   <span className="text-[15px]">{item.text}</span>
                   {a.kind === "link" ? (
                     <Link href={a.href} className="text-sm btn-link">{a.button}</Link>
                   ) : added ? (
-                    <span className="chip !text-sage">In your Blueprint</span>
+                    <span className="chip !text-sage">In your blueprint</span>
                   ) : source ? (
                     <form action={addIdentityPractice}><input type="hidden" name="index" value={i} /><button className="text-sm btn-link text-left">{a.button}</button></form>
                   ) : (

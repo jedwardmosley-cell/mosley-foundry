@@ -22,7 +22,7 @@ export const metadata = { title: "Your first session" };
 
 const STEP_COPY = [
   { title: "Claim who you are", intro: "Start with who you are. Write it as true today, the way you would say it out loud." },
-  { title: "Write your FORGE Identity", intro: `${FORGE_IDENTITY_INTRO} Start with F. If you get stuck, save what you have and finish the rest during your first week.` },
+  { title: "Write your FORGE identity", intro: `${FORGE_IDENTITY_INTRO} Start with F. If you get stuck, save what you have and finish the rest during your first week.` },
   { title: "See where you are today", intro: "Score yourself on the five pillars against the person you just described. Then pick one pillar to work on first." },
   { title: "Design your road", intro: "Discipline by Design turns your identity into practice. Add one routine that reinforces who you are, and one person who will know whether you did it." },
   { title: "Start your 30 days", intro: "Practice one behavior for 30 days, with a two-minute check-in each day. On day 30 you decide what comes next." },
@@ -88,7 +88,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
         <Card>
           <p className="eyebrow">Who I am</p>
           <p className="mt-2 font-serif text-lg leading-relaxed">{identity.becoming}</p>
-          <p className="text-sm muted mt-1">Level {LEVELS[identity.level as IdentityLevel].n} · {LEVELS[identity.level as IdentityLevel].name}. You can change it any time in <Link href="/identity" className="btn-link">Identity Shift</Link>.</p>
+          <p className="text-sm muted mt-1">Level {LEVELS[identity.level as IdentityLevel].n} · {LEVELS[identity.level as IdentityLevel].name}. You can change it any time in <Link href="/identity" className="btn-link">Identity shift</Link>.</p>
           <Link href={next} className="btn-primary mt-4 inline-flex">{nextLabel}</Link>
         </Card>
       ) : (
@@ -115,7 +115,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
                 ))}
               </div>
             </fieldset>
-            <p className="text-xs text-ink-mute">You can add why now, the behavior that shows it, and the rest later in Identity Shift.</p>
+            <p className="text-xs text-ink-mute">You can add why now, the behavior that shows it, and the rest later in identity shift.</p>
             <Submit>Save and continue</Submit>
           </form>
         </Card>
@@ -187,7 +187,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
               <RelationshipFields />
               <div className="sm:col-span-2"><Submit className="btn-quiet">Add person</Submit></div>
             </form>
-            <p className="text-xs text-ink-mute mt-3">They do not see your records. You can add mentors, mentees and groups later in your Blueprint.</p>
+            <p className="text-xs text-ink-mute mt-3">They do not see your records. You can add mentors, mentees and groups later in your blueprint.</p>
           </Card>
           {commitments.length > 0 && people.length > 0 && <Link href={next} className="btn-primary inline-flex">{nextLabel}</Link>}
         </div>
@@ -198,7 +198,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
           <p className="eyebrow">Your road</p>
           <dl className="mt-3 space-y-3 text-[15px]">
             {identity && <div><dt className="text-ink-mute text-sm">Who I am</dt><dd className="font-serif text-lg">{identity.becoming}</dd></div>}
-            {(profile?.forgeStatement || profile?.destination) && <div><dt className="text-ink-mute text-sm">My FORGE Statement</dt><dd>{profile.forgeStatement || profile.destination}</dd></div>}
+            {(profile?.forgeStatement || profile?.destination) && <div><dt className="text-ink-mute text-sm">My FORGE statement</dt><dd>{profile.forgeStatement || profile.destination}</dd></div>}
             {priority && <div><dt className="text-ink-mute text-sm">My focus</dt><dd className="flex items-center gap-2"><PillarMark k={priority.key} /> {priority.name}</dd></div>}
             {commitments[0] && <div><dt className="text-ink-mute text-sm">My routine</dt><dd>{commitments.map((c) => c.title).join(", ")}</dd></div>}
             {people[0] && <div><dt className="text-ink-mute text-sm">My people</dt><dd>{people.map((p) => p.name).join(", ")}</dd></div>}

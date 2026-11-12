@@ -38,3 +38,19 @@ test("quick-pick options and the guide follow the house style", () => {
     assert.ok(!/, not /.test(t), `"X, not Y" pattern in: ${t}`);
   }
 });
+
+import { readFileSync, readdirSync, statSync } from "node:fs";
+import { join } from "node:path";
+
+test("only Both Hands on the Wheel, FORGE and Discipline by Design are capitalized names", () => {
+  const files: string[] = [];
+  const walk = (d: string) => { for (const f of readdirSync(d)) { const p = join(d, f); if (statSync(p).isDirectory()) walk(p); else if (/\.(ts|tsx)$/.test(p) && !p.endsWith("public-pack.ts")) files.push(p); } };
+  walk("src");
+  const NAMES = /[a-z,] +(Blueprint|Design Inventory|Identity Shift|Road Library|Private Journal|Weekly Reflection|Core Alignment|Role Transition|Identity Reinvention)\b|AI Companion|FORGE (Statement|Plan|Identity|Assessment)\b/;
+  for (const f of files) {
+    readFileSync(f, "utf8").split("\n").forEach((line, i) => {
+      if (/Source>|Ch\. |[^h]ref:/.test(line)) return; // book citations keep the book's own titles
+      assert.ok(!NAMES.test(line), `${f}:${i + 1} capitalizes a secondary name: ${line.trim().slice(0, 120)}`);
+    });
+  }
+});

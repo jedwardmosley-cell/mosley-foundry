@@ -55,7 +55,7 @@ export function IdentityCoach({ field, prefix = "I am" }: { field: string; prefi
               <button type="button" onClick={use} className="mt-1 text-sm btn-link">Use this, then edit it</button>
             </div>
           )}
-          <p className="mt-2 text-[11px] text-ink-mute">From the AI Companion. Keep only what is true for you.</p>
+          <p className="mt-2 text-[11px] text-ink-mute">From the AI companion. Keep only what is true for you.</p>
         </div>
       )}
     </div>

@@ -95,7 +95,7 @@ export async function setPriority(fd: FormData) {
   redirect(fromStart(fd) ? "/start?step=4" : "/blueprint#one-move");
 }
 
-// ---------- FORGE Action Plan (development goals) ----------
+// ---------- FORGE plan (development goals) ----------
 
 const planSchema = z.object({
   pillar: pillarKey,
@@ -114,7 +114,7 @@ export async function saveGoal(fd: FormData) {
   revalidatePath("/pathway");
 }
 
-// ---------- Discipline by Design Blueprint ----------
+// ---------- Discipline by Design blueprint ----------
 
 const commitmentSchema = z.object({
   area: z.enum(BLUEPRINT_AREAS.map((a) => a.key) as [string, ...string[]]),
@@ -396,7 +396,7 @@ export async function updateEqi(fd: FormData) {
   revalidatePath("/dashboard");
 }
 
-/** Puts the practice for an EQ-i priority into the Blueprint as a daily routine. */
+/** Puts the practice for an EQ-i priority into the blueprint as a daily routine. */
 export async function addEqiToBlueprint(fd: FormData) {
   const u = await participant();
   const { id } = parse(z.object({ id: z.string() }), fd);

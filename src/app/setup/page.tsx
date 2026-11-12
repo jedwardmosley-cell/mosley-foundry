@@ -35,7 +35,7 @@ export default async function SetupPage() {
         <Row ok={tokenSet} label="Setup token configured" hint={tokenSet ? undefined : "Add SETUP_TOKEN (16+ characters) in your hosting settings, then redeploy."} />
         <Row ok={hasAdmin} label="Administrator account created" />
         <Row ok={content} label="Licensed content pack installed" hint={content ? undefined : "Until then the app shows a draft placeholder assessment."} />
-        <Row ok={ai} label="AI Companion key configured" hint={ai ? undefined : "Optional. Add ANTHROPIC_API_KEY to turn on the companion."} />
+        <Row ok={ai} label="AI companion key configured" hint={ai ? undefined : "Optional. Add ANTHROPIC_API_KEY to turn on the companion."} />
       </ul>
 
       {dbOk && tokenSet && !hasAdmin && (

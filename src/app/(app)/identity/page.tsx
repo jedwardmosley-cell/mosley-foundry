@@ -11,7 +11,7 @@ import { Submit } from "@/components/Submit";
 import { Picks } from "@/components/Picks";
 import { IdentitySpectrum } from "@/components/IdentitySpectrum";
 
-export const metadata = { title: "Identity Shift" };
+export const metadata = { title: "Identity shift" };
 
 export default async function IdentityPage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
   const u = await requireUser("PARTICIPANT");
@@ -26,7 +26,7 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
 
   return (
     <>
-      <PageHeader eyebrow="Identity Shift · optional" title="Who I am">Claim who you are, and choose how big a change it is. Your FORGE scores and plan stay as they are.</PageHeader>
+      <PageHeader eyebrow="Identity shift · optional" title="Who I am">Claim who you are, and choose how big a change it is. Your FORGE scores and plan stay as they are.</PageHeader>
 
       {saved && <p role="status" className="mb-4 rounded-xl border border-sage/40 bg-sage-soft px-4 py-2.5 text-sm text-sage">Saved. Next, <Link href="/plan" className="underline">write your FORGE identity</Link> so the rest of your plan builds on who you are.</p>}
 
@@ -74,10 +74,10 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
 
       {id && (
         <details className="card mt-6">
-          <summary className="cursor-pointer h3">AI Companion and sharing</summary>
+          <summary className="cursor-pointer h3">AI companion and sharing</summary>
           <form action={saveIdentityControls} className="mt-4 space-y-5">
             <fieldset>
-              <legend className="label">Coaching tone in the AI Companion</legend>
+              <legend className="label">Coaching tone in the AI companion</legend>
                             <div className="space-y-1.5">
                 {(Object.entries(TONE_LABELS) as [ToneSetting, string][]).map(([v, label]) => (
                   <label key={v} className="flex items-start gap-2 text-[15px]">
@@ -88,7 +88,7 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
               </div>
             </fieldset>
             <fieldset className="space-y-2">
-              <legend className="label">What the AI Companion can use</legend>
+              <legend className="label">What the AI companion can use</legend>
               <label className="flex items-start gap-2 text-[15px]">
                 <input type="checkbox" name="aiUse" defaultChecked={id.aiUse} className="mt-1 h-4 w-4 accent-navy" />
                 <span>Use my level, my statement and my behavior. <span className="text-ink-mute text-sm">They are sent to Anthropic, the AI provider, when you chat.</span></span>
@@ -102,11 +102,11 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
             </fieldset>
             <fieldset>
               <legend className="label">What my coach can see</legend>
-              <p className="text-sm text-ink-soft">Only if you turn on <Link href="/sharing" className="btn-link">Identity Shift in Sharing</Link>. Check-in notes stay private.</p>
+              <p className="text-sm text-ink-soft">Only if you turn on <Link href="/sharing" className="btn-link">Identity shift in Sharing</Link>. Check-in notes stay private.</p>
               {id.level === "REINVENT" && (
                 <label className="mt-2 flex items-start gap-2 text-[15px]">
                   <input type="checkbox" name="sharePersona" defaultChecked={id.sharePersona} className="mt-1 h-4 w-4 accent-navy" />
-                  <span>When Identity Shift is shared, include my performance identity too.</span>
+                  <span>When identity shift is shared, include my performance identity too.</span>
                 </label>
               )}
             </fieldset>
@@ -132,7 +132,7 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
 
       {id && (
         <form action={removeIdentity} className="mt-6">
-          <button className="text-sm text-ink-mute hover:text-ink">Turn off Identity Shift (your version is kept)</button>
+          <button className="text-sm text-ink-mute hover:text-ink">Turn off identity shift (your version is kept)</button>
         </form>
       )}
     </>

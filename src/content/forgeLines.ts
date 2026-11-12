@@ -4,7 +4,7 @@ import type { PillarKey } from "./types";
 /**
  * FORGE IDENTITY: five identity statements, one per pillar.
  *
- * The questions and the example statements (used as placeholders) are the author's.
+ * The questions are the author's.
  * FORGE describes who is behind the wheel. Habits, tasks and techniques belong downstream,
  * in Discipline by Design (see PRACTICE_STARTERS below).
  *
@@ -36,23 +36,23 @@ export const FORGE_LINES: ForgeLine[] = [
     label: "Future Focused",
     question: "Who am I becoming?",
     prefix: "I am",
-    hint: "Describe the person you are choosing to be and where that person is headed. Plans and tasks go in your Blueprint.",
-    placeholder: "a purposeful leader who knows where I am going and takes ownership of my direction",
+    hint: "Describe the person you are choosing to be and where that person is headed. Plans and tasks go in your blueprint.",
+    placeholder: "the leader who knows where we're headed and says it out loud",
     starters: {
       PERSONAL: [
-        "a purposeful person who knows where I am going and owns my direction",
-        "a person who lives my life on purpose",
-        "becoming someone who lives by my own priorities instead of other people's urgency",
+        "someone who decides where my life is going instead of letting it happen",
+        "a person who keeps my word, to other people and to myself",
+        "becoming someone who stops waiting for the right time",
       ],
       LEADING_OTHERS: [
-        "a purposeful leader who knows where we are going and takes ownership of our direction",
-        "a leader people can follow because I know what I am building",
-        "becoming a leader who builds people as well as results",
+        "the leader who knows where we're headed and says it out loud",
+        "a boss people would follow even if they didn't have to",
+        "becoming the leader who builds people, and the results come with them",
       ],
       ENTREPRENEURIAL: [
-        "an owner who leads the business toward a clear future",
-        "a builder of something that lasts beyond my own effort",
-        "becoming a founder who leads the company instead of carrying it",
+        "the owner who runs the business instead of the business running me",
+        "someone building a company that works when I'm not in the room",
+        "becoming a founder who leads instead of carrying everything",
       ],
     },
   },
@@ -62,23 +62,23 @@ export const FORGE_LINES: ForgeLine[] = [
     label: "Outcome Aware",
     question: "What does someone with my identity pay attention to?",
     prefix: "I am",
-    hint: "Describe the kind of attention this person brings. The signals you will track go in your Blueprint.",
-    placeholder: "a discerning leader who recognizes what moves me toward my purpose and what pulls me away",
+    hint: "Describe the kind of attention this person brings. The signals you will track go in your blueprint.",
+    placeholder: "the leader who notices when someone goes quiet",
     starters: {
       PERSONAL: [
-        "a discerning person who recognizes what moves me toward my purpose and what pulls me away",
-        "an honest observer of my own life, willing to see what is happening",
-        "becoming a person who notices the early signs before they turn into problems",
+        "someone who sees what's pulling me off course and doesn't look away",
+        "honest with myself about what's working and what isn't",
+        "becoming someone who catches it early",
       ],
       LEADING_OTHERS: [
-        "a discerning leader who sees what my team needs before they have to ask",
-        "a leader who pays attention to people as closely as results",
-        "becoming a leader who listens for what is not being said",
+        "the leader who notices when someone goes quiet",
+        "a boss who watches people as closely as the numbers",
+        "becoming a leader who hears what isn't being said",
       ],
       ENTREPRENEURIAL: [
-        "an owner who sees the business clearly, the numbers and the people",
-        "a founder who pays attention to what customers are telling me",
-        "becoming an owner who notices when I am the bottleneck",
+        "an owner who looks at the numbers every week, good or bad",
+        "someone who listens to what customers are telling me",
+        "becoming an owner who sees when I'm the bottleneck",
       ],
     },
   },
@@ -89,22 +89,22 @@ export const FORGE_LINES: ForgeLine[] = [
     question: "What makes this identity meaningful to me?",
     prefix: "I am",
     hint: "Name the values underneath this identity, and who it is for.",
-    placeholder: "a person whose decisions reflect my deepest values and commitments",
+    placeholder: "a leader who believes the people on my team are worth the effort",
     starters: {
       PERSONAL: [
-        "a person whose decisions reflect my deepest values and commitments",
-        "a person who lives for something bigger than my own comfort",
-        "someone whose word means something to the people I love",
+        "someone who does this for the people I love",
+        "a person whose word means something",
+        "someone who lives by what I say I value",
       ],
       LEADING_OTHERS: [
-        "a leader who serves because my people deserve my best",
-        "a leader whose choices reflect what I believe about people",
-        "a leader who cares more about my team's growth than my own recognition",
+        "a leader who believes the people on my team are worth the effort",
+        "a boss who cares more about my team growing than about getting credit",
+        "a leader who does this because my people deserve better than I got",
       ],
       ENTREPRENEURIAL: [
-        "an owner who builds because the people who count on this business matter to me",
-        "a founder whose business reflects what I value",
-        "an owner who measures success by the lives the business makes better",
+        "an owner who builds this for the people who count on it",
+        "a founder whose business looks like what I believe",
+        "an owner who measures success by the lives it changes",
       ],
     },
   },
@@ -114,23 +114,23 @@ export const FORGE_LINES: ForgeLine[] = [
     label: "Growth Oriented",
     question: "Who am I when I encounter my limitations?",
     prefix: "I am",
-    hint: "Describe who you are when you hit a limit. The skills you will practice go in your Blueprint.",
-    placeholder: "a developing leader who embraces challenges as opportunities to become more capable",
+    hint: "Describe who you are when you hit a limit. The skills you will practice go in your blueprint.",
+    placeholder: "a leader who can be corrected without getting defensive",
     starters: {
       PERSONAL: [
-        "a developing person who treats challenges as chances to become more capable",
-        "a learner who is honest about where I fall short and keeps growing",
-        "a person who can be corrected without being crushed",
+        "someone who can hear I was wrong and keep going",
+        "still a learner, and not embarrassed about it",
+        "someone who gets better on purpose",
       ],
       LEADING_OTHERS: [
-        "a developing leader who embraces challenges as opportunities to become more capable",
-        "a leader who learns out loud, so my team can too",
-        "a leader secure enough to ask for feedback and use it",
+        "a leader who can be corrected without getting defensive",
+        "a boss who learns out loud so my team can too",
+        "a leader secure enough to ask how I'm doing",
       ],
       ENTREPRENEURIAL: [
         "an owner who grows as fast as the business needs me to",
-        "a founder who learns from failure without being defined by it",
-        "becoming an owner who develops people who can do what I do",
+        "a founder who can fail without being a failure",
+        "becoming an owner who teaches people to do what I do",
       ],
     },
   },
@@ -140,23 +140,23 @@ export const FORGE_LINES: ForgeLine[] = [
     label: "Emotionally Anchored",
     question: "Who am I when emotions challenge my identity?",
     prefix: "I am",
-    hint: "Describe who you are when emotions run high. Techniques, like a pause or a breath, go in your Blueprint.",
-    placeholder: "a courageous, emotionally grounded leader who stays intentional when things get hard",
+    hint: "Describe who you are when emotions run high. Techniques, like a pause or a breath, go in your blueprint.",
+    placeholder: "the calm one in the room when it goes sideways",
     starters: {
       PERSONAL: [
-        "a courageous, grounded person who stays intentional when things get hard",
-        "a person who feels fear fully and still chooses who I am",
-        "becoming a person whose emotions inform me without running me",
+        "someone who feels the fear and does it anyway",
+        "a person my emotions inform, but don't run",
+        "becoming someone who chooses how I respond",
       ],
       LEADING_OTHERS: [
-        "a courageous, emotionally grounded leader who stays intentional when things get hard",
-        "a calm presence my team can count on in a hard moment",
-        "becoming a leader who chooses my response instead of reacting",
+        "the calm one in the room when it goes sideways",
+        "a leader who feels it and still makes the call",
+        "becoming a leader who responds instead of reacting",
       ],
       ENTREPRENEURIAL: [
-        "an owner who stays clear-headed when money or deals get tight",
-        "a founder whose confidence comes from who I am more than how the month went",
-        "becoming an owner who leads with courage when the stakes are high",
+        "an owner who keeps a clear head when money gets tight",
+        "a founder whose confidence doesn't ride on this month's numbers",
+        "becoming an owner who makes the hard call when the stakes are high",
       ],
     },
   },
@@ -164,7 +164,7 @@ export const FORGE_LINES: ForgeLine[] = [
 
 /**
  * Practices that REINFORCE a FORGE identity. These are habits and actions, so they live in
- * Discipline by Design (the Blueprint and the guided session's "My road" step), never in FORGE.
+ * Discipline by Design (the blueprint and the guided session's "My road" step), never in FORGE.
  * Build-team draft, for author review.
  */
 export const PRACTICE_STARTERS: Record<PillarKey, Record<PathwayKey, string[]>> = {

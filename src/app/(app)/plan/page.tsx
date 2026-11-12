@@ -12,7 +12,7 @@ import { FORGE_IDENTITY_TITLE, FORGE_IDENTITY_INTRO } from "@/content/forgeIdent
 import { ForgeLinesFields } from "@/components/ForgeLinesFields";
 import type { PathwayKey } from "@/content/program";
 
-export const metadata = { title: "FORGE Plan" };
+export const metadata = { title: "FORGE plan" };
 
 export default async function PlanPage() {
   const u = await requireUser("PARTICIPANT");
@@ -26,7 +26,7 @@ export default async function PlanPage() {
 
   return (
     <>
-      <PageHeader title="Your FORGE Plan" />
+      <PageHeader title="Your FORGE plan" />
       {pack.actionPlanIntro && (
         <details className="mb-5 text-sm">
           <summary className="cursor-pointer text-navy">From the workbook, Section Six</summary>
@@ -41,7 +41,7 @@ export default async function PlanPage() {
             <span className="chip">Level {LEVELS[identity.level as IdentityLevel].n} · {LEVELS[identity.level as IdentityLevel].name}</span>
           </div>
           <p className="mt-2 font-serif text-lg leading-relaxed">{identity.becoming}</p>
-          <p className="mt-1 text-xs text-ink-mute">Tap to change it in Identity Shift.</p>
+          <p className="mt-1 text-xs text-ink-mute">Tap to change it in identity shift.</p>
         </Link>
       ) : (
         <Link href="/identity" className="card block border-navy/40 ring-1 ring-navy/10 hover:border-navy">
@@ -68,7 +68,7 @@ export default async function PlanPage() {
       <Link href="/blueprint#one-move" className="card block mt-5 hover:border-navy/40">
         <p className="eyebrow">Next: Discipline by Design</p>
         <h2 className="h3 mt-1">Turn your identity into practice</h2>
-        <p className="text-sm muted mt-1">Your one move each week, your routines and your people are in your Blueprint.</p>
+        <p className="text-sm muted mt-1">Your one move each week, your routines and your people are in your blueprint.</p>
       </Link>
     </>
   );

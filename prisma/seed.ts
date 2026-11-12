@@ -82,7 +82,7 @@ async function main() {
     { userId: dana.id, area: "LEADERSHIP", title: "Team commitments board: owner, date, follow-up", cadence: "WEEKLY", when: "Tuesday stand-up" },
     { userId: dana.id, area: "REVIEW", title: "Quarterly destination check", cadence: "QUARTERLY" },
   ] });
-  const r1 = await db.relationship.create({ data: { ownerId: dana.id, name: "Keisha Grant", role: "ACCOUNTABILITY_PARTNER", purpose: "Checks my pause practice and my FORGE Statement", cadenceDays: 14, nextCheckIn: day(4) } });
+  const r1 = await db.relationship.create({ data: { ownerId: dana.id, name: "Keisha Grant", role: "ACCOUNTABILITY_PARTNER", purpose: "Checks my pause practice and my FORGE statement", cadenceDays: 14, nextCheckIn: day(4) } });
   await db.relationship.create({ data: { ownerId: dana.id, name: "Ruth Alvarez", role: "MENTOR", purpose: "Former VP. Tells me the truth about the road ahead", cadenceDays: 30, nextCheckIn: day(-3) } });
   await db.relationship.create({ data: { ownerId: dana.id, name: "Reggie Shaw", role: "DIRECT_REPORT", purpose: "Developing him into a team lead", cadenceDays: 7, nextCheckIn: day(2) } });
   await db.relationship.create({ data: { ownerId: dana.id, name: "Thursday leaders circle", role: "GROUP", purpose: "Peer group of new managers", cadenceDays: 7, nextCheckIn: day(1) } });

@@ -22,7 +22,7 @@ test("coach sees only the scopes the participant granted", async () => {
   const v = await getCoachView(coach, dana.id);
   assert.deepEqual(new Set(v.scopes), new Set(["GOALS", "PRACTICE", "REFLECTIONS", "NETWORK", "EQI"]));
   assert.equal(v.assessment, null, "Dana did not share FORGE scores");
-  assert.ok(v.profile?.forgeStatement, "goals scope includes FORGE Statement");
+  assert.ok(v.profile?.forgeStatement, "goals scope includes FORGE statement");
 });
 
 test("reflection text needs the scope AND the entry marked shared", async () => {

@@ -1,4 +1,4 @@
-/** Identity Shift: tone selection, what the AI receives, and what a coach can see. Needs the seeded demo database. */
+/** Identity shift: tone selection, what the AI receives, and what a coach can see. Needs the seeded demo database. */
 import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
 import { PrismaClient } from "@prisma/client";

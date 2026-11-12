@@ -28,7 +28,7 @@ export async function sendMessage(_: ChatState, fd: FormData): Promise<ChatState
   const { id, content } = parse(z.object({ id: z.string(), content: z.string().trim().min(1).max(6000) }), fd);
   const convo = await db.aiConversation.findFirst({ where: { id, userId: u.id }, include: { messages: { orderBy: { createdAt: "asc" } } } });
   if (!convo) return { error: "Conversation not found." };
-  if (!aiAvailable()) return { error: "The AI Companion is not configured on this server (no ANTHROPIC_API_KEY)." };
+  if (!aiAvailable()) return { error: "The AI companion is not configured on this server (no ANTHROPIC_API_KEY)." };
 
   await db.aiMessage.create({ data: { conversationId: id, role: "user", content } });
   const history = [...convo.messages.map((m) => ({ role: m.role as "user" | "assistant", content: m.content })), { role: "user" as const, content }];
@@ -70,9 +70,9 @@ export type DraftKind = "destination" | "lineO" | "why" | "lineG" | "lineE" | "f
 export async function draftWithAI(kind: DraftKind): Promise<{ text: string } | { error: string }> {
   const u = await requireUser("PARTICIPANT");
   if (!["destination", "lineO", "why", "lineG", "lineE", "forgeStatement"].includes(kind)) return { error: "Unknown field." };
-  if (!aiAvailable()) return { error: "The AI Companion is not turned on for this site yet." };
+  if (!aiAvailable()) return { error: "The AI companion is not turned on for this site yet." };
   const profile = await db.profile.findUnique({ where: { userId: u.id } });
-  if (profile && !profile.aiEnabled) return { error: "You turned the AI Companion off in Settings." };
+  if (profile && !profile.aiEnabled) return { error: "You turned the AI companion off in Settings." };
   try {
     const text = await draftField(u.id, kind);
     return text ? { text } : { error: "No draft this time. Try writing a few words first." };
@@ -89,9 +89,9 @@ const LINE_FIELDS = ["destination", "lineO", "why", "lineG", "lineE"] as const;
 export async function coachLine(field: string, written: string): Promise<CoachReply | { error: string }> {
   const u = await requireUser("PARTICIPANT");
   if (!(LINE_FIELDS as readonly string[]).includes(field)) return { error: "Unknown field." };
-  if (!aiAvailable()) return { error: "The AI Companion is not turned on for this site yet." };
+  if (!aiAvailable()) return { error: "The AI companion is not turned on for this site yet." };
   const profile = await db.profile.findUnique({ where: { userId: u.id } });
-  if (profile && !profile.aiEnabled) return { error: "You turned the AI Companion off in Settings." };
+  if (profile && !profile.aiEnabled) return { error: "You turned the AI companion off in Settings." };
   try {
     const r = await coachIdentityLine(u.id, field as (typeof LINE_FIELDS)[number], String(written ?? "").slice(0, 1500));
     return r ?? { error: "No answer this time. Try again in a moment." };

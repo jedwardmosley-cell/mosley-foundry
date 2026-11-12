@@ -66,7 +66,7 @@ export async function removeIdentity() {
 }
 
 /**
- * Adds one identity practice to the Blueprint from the participant's own words.
+ * Adds one identity practice to the blueprint from the participant's own words.
  * The participant can change or remove it like any other commitment.
  */
 export async function addIdentityPractice(fd: FormData) {
@@ -84,7 +84,7 @@ export async function addIdentityPractice(fd: FormData) {
     : a.from === "standards" ? "Read my standards"
     : "Review my week against my standards";
   if (!title) redirect("/identity");
-  const detail = "Identity Shift";
+  const detail = "Identity shift";
   const exists = await db.commitment.findFirst({ where: { userId: u.id, active: true, title, detail } });
   if (!exists) await db.commitment.create({ data: { userId: u.id, area: a.area, title, detail, cadence: a.cadence } });
   revalidatePath("/blueprint");

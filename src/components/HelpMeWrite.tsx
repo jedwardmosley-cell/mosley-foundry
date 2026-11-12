@@ -2,7 +2,7 @@
 import { useRef, useState, useTransition } from "react";
 import { draftWithAI, type DraftKind } from "@/app/actions/ai";
 
-/** Asks the AI Companion for a first draft from the participant's own records. Never saves on its own. */
+/** Asks the AI companion for a first draft from the participant's own records. Never saves on its own. */
 export function HelpMeWrite({ kind, target, strip = "" }: { kind: DraftKind; target: string; strip?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
   const [pending, start] = useTransition();

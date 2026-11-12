@@ -5,15 +5,15 @@ import { fmt } from "@/lib/dates";
 import { PageHeader, Card, Field } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 
-export const metadata = { title: "Private Journal" };
+export const metadata = { title: "Private journal" };
 
 export default async function JournalPage() {
   const u = await requireUser("PARTICIPANT");
   const entries = await db.journalEntry.findMany({ where: { userId: u.id }, orderBy: { createdAt: "desc" } });
   return (
     <>
-      <PageHeader eyebrow="Private to you" title="Private Journal">
-        Nothing here can be shared. Coaches, administrators and the AI Companion have no access to it.
+      <PageHeader eyebrow="Private to you" title="Private journal">
+        Nothing here can be shared. Coaches, administrators and the AI companion have no access to it.
       </PageHeader>
       <Card>
         <form action={addJournal} className="space-y-3">

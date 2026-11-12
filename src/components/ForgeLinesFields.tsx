@@ -9,7 +9,7 @@ import { IdentityCoach } from "./IdentityCoach";
 
 type Saved = Partial<Record<LineField | "forgeStatement", string>> | null | undefined;
 
-/** The five FORGE identity statements and the FORGE Statement. Used on the FORGE Plan and in the guided first session. */
+/** The five FORGE identity statements and the FORGE statement. Used on the FORGE plan and in the guided first session. */
 export function ForgeLinesFields({ profile, pathway, claim, ai, statementHint }: { profile: Saved; pathway: PathwayKey; claim: string; ai: boolean; statementHint: string }) {
   return (
     <>
@@ -28,7 +28,7 @@ export function ForgeLinesFields({ profile, pathway, claim, ai, statementHint }:
         );
       })}
       <div className="border-t border-line pt-5">
-        <label htmlFor="forgeStatement" className="label">FORGE Statement</label>
+        <label htmlFor="forgeStatement" className="label">FORGE statement</label>
         {statementHint && (
           <details className="mb-2 text-sm">
             <summary className="cursor-pointer text-navy">What to write</summary>

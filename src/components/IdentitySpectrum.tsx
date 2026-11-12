@@ -21,7 +21,7 @@ export function IdentitySpectrum({ initial, firstExample, persona }: { initial?:
     <div>
       <div className="relative pt-2">
         <div aria-hidden className="absolute left-[16.6%] right-[16.6%] top-[22px] h-1.5 rounded-full" style={{ background: `linear-gradient(90deg, ${LEVELS.CORE.color}, ${LEVELS.ROLE.color}, ${LEVELS.REINVENT.color})` }} />
-        <div role="radiogroup" aria-label="Identity Shift Spectrum" className="relative grid grid-cols-3">
+        <div role="radiogroup" aria-label="Identity shift spectrum" className="relative grid grid-cols-3">
           {IDENTITY_LEVELS.map((k) => {
             const x = LEVELS[k];
             const on = level === k;

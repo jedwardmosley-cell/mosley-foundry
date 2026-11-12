@@ -8,12 +8,12 @@ import type { PillarKey } from "./types";
  * is shown in the app with a "Draft options" label until the author approves it.
  * To approve a list, change its `status` to "approved". To edit, change the text.
  *
- * Lists marked `basis: "ch10"` follow examples named in Chapter 10's Design Inventory;
+ * Lists marked `basis: "ch10"` follow examples named in Chapter 10's design inventory;
  * `basis: "workbook"` follow the workbook's lowest-pillar guidance in paraphrase.
  */
 export type OptionList = { status: "draft" | "approved"; basis?: "ch10" | "workbook"; options: string[] };
 
-/** One move this week, per pillar (FORGE Plan and segment goals). */
+/** One move this week, per pillar (FORGE plan and segment goals). */
 export const ONE_MOVE: Record<PillarKey, OptionList> = {
   F: { status: "draft", basis: "workbook", options: [
     "Write my destination in one sentence and read it every morning",
@@ -81,25 +81,25 @@ export const CHECKIN_TAGS: OptionList = { status: "draft", options: [
   "In a meeting", "One-on-one", "With my team", "With a client or customer", "At home", "On my own",
 ] };
 
-/** Quick picks for each Blueprint area. */
+/** Quick picks for each blueprint area. */
 export const BLUEPRINT_PICKS: Record<string, OptionList> = {
-  ROUTINES: { status: "draft", basis: "ch10", options: ["Fifteen minutes before the day starts", "Reading", "Journaling", "Prayer or quiet reflection", "Moving my body", "Reading my FORGE Statement"] },
+  ROUTINES: { status: "draft", basis: "ch10", options: ["Fifteen minutes before the day starts", "Reading", "Journaling", "Prayer or quiet reflection", "Moving my body", "Reading my FORGE statement"] },
   WEEKLY: { status: "draft", basis: "ch10", options: ["Plan the week ahead", "Look back: did I do what I said?", "Check my three signals"] },
-  ACCOUNTABILITY: { status: "draft", options: ["Share my FORGE Statement with my partner", "Every-other-week check-in call", "Text my partner my one move each Monday"] },
+  ACCOUNTABILITY: { status: "draft", options: ["Share my FORGE statement with my partner", "Every-other-week check-in call", "Text my partner my one move each Monday"] },
   MENTORING: { status: "draft", basis: "ch10", options: ["Monthly call with my mentor", "Regular session with my coach", "Bring one crossroads decision to my mentor"] },
   MENTEES: { status: "draft", basis: "ch10", options: ["Weekly time with someone I am developing", "Teach one thing I am practicing", "Name the potential I see in someone, out loud"] },
   GROUPS: { status: "draft", basis: "ch10", options: ["Weekly peer group", "Mastermind", "A class or cohort", "Community of practice"] },
   RELATIONSHIPS: { status: "draft", options: ["Reach out to one person in my circle each week", "Coffee conversation, nothing to ask for", "Thank-you note to someone who helped me"] },
   LEARNING: { status: "draft", basis: "ch10", options: ["A book I am working through right now", "A course or certification", "A podcast worth becoming like", "Audit my feed"] },
   LEADERSHIP: { status: "draft", options: ["Every commitment gets an owner, a date, and a follow-up", "Follow up on what my team said they would do", "Delegate one task I am still doing myself"] },
-  REVIEW: { status: "draft", options: ["Quarterly destination check", "Monthly look at my Blueprint", "Re-take the FORGE assessment every 90 days"] },
+  REVIEW: { status: "draft", options: ["Quarterly destination check", "Monthly look at my blueprint", "Re-take the FORGE assessment every 90 days"] },
 };
 
 /** Purpose quick picks per relationship role. */
 export const RELATIONSHIP_PURPOSE: Record<string, OptionList> = {
   MENTOR: { status: "draft", basis: "ch10", options: ["Perspective from further up the road", "Tells me the truth at a crossroads"] },
   COACH: { status: "draft", basis: "ch10", options: ["Watches my blind spots", "Checks that I do what I said I would do"] },
-  ACCOUNTABILITY_PARTNER: { status: "draft", options: ["Checks on my FORGE Statement", "Checks on my one move each week", "Won't let me manage around my blind spots"] },
+  ACCOUNTABILITY_PARTNER: { status: "draft", options: ["Checks on my FORGE statement", "Checks on my one move each week", "Won't let me manage around my blind spots"] },
   MENTEE: { status: "draft", basis: "ch10", options: ["Someone I am pouring into", "Developing them for a bigger role"] },
   GROUP: { status: "draft", basis: "ch10", options: ["Peers pointed toward growth", "Study and accountability"] },
   DIRECT_REPORT: { status: "draft", options: ["Developing them into a leader", "Weekly one-on-one", "Clear expectations and follow-up"] },
