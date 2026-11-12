@@ -60,6 +60,7 @@ const submitAndWait = async (page: Page, selector: string) => {
 
   let assessmentUrl = "";
   await check("2. complete a FORGE assessment", async () => {
+    await page.waitForSelector('nav[aria-label="Your journey"] >> text=Step 1 of 5');
     const scores: Record<string, number> = { F: 4, O: 3, R: 4, G: 3, E: 2 };
     for (const [k, v] of Object.entries(scores)) await page.locator(`input[name="${k}"][value="${v}"]`).check({ force: true });
     await page.locator("fieldset", { hasText: "Emotionally Anchored" }).locator("summary", { hasText: "Add a reflection" }).click();
@@ -121,6 +122,11 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.fill('input[name="focus"]', "Pause before I answer a challenge");
     await Promise.all([page.waitForURL("**/cycle"), page.click('button:has-text("Start the cycle")')]);
     await page.waitForSelector("text=Day 1 of 30");
+    // the journey bar follows: steps 2 to 5 done, Who I am still open, and the 30 days under way
+    await page.goto(`${BASE}/dashboard`);
+    const bar = page.locator('nav[aria-label="Your journey"]');
+    await bar.locator("text=Day 1 of 30").waitFor();
+    assert.equal(await bar.locator("text=(done)").count(), 4, "four steps done before Identity Shift");
   });
 
   await check("7. record a daily reflection", async () => {
@@ -184,7 +190,7 @@ const submitAndWait = async (page: Page, selector: string) => {
 
   await check("7e. Identity Shift: explore all three levels, choose one, change it later, history kept", async () => {
     await page.goto(`${BASE}/dashboard`);
-    assert.equal(await page.locator("text=Who I am").count(), 0, "no identity card until the person opts in");
+    assert.equal(await page.locator("section", { hasText: "Who I am" }).count(), 0, "no identity card until the person opts in");
     await page.goto(`${BASE}/identity`);
     await page.fill('textarea[name="claim"]', "someone who follows through on what I say.");
     await page.fill('input[name="behavior"]', "I close every open commitment by Friday noon.");

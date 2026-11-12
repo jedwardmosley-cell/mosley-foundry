@@ -4,26 +4,22 @@ import type { CurrentUser } from "@/lib/auth";
 import { NavLink } from "./NavLink";
 import { signOut } from "@/app/actions/auth";
 
-const PARTICIPANT_NAV = [
+// Client menu, in journey order. The phone tab bar keeps five tabs; everything else is under More.
+const PARTICIPANT_NAV: NavItem[] = [
   { href: "/dashboard", label: "Today", mobile: true },
-  { href: "/cycle", label: "30-Day Cycle", mobile: true },
-  { href: "/plan", label: "FORGE Plan", mobile: true },
-  { href: "/network", label: "People", mobile: true },
+  { href: "/identity", label: "1. Who I am", group: "My journey" },
+  { href: "/plan", label: "2. FORGE lines", tab: "Plan", mobile: true, group: "My journey" },
+  { href: "/assessment", label: "3. Where I am", group: "My journey" },
+  { href: "/blueprint", label: "4. My road", group: "My journey" },
+  { href: "/cycle", label: "5. 30 days", group: "My journey" },
+  { href: "/reflect", label: "Weekly reflection", group: "My journey" },
+  { href: "/network", label: "People", mobile: true, group: "Support" },
+  { href: "/coaching", label: "Coaching", tab: "Coach", mobile: true, group: "Support" },
+  { href: "/companion", label: "AI Companion", group: "Support" },
   { href: "/more", label: "More", mobile: true, desktop: false },
-  { href: "/assessment", label: "FORGE Assessment" },
-  { href: "/blueprint", label: "Blueprint" },
-  { href: "/identity", label: "Identity Shift" },
-  { href: "/reflect", label: "Weekly Reflection" },
-  { href: "/pathway", label: "My Pathway" },
-  { href: "/library", label: "Road Library" },
-  { href: "/companion", label: "AI Companion" },
-  { href: "/coaching", label: "Coaching" },
-  { href: "/journal", label: "Private Journal" },
-  { href: "/history", label: "History & Export" },
-  { href: "/sharing", label: "Sharing" },
-  { href: "/settings", label: "Settings" },
-  { href: "/guide", label: "Guide" },
+  { href: "/more", label: "More", group: "Support" },
 ];
+type NavItem = { href: string; label: string; tab?: string; mobile?: boolean; desktop?: boolean; group?: string };
 const GUIDE_TAB = { href: "/guide", label: "Guide", mobile: true };
 
 const COACH_NAV = [
@@ -35,15 +31,18 @@ const ADMIN_NAV = [
   { href: "/admin/reports", label: "Reports", mobile: true },
 ];
 
-export function Shell({ user, children }: { user: CurrentUser; children: ReactNode }) {
+export function Shell({ user, children, journey }: { user: CurrentUser; children: ReactNode; journey?: ReactNode }) {
   const nav = user.role === "COACH" ? [...COACH_NAV, GUIDE_TAB] : user.role === "ADMIN" ? (user.alsoCoach ? [...ADMIN_NAV, ...COACH_NAV, GUIDE_TAB] : [...ADMIN_NAV, GUIDE_TAB]) : PARTICIPANT_NAV;
   return (
     <div className="min-h-screen md:flex">
       <aside className="hidden md:flex md:w-64 md:flex-col md:border-r md:border-line md:bg-card md:px-5 md:py-6 md:sticky md:top-0 md:h-screen">
         <Brand />
         <nav className="mt-8 flex-1 space-y-0.5 overflow-y-auto" aria-label="Main">
-          {nav.filter((n) => (n as { desktop?: boolean }).desktop !== false).map((n) => (
-            <NavLink key={n.href} href={n.href} variant="side">{n.label}</NavLink>
+          {(nav as NavItem[]).filter((n) => n.desktop !== false).map((n, i, all) => (
+            <div key={n.href + n.label}>
+              {n.group && n.group !== all[i - 1]?.group && <p className="mt-5 mb-1 px-3 text-[11px] uppercase tracking-[0.12em] text-ink-mute">{n.group}</p>}
+              <NavLink href={n.href} variant="side">{n.label}</NavLink>
+            </div>
           ))}
         </nav>
         <UserBox user={user} />
@@ -59,12 +58,12 @@ export function Shell({ user, children }: { user: CurrentUser; children: ReactNo
             Demo account. All people and data shown are fictional.
           </div>
         )}
-        <main className="mx-auto w-full max-w-4xl px-4 sm:px-6 py-6 sm:py-10 pb-28 md:pb-12">{children}</main>
+        <main className="mx-auto w-full max-w-4xl px-4 sm:px-6 py-6 sm:py-10 pb-28 md:pb-12">{journey}{children}</main>
       </div>
 
       <nav aria-label="Primary" className="md:hidden fixed bottom-0 inset-x-0 z-30 border-t border-line bg-card/95 backdrop-blur grid" style={{ gridTemplateColumns: `repeat(${nav.filter((n) => n.mobile).length}, minmax(0, 1fr))` }}>
-        {nav.filter((n) => n.mobile).map((n) => (
-          <NavLink key={n.href} href={n.href} variant="tab">{n.label.replace("30-Day ", "").replace("FORGE ", "")}</NavLink>
+        {(nav as NavItem[]).filter((n) => n.mobile).map((n) => (
+          <NavLink key={n.href} href={n.href} variant="tab">{n.tab ?? n.label}</NavLink>
         ))}
       </nav>
     </div>

@@ -32,7 +32,7 @@ export const FORGE_LINES: ForgeLine[] = [
   {
     pillar: "F",
     field: "destination",
-    label: "Who I am",
+    label: "My destination",
     question: "Where am I going? Picture yourself there, as true today.",
     prefix: "I am",
     hint: "This is your destination, claimed in the present tense.",
