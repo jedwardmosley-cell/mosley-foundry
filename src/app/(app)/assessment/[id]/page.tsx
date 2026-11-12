@@ -11,10 +11,10 @@ import { Submit } from "@/components/Submit";
 
 export const metadata = { title: "Your FORGE Profile" };
 
-export default async function AssessmentResult({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ focus?: string }> }) {
+export default async function AssessmentResult({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ focus?: string; next?: string }> }) {
   const u = await requireUser("PARTICIPANT");
   const { id } = await params;
-  const { focus } = await searchParams;
+  const { focus, next } = await searchParams;
   const a = await db.assessment.findFirst({ where: { id, userId: u.id } });
   if (!a) notFound();
   const profile = await db.profile.findUnique({ where: { userId: u.id } });
@@ -85,6 +85,7 @@ export default async function AssessmentResult({ params, searchParams }: { param
         <p className="mt-4 text-[15px] leading-relaxed">{r.guidance?.text}</p>
         <form action={setPriority} className="mt-5 flex flex-wrap items-center gap-3">
           <input type="hidden" name="pillar" value={fp.key} />
+          {next === "start" && <input type="hidden" name="next" value="/start" />}
           <Submit>{profile?.priorityPillar === fp.key ? "This is my priority" : `Make ${fp.name} my development priority`}</Submit>
           <span className="text-sm muted">One pillar with real attention produces more than five with divided attention.</span>
         </form>

@@ -13,18 +13,22 @@ import { SHARE_SCOPES } from "@/lib/access";
 import { CHECKIN_TAGS } from "@/content/options";
 
 const participant = () => requireUser("PARTICIPANT");
+/** True when the form was sent from the guided first session, which takes the client on to the next step. */
+const fromStart = (fd: FormData) => fd.get("next") === "/start";
 
 // ---------- Onboarding and profile ----------
 
 export async function choosePathway(fd: FormData) {
   const u = await participant();
   const { pathway } = parse(z.object({ pathway: z.enum(Object.keys(PATHWAYS) as [keyof typeof PATHWAYS]) }), fd);
+  const before = await db.profile.findUnique({ where: { userId: u.id }, select: { onboardedAt: true } });
   await db.profile.upsert({
     where: { userId: u.id },
     create: { userId: u.id, pathway, onboardedAt: new Date() },
     update: { pathway, onboardedAt: new Date() },
   });
-  redirect("/assessment");
+  // New clients go into the guided first session. Someone changing pathway later goes back to the assessment.
+  redirect(before?.onboardedAt ? "/assessment" : "/start");
 }
 
 export async function saveStatement(fd: FormData) {
@@ -35,6 +39,7 @@ export async function saveStatement(fd: FormData) {
   await db.profile.update({ where: { userId: u.id }, data: d });
   revalidatePath("/plan");
   revalidatePath("/dashboard");
+  if (fromStart(fd)) redirect("/start?step=3");
 }
 
 // ---------- FORGE assessment ----------
@@ -55,7 +60,7 @@ export async function saveAssessment(fd: FormData) {
       reflections: JSON.stringify({ F: d.reflF, O: d.reflO, R: d.reflR, G: d.reflG, E: d.reflE }),
     },
   });
-  redirect(`/assessment/${a.id}`);
+  redirect(`/assessment/${a.id}${fromStart(fd) ? "?next=start" : ""}`);
 }
 
 const reviseSchema = z.object({
@@ -87,7 +92,7 @@ export async function setPriority(fd: FormData) {
   const existing = await db.developmentGoal.findFirst({ where: { userId: u.id, pillar, status: "ACTIVE" } });
   if (existing) await db.developmentGoal.update({ where: { id: existing.id }, data: { isPriority: true } });
   else await db.developmentGoal.create({ data: { userId: u.id, pillar, isPriority: true } });
-  redirect("/plan");
+  redirect(fromStart(fd) ? "/start?step=4" : "/plan");
 }
 
 // ---------- FORGE Action Plan (development goals) ----------
@@ -135,6 +140,7 @@ export async function addCommitment(fd: FormData) {
     data: { ...d, userId: u.id, startsOn: d.startsOn ? new Date(d.startsOn + "T12:00:00") : null },
   });
   revalidatePath("/blueprint");
+  if (fromStart(fd)) redirect("/start?step=4");
 }
 
 export async function removeCommitment(fd: FormData) {
@@ -166,6 +172,7 @@ export async function addRelationship(fd: FormData) {
     },
   });
   revalidatePath("/network");
+  if (fromStart(fd)) redirect("/start?step=4");
 }
 
 export async function logRelationshipCheckIn(fd: FormData) {

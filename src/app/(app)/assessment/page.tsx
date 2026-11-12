@@ -11,7 +11,8 @@ import { DictationHint } from "@/components/Picks";
 
 export const metadata = { title: "FORGE Self-Assessment" };
 
-export default async function AssessmentPage() {
+export default async function AssessmentPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
+  const { next } = await searchParams;
   const u = await requireUser("PARTICIPANT");
   const { pack, entrepreneur } = await getContent();
   const profile = await db.profile.findUnique({ where: { userId: u.id } });
@@ -52,6 +53,7 @@ export default async function AssessmentPage() {
 
       <form action={saveAssessment} className="space-y-6">
         <input type="hidden" name="instrument" value={instrument} />
+        {next === "start" && <input type="hidden" name="next" value="/start" />}
         {pack.pillars.map((p) => {
           const e = useEntre ? entrepreneur!.pillars[p.key] : null;
           const brief = e?.brief ?? p.brief;
