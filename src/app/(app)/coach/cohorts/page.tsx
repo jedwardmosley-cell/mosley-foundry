@@ -42,7 +42,7 @@ async function CohortMembers({ cohortId, assigned }: { cohortId: string; assigne
   return (
     <div className="mt-4 flex flex-wrap gap-2">
       {members.map((m) => assigned.has(m.user.id)
-        ? <Link key={m.id} href={`/coach/${m.user.id}`} className="chip !text-navy">{m.user.name}</Link>
+        ? <Link key={m.id} href={`/coach/${m.user.id}`} className="chip !text-link">{m.user.name}</Link>
         : <span key={m.id} className="chip">{m.user.name}</span>)}
     </div>
   );

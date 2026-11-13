@@ -16,7 +16,7 @@ export function AddClientForm() {
         <div className="rounded-xl border border-brass bg-brass-soft/40 p-3 text-[15px]">
           <p>Send these sign-in details to your client privately:</p>
           <p className="mt-1">Email: <strong>{s.temp.email}</strong></p>
-          <p>Temporary password: <code className="bg-white px-1.5 py-0.5 rounded">{s.temp.password}</code></p>
+          <p>Temporary password: <code className="bg-surface px-1.5 py-0.5 rounded">{s.temp.password}</code></p>
           <p className="mt-1 text-xs text-ink-mute">This password is shown once. Copy it before you leave this page.</p>
         </div>
       )}

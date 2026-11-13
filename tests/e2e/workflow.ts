@@ -210,7 +210,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal((await db.identityProfile.findUniqueOrThrow({ where: { userId: me.id } })).level, "CORE");
     await page.goto(`${BASE}/dashboard`);
     // the I am statement leads the Today card
-    await page.waitForSelector("main section >> text=I am someone who follows through on what I say.");
+    await page.waitForSelector("main a:has-text(\"Who I am\") >> text=I am someone who follows through on what I say.");
     // change to Level 3 with an optional performance identity
     await page.goto(`${BASE}/identity`);
     await page.locator("label", { hasText: "Identity reinvention" }).click();

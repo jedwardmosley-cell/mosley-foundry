@@ -107,7 +107,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
               <p className="text-sm muted mb-3">No level ranks above another.</p>
               <div className="space-y-2">
                 {IDENTITY_LEVELS.map((k) => (
-                  <label key={k} className="flex gap-3 rounded-xl border border-line bg-white p-3.5 cursor-pointer has-[:checked]:border-navy has-[:checked]:ring-1 has-[:checked]:ring-navy/20">
+                  <label key={k} className="flex gap-3 rounded-xl border border-line bg-surface p-3.5 cursor-pointer has-[:checked]:border-navy has-[:checked]:ring-1 has-[:checked]:ring-navy/20">
                     <input type="radio" name="level" value={k} required className="mt-1" />
                     <span>
                       <span className="font-medium">Level {LEVELS[k].n} · {LEVELS[k].name}</span>

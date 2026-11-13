@@ -13,7 +13,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <section className="flex items-center justify-center px-4 py-12">
           <div className="w-full max-w-sm">
             <div className="md:hidden mb-10">
-              <p className="font-serif text-3xl text-navy-deep">Both Hands on the Wheel</p>
+              <p className="font-serif text-3xl text-heading">Both Hands on the Wheel</p>
               <p className="mt-2 muted">Lead yourself. Develop others. Build a life by design.</p>
             </div>
             {children}

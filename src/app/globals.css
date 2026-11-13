@@ -3,29 +3,70 @@
 @tailwind utilities;
 
 :root {
+  color-scheme: light dark;
+  /* Light: the original palette. */
+  --paper: 246 242 234;  --card: 255 253 248;  --surface: 255 255 255;  --line: 228 221 208;
+  --ink: 31 39 51;  --ink-soft: 74 84 99;  --ink-mute: 122 130 145;
+  --navy: 30 47 74;  --navy-deep: 21 34 58;  --heading: 21 34 58;  --link: 30 47 74;
+  --brass: 167 123 59;  --brass-soft: 239 226 204;
+  --sage: 94 122 100;  --sage-soft: 227 235 227;
+  --clay: 168 92 69;  --clay-soft: 243 226 219;
+  --glow-a: 167 123 59;  --glow-b: 30 47 74;
   --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
   --font-sans: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
+/* Dark: the same palette, deepened. Follows the phone or computer setting. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: 13 17 24;  --card: 22 28 38;  --surface: 28 35 47;  --line: 44 53 68;
+    --ink: 236 231 222;  --ink-soft: 182 188 200;  --ink-mute: 136 145 160;
+    --navy: 52 82 124;  --navy-deep: 27 42 66;  --heading: 240 235 226;  --link: 170 192 224;
+    --brass: 214 172 104;  --brass-soft: 58 47 30;
+    --sage: 141 180 151;  --sage-soft: 30 44 36;
+    --clay: 226 145 122;  --clay-soft: 58 35 29;
+    --glow-a: 214 172 104;  --glow-b: 70 110 170;
+  }
+}
+
 html { -webkit-text-size-adjust: 100%; }
-body { @apply bg-paper text-ink font-sans antialiased; }
+body {
+  @apply bg-paper text-ink font-sans antialiased;
+  background-image: radial-gradient(80% 40% at 50% 0%, rgb(var(--glow-b) / 0.10), transparent 70%);
+  background-attachment: fixed;
+}
 
 @layer components {
   .card { @apply bg-card border border-line rounded-2xl p-5 sm:p-6; }
   .eyebrow { @apply text-[11px] uppercase tracking-[0.14em] text-ink-mute font-semibold; }
-  .h1 { @apply font-serif text-[28px] sm:text-[34px] leading-tight text-navy-deep; }
-  .h2 { @apply font-serif text-xl sm:text-2xl leading-snug text-navy-deep; }
+  .h1 { @apply font-serif text-[28px] sm:text-[34px] leading-tight text-heading; }
+  .h2 { @apply font-serif text-xl sm:text-2xl leading-snug text-heading; }
   .h3 { @apply font-semibold text-ink text-base; }
   .muted { @apply text-ink-soft; }
   .label { @apply block text-sm font-medium text-ink mb-1.5; }
-  .input { @apply w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-[15px] text-ink placeholder:text-ink-mute focus:outline-none focus:ring-2 focus:ring-navy/30 focus:border-navy; }
+  .input { @apply w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-[15px] text-ink placeholder:text-ink-mute focus:outline-none focus:ring-2 focus:ring-navy/30 focus:border-navy; }
   .textarea { @apply input min-h-[96px] leading-relaxed; }
   .btn { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-[15px] font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-navy/40 disabled:opacity-50; }
   .btn-primary { @apply btn bg-navy text-white hover:bg-navy-deep; }
-  .btn-quiet { @apply btn border border-line bg-white text-ink hover:bg-paper; }
-  .btn-link { @apply text-navy underline underline-offset-4 decoration-brass/60 hover:decoration-brass; }
-  .chip { @apply inline-flex items-center rounded-full border border-line bg-white px-2.5 py-0.5 text-xs font-medium text-ink-soft; }
+  .btn-quiet { @apply btn border border-line bg-surface text-ink hover:bg-paper; }
+  .btn-link { @apply text-link underline underline-offset-4 decoration-brass/60 hover:decoration-brass; }
+  .chip { @apply inline-flex items-center rounded-full border border-line bg-surface px-2.5 py-0.5 text-xs font-medium text-ink-soft; }
   .quote { @apply font-serif italic text-ink-soft border-l-2 border-brass pl-4; }
   .source { @apply text-xs text-ink-mute; }
+  /* The soft, glowing style: light comes from the brand colors instead of hard borders. */
+  .glow {
+    background:
+      radial-gradient(120% 70% at 0% 0%, rgb(var(--glow-a) / 0.16), transparent 60%),
+      radial-gradient(110% 80% at 100% 0%, rgb(var(--glow-b) / 0.20), transparent 62%),
+      rgb(var(--card));
+    border: 1px solid rgb(var(--line) / 0.55);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 18px 40px -24px rgb(var(--glow-b) / 0.45);
+  }
+  .tile {
+    @apply rounded-[22px] p-4;
+    background: linear-gradient(180deg, rgb(var(--card)), rgb(var(--card) / 0.86));
+    border: 1px solid rgb(var(--line) / 0.5);
+    box-shadow: 0 10px 30px -22px rgb(var(--glow-b) / 0.5);
+  }
   .draft { @apply inline-flex items-center rounded-full bg-clay-soft text-clay px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide; }
 }

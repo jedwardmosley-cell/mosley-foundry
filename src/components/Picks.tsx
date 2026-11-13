@@ -21,7 +21,7 @@ export function Picks({ list, target, label = "Tap to use one, then edit if you 
     return (
       <div ref={ref} className="mt-1.5">
         <details>
-          <summary className="cursor-pointer text-sm text-navy">{folded}{list.status === "draft" && <span className="ml-2 draft !text-[10px]">Draft</span>}</summary>
+          <summary className="cursor-pointer text-sm text-link">{folded}{list.status === "draft" && <span className="ml-2 draft !text-[10px]">Draft</span>}</summary>
           {note && <p className="mt-2 text-xs text-ink-mute">{note}</p>}
           {groups && groups.map((g) => (
             <div key={g.label} className="mt-2.5">
@@ -29,7 +29,7 @@ export function Picks({ list, target, label = "Tap to use one, then edit if you 
               <div className="mt-1 flex flex-wrap gap-2">
                 {g.options.map((o) => (
                   <button key={o} type="button" onClick={() => fill(o)}
-                    className="rounded-full border border-line bg-white px-3 py-1.5 text-[13px] text-ink-soft hover:border-navy hover:text-navy active:bg-paper text-left">
+                    className="rounded-full border border-line bg-surface px-3 py-1.5 text-[13px] text-ink-soft hover:border-navy hover:text-link active:bg-paper text-left">
                     {o}
                   </button>
                 ))}
@@ -39,7 +39,7 @@ export function Picks({ list, target, label = "Tap to use one, then edit if you 
           <div className="mt-2 flex flex-wrap gap-2">
             {list.options.map((o) => (
               <button key={o} type="button" onClick={() => fill(o)}
-                className="rounded-full border border-line bg-white px-3 py-1.5 text-[13px] text-ink-soft hover:border-navy hover:text-navy active:bg-paper text-left">
+                className="rounded-full border border-line bg-surface px-3 py-1.5 text-[13px] text-ink-soft hover:border-navy hover:text-link active:bg-paper text-left">
                 {o}
               </button>
             ))}
@@ -57,7 +57,7 @@ export function Picks({ list, target, label = "Tap to use one, then edit if you 
       <div className="flex flex-wrap gap-2">
         {list.options.map((o) => (
           <button key={o} type="button" onClick={() => fill(o)}
-            className="rounded-full border border-line bg-white px-3 py-1.5 text-[13px] text-ink-soft hover:border-navy hover:text-navy active:bg-paper text-left">
+            className="rounded-full border border-line bg-surface px-3 py-1.5 text-[13px] text-ink-soft hover:border-navy hover:text-link active:bg-paper text-left">
             {o}
           </button>
         ))}
@@ -78,7 +78,7 @@ export function TagChoices({ name, list, selected = [], legend }: { name: string
         {list.options.map((o) => (
           <label key={o} className="cursor-pointer">
             <input type="checkbox" name={name} value={o} defaultChecked={selected.includes(o)} className="peer sr-only" />
-            <span className="block rounded-full border border-line bg-white px-3 py-1.5 text-[13px] text-ink-soft peer-checked:bg-navy peer-checked:text-white peer-checked:border-navy peer-focus-visible:ring-2 peer-focus-visible:ring-navy/40">
+            <span className="block rounded-full border border-line bg-surface px-3 py-1.5 text-[13px] text-ink-soft peer-checked:bg-navy peer-checked:text-white peer-checked:border-navy peer-focus-visible:ring-2 peer-focus-visible:ring-navy/40">
               {o}
             </span>
           </label>

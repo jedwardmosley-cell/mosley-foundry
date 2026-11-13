@@ -4,15 +4,19 @@ export default {
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
+      // Every color is a CSS variable (see globals.css), so the app follows the phone's light or dark setting.
       colors: {
-        paper: "#F6F2EA",
-        card: "#FFFDF8",
-        line: "#E4DDD0",
-        ink: { DEFAULT: "#1F2733", soft: "#4A5463", mute: "#7A8291" },
-        navy: { DEFAULT: "#1E2F4A", deep: "#15223A" },
-        brass: { DEFAULT: "#A77B3B", soft: "#EFE2CC" },
-        sage: { DEFAULT: "#5E7A64", soft: "#E3EBE3" },
-        clay: { DEFAULT: "#A85C45", soft: "#F3E2DB" },
+        paper: "rgb(var(--paper) / <alpha-value>)",
+        card: "rgb(var(--card) / <alpha-value>)",
+        surface: "rgb(var(--surface) / <alpha-value>)",
+        line: "rgb(var(--line) / <alpha-value>)",
+        ink: { DEFAULT: "rgb(var(--ink) / <alpha-value>)", soft: "rgb(var(--ink-soft) / <alpha-value>)", mute: "rgb(var(--ink-mute) / <alpha-value>)" },
+        navy: { DEFAULT: "rgb(var(--navy) / <alpha-value>)", deep: "rgb(var(--navy-deep) / <alpha-value>)" },
+        heading: "rgb(var(--heading) / <alpha-value>)",
+        link: "rgb(var(--link) / <alpha-value>)",
+        brass: { DEFAULT: "rgb(var(--brass) / <alpha-value>)", soft: "rgb(var(--brass-soft) / <alpha-value>)" },
+        sage: { DEFAULT: "rgb(var(--sage) / <alpha-value>)", soft: "rgb(var(--sage-soft) / <alpha-value>)" },
+        clay: { DEFAULT: "rgb(var(--clay) / <alpha-value>)", soft: "rgb(var(--clay-soft) / <alpha-value>)" },
       },
       fontFamily: {
         serif: ["var(--font-serif)", "Georgia", "serif"],

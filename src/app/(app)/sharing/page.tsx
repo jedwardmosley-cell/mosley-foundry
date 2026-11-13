@@ -32,7 +32,7 @@ export default async function SharingPage() {
                     <input type="hidden" name="scope" value={scope} />
                     <input type="hidden" name="on" value={on ? "false" : "true"} />
                     <button aria-pressed={on} aria-label={`${on ? "Stop sharing" : "Share"}: ${label}`} className={`relative h-7 w-12 rounded-full transition-colors ${on ? "bg-navy" : "bg-line"}`}>
-                      <span className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-all ${on ? "left-6" : "left-1"}`} />
+                      <span className={`absolute top-1 h-5 w-5 rounded-full bg-surface shadow transition-all ${on ? "left-6" : "left-1"}`} />
                     </button>
                   </form>
                 </li>

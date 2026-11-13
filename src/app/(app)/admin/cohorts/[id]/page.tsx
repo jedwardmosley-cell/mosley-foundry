@@ -85,7 +85,7 @@ export default async function CohortAdmin({ params }: { params: Promise<{ id: st
                         <form action={markAttendance}>
                           <input type="hidden" name="cohortId" value={cohort.id} /><input type="hidden" name="sessionId" value={s.id} />
                           <input type="hidden" name="userId" value={m.userId} /><input type="hidden" name="status" value={next} />
-                          <button aria-label={`${m.user.name}, segment ${s.segmentKey}: ${st ?? "not recorded"}. Mark ${next.toLowerCase()}`} className={`h-7 w-7 rounded-md border text-xs ${st === "PRESENT" ? "bg-navy text-white border-navy" : st === "ABSENT" ? "bg-clay-soft text-clay border-clay/30" : st === "EXCUSED" ? "bg-brass-soft border-brass/30" : "bg-white border-line"}`}>
+                          <button aria-label={`${m.user.name}, segment ${s.segmentKey}: ${st ?? "not recorded"}. Mark ${next.toLowerCase()}`} className={`h-7 w-7 rounded-md border text-xs ${st === "PRESENT" ? "bg-navy text-white border-navy" : st === "ABSENT" ? "bg-clay-soft text-clay border-clay/30" : st === "EXCUSED" ? "bg-brass-soft border-brass/30" : "bg-surface border-line"}`}>
                             {st === "PRESENT" ? "✓" : st === "ABSENT" ? "×" : st === "EXCUSED" ? "E" : ""}
                           </button>
                         </form>

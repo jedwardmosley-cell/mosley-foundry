@@ -15,7 +15,7 @@ export function ForgeLinesFields({ profile, pathway, claim, ai, statementHint }:
   return (
     <>
       <details className="rounded-xl bg-paper px-3 py-2 text-sm">
-        <summary className="cursor-pointer text-navy">Is it an identity?</summary>
+        <summary className="cursor-pointer text-link">Is it an identity?</summary>
         <ol className="mt-2 list-decimal pl-5 space-y-1 text-ink-soft">{IDENTITY_TESTS.map((t) => <li key={t}>{t}</li>)}</ol>
         <p className="mt-2 text-ink-soft">The behaviors come next, in My road and your 30 days.</p>
       </details>
@@ -37,7 +37,7 @@ export function ForgeLinesFields({ profile, pathway, claim, ai, statementHint }:
         <label htmlFor="forgeStatement" className="label">FORGE statement</label>
         {statementHint && (
           <details className="mb-2 text-sm">
-            <summary className="cursor-pointer text-navy">What to write</summary>
+            <summary className="cursor-pointer text-link">What to write</summary>
             <p className="mt-1 text-ink-soft">{statementHint}</p>
           </details>
         )}

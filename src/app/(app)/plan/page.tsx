@@ -29,7 +29,7 @@ export default async function PlanPage() {
       <PageHeader title="Your FORGE plan" />
       {pack.actionPlanIntro && (
         <details className="mb-5 text-sm">
-          <summary className="cursor-pointer text-navy">About your FORGE plan</summary>
+          <summary className="cursor-pointer text-link">About your FORGE plan</summary>
           <p className="mt-2 text-ink-soft">{pack.actionPlanIntro}</p>
         </details>
       )}

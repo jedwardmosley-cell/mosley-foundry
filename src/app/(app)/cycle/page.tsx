@@ -54,7 +54,7 @@ export default async function CyclePage() {
             const date = ymd(addDays(cycle.startDate, i));
             const c = byDate.get(date);
             const isToday = i + 1 === pos.day && !pos.finished;
-            const tone = c?.status === "DONE" ? "bg-navy text-white" : c?.status === "PARTIAL" ? "bg-brass text-white" : c?.status === "NOT_YET" ? "bg-line" : "bg-white";
+            const tone = c?.status === "DONE" ? "bg-navy text-white" : c?.status === "PARTIAL" ? "bg-brass text-white" : c?.status === "NOT_YET" ? "bg-line" : "bg-surface";
             return <span key={i} title={`Day ${i + 1}${c ? `: ${CHECKIN_STATUS[c.status as keyof typeof CHECKIN_STATUS]}` : ""}`} className={`aspect-square rounded-md border border-line text-[10px] flex items-center justify-center ${tone} ${isToday ? "ring-2 ring-brass" : ""}`}>{i + 1}</span>;
           })}
         </div>
@@ -106,7 +106,7 @@ export default async function CyclePage() {
                     ))}
                   </fieldset>
                   <details>
-                    <summary className="cursor-pointer text-sm text-navy">Write a final review <span className="text-ink-mute">(optional)</span></summary>
+                    <summary className="cursor-pointer text-sm text-link">Write a final review <span className="text-ink-mute">(optional)</span></summary>
                     <p className="mt-2 text-xs text-ink-mute">What did you practice? What evidence do you have that anything changed? What surprised you?</p>
                     <textarea name="finalReview" aria-label="Final review" className="textarea min-h-[120px] mt-2" maxLength={6000} />
                   </details>
@@ -163,7 +163,7 @@ function WeekForm({ cycleId, week, status, note }: { cycleId: string; week: numb
         ))}
       </div>
       <details open={!!note}>
-        <summary className="cursor-pointer text-sm text-navy">{WEEK_NOTE[week - 1] ?? "Notes"}</summary>
+        <summary className="cursor-pointer text-sm text-link">{WEEK_NOTE[week - 1] ?? "Notes"}</summary>
         <textarea name="note" aria-label="Week notes" defaultValue={note} className="textarea mt-2" maxLength={4000} />
       </details>
       <Submit className="btn-quiet">Save week {week}</Submit>

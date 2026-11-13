@@ -117,7 +117,7 @@ export default async function EqiPage() {
           <Field label="Priority from my debrief" hint="Your own words. For example: Impulse control in budget meetings"><input name="label" required maxLength={200} className="input" /></Field>
           <Field label="FORGE pillar this connects to"><PillarSelect /></Field>
           <details>
-            <summary className="cursor-pointer text-sm text-navy">Add what I noticed and a practice <span className="text-ink-mute">(optional)</span></summary>
+            <summary className="cursor-pointer text-sm text-link">Add what I noticed and a practice <span className="text-ink-mute">(optional)</span></summary>
             <div className="mt-3 space-y-3">
               <Field label="What I noticed"><textarea name="note" maxLength={1500} className="textarea" /></Field>
               <Field label="Practice I will try"><input name="practice" maxLength={1500} className="input" /></Field>

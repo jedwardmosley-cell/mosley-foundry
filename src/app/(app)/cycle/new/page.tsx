@@ -41,13 +41,13 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
               <Link href="/cycle/new?season=none" className="mt-1 inline-block text-xs text-ink-mute hover:text-ink">Start this one outside the season</Link>
             </div>
           ) : (
-            <label className="flex items-start gap-3 rounded-xl border border-line bg-white px-4 py-3 cursor-pointer">
+            <label className="flex items-start gap-3 rounded-xl border border-line bg-surface px-4 py-3 cursor-pointer">
               <input type="checkbox" name="season" value="new" defaultChecked={sp.season === "new" || (coaches > 0 && sp.season !== "none")} className="mt-1 h-4 w-4 accent-navy" />
               <span><span className="font-medium">Make this month 1 of a 90-day season</span><span className="block text-sm text-ink-soft">Three 30-day cycles back to back, with a review at the end.</span></span>
             </label>
           )}
           <details className="rounded-xl bg-paper px-3 py-2">
-            <summary className="cursor-pointer text-sm text-navy">Structure and start date</summary>
+            <summary className="cursor-pointer text-sm text-link">Structure and start date</summary>
             <fieldset className="mt-3">
               <legend className="sr-only">Structure</legend>
               <div className="space-y-2">
@@ -56,7 +56,7 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
                   const w = cycleWeeks(k, pack).weeks;
                   if (k === "WORKBOOK_30" && !pack.thirtyDayPlan.length) return null;
                   return (
-                    <label key={k} className="flex gap-3 rounded-xl border border-line bg-white p-3 cursor-pointer has-[:checked]:border-navy">
+                    <label key={k} className="flex gap-3 rounded-xl border border-line bg-surface p-3 cursor-pointer has-[:checked]:border-navy">
                       <input type="radio" name="template" value={k} defaultChecked={k === defaultTemplate} className="mt-1 accent-navy" />
                       <span>
                         <span className="font-medium text-[15px]">{w.map((x) => x.phase).join(" · ")}</span>

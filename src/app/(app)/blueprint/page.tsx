@@ -169,7 +169,7 @@ export default async function BlueprintPage() {
                 </ul>
               )}
                 <details className="mt-3">
-                  <summary className="cursor-pointer text-sm text-navy">Add to this area</summary>
+                  <summary className="cursor-pointer text-sm text-link">Add to this area</summary>
                   <p className="mt-2 text-sm text-ink-soft">{text ?? area.hint}</p>
                   <form action={addCommitment} className="mt-3 space-y-3">
                     <input type="hidden" name="area" value={area.key} />
@@ -189,7 +189,7 @@ export default async function BlueprintPage() {
                       <Field label="Time (optional)"><input type="time" name="whenTime" className="input" /></Field>
                     </div>
                     <details>
-                      <summary className="cursor-pointer text-sm text-navy">More details <span className="text-ink-mute">(optional)</span></summary>
+                      <summary className="cursor-pointer text-sm text-link">More details <span className="text-ink-mute">(optional)</span></summary>
                       <div className="mt-3 grid gap-3 sm:grid-cols-2">
                         <Field label="Starting"><input type="date" name="startsOn" className="input" /></Field>
                         <Field label="Detail"><input name="detail" maxLength={1500} className="input" /></Field>
@@ -218,7 +218,7 @@ export default async function BlueprintPage() {
 function FromBook({ label, children, className = "" }: { label: string; children: React.ReactNode; className?: string }) {
   return (
     <details className={`mb-5 text-sm ${className}`}>
-      <summary className="cursor-pointer text-navy">{label}</summary>
+      <summary className="cursor-pointer text-link">{label}</summary>
       <div className="mt-2 text-ink-soft leading-relaxed">{children}</div>
       {label.startsWith("From the book") && <ReadTheBook kind="passage" className="mt-2" />}
     </details>

@@ -40,7 +40,7 @@ export function Shell({ user, children, journey }: { user: CurrentUser; children
         <nav className="mt-8 flex-1 space-y-0.5 overflow-y-auto" aria-label="Main">
           {(nav as NavItem[]).filter((n) => n.desktop !== false).map((n, i, all) => (
             <div key={n.href + n.label}>
-              {n.group && n.group !== all[i - 1]?.group && <p className={`mt-5 mb-1 px-3 text-[11px] uppercase tracking-[0.12em] ${n.group === "Support" ? "text-ink-mute" : "font-semibold text-navy-deep"}`}>{n.group}</p>}
+              {n.group && n.group !== all[i - 1]?.group && <p className={`mt-5 mb-1 px-3 text-[11px] uppercase tracking-[0.12em] ${n.group === "Support" ? "text-ink-mute" : "font-semibold text-heading"}`}>{n.group}</p>}
               <NavLink href={n.href} variant="side">{n.label}</NavLink>
             </div>
           ))}
@@ -61,11 +61,19 @@ export function Shell({ user, children, journey }: { user: CurrentUser; children
         <main className="mx-auto w-full max-w-4xl px-4 sm:px-6 py-6 sm:py-10 pb-28 md:pb-12">{journey}{children}</main>
       </div>
 
-      <nav aria-label="Primary" className="md:hidden fixed bottom-0 inset-x-0 z-30 border-t border-line bg-card/95 backdrop-blur grid" style={{ gridTemplateColumns: `repeat(${nav.filter((n) => n.mobile).length}, minmax(0, 1fr))` }}>
-        {(nav as NavItem[]).filter((n) => n.mobile).map((n) => (
-          <NavLink key={n.href} href={n.href} variant="tab">{n.tab ?? n.label}</NavLink>
-        ))}
-      </nav>
+      {/* Phone: a floating, frosted menu bar. Clients also get a round button for the AI companion. */}
+      <div className="md:hidden fixed bottom-3 inset-x-3 z-30 flex items-end gap-2">
+        <nav aria-label="Primary" className="flex-1 grid rounded-full border border-line/60 bg-card/80 backdrop-blur-xl shadow-[0_12px_32px_-12px_rgb(0_0_0/0.35)]" style={{ gridTemplateColumns: `repeat(${nav.filter((n) => n.mobile).length}, minmax(0, 1fr))` }}>
+          {(nav as NavItem[]).filter((n) => n.mobile).map((n) => (
+            <NavLink key={n.href} href={n.href} variant="tab">{n.tab ?? n.label}</NavLink>
+          ))}
+        </nav>
+        {user.role === "PARTICIPANT" && (
+          <Link href="/companion" aria-label="AI companion" className="h-[54px] w-[54px] shrink-0 grid place-items-center rounded-full border border-line/60 bg-card/80 backdrop-blur-xl text-heading shadow-[0_12px_32px_-12px_rgb(0_0_0/0.35)]">
+            <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden><path d="M12 5v14M5 12h14" /><path d="M18.5 2.5l.7 1.6 1.6.7-1.6.7-.7 1.6-.7-1.6-1.6-.7 1.6-.7z" fill="currentColor" stroke="none" /></svg>
+          </Link>
+        )}
+      </div>
     </div>
   );
 }
@@ -73,7 +81,7 @@ export function Shell({ user, children, journey }: { user: CurrentUser; children
 function Brand({ compact = false }: { compact?: boolean }) {
   return (
     <Link href="/" className="block">
-      <span className="font-serif text-navy-deep text-[19px] leading-none">Both Hands on the Wheel</span>
+      <span className="font-serif text-heading text-[19px] leading-none">Both Hands on the Wheel</span>
       {!compact && <span className="block mt-1.5 text-[11px] tracking-[0.14em] uppercase text-ink-mute">Mosley Foundry</span>}
     </Link>
   );

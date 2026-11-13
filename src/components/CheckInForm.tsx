@@ -15,8 +15,8 @@ const OPTIONS = [
 /** Two-minute daily check-in. Works without JavaScript. */
 export function CheckInForm({ existing, hasCoach, identityLevel, dark = false }: { existing: Existing; hasCoach: boolean; identityLevel?: string | null; dark?: boolean }) {
   const pill = dark
-    ? "border-white/30 bg-white/5 text-white peer-checked:bg-white peer-checked:text-navy-deep peer-checked:border-white"
-    : "border-line bg-white peer-checked:bg-navy peer-checked:text-white peer-checked:border-navy";
+    ? "border-white/30 bg-surface/5 text-white peer-checked:bg-surface peer-checked:text-heading peer-checked:border-white"
+    : "border-line bg-surface peer-checked:bg-navy peer-checked:text-white peer-checked:border-navy";
   return (
     <form action={logCheckIn} className="space-y-4">
       <fieldset>
@@ -44,9 +44,9 @@ export function CheckInForm({ existing, hasCoach, identityLevel, dark = false }:
           ))}
         </fieldset>
       )}
-      <details className={`rounded-xl ${dark ? "bg-white/5" : "bg-paper"} px-3 py-2`} open={!!(existing?.note || existing?.reflection || existing?.identityNote)}>
-        <summary className={`cursor-pointer text-sm ${dark ? "text-white/80" : "text-navy"}`}>Add detail</summary>
-        <div className={`mt-3 space-y-3 rounded-xl bg-white p-3 text-ink`}>
+      <details className={`rounded-xl ${dark ? "bg-surface/5" : "bg-paper"} px-3 py-2`} open={!!(existing?.note || existing?.reflection || existing?.identityNote)}>
+        <summary className={`cursor-pointer text-sm ${dark ? "text-white/80" : "text-link"}`}>Add detail</summary>
+        <div className={`mt-3 space-y-3 rounded-xl bg-surface p-3 text-ink`}>
           <TagChoices name="tags" list={CHECKIN_TAGS} legend="Where?" selected={existing ? (JSON.parse(existing.tags || "[]") as string[]) : []} />
           <input name="note" aria-label="Note" defaultValue={existing?.note} className="input" maxLength={1000} placeholder="One line: what happened" />
           <textarea name="reflection" aria-label="Reflection" defaultValue={existing?.reflection} className="textarea !min-h-[64px]" maxLength={3000} placeholder="What did today show you?" />
@@ -62,7 +62,7 @@ export function CheckInForm({ existing, hasCoach, identityLevel, dark = false }:
           )}
         </div>
       </details>
-      <Submit className={dark ? "btn w-full bg-brass text-navy-deep hover:bg-white" : "btn-primary w-full"}>{existing ? "Update today" : "Log today"}</Submit>
+      <Submit className={dark ? "btn w-full bg-brass text-heading hover:bg-surface" : "btn-primary w-full"}>{existing ? "Update today" : "Log today"}</Submit>
     </form>
   );
 }

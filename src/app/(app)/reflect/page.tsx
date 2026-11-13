@@ -51,7 +51,7 @@ export default async function ReflectPage() {
           )}
           <Field label="What does next week need?" hint="One line is enough."><input name="nextWeek" defaultValue={current?.nextWeek} className="input" maxLength={4000} /></Field>
           <details open={!!(current?.built || current?.avoided)}>
-            <summary className="cursor-pointer text-sm text-navy">What did I build? What did I avoid? <span className="text-ink-mute">(optional)</span></summary>
+            <summary className="cursor-pointer text-sm text-link">What did I build? What did I avoid? <span className="text-ink-mute">(optional)</span></summary>
             <div className="mt-3 space-y-3">
               <Field label="What did I build?"><textarea name="built" defaultValue={current?.built} className="textarea" maxLength={4000} /></Field>
               <Field label="What did I avoid?"><textarea name="avoided" defaultValue={current?.avoided} className="textarea" maxLength={4000} /></Field>

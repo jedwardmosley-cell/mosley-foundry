@@ -22,7 +22,7 @@ export function RelationshipFields({ initialRole, purposeFolded = false }: { ini
         </select>
       </label>
       <details className="sm:col-span-2" open={!purposeFolded}>
-        <summary className={purposeFolded ? "cursor-pointer text-sm text-navy" : "hidden"}>Purpose (optional)</summary>
+        <summary className={purposeFolded ? "cursor-pointer text-sm text-link" : "hidden"}>Purpose (optional)</summary>
         <label className="block">
           <span className="label">Purpose <span className="text-ink-mute font-normal">(what is this relationship for?)</span></span>
           <input name="purpose" maxLength={1000} className="input" />

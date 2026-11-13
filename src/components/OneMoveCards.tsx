@@ -24,7 +24,7 @@ export function OneMoveCards({ pack, goals, priority, level }: { pack: ContentPa
                   <h2 className="h3">{p.name}</h2>
                   <p className="text-sm muted">{g?.oneMove ? `One move: ${g.oneMove}` : p.short}</p>
                 </div>
-                {isPriority ? <span className="chip !border-navy/30 !text-navy">Priority</span> : filled ? <span className="chip">Started</span> : null}
+                {isPriority ? <span className="chip !border-navy/30 !text-link">Priority</span> : filled ? <span className="chip">Started</span> : null}
                 <span aria-hidden className="text-ink-mute group-open:rotate-90 transition-transform">›</span>
               </summary>
               <form action={saveGoal} className="mt-5 space-y-4">
@@ -41,7 +41,7 @@ export function OneMoveCards({ pack, goals, priority, level }: { pack: ContentPa
                   </p>
                 )}
                 <details open={!!(g?.whereNow || g?.whereWant)}>
-                  <summary className="cursor-pointer text-sm text-navy">Where I am now and where I want to be</summary>
+                  <summary className="cursor-pointer text-sm text-link">Where I am now and where I want to be</summary>
                   <div className="mt-3 grid gap-4 sm:grid-cols-2">
                     <Field label="Where I am now"><textarea name="whereNow" defaultValue={g?.whereNow} className="textarea !min-h-[80px]" maxLength={1500} /></Field>
                     <Field label="Where I want to be"><textarea name="whereWant" defaultValue={g?.whereWant} className="textarea !min-h-[80px]" maxLength={1500} /></Field>
@@ -49,7 +49,7 @@ export function OneMoveCards({ pack, goals, priority, level }: { pack: ContentPa
                 </details>
                 {rt(p.key) && (
                   <details className="text-sm">
-                    <summary className="cursor-pointer text-navy">Road test from the book</summary>
+                    <summary className="cursor-pointer text-link">Road test from the book</summary>
                     <p className="mt-1 text-ink-soft">{rt(p.key)}</p>
                   </details>
                 )}
@@ -65,7 +65,7 @@ export function OneMoveCards({ pack, goals, priority, level }: { pack: ContentPa
       {first.map(one)}
       {rest.length > 0 && (
         <details className="group/other">
-          <summary className="cursor-pointer text-sm text-navy">Other pillars ({rest.length})</summary>
+          <summary className="cursor-pointer text-sm text-link">Other pillars ({rest.length})</summary>
           <div className="mt-3 space-y-3">{rest.map(one)}</div>
         </details>
       )}

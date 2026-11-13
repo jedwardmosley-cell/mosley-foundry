@@ -13,7 +13,7 @@ export function ResetPasswordForm({ participantId }: { participantId: string }) 
       {s?.error && <p role="alert" className="text-sm text-clay mb-2">{s.error}</p>}
       {s?.temp ? (
         <div className="rounded-xl border border-brass bg-brass-soft/40 p-3 text-[15px]">
-          <p>New temporary password: <code className="bg-white px-1.5 py-0.5 rounded">{s.temp}</code></p>
+          <p>New temporary password: <code className="bg-surface px-1.5 py-0.5 rounded">{s.temp}</code></p>
           <p className="mt-1 text-xs text-ink-mute">This password is shown once. Copy it and send it to your client privately.</p>
         </div>
       ) : (

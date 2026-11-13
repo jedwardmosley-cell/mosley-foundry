@@ -35,8 +35,8 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
         <form action={saveIdentity} className="space-y-6">
           <div>
             <label htmlFor="claim" className="label">1. {QUESTIONS.becoming} <span className="font-normal text-ink-mute">Say it out loud.</span></label>
-            <div className="flex items-start rounded-xl border border-line bg-white focus-within:ring-2 focus-within:ring-navy/30 focus-within:border-navy">
-              <span className="pl-3.5 pr-1.5 py-2.5 font-serif text-[17px] leading-6 text-navy-deep select-none">I am</span>
+            <div className="flex items-start rounded-xl border border-line bg-surface focus-within:ring-2 focus-within:ring-navy/30 focus-within:border-navy">
+              <span className="pl-3.5 pr-1.5 py-2.5 font-serif text-[17px] leading-6 text-heading select-none">I am</span>
               <textarea id="claim" name="claim" required rows={Math.min(6, Math.max(2, Math.ceil(claimText.length / 34)))} maxLength={1500} defaultValue={claimText} placeholder={examplePlaceholder("claim", pathway)} className="flex-1 min-w-0 resize-none bg-transparent py-2.5 pr-3 text-[15px] leading-6 focus:outline-none" />
             </div>
             <Picks list={{ status: IDENTITY_EXAMPLES_STATUS, options: [] }} groups={exampleGroups("claim", pathway)} target="claim" folded="Examples" />
@@ -63,7 +63,7 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
             />
             <p className="mt-4 text-sm text-ink-soft">No level ranks above another. You choose, and you can change it later.</p>
             <details className="mt-1 text-xs text-ink-mute">
-              <summary className="cursor-pointer text-navy text-sm">More about the levels</summary>
+              <summary className="cursor-pointer text-link text-sm">More about the levels</summary>
               <p className="mt-1">{PATHWAY_CONTEXT[pathway]}</p>
               <p className="mt-1">{NO_RANK_NOTE} The app never picks a level from your FORGE scores, and you can change it later without losing anything.</p>
             </details>
