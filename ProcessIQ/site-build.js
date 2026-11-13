@@ -7,7 +7,8 @@ const fs = require("fs");
 const path = require("path");
 
 const here = __dirname;
-const out = path.join(here, "..", "site");
+// Output folder: given as an argument (relative to where the build runs), else ../site
+const out = process.argv[2] ? path.resolve(process.cwd(), process.argv[2]) : path.join(here, "..", "site");
 const app = fs.readFileSync(path.join(here, "index.html"), "utf8");
 const seed = JSON.parse(fs.readFileSync(path.join(here, "demo", "demo-seed.json"), "utf8"));
 
