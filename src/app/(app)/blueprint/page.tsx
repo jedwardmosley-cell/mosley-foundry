@@ -68,8 +68,8 @@ export default async function BlueprintPage() {
       <section className="mb-10 overflow-hidden rounded-[24px] shadow-[0_24px_48px_-28px_rgb(var(--navy-deep)/0.8)]">
         {(identity?.becoming || profile?.forgeStatement) && (
           <Link href="/identity" className="block bg-[linear-gradient(150deg,rgb(var(--navy)),rgb(var(--navy-deep)))] px-5 py-6 sm:px-7 text-white transition hover:brightness-110">
-            <p className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.16em] text-[#E2C48E]">This road reinforces{identity?.role ? ` · as ${withArticle(identity.role)}` : ""}<Icon name="arrow" className="h-4 w-4 text-white/50" /></p>
-            <p className="mt-3 font-serif text-[20px] sm:text-[22px] leading-[1.3] tracking-[-0.01em] line-clamp-4"><span aria-hidden className="mr-1 text-[#E2C48E]">&ldquo;</span>{profile?.forgeStatement || identity?.becoming}</p>
+            <p className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.16em] text-[#F8CC78]">This road reinforces{identity?.role ? ` · as ${withArticle(identity.role)}` : ""}<Icon name="arrow" className="h-4 w-4 text-white/50" /></p>
+            <p className="mt-3 font-serif text-[20px] sm:text-[22px] leading-[1.3] tracking-[-0.01em] line-clamp-4"><span aria-hidden className="mr-1 text-[#F8CC78]">&ldquo;</span>{profile?.forgeStatement || identity?.becoming}</p>
           </Link>
         )}
         <div className="bg-card px-5 py-5 sm:px-7 sm:py-6">
@@ -95,7 +95,7 @@ export default async function BlueprintPage() {
       </section>
 
       {d.whosChecking.length > 0 && (
-        <figure className="mb-10 border-l-2 border-brass/60 pl-5">
+        <figure className="mb-10 border-l-2 border-gold/60 pl-5">
           <blockquote className="font-serif text-[21px] sm:text-[24px] leading-[1.3] tracking-[-0.01em] text-heading">{d.whosChecking[0]}</blockquote>
           <FromBook label="So who's checking?" className="mt-3 !mb-0">{d.whosChecking[2]}</FromBook>
         </figure>

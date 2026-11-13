@@ -53,7 +53,7 @@ export function JourneyBar({ steps, done, current, cycle }: Props) {
 
   return (
     <nav aria-label="Your journey" className="mb-8">
-      <div aria-hidden className="grid grid-cols-4 gap-1.5 mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-brass">
+      <div aria-hidden className="grid grid-cols-4 gap-1.5 mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">
         <span className="col-span-2">FORGE</span>
         <span className="col-span-2">Discipline by Design</span>
       </div>

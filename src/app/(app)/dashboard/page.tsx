@@ -83,9 +83,9 @@ export default async function Dashboard() {
 
         {/* Who I am: the anchor of the day, set like a page from the book. */}
         <Link href="/identity" className="glow col-span-2 block rounded-[22px] p-5 sm:p-6 transition hover:-translate-y-0.5">
-          <p className="flex items-center justify-between eyebrow !text-brass">{d.identity?.role ? `Who I am · as ${withArticle(d.identity.role)}` : "Who I am"}<Icon name="arrow" className="h-4 w-4 text-ink-mute" /></p>
+          <p className="flex items-center justify-between eyebrow !text-gold">{d.identity?.role ? `Who I am · as ${withArticle(d.identity.role)}` : "Who I am"}<Icon name="arrow" className="h-4 w-4 text-ink-mute" /></p>
           <p className="mt-3 font-serif text-[21px] sm:text-[23px] leading-[1.3] tracking-[-0.01em] text-heading line-clamp-4">
-            <span aria-hidden className="mr-1 text-brass">&ldquo;</span>{statement || "Claim who you are."}
+            <span aria-hidden className="mr-1 gold-text">&ldquo;</span>{statement || "Claim who you are."}
           </p>
           {d.identity?.level === "REINVENT" && d.identity.personaName && <p className="mt-3 text-xs text-ink-mute">Performance identity: <span className="text-ink">{d.identity.personaName}</span></p>}
         </Link>

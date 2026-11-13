@@ -12,10 +12,12 @@
   --ink: 28 34 45;  --ink-soft: 78 86 100;  --ink-mute: 128 134 146;
   --navy: 30 47 74;  --navy-deep: 18 29 50;  --heading: 19 31 53;  --link: 37 62 101;
   --brass: 167 123 59;  --brass-soft: 241 230 210;
+  /* Brand gold, from the Mosley Foundry wordmark. Brass stays the Reason Rooted pillar color. */
+  --gold: 176 96 12;  --gold-soft: 249 234 212;  --gold-hi: 224 146 42;  --gold-lo: 163 84 9;
   --sage: 94 122 100;  --sage-soft: 227 235 227;
   --clay: 168 92 69;  --clay-soft: 243 226 219;
   --violet: 107 106 143;  --alert: 180 35 24;  --alert-soft: 254 228 226;
-  --glow-a: 196 152 92;  --glow-b: 30 47 74;
+  --glow-a: 224 146 42;  --glow-b: 30 47 74;
   --shadow: 28 34 45;
   --font-serif: "Fraunces Variable", "Iowan Old Style", Palatino, Georgia, serif;
   --font-sans: "Inter Variable", ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
@@ -28,6 +30,7 @@
     --ink: 236 231 222;  --ink-soft: 180 186 198;  --ink-mute: 132 141 156;
     --navy: 58 90 136;  --navy-deep: 27 42 66;  --heading: 243 238 229;  --link: 176 198 230;
     --brass: 214 172 104;  --brass-soft: 52 42 27;
+    --gold: 236 164 70;  --gold-soft: 58 38 14;  --gold-hi: 248 204 120;  --gold-lo: 214 128 30;
     --sage: 141 180 151;  --sage-soft: 30 44 36;
     --clay: 226 145 122;  --clay-soft: 58 35 29;
     --violet: 160 158 205;  --alert: 249 112 102;  --alert-soft: 58 28 26;
@@ -45,7 +48,7 @@ body {
     radial-gradient(70% 45% at 100% 0%, rgb(var(--glow-b) / 0.08), transparent 70%);
   background-attachment: fixed;
 }
-::selection { background: rgb(var(--brass) / 0.25); }
+::selection { background: rgb(var(--gold) / 0.22); }
 .font-serif { font-variation-settings: "SOFT" 50, "WONK" 0; }
 
 /* Disclosure: a small chevron instead of the browser's triangle. */
@@ -80,8 +83,10 @@ summary { -webkit-tap-highlight-color: transparent; }
   .h3 { @apply font-semibold text-heading text-[15px] tracking-[-0.005em]; }
   .muted { @apply text-ink-soft; }
   .label { @apply block text-[15px] font-semibold text-heading mb-2 tracking-[-0.005em]; }
-  /* A step inside a page: a brass numeral and a title. */
-  .step-n { @apply mr-2.5 font-serif text-brass font-normal; }
+  /* The logo's gold as a gradient, for numerals and quote marks. */
+  .gold-text { background: linear-gradient(180deg, rgb(var(--gold-hi)), rgb(var(--gold)) 55%, rgb(var(--gold-lo))); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  /* A step inside a page: a gold numeral and a title. */
+  .step-n { @apply mr-2.5 font-serif font-normal gold-text; }
   .section-title { @apply block font-serif text-[23px] sm:text-[26px] leading-tight text-heading tracking-[-0.015em] mb-4; font-weight: 420; }
   .input {
     @apply w-full rounded-2xl bg-field px-4 py-3 text-[15px] text-ink placeholder:text-ink-mute/80 transition;
@@ -101,7 +106,7 @@ summary { -webkit-tap-highlight-color: transparent; }
   .btn-link { @apply text-link font-medium decoration-transparent underline underline-offset-4 transition-colors hover:decoration-link/60; }
   .chip { @apply inline-flex items-center rounded-full bg-ink/[0.06] px-2.5 py-1 text-xs font-medium text-ink-soft; }
   .pick { @apply rounded-full bg-field px-3.5 py-2 text-[13px] text-ink-soft text-left transition hover:bg-navy/10 hover:text-heading active:scale-[0.98]; }
-  .quote { @apply font-serif italic text-ink-soft border-l-2 border-brass/40 pl-4; }
+  .quote { @apply font-serif italic text-ink-soft border-l-2 border-gold/40 pl-4; }
   .source { @apply text-xs text-ink-mute; }
   /* The soft, glowing hero: light comes from the brand colors instead of hard borders. */
   .glow {
@@ -130,5 +135,5 @@ summary { -webkit-tap-highlight-color: transparent; }
   .peer:checked ~ .option, .option:has(:checked) { @apply bg-surface; border-color: rgb(var(--navy) / 0.55); box-shadow: 0 0 0 3px rgb(var(--navy) / 0.10), 0 8px 20px -14px rgb(var(--shadow) / 0.35); }
   .peer:focus-visible ~ .option { box-shadow: 0 0 0 4px rgb(var(--navy) / 0.25); }
   .notice { @apply rounded-2xl bg-sage-soft px-4 py-3 text-sm text-ink; }
-  .draft { @apply inline-flex items-center rounded-full bg-brass-soft text-brass px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em]; }
+  .draft { @apply inline-flex items-center rounded-full bg-gold-soft text-gold px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em]; }
 }

@@ -40,7 +40,7 @@ export function Shell({ user, children, journey }: { user: CurrentUser; children
         <nav className="mt-8 flex-1 space-y-0.5 overflow-y-auto" aria-label="Main">
           {(nav as NavItem[]).filter((n) => n.desktop !== false).map((n, i, all) => (
             <div key={n.href + n.label}>
-              {n.group && n.group !== all[i - 1]?.group && <p className={`mt-6 mb-1.5 px-3 text-[10.5px] font-semibold uppercase tracking-[0.16em] ${n.group === "Support" ? "text-ink-mute" : "text-brass"}`}>{n.group}</p>}
+              {n.group && n.group !== all[i - 1]?.group && <p className={`mt-6 mb-1.5 px-3 text-[10.5px] font-semibold uppercase tracking-[0.16em] ${n.group === "Support" ? "text-ink-mute" : "text-gold"}`}>{n.group}</p>}
               <NavLink href={n.href} variant="side">{n.label}</NavLink>
             </div>
           ))}

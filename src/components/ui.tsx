@@ -5,7 +5,7 @@ import type { PillarKey } from "@/content/types";
 export function PageHeader({ eyebrow, title, children }: { eyebrow?: string; title: string; children?: ReactNode }) {
   return (
     <header className="mb-7 sm:mb-10">
-      {eyebrow && <p className="eyebrow mb-3 !text-brass">{eyebrow}</p>}
+      {eyebrow && <p className="eyebrow mb-3 !text-gold">{eyebrow}</p>}
       <h1 className="h1">{title}</h1>
       {children && <div className="mt-4 muted text-[16px] leading-relaxed max-w-xl">{children}</div>}
     </header>
