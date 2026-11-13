@@ -15,7 +15,7 @@ const KIND_LABEL: Record<CoachReply["kind"], string> = {
  * "Help me find this": the AI works as an identity coach. It reads what the client typed, says whether it is
  * a goal, a habit, a value or an identity, asks one question, and offers a statement they can use or edit.
  */
-export function IdentityCoach({ field, prefix = "I am" }: { field: string; prefix?: string }) {
+export function IdentityCoach({ field, prefix = "I am", corner = false }: { field: string; prefix?: string; corner?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   const [pending, start] = useTransition();
   const [reply, setReply] = useState<CoachReply | null>(null);
@@ -39,9 +39,9 @@ export function IdentityCoach({ field, prefix = "I am" }: { field: string; prefi
   };
 
   return (
-    <div ref={ref} className="mt-2">
-      <button type="button" onClick={ask} disabled={pending} className="text-sm btn-link text-left">
-        {pending ? "Thinking..." : reply ? "Ask again" : "Help me find this"}
+    <div ref={ref} className={corner ? "" : "mt-2"}>
+      <button type="button" onClick={ask} disabled={pending} className={corner ? "absolute left-0 top-[3px] text-sm text-link hover:text-heading" : "text-sm btn-link text-left"}>
+        {corner && <span aria-hidden className="mr-1">✦</span>}{pending ? "Thinking..." : reply ? "Ask again" : "Help me find this"}
       </button>
       {error && <p role="alert" className="text-xs text-alert mt-1">{error}</p>}
       {reply && (
