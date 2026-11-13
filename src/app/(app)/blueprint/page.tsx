@@ -1,4 +1,5 @@
 import { requireUser } from "@/lib/auth";
+import { ReadTheBook } from "@/components/ReadTheBook";
 import { db } from "@/lib/db";
 import { getContent } from "@/content";
 import { BLUEPRINT_AREAS } from "@/content/program";
@@ -219,6 +220,7 @@ function FromBook({ label, children, className = "" }: { label: string; children
     <details className={`mb-5 text-sm ${className}`}>
       <summary className="cursor-pointer text-navy">{label}</summary>
       <div className="mt-2 text-ink-soft leading-relaxed">{children}</div>
+      {label.startsWith("From the book") && <ReadTheBook kind="passage" className="mt-2" />}
     </details>
   );
 }

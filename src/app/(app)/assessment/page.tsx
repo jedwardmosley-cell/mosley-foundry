@@ -22,7 +22,7 @@ export default async function AssessmentPage({ searchParams }: { searchParams: P
 
   return (
     <>
-      <PageHeader eyebrow={useEntre ? "The FORGE Worksheet for Entrepreneurs" : "Section One"} title="The FORGE Self-Assessment">
+      <PageHeader eyebrow={useEntre ? "FORGE · for entrepreneurs" : "FORGE"} title="The FORGE Self-Assessment">
         {useEntre ? entrepreneur!.intro.slice(0, 3).map((t) => <p key={t} className="mb-2">{t}</p>) : (
           <p>Read the anchors. Score yourself honestly. Then verify. Your score should reflect behavior, not intention.</p>
         )}
@@ -101,7 +101,7 @@ export default async function AssessmentPage({ searchParams }: { searchParams: P
           <Submit>See my profile</Submit>
           <p className="text-sm muted">Your answers are private. You decide later what, if anything, your coach sees.</p>
         </div>
-        <Source>{useEntre ? entrepreneur!.source.title : pack.kind === "licensed" ? "Both Hands on the Wheel Personal Application Workbook, Section One" : "Draft placeholder"}</Source>
+        {pack.kind !== "licensed" && !useEntre && <Source>Draft placeholder</Source>}
       </form>
     </>
   );

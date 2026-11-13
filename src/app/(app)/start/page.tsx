@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ReadTheBook } from "@/components/ReadTheBook";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getContent } from "@/content";
@@ -50,6 +51,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
           <p className="text-[15px]">Your 30 days are under way. Each day, open Today and check in. It takes about two minutes.</p>
           <Link href="/dashboard" className="btn-primary mt-4 inline-flex">Go to Today</Link>
         </Card>
+        <ReadTheBook className="mt-5" />
       </>
     );
   }
@@ -205,6 +207,9 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
             <Link href="/dashboard" className="btn-primary mt-5 inline-flex">Your 30 days are under way. Go to Today</Link>
           ) : (
             <Link href={`/cycle/new${priority ? `?pillar=${priority.key}` : ""}`} className="btn-primary mt-5 inline-flex">Choose my behavior and start my 30 days</Link>
+          )}
+          {!journey.done.drive && (
+            <ReadTheBook className="mt-4" />
           )}
         </Card>
       )}

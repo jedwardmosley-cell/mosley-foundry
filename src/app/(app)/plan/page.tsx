@@ -29,7 +29,7 @@ export default async function PlanPage() {
       <PageHeader title="Your FORGE plan" />
       {pack.actionPlanIntro && (
         <details className="mb-5 text-sm">
-          <summary className="cursor-pointer text-navy">From the workbook, Section Six</summary>
+          <summary className="cursor-pointer text-navy">About your FORGE plan</summary>
           <p className="mt-2 text-ink-soft">{pack.actionPlanIntro}</p>
         </details>
       )}
@@ -62,7 +62,7 @@ export default async function PlanPage() {
           {pack.holdYourself && <p className="quote text-[15px]">{pack.holdYourself}</p>}
           <Submit>Save my FORGE identity</Submit>
         </form>
-        <Source>FORGE pillars, questions and instruction: Jason Mosley. Hints and examples: build team draft. FORGE Statement: Personal Application Workbook, Section Six</Source>
+        <Source>FORGE: Both Hands on the Wheel, by Jason Mosley</Source>
       </Card>
 
       <Link href="/blueprint#one-move" className="card block mt-5 hover:border-navy/40">

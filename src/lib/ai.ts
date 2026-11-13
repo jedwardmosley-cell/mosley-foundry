@@ -25,8 +25,8 @@ export async function buildChunks(): Promise<Chunk[]> {
   const add = (ref: string, text: string) => text.trim() && out.push({ id: `S${out.length + 1}`, ref, text });
 
   for (const p of pack.pillars) {
-    add(`FORGE ${p.key}: ${p.name} (Workbook, Section One)`, `${p.name}. ${p.short} ${p.definition} ` + p.anchors.map((a) => `${a.score} ${a.level}: ${a.text}`).join(" "));
-    add(`FORGE ${p.key}: if this is your lowest score (Workbook, Section Two)`, p.lowest.map((g) => `Score ${g.min} to ${g.max}: ${g.text}`).join(" "));
+    add(`FORGE ${p.key}: ${p.name}`, `${p.name}. ${p.short} ${p.definition} ` + p.anchors.map((a) => `${a.score} ${a.level}: ${a.text}`).join(" "));
+    add(`FORGE ${p.key}: if this is your lowest score`, p.lowest.map((g) => `Score ${g.min} to ${g.max}: ${g.text}`).join(" "));
     if (p.rule) add(`Book, Ch. 9 The Rules of the Road, ${p.rule.heading}`, p.rule.paragraphs.join(" "));
   }
   for (const c of pack.chapters) {
@@ -40,13 +40,13 @@ export async function buildChunks(): Promise<Chunk[]> {
   for (const i of d.inventory) add(`Book, Ch. 10 Discipline by Design, Design Inventory: ${i.label}`, i.text);
   if (d.whosChecking.length) add("Book, Ch. 10 Discipline by Design, So Who's Checking?", d.whosChecking.join(" "));
   if (d.leadingOthers.length) add("Book, Ch. 10 Discipline by Design, Now the Part That Isn't About You", d.leadingOthers.join(" "));
-  for (const e of pack.edsLessons) add(`Workbook, Section Four, Ed's Lessons: ${e.title} (${e.chapter})`, [e.quote, e.setup, ...e.prompts].filter(Boolean).join(" "));
-  for (const j of pack.jaysJourney) add(`Workbook, Section Five, Jay's Journey: ${j.title}`, [j.setup, ...j.prompts].filter(Boolean).join(" "));
-  for (const p of pack.profiles) add(`Workbook, Section Three, FORGE in the Wild: ${p.name}`, [p.subtitle, p.designedDiscipline, p.lesson].filter(Boolean).join(" "));
-  if (pack.thirtyDayPlan.length) add("Workbook, Section Seven, 30-Day Implementation Plan", pack.thirtyDayPlan.map((w) => `${w.label} ${w.focus}: ${w.work}`).join(" "));
+  for (const e of pack.edsLessons) add(`Ed's Lessons: ${e.title} (${e.chapter})`, [e.quote, e.setup, ...e.prompts].filter(Boolean).join(" "));
+  for (const j of pack.jaysJourney) add(`Jay's Journey: ${j.title}`, [j.setup, ...j.prompts].filter(Boolean).join(" "));
+  for (const p of pack.profiles) add(`FORGE in the Wild: ${p.name}`, [p.subtitle, p.designedDiscipline, p.lesson].filter(Boolean).join(" "));
+  if (pack.thirtyDayPlan.length) add("The 30-day implementation plan", pack.thirtyDayPlan.map((w) => `${w.label} ${w.focus}: ${w.work}`).join(" "));
   for (const s of SEGMENTS) add(`Leading Others program, Segment ${s.key}: ${s.title} (program brief)`, s.summary);
   if (entrepreneur) {
-    for (const pt of entrepreneur.patterns) add(`FORGE Worksheet for Entrepreneurs, ${pt.title}`, pt.text.join(" "));
+    for (const pt of entrepreneur.patterns) add(`FORGE for entrepreneurs: ${pt.title}`, pt.text.join(" "));
     add(`FORGE Ahead session: building a business`, entrepreneur.owner.fourBuilds.map((b) => `${b.label}: ${b.detail}. ${b.signal}`).join(" ") + " " + entrepreneur.owner.howToBuild + " " + entrepreneur.owner.sellableTest);
   }
   chunkCache = { pack, chunks: out };
@@ -172,6 +172,7 @@ export function systemPrompt(mode: AiMode, context: string, sources: Chunk[], to
     "- FORGE scores are self-ratings for development, not a validated psychometric measure, and not equivalent to EQ-i scores. Never invent or estimate scores or assessment results.",
     "- You are not a therapist and do not diagnose. If the participant describes a mental health crisis, self-harm, abuse or danger, respond with care, encourage them to contact a qualified professional or local emergency services (in the US, call or text 988), and suggest they tell their coach.",
     "- Push toward real-world action and human accountability: a specific behavior, a date, and a person who will know.",
+    "- When you draw on a passage from the book and it would help, you can suggest reading that chapter of Both Hands on the Wheel. At most once in a conversation, and never as a sales pitch. Never mention a workbook or worksheet, or section numbers. The app is standalone.",
     "- FORGE is identity formation, and it comes first. Discipline by Design comes after: it turns the identity into routines, relationships and accountability. Keep them apart. A FORGE statement describes who the person is and how they understand themselves. A habit, task or technique belongs in their blueprint.",
     "- Identity statements are claimed in the present tense, in the person's own words: \"I am a leader who operates with integrity.\" Never pressure someone to claim something they do not believe. If they are not there yet, \"I am becoming a courageous leader who speaks up when something matters\" is honest and fine.",
     "",
