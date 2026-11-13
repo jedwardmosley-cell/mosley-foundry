@@ -1,13 +1,17 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { saveIdentity, removeIdentity, saveIdentityControls } from "@/app/actions/identity";
+import { saveWhoIAm, removeIdentity, saveIdentityControls } from "@/app/actions/identity";
 import { TONE_LABELS, type ToneSetting } from "@/lib/identityTone";
-import { LEVELS, QUESTIONS, PATHWAY_CONTEXT, FIRST_EXAMPLE, NO_RANK_NOTE, PICKS_STATUS, SITUATION_PICKS, BEHAVIOR_PICKS, type IdentityLevel } from "@/content/identity";
-import { exampleGroups, examplePlaceholder, IDENTITY_EXAMPLES_STATUS } from "@/content/identityExamples";
+import { LEVELS, FIRST_EXAMPLE, PICKS_STATUS, SITUATION_PICKS, type IdentityLevel } from "@/content/identity";
+import { ROLE_PICKS, WHO_I_AM_STATUS } from "@/content/whoIAm";
+import { FORGE_IDENTITY_INTRO } from "@/content/forgeIdentityIntro";
+import { FiveSides, MyStatement } from "@/components/ForgeLinesFields";
+import { aiAvailable } from "@/lib/ai";
+import { getContent } from "@/content";
 import type { PathwayKey } from "@/content/program";
 import { fmt } from "@/lib/dates";
-import { PageHeader, Card, Field } from "@/components/ui";
+import { PageHeader, Card } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 import { Picks } from "@/components/Picks";
 import { IdentitySpectrum } from "@/components/IdentitySpectrum";
@@ -23,55 +27,60 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
     db.identityHistory.findMany({ where: { userId: u.id }, orderBy: { endedAt: "desc" }, take: 10 }),
   ]);
   const pathway = (profile?.pathway ?? "PERSONAL") as PathwayKey;
-  const claimText = (id?.becoming ?? "").replace(/^(i am|i'm)\s+/i, "");
+  const role = id?.role ?? "";
+  const level = id?.level ?? "";
+  // My statement: the profile's statement, or the older I am claim when that is all there is.
+  const statement = profile?.forgeStatement || id?.becoming || "";
+  const earlier = profile?.forgeStatement && id?.becoming && id.becoming !== profile.forgeStatement ? id.becoming : "";
+  const ai = aiAvailable() && profile?.aiEnabled !== false;
+  const { pack, entrepreneur } = await getContent();
+  const hint = profile?.pathway === "ENTREPRENEURIAL" && entrepreneur ? entrepreneur.forgeStatementPrompt : pack.forgeStatementPrompt;
 
   return (
     <>
-      <PageHeader eyebrow="FORGE · Step 1" title="Who I am">Claim who you are, and choose how big a change it is.</PageHeader>
+      <PageHeader eyebrow="FORGE" title="Who I am">One identity, in your own words. Name the role it is about and the kind of change, then describe who you are from five sides.</PageHeader>
 
-      {saved && <p role="status" className="mb-4 rounded-xl border border-line bg-surface px-4 py-2.5 text-sm text-link">Saved. Next, <Link href="/plan" className="underline">write your FORGE identity</Link> so the rest of your plan builds on who you are.</p>}
+      {saved && <p role="status" className="mb-4 rounded-xl border border-line bg-surface px-4 py-2.5 text-sm">Saved. Next, <Link href="/assessment" className="btn-link">see where you are today</Link>.</p>}
 
-      <Card>
-        <form action={saveIdentity} className="space-y-6">
-          <div>
-            <label htmlFor="claim" className="label">1. {QUESTIONS.becoming} <span className="font-normal text-ink-mute">Say it out loud.</span></label>
-            <div className="flex items-start rounded-xl border border-line bg-surface focus-within:ring-2 focus-within:ring-navy/30 focus-within:border-navy">
-              <span className="pl-3.5 pr-1.5 py-2.5 font-serif text-[17px] leading-6 text-heading select-none">I am</span>
-              <textarea id="claim" name="claim" required rows={Math.min(6, Math.max(2, Math.ceil(claimText.length / 34)))} maxLength={1500} defaultValue={claimText} placeholder={examplePlaceholder("claim", pathway)} className="flex-1 min-w-0 resize-none bg-transparent py-2.5 pr-3 text-[15px] leading-6 focus:outline-none" />
-            </div>
-            <Picks list={{ status: IDENTITY_EXAMPLES_STATUS, options: [] }} groups={exampleGroups("claim", pathway)} target="claim" folded="Examples" />
+      <form action={saveWhoIAm} className="space-y-5">
+        <Card>
+          <label htmlFor="role" className="label">1. The role this is about</label>
+          <div className="flex items-center rounded-xl border border-line bg-surface focus-within:ring-2 focus-within:ring-navy/30 focus-within:border-navy">
+            <span className="pl-3.5 pr-1.5 py-2.5 text-[15px] text-ink-soft whitespace-nowrap select-none">This is about me as</span>
+            <input id="role" name="role" defaultValue={role} maxLength={80} placeholder={ROLE_PICKS[pathway][0]} className="flex-1 min-w-0 bg-transparent py-2.5 pr-3 text-[15px] focus:outline-none" />
           </div>
-          <div>
-            <Field label={`2. ${QUESTIONS.situation}`}>
-              <input name="situation" defaultValue={id?.situation} maxLength={1500} className="input" />
-            </Field>
+          <Picks list={{ status: WHO_I_AM_STATUS, options: ROLE_PICKS[pathway] }} target="role" label="Tap one, or write your own. One role for each 30 days." />
+          <details className="mt-4" open={!!id?.situation}>
+            <summary className="cursor-pointer text-sm text-link">What situation or chapter of life makes this change important? <span className="text-ink-mute">(optional)</span></summary>
+            <input name="situation" aria-label="Situation" defaultValue={id?.situation} maxLength={1500} className="input mt-2" />
             <Picks list={{ status: PICKS_STATUS, options: SITUATION_PICKS[pathway] }} target="situation" folded="Examples" />
-          </div>
+          </details>
+        </Card>
+
+        <Card>
+          <p className="label">2. The kind of change</p>
+          <IdentitySpectrum
+            initial={id?.level as IdentityLevel | undefined}
+            firstExample={FIRST_EXAMPLE[pathway]}
+            persona={{ personaName: id?.personaName, personaQualities: id?.personaQualities, personaStandards: id?.personaStandards, personaSituations: id?.personaSituations, personaCue: id?.personaCue, personaBehaviors: id?.personaBehaviors }}
+          />
+        </Card>
+
+        <Card className="space-y-6">
           <div>
-            <Field label={`3. ${QUESTIONS.behavior}`}>
-              <input name="behavior" defaultValue={id?.behavior} maxLength={1500} className="input" />
-            </Field>
-            <Picks list={{ status: PICKS_STATUS, options: BEHAVIOR_PICKS[pathway] }} target="behavior" folded="Examples" note="Something another person could see you do." />
+            <p className="label">3. Who I am, from five sides</p>
+            <p className="text-sm text-ink-soft">{FORGE_IDENTITY_INTRO}</p>
+            <p className="mt-2 text-sm text-ink-soft">These are one identity seen five ways. They are not five separate identities.</p>
           </div>
+          <FiveSides profile={profile} pathway={pathway} role={role} level={level} ai={ai} />
+        </Card>
 
-          <fieldset>
-            <legend className="label">4. {QUESTIONS.level}</legend>
-            <IdentitySpectrum
-              initial={id?.level as IdentityLevel | undefined}
-              firstExample={FIRST_EXAMPLE[pathway]}
-              persona={{ personaName: id?.personaName, personaQualities: id?.personaQualities, personaStandards: id?.personaStandards, personaSituations: id?.personaSituations, personaCue: id?.personaCue, personaBehaviors: id?.personaBehaviors }}
-            />
-            <p className="mt-4 text-sm text-ink-soft">No level ranks above another. You choose, and you can change it later.</p>
-            <details className="mt-1 text-xs text-ink-mute">
-              <summary className="cursor-pointer text-link text-sm">More about the levels</summary>
-              <p className="mt-1">{PATHWAY_CONTEXT[pathway]}</p>
-              <p className="mt-1">{NO_RANK_NOTE} The app never picks a level from your FORGE scores, and you can change it later without losing anything.</p>
-            </details>
-          </fieldset>
+        <Card>
+          <MyStatement n={4} statement={statement} earlier={earlier} ai={ai} hint={hint} />
+        </Card>
 
-          <Submit>{id ? "Save changes" : "Save who I am"}</Submit>
-        </form>
-      </Card>
+        <Submit>Save who I am</Submit>
+      </form>
 
       {id && (
         <details className="card mt-6">

@@ -8,8 +8,9 @@ import { PageHeader, Card, Source, Field } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 import Link from "next/link";
 import { BLUEPRINT_PICKS } from "@/content/options";
-import { LEVELS, PRACTICE, type IdentityLevel } from "@/content/identity";
-import { addIdentityPractice } from "@/app/actions/identity";
+import { LEVELS, PRACTICE, PICKS_STATUS, BEHAVIOR_PICKS, type IdentityLevel } from "@/content/identity";
+import { addIdentityPractice, saveBehavior } from "@/app/actions/identity";
+import { withArticle } from "@/content/whoIAm";
 import { Picks } from "@/components/Picks";
 import { OneMoveCards } from "@/components/OneMoveCards";
 import { FORGE_LINES, PRACTICE_STARTERS } from "@/content/forgeLines";
@@ -61,12 +62,26 @@ export default async function BlueprintPage() {
         {d.intro[0] ? <><p>{d.intro.find((t) => t.startsWith("It's the deliberate construction"))}</p><p className="mt-2">{d.intro.find((t) => t.startsWith("The question isn't"))}</p></> : "The deliberate construction of the routines, relationships, environments, and accountability structures that support sustained development."}
       </FromBook>
 
-      {(statements.length > 0 || profile?.forgeStatement) && (
-        <Link href="/plan" className="mb-6 block rounded-2xl bg-navy-deep p-5 text-white hover:bg-navy">
-          <p className="text-xs uppercase tracking-[0.14em] text-white/60">This road reinforces</p>
-          <p className="mt-2 font-serif text-[18px] leading-snug line-clamp-3">{identity?.becoming || profile?.destination || profile?.forgeStatement}</p>
+      {(identity?.becoming || profile?.forgeStatement) && (
+        <Link href="/identity" className="mb-4 block rounded-2xl bg-navy-deep p-5 text-white hover:bg-navy">
+          <p className="text-xs uppercase tracking-[0.14em] text-white/60">This road reinforces{identity?.role ? ` · as ${withArticle(identity.role)}` : ""}</p>
+          <p className="mt-2 font-serif text-[18px] leading-snug line-clamp-3">{profile?.forgeStatement || identity?.becoming}</p>
         </Link>
       )}
+
+      {/* Behavior belongs in Discipline by Design, so it opens My road. */}
+      <Card className="mb-6">
+        {identity ? (
+          <form action={saveBehavior} className="space-y-2">
+            <label htmlFor="behavior" className="label">What behavior would show I&apos;ve become this person?</label>
+            <input id="behavior" name="behavior" defaultValue={identity.behavior} maxLength={1500} className="input" placeholder="Something another person could see me do" />
+            <Picks list={{ status: PICKS_STATUS, options: BEHAVIOR_PICKS[pathway] }} target="behavior" folded="Examples" />
+            <Submit className="btn-quiet">Save</Submit>
+          </form>
+        ) : (
+          <p className="text-[15px]">Start with <Link href="/identity" className="btn-link">Who I am</Link>. Then name the behavior that would show it.</p>
+        )}
+      </Card>
 
       <section id="one-move" className="mb-6 scroll-mt-20">
         <h2 className="h3 mb-3">One move this week</h2>
@@ -85,7 +100,7 @@ export default async function BlueprintPage() {
         <Card className="mb-6" >
           <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
             <h2 className="h3">Identity practice</h2>
-            <Link href="/identity" className="chip whitespace-nowrap" style={{ borderColor: LEVELS[identity.level as IdentityLevel].color, color: LEVELS[identity.level as IdentityLevel].color }}>Level {LEVELS[identity.level as IdentityLevel].n} · {LEVELS[identity.level as IdentityLevel].name}</Link>
+            <Link href="/identity" className="chip whitespace-nowrap">{LEVELS[identity.level as IdentityLevel].name}</Link>
           </div>
           <ul className="mt-3 divide-y divide-line">
             {PRACTICE[identity.level as IdentityLevel].map((item, i) => {

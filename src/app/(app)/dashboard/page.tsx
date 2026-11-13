@@ -6,6 +6,7 @@ import { getContent } from "@/content";
 import { cycleWeeks, cyclePosition, practiceSummary } from "@/lib/cycle";
 import { fmt, daysBetween, ymd, addDays } from "@/lib/dates";
 import { todayHeadline } from "@/lib/todayHeadline";
+import { withArticle } from "@/content/whoIAm";
 import type { PillarKey } from "@/content/types";
 import { PillarMark, PILLAR_FILL } from "@/components/ui";
 import { CheckInForm } from "@/components/CheckInForm";
@@ -31,7 +32,7 @@ export default async function Dashboard() {
   const lastCommitments = d.sessions.find((x) => x.scheduledAt < now && x.commitments) ?? null;
 
 
-  const statement = d.identity?.becoming || d.profile.destination || "";
+  const statement = d.profile.forgeStatement || d.identity?.becoming || d.profile.destination || "";
   const dueSoon = d.relationships.filter((r) => r.nextCheckIn && daysBetween(new Date(), r.nextCheckIn) <= 2).slice(0, 3);
   const coachItems = [
     nextSession && { key: "s", href: "/coaching", icon: "◷", text: `${fmt(nextSession.scheduledAt, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })} · Session with ${nextSession.coach.name.split(" (")[0]}`, side: nextSession.participantPrep ? "" : "Add prep" },
@@ -78,7 +79,7 @@ export default async function Dashboard() {
           <PracticeStrip checkIns={d.checkIns} pillar={(d.cycle?.pillar ?? pillarKey ?? "F") as PillarKey} />
         </Tile>
         <Tile href="/network" label="People" value={String(dueSoon.length)} word={overdue ? `${overdue} overdue` : dueSoon.length ? "due soon" : d.relationships.length ? "all caught up" : "add someone"} tone={overdue ? "text-alert" : "text-link"} />
-        <Tile href="/plan" label="Who I am" wide>
+        <Tile href="/identity" label={d.identity?.role ? `Who I am · as ${withArticle(d.identity.role)}` : "Who I am"} wide>
           <p className="mt-2 font-serif text-[17px] leading-snug text-heading line-clamp-3">{statement || "Claim who you are."}</p>
           {d.identity?.level === "REINVENT" && d.identity.personaName && <p className="mt-1.5 text-xs text-ink-mute">Performance identity: <span className="text-ink">{d.identity.personaName}</span></p>}
         </Tile>

@@ -4,13 +4,12 @@ import { PageHeader } from "@/components/ui";
 
 const GROUPS: [string, [string, string, string][]][] = [
   ["FORGE", [
-    ["/identity", "1. Who I am", "Claim it in an I am statement and choose how big a change it is."],
-    ["/plan", "2. FORGE identity", "Five I am statements, one for each letter, then your FORGE statement."],
-    ["/assessment", "3. Where I am today", "Score the five pillars and pick one to work on."],
+    ["/identity", "1. Who I am", "The role, the kind of change, five sides of one identity, and one statement."],
+    ["/assessment", "2. Where I am today", "Score the five pillars and pick one to work on."],
   ]],
   ["Discipline by Design", [
-    ["/blueprint", "4. My road", "Discipline by Design: your routines, your people, your learning."],
-    ["/cycle", "5. 30 days", "Practice one behavior for 30 days, then decide what is next."],
+    ["/blueprint", "3. My road", "Discipline by Design: your routines, your people, your learning."],
+    ["/cycle", "4. 30 days", "Practice one behavior for 30 days, then decide what is next."],
     ["/season", "Season", "Three 30-day cycles, about 90 days, and the review at the end."],
     ["/reflect", "Weekly reflection", "Did I do what I said I was going to do?"],
   ]],

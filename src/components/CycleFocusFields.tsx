@@ -28,7 +28,7 @@ export function CycleFocusFields({ pillars, initial, initialFocus = "", identity
           <span className="label">The behavior you will practice</span>
           <input name="focus" className="input" maxLength={500} defaultValue={initialFocus} placeholder="The situation and what you do in it" />
         </label>
-        {identityBehavior && <Picks list={{ status: "approved", options: [identityBehavior] }} target="focus" label="From who I am" />}
+        {identityBehavior && <Picks list={{ status: "approved", options: [identityBehavior] }} target="focus" label="From my road" />}
         <Picks key={pillar} list={CYCLE_FOCUS[pillar]} target="focus" label="Ideas for this pillar" />
       </div>
     </>

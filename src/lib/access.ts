@@ -100,7 +100,7 @@ export async function getCoachView(coach: CurrentUser, participantId: string) {
   const idRow = has("IDENTITY") ? await db.identityProfile.findUnique({ where: { userId: participantId } }) : null;
   const identity = idRow
     ? {
-        level: idRow.level, becoming: idRow.becoming, situation: idRow.situation, behavior: idRow.behavior,
+        level: idRow.level, role: idRow.role, becoming: idRow.becoming, situation: idRow.situation, behavior: idRow.behavior,
         persona: idRow.sharePersona && idRow.level === "REINVENT"
           ? { name: idRow.personaName, qualities: idRow.personaQualities, standards: idRow.personaStandards, situations: idRow.personaSituations, cue: idRow.personaCue, behaviors: idRow.personaBehaviors }
           : null,

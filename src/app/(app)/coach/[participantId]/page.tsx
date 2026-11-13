@@ -1,4 +1,5 @@
 import { FORGE_LINES } from "@/content/forgeLines";
+import { withArticle } from "@/content/whoIAm";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { getCoachView, getCoachWork, ForbiddenError, SHARE_SCOPES, type ShareScope } from "@/lib/access";
@@ -146,7 +147,7 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
           <p className="eyebrow">Who I am</p>
           {v.identity ? (
             <>
-              <p className="mt-2 text-sm"><span className="chip">Level {LEVELS[v.identity.level as IdentityLevel].n} · {LEVELS[v.identity.level as IdentityLevel].name}</span> <span className="text-ink-mute">The client chose this level.</span></p>
+              <p className="mt-2 text-sm">{v.identity.role && <span className="font-medium">As {withArticle(v.identity.role)} · </span>}<span className="chip">{LEVELS[v.identity.level as IdentityLevel].name}</span> <span className="text-ink-mute">The client chose this kind of change.</span></p>
               <p className="mt-3 font-serif text-[16px] leading-relaxed">{v.identity.becoming}</p>
               {v.identity.situation && <p className="mt-2 text-[15px]"><span className="text-ink-mute">Why now: </span>{v.identity.situation}</p>}
               {v.identity.behavior && <p className="mt-1 text-[15px]"><span className="text-ink-mute">Behavior that shows it: </span>{v.identity.behavior}</p>}

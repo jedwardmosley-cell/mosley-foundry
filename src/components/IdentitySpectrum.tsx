@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { LEVELS, IDENTITY_LEVELS, PERSONA_FIELDS, PERSONA_NOTE, PICKS_STATUS, QUALITY_PICKS, PERSONA_SITUATION_PICKS, CUE_PICKS, STANDARD_PICKS, type IdentityLevel } from "@/content/identity";
 import { Picks, TagChoices } from "./Picks";
+import { KIND_NOTE } from "@/content/whoIAm";
 
 const label = (k: (typeof PERSONA_FIELDS)[number]["key"]) => PERSONA_FIELDS.find((f) => f.key === k)!.label;
 const split = (v?: string) => (v ?? "").split(",").map((x) => x.trim()).filter(Boolean);
@@ -19,38 +20,30 @@ export function IdentitySpectrum({ initial, firstExample, persona }: { initial?:
   const examples = l && level ? [...l.examples.slice(firstExample[level] ?? 0), ...l.examples.slice(0, firstExample[level] ?? 0)] : [];
   return (
     <div>
-      <div className="relative pt-2">
-        <div aria-hidden className="absolute left-[16.6%] right-[16.6%] top-[22px] h-1.5 rounded-full" style={{ background: `linear-gradient(90deg, ${LEVELS.CORE.color}, ${LEVELS.ROLE.color}, ${LEVELS.REINVENT.color})` }} />
-        <div role="radiogroup" aria-label="How big a change" className="relative grid grid-cols-3">
-          {IDENTITY_LEVELS.map((k) => {
-            const x = LEVELS[k];
-            const on = level === k;
-            return (
-              <label key={k} className="flex flex-col items-center text-center cursor-pointer px-1">
-                <input type="radio" name="level" value={k} checked={on} onChange={() => setLevel(k)} required className="peer sr-only" />
-                <span className="h-9 w-9 rounded-full border-4 border-card flex items-center justify-center font-serif text-card text-sm shadow-sm transition-transform peer-focus-visible:ring-2 peer-focus-visible:ring-navy/50"
-                  style={{ background: x.color, transform: on ? "scale(1.3)" : "scale(1)", boxShadow: on ? "0 0 0 3px rgb(var(--line))" : undefined }}>{x.n}</span>
-                <span className={`mt-2 text-[13px] leading-tight ${on ? "font-semibold text-heading" : "text-ink-soft"}`}>{x.name}</span>
-              </label>
-            );
-          })}
-        </div>
+      {/* Three equal choices. No numbers, no line, no pillar colors. */}
+      <div role="radiogroup" aria-label="The kind of change" className="grid gap-2 sm:grid-cols-3">
+        {IDENTITY_LEVELS.map((k) => {
+          const x = LEVELS[k];
+          return (
+            <label key={k} className="cursor-pointer">
+              <input type="radio" name="level" value={k} checked={level === k} onChange={() => setLevel(k)} required className="peer sr-only" />
+              <span className="block h-full rounded-2xl border border-line bg-surface p-4 transition peer-checked:border-heading peer-checked:ring-1 peer-checked:ring-heading/30 peer-focus-visible:ring-2 peer-focus-visible:ring-heading/40">
+                <span className="block font-medium text-[15px]">{x.name}</span>
+                <span className="mt-1 block text-sm text-ink-soft">{x.line}</span>
+              </span>
+            </label>
+          );
+        })}
       </div>
-
-      {!l && <p className="mt-4 text-sm muted text-center">Tap each one to read about it.</p>}
-
+      <p className="mt-3 text-sm text-ink-soft">{KIND_NOTE}</p>
       {l && level && (
-        <div className="mt-5 rounded-2xl border p-4" style={{ borderColor: l.color }} aria-live="polite">
-          <p className="font-serif text-xl text-heading">{l.line}</p>
-          <p className="mt-1 text-[15px] text-ink-soft">{l.forWhom}</p>
-          <div className="mt-2 flex flex-wrap gap-1.5">{l.coaching.map((c) => <span key={c} className="chip">{c}</span>)}</div>
-          <details className="mt-3 text-sm">
-            <summary className="cursor-pointer text-link">More about this level</summary>
-            <p className="mt-2 text-xs uppercase tracking-wider text-ink-mute">For example</p>
-            <ul className="mt-1 space-y-0.5 text-[15px]">{examples.map((e) => <li key={e}>{e}</li>)}</ul>
-            <p className="mt-2"><span className="text-ink-mute">The work centers on: </span>{l.emphasis}</p>
-          </details>
-        </div>
+        <details className="mt-2 text-sm">
+          <summary className="cursor-pointer text-link">More about {l.name}</summary>
+          <p className="mt-2 text-ink-soft">{l.forWhom}</p>
+          <p className="mt-2 text-xs uppercase tracking-wider text-ink-mute">For example</p>
+          <ul className="mt-1 space-y-0.5">{examples.map((e) => <li key={e}>{e}</li>)}</ul>
+          <p className="mt-2"><span className="text-ink-mute">The work centers on: </span>{l.emphasis}</p>
+        </details>
       )}
 
       <div className={level === "REINVENT" ? "mt-5" : "hidden"}>

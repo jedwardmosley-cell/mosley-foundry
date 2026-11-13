@@ -6,7 +6,10 @@ import { db } from "./db";
 import { scoresFrom } from "./forge";
 import { effectiveTone, toneBlock } from "./identityTone";
 import { FORGE_LINES, LINE_BY_FIELD, type LineField } from "@/content/forgeLines";
-import { EXAMPLE_PEOPLE, FOUR_THINGS, IDENTITY_TESTS } from "@/content/identityExamples";
+import { EXAMPLE_PEOPLE, FOUR_THINGS, IDENTITY_TESTS, peopleFor } from "@/content/identityExamples";
+import { KIND_GUIDANCE, KIND_RULE, asRole } from "@/content/whoIAm";
+import type { IdentityLevel } from "@/content/identity";
+import type { PathwayKey } from "@/content/program";
 
 export const AI_MODEL = "claude-opus-5-5";
 export const aiAvailable = () => Boolean(process.env.ANTHROPIC_API_KEY);
@@ -98,7 +101,7 @@ export async function participantContext(userId: string) {
     lines.push(`Pathway: ${PATHWAYS[profile.pathway as keyof typeof PATHWAYS]?.name ?? profile.pathway}`);
     if (profile.priorityPillar) lines.push(`Chosen development priority: FORGE ${profile.priorityPillar}`);
     for (const l of FORGE_LINES) if (profile[l.field]) lines.push(`FORGE line ${l.pillar}, ${l.label} (their words): ${profile[l.field]}`);
-    if (profile.forgeStatement) lines.push(`FORGE statement (their words): ${profile.forgeStatement}`);
+    if (profile.forgeStatement) lines.push(`My statement, their single identity statement in their words: ${profile.forgeStatement}`);
   }
   if (assessment) {
     const s = scoresFrom(assessment);
@@ -114,9 +117,11 @@ export async function participantContext(userId: string) {
   // The performance identity is sent only if they also ticked that box.
   const id = await db.identityProfile.findUnique({ where: { userId } });
   if (id && id.aiUse) {
-    const level = { CORE: "Level 1, core alignment", ROLE: "Level 2, role transition", REINVENT: "Level 3, identity reinvention" }[id.level as "CORE"] ?? id.level;
-    lines.push(`Who I am, size of change (participant's own choice, not a ranking): ${level}`);
-    if (id.becoming) lines.push(`Identity statement, a present-tense claim in their words: ${id.becoming}`);
+    const kind = { CORE: "core alignment", ROLE: "role transition", REINVENT: "identity reinvention" }[id.level as "CORE"] ?? id.level;
+    if (id.role) lines.push(`The role this is about: ${id.role}`);
+    lines.push(`The kind of change (the participant's own choice, not a ranking): ${kind}`);
+    if (KIND_GUIDANCE[id.level as IdentityLevel]) lines.push(`How to coach this kind of change: ${KIND_GUIDANCE[id.level as IdentityLevel]}`);
+    if (id.becoming && !profile?.forgeStatement) lines.push(`My statement, their single identity statement in their words: ${id.becoming}`);
     if (id.behavior) lines.push(`Behavior that would show it (their words): ${id.behavior}`);
     if (id.level === "REINVENT" && id.aiUsePersona) {
       if (id.personaName) lines.push(`Performance identity they chose, a practice tool: ${id.personaName}`);
@@ -174,6 +179,7 @@ export function systemPrompt(mode: AiMode, context: string, sources: Chunk[], to
     "- Push toward real-world action and human accountability: a specific behavior, a date, and a person who will know.",
     "- When you draw on a passage from the book and it would help, you can suggest reading that chapter of Both Hands on the Wheel. At most once in a conversation, and never as a sales pitch. Never mention a workbook or worksheet, or section numbers. The app is standalone.",
     "- FORGE is identity formation, and it comes first. Discipline by Design comes after: it turns the identity into routines, relationships and accountability. Keep them apart. A FORGE statement describes who the person is and how they understand themselves. A habit, task or technique belongs in their blueprint.",
+    `- ${KIND_RULE} When the records name a role and a kind of change, coach to them: use the role in your questions and follow the guidance for that kind.`,
     "- Identity statements are claimed in the present tense, in the person's own words: \"I am a leader who operates with integrity.\" Never pressure someone to claim something they do not believe. If they are not there yet, \"I am becoming a courageous leader who speaks up when something matters\" is honest and fine.",
     "",
     `MODE: ${MODES[mode]}`,
@@ -234,7 +240,7 @@ function draftAsk(kind: DraftKind): { query: string; ask: string } {
   if (kind === "forgeStatement") {
     return {
       query: "FORGE statement one paragraph leader destination discipline committing",
-      ask: "Draft the participant's FORGE statement: one short paragraph that pulls their five FORGE identity statements together into one description of who they are. It starts with \"I am\", stays in the present tense, and keeps their own words where it can. It describes the person. It does not list habits, schedules or tasks. If they wrote \"I am becoming\" somewhere, keep that honesty. If some statements are missing, use their identity statement and what else they have recorded.",
+      ask: "Draft the participant's statement (My statement): one short paragraph that pulls their five FORGE identity statements together into one description of who they are, in the role their records name. It starts with \"I am\", stays in the present tense, and keeps their own words where it can. It describes the person. It does not list habits, schedules or tasks. If they wrote \"I am becoming\" somewhere, keep that honesty. If some statements are missing, use their identity statement and what else they have recorded.",
     };
   }
   const l = LINE_BY_FIELD[kind];
@@ -291,6 +297,14 @@ export async function coachIdentityLine(userId: string, field: LineField, writte
   const client = new Anthropic();
   const sources = await retrieve(LINE_QUERY[field], 3);
   const context = await participantContext(userId);
+  // The role and kind of change shape the question, the examples and the coaching, if the client allows identity use.
+  const [idRow, prof] = await Promise.all([
+    db.identityProfile.findUnique({ where: { userId }, select: { role: true, level: true, aiUse: true } }),
+    db.profile.findUnique({ where: { userId }, select: { pathway: true } }),
+  ]);
+  const role = idRow?.aiUse ? idRow.role : "";
+  const level = idRow?.aiUse ? idRow.level : "";
+  const examples = peopleFor((prof?.pathway ?? "PERSONAL") as PathwayKey, role, level).slice(0, 2);
   const stream = client.beta.messages.stream({
     model: AI_MODEL,
     max_tokens: 2000,
@@ -300,13 +314,15 @@ export async function coachIdentityLine(userId: string, field: LineField, writte
     fallbacks: "default",
     system: [
       "You are an identity coach inside Both Hands on the Wheel, a personal leadership app by Jason Mosley.",
+      ...(level ? [`They chose ${({ CORE: "core alignment", ROLE: "role transition", REINVENT: "identity reinvention" } as Record<string, string>)[level]}. ${KIND_GUIDANCE[level as IdentityLevel]}`, KIND_RULE] : []),
+      "These five statements describe one identity from five sides. They are not five separate identities.",
       "FORGE is identity formation. It answers who is behind the wheel. Discipline by Design comes later and turns that identity into routines, relationships and accountability.",
-      `The participant is writing their ${l.pillar}, ${l.label} identity statement. The question is: ${l.question} The statement starts with "I am".`,
+      `The participant is writing their ${l.pillar}, ${l.label} identity statement. The question is: ${asRole(l.question, role)} The statement starts with "I am".`,
       "Identity comes first and behavior follows it. People don't sustain a behavior that conflicts with who they believe they are. Behavior already has a home in this app: My road (one move this week) and 30 days (the practice). If the statement names a behavior, the person has claimed a task and those steps have nothing left to do.",
       `Your job is to help them tell apart four things and work at the identity level. A goal is ${FOUR_THINGS.goal}. A habit is ${FOUR_THINGS.habit}. A value is ${FOUR_THINGS.value}. An identity is ${FOUR_THINGS.identity}.`,
       `Apply these four tests to what they wrote and to anything you suggest: ${IDENTITY_TESTS.map((t, i) => `(${i + 1}) ${t}`).join(" ")}`,
       "- Too vague (\"a purposeful leader\") fails test 4: make it specific to the shift they are making. Too narrow (\"the leader who notices when someone goes quiet\") fails tests 1 and 3: that is one of fifty things a leader who puts people before tasks does. Move up to the identity that produces it.",
-      `- Examples that pass, from the author: ${EXAMPLE_PEOPLE.slice(0, 2).map((p) => [p.claim, ...Object.values(p.lines).slice(0, 2)].join(" ")).join(" ")}`,
+      `- Examples that pass, from the author: ${examples.map((p) => `(${p.who}) ` + [p.claim, p.lines[field]].join(" ")).join(" ")}`,
       "- If they wrote a goal or a habit: say so kindly, ask one question about what it represents about the person they are becoming, and offer one identity statement built from their words. Mention that the habit itself can go in their blueprint.",
       "- If they wrote a value: ask what kind of person lives by it, and offer one identity statement.",
       "- If they wrote an identity: say what is strong about it in one sentence. Offer a clearer version only if it would help. Otherwise leave the suggestion empty.",

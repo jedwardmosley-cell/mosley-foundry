@@ -8,11 +8,10 @@ import { signOut } from "@/app/actions/auth";
 // Client menu, in journey order. The phone tab bar keeps five tabs; everything else is under More.
 const PARTICIPANT_NAV: NavItem[] = [
   { href: "/dashboard", label: "Today", mobile: true },
-  { href: "/identity", label: "1. Who I am", group: "FORGE" },
-  { href: "/plan", label: "2. FORGE identity", tab: "Plan", mobile: true, group: "FORGE" },
-  { href: "/assessment", label: "3. Where I am", group: "FORGE" },
-  { href: "/blueprint", label: "4. My road", group: "Discipline by Design" },
-  { href: "/cycle", label: "5. 30 days", group: "Discipline by Design" },
+  { href: "/identity", label: "1. Who I am", tab: "Who I am", mobile: true, group: "FORGE" },
+  { href: "/assessment", label: "2. Where I am", group: "FORGE" },
+  { href: "/blueprint", label: "3. My road", group: "Discipline by Design" },
+  { href: "/cycle", label: "4. 30 days", group: "Discipline by Design" },
   { href: "/reflect", label: "Weekly reflection", group: "Discipline by Design" },
   { href: "/network", label: "People", mobile: true, group: "Support" },
   { href: "/coaching", label: "Coaching", tab: "Coach", mobile: true, group: "Support" },
@@ -95,7 +94,7 @@ function UserBox({ user }: { user: CurrentUser }) {
   return (
     <div className="border-t border-line pt-4 text-sm">
       <p className="font-medium text-ink truncate">{user.name}</p>
-      <p className="text-ink-mute text-xs capitalize">{user.role === "ADMIN" && user.alsoCoach ? "Administrator and coach" : user.role.toLowerCase()}</p>
+      <p className="text-ink-mute text-xs">{user.role === "ADMIN" && user.alsoCoach ? "Administrator and coach" : ({ PARTICIPANT: "Participant", COACH: "Coach", ADMIN: "Administrator" } as Record<string, string>)[user.role]}</p>
       <Link href="/account/password" className="mt-2 block text-ink-soft hover:text-ink text-sm">Change password</Link>
       <form action={signOut} className="mt-1"><button className="text-ink-soft hover:text-ink text-sm">Sign out</button></form>
     </div>

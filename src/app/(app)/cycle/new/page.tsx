@@ -21,7 +21,7 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
   const u = await requireUser("PARTICIPANT");
   const { pack } = await getContent();
   const profile = await db.profile.findUnique({ where: { userId: u.id } });
-  const identity = await db.identityProfile.findUnique({ where: { userId: u.id }, select: { behavior: true } });
+  const identity = await db.identityProfile.findUnique({ where: { userId: u.id }, select: { behavior: true, role: true } });
   const pathway = PATHWAYS[(profile?.pathway ?? "PERSONAL") as keyof typeof PATHWAYS];
   const defaultTemplate = pack.thirtyDayPlan.length ? pathway.cycleTemplate : "NIRS_30";
   const [open, coaches] = await Promise.all([activeSeason(u.id), db.coachAssignment.count({ where: { participantId: u.id, active: true } })]);
@@ -32,6 +32,14 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
       <PageHeader eyebrow="Discipline by Design" title="Start your 30 days">Pick one pillar and one behavior to practice. Checking in takes two minutes a day.</PageHeader>
       <Card>
         <form action={startCycle} className="space-y-5">
+          <div>
+            <label htmlFor="role" className="label">{identity?.role ? "Still about me as..." : "The role this 30 days is about"}</label>
+            <div className="flex items-center rounded-xl border border-line bg-surface">
+              <span className="pl-3.5 pr-1.5 py-2.5 text-[15px] text-ink-soft whitespace-nowrap">This is about me as</span>
+              <input id="role" name="role" defaultValue={identity?.role ?? ""} maxLength={80} placeholder="manager" className="flex-1 min-w-0 bg-transparent py-2.5 pr-3 text-[15px] focus:outline-none" />
+            </div>
+            <p className="mt-1 text-xs text-ink-mute">One role for each 30 days. Change it here if this month is about a different one.</p>
+          </div>
           <CycleFocusFields pillars={pack.pillars.map((p) => ({ key: p.key, name: p.name }))} initial={fromLink ?? ((profile?.priorityPillar ?? "F") as PillarKey)} initialFocus={(sp.focus ?? "").slice(0, 500)} identityBehavior={identity?.behavior.split("\n")[0].slice(0, 300) ?? ""} />
           {continuing ? (
             <div className="rounded-xl border border-line bg-paper px-4 py-3">
