@@ -1053,7 +1053,15 @@
 
 <script>
 (function () {
-  var STORAGE_KEY = "processiq.sipocs.v1";
+  // Public demo copy: a separate build sets window.PROCESSIQ_DEMO = { seed: {...} }.
+  // It keeps its own storage, starts from sample data, and never syncs.
+  var DEMO = (window.PROCESSIQ_DEMO && window.PROCESSIQ_DEMO.seed) ? window.PROCESSIQ_DEMO : null;
+  var STORAGE_KEY = DEMO ? "processiq.demo.v1" : "processiq.sipocs.v1";
+  function demoState() {
+    var d = JSON.parse(JSON.stringify(DEMO.seed));
+    d.sipocs.forEach(ensureShape);
+    return d;
+  }
 
   var COLUMNS = [
     { key: "suppliers", letter: "S", title: "Suppliers", color: "var(--s)", hint: "Who provides what the process needs?", placeholder: "Add a supplier" },
@@ -1155,6 +1163,7 @@
         }
       }
     } catch (e) { /* storage unavailable: start fresh */ }
+    if (DEMO) return demoState();
     var ex = exampleSipoc();
     return { currentId: ex.id, sipocs: [ensureShape(ex)] };
   }
@@ -3272,6 +3281,7 @@
   });
 
   function startSync() {
+    if (DEMO) { setSync("off", "Demo: saved in this browser"); return; }
     if (!window.claude || typeof window.claude.use !== "function") { setSync("off", "Saved on this device only"); return; }
     setSync("busy", "Connecting to sync...");
     Promise.all([window.claude.use("db"), window.claude.use("user")]).then(function (r) {
@@ -3413,7 +3423,8 @@
       if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });
     document.getElementById("process-bar").hidden = name === "processes" || name === "guide";
-    document.title = name === "dashboard" ? "ProcessIQ" : PAGE_TITLES[name] + " · ProcessIQ";
+    var appName = DEMO ? "ProcessIQ Demo" : "ProcessIQ";
+    document.title = name === "dashboard" ? appName : PAGE_TITLES[name] + " · " + appName;
     if (name === "dashboard") renderDashboard();
     else if (name === "processes") renderProcesses();
     else if (name === "analysis") showSub((opts && opts.sub) || activeSub);
@@ -3510,7 +3521,20 @@
     var box = document.getElementById("page-dashboard");
     box.innerHTML = "";
 
-    if (syncState === "off") {
+    if (DEMO) {
+      var dn = el("div", "banner tone-info");
+      var dt = el("div");
+      dt.appendChild(el("strong", null, "Interactive demo with sample data. "));
+      dt.appendChild(document.createTextNode("Northwind Bookkeeping is a fictional company. Explore freely: changes stay in your browser only."));
+      dn.appendChild(dt);
+      var rb = el("button", "small", "Reset demo"); rb.type = "button";
+      rb.addEventListener("click", function () {
+        openDialog({ title: "Reset the demo?", text: "This puts the sample data back the way it started. Anything you changed in this browser is cleared.", okLabel: "Reset demo",
+          onOk: function () { state = demoState(); save(); renderAll(); showPage("dashboard"); } });
+      });
+      dn.appendChild(rb);
+      box.appendChild(dn);
+    } else if (syncState === "off") {
       var bn = el("div", "banner tone-info");
       var bt = el("div");
       bt.appendChild(el("strong", null, "Saved in this browser only. "));
@@ -4114,16 +4138,24 @@
     card.appendChild(dl);
     input.setAttribute("list", dl.id);
     input.addEventListener("change", function () {
+      // Wait until focus has moved to wherever the user went next, then fill only the
+      // boxes that are blank and that the user is not typing in.
+      setTimeout(fillFromMetric, 0);
+    });
+    function fillFromMetric() {
       var hit = s.metrics.filter(function (x) { return String(x.name || "").trim().toLowerCase() === input.value.trim().toLowerCase(); })[0];
       if (!hit) return;
       ["baseline", "target", "unit"].forEach(function (k) {
+        var f = card.querySelector('input[id^="i-' + k + '-"]');
+        if (f && f === document.activeElement) return;   // never fill the box you are typing in
+        if (f && String(f.value || "").trim()) return;     // never overwrite what is already there
         if (!numText(m[k]) && numText(hit[k])) {
           m[k] = hit[k];
-          var f = card.querySelector('input[id^="i-' + k + '-"]'); if (f) f.value = hit[k];
+          if (f) f.value = hit[k];
         }
       });
       saveSoon(); renderPlan(s);
-    });
+    }
   }
 
   // =====================================================================
