@@ -380,6 +380,39 @@ const submitAndWait = async (page: Page, selector: string) => {
     await gc.close();
   });
 
+  await check("1e. start over: the client erases their own records and begins again", async () => {
+    const gc = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const g: Page = await gc.newPage();
+    const guided = await db.user.findFirstOrThrow({ where: { name: "Guided Driver (E2E)" }, orderBy: { createdAt: "desc" } });
+    assert.ok((await db.assessment.count({ where: { userId: guided.id } })) > 0, "has records before");
+    await login(g, guided.email, "e2e-password-123");
+    await g.goto(`${BASE}/settings`);
+    await g.locator("summary", { hasText: "Start over" }).click();
+    await g.fill('input[name="confirm"]', "yes");
+    await g.click('button:has-text("Erase everything and start over")');
+    await g.waitForSelector('text=Type "start over" to confirm.');
+    assert.ok((await db.assessment.count({ where: { userId: guided.id } })) > 0, "nothing erased without the words");
+    await g.fill('input[name="confirm"]', "Start over");
+    await Promise.all([g.waitForURL("**/onboarding"), g.click('button:has-text("Erase everything and start over")')]);
+    const counts = await Promise.all([
+      db.assessment.count({ where: { userId: guided.id } }),
+      db.developmentCycle.count({ where: { userId: guided.id } }),
+      db.season.count({ where: { userId: guided.id } }),
+      db.commitment.count({ where: { userId: guided.id } }),
+      db.relationship.count({ where: { ownerId: guided.id } }),
+      db.identityProfile.count({ where: { userId: guided.id } }),
+    ]);
+    assert.deepEqual(counts, [0, 0, 0, 0, 0, 0]);
+    const p = await db.profile.findUniqueOrThrow({ where: { userId: guided.id } });
+    assert.equal(p.onboardedAt, null);
+    assert.equal(p.destination, "");
+    assert.ok(await db.auditEvent.findFirst({ where: { actorId: guided.id, action: "participant.start_over" } }), "logged");
+    // the login still works, and the client goes back through the guided session
+    await Promise.all([g.waitForURL("**/start"), g.locator('form:has(input[value="PERSONAL"]) button').click()]);
+    await g.waitForSelector("text=Claim who you are");
+    await gc.close();
+  });
+
   console.log("Sharing and coach access");
   const dana = await db.user.findUniqueOrThrow({ where: { email: "dana@demo.bothhands.app" } });
   const lena = await db.user.findUniqueOrThrow({ where: { email: "lena@demo.bothhands.app" } });
