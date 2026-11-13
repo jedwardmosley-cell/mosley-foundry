@@ -6,26 +6,30 @@
 <style>
   @page { size: Letter; margin: 0; }
   * { box-sizing: border-box; }
-  body { margin: 0; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: #1F2733; background: #F6F2EA; font-size: 10pt; line-height: 1.4; }
+  body { margin: 0; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: #1F2733; background: #F6F2EA; font-size: 9.4pt; line-height: 1.34; }
   .page { width: 8.5in; height: 11in; display: flex; flex-direction: column; }
-  header { background: #15223A; color: #fff; padding: 0.32in 0.55in 0.26in; }
+  header { background: #15223A; color: #fff; padding: 0.26in 0.55in 0.2in; }
   header .mf { font-size: 7.5pt; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,.6); }
-  header h1 { font-family: Georgia, "Times New Roman", serif; font-weight: normal; font-size: 25pt; margin: 5pt 0 2pt; }
+  header h1 { font-family: Georgia, "Times New Roman", serif; font-weight: normal; font-size: 23pt; margin: 4pt 0 2pt; }
   header p { margin: 0; color: rgba(255,255,255,.82); font-size: 10pt; }
-  main { flex: 1; padding: 0.24in 0.55in 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0.14in 0.22in; align-content: start; }
-  .card { background: #FFFDF8; border: 1px solid #E4DDD0; border-radius: 11pt; padding: 10pt 14pt; }
+  main { flex: 1; padding: 0.18in 0.5in 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0.11in 0.18in; align-content: start; }
+  .card { background: #FFFDF8; border: 1px solid #E4DDD0; border-radius: 11pt; padding: 8pt 12pt; }
   .wide { grid-column: 1 / -1; }
-  h2 { font-family: Georgia, serif; font-weight: normal; font-size: 13.5pt; color: #15223A; margin: 0 0 5pt; display: flex; align-items: baseline; gap: 7pt; }
+  h2 { font-family: Georgia, serif; font-weight: normal; font-size: 12.5pt; color: #15223A; margin: 0 0 4pt; display: flex; align-items: baseline; gap: 7pt; }
   h2 .n { color: #A77B3B; font-size: 13pt; }
   h2 .t { margin-left: auto; font-family: "Helvetica Neue", Arial, sans-serif; font-size: 7.5pt; letter-spacing: 0.1em; text-transform: uppercase; color: #7A8291; }
   ol, ul { margin: 0; padding-left: 15pt; }
-  li { margin-bottom: 2pt; }
+  li { margin-bottom: 1.5pt; }
   .fill { display: grid; grid-template-columns: auto 1fr auto 1fr; gap: 4pt 10pt; margin-top: 5pt; align-items: end; }
   .fill span { color: #4A5463; }
   .fill i { border-bottom: 1px solid #7A8291; height: 15pt; display: block; }
   .addr { font-family: Georgia, serif; font-size: 12pt; color: #1E2F4A; }
-  .note { color: #4A5463; font-size: 9.2pt; margin: 4pt 0 0; }
-  footer { padding: 0.1in 0.55in 0.22in; display: flex; justify-content: space-between; color: #7A8291; font-size: 8.5pt; }
+  .note { color: #4A5463; font-size: 8.6pt; margin: 3pt 0 0; }
+  footer { padding: 0.08in 0.55in 0.18in; display: flex; justify-content: space-between; color: #7A8291; font-size: 8.5pt; }
+  .lead { margin: 0 0 6pt; }
+  .two { display: grid; grid-template-columns: 1.35fr 1fr; gap: 0 18pt; }
+  .part { margin: 0 0 3pt; font-size: 7.5pt; letter-spacing: 0.12em; text-transform: uppercase; font-weight: bold; color: #15223A; }
+  .part span { font-weight: normal; letter-spacing: 0.04em; text-transform: none; font-size: 8.5pt; color: #7A8291; margin-left: 4pt; }
   footer b { color: #15223A; font-family: Georgia, serif; font-weight: normal; font-size: 10.5pt; }
 </style>
 </head>
@@ -49,14 +53,26 @@
     </section>
 
     <section class="card wide">
-      <h2><span class="n">2</span> Your first 10 minutes <span class="t">One time</span></h2>
-      <ol>
-        <li>Pick the pathway that fits you: Personal Leadership, Leading Others, or Entrepreneurial Leadership.</li>
-        <li>Take the FORGE assessment. Tap a score from 1 to 5 for each of the five pillars: Future Focused, Outcome Aware, Reason Rooted, Growth Oriented, and Emotionally Anchored.</li>
-        <li>Read your results and choose one pillar as your development priority.</li>
-        <li>Follow the setup list on the Today screen: add to your Blueprint, add your people, and start a 30-day cycle.</li>
-      </ol>
-      <p class="note">Score what you do today. A 3 is a fine place to start.</p>
+      <h2><span class="n">2</span> Your first session <span class="t">About 15 minutes, one time</span></h2>
+      <p class="lead">Pick your pathway: Personal Leadership, Leading Others, or Entrepreneurial Leadership. Then the app walks you through five steps, one screen each.</p>
+      <div class="two">
+        <div>
+          <p class="part">FORGE <span>who is behind the wheel</span></p>
+          <ol>
+            <li><b>Who I am.</b> Finish the sentence: I am ... Say it as true today.</li>
+            <li><b>FORGE identity.</b> One I am statement for each letter, about who you are. Tasks come later.</li>
+            <li><b>Where I am.</b> Score the five pillars from 1 to 5, then pick one to work on.</li>
+          </ol>
+        </div>
+        <div>
+          <p class="part">Discipline by Design <span>how you drive</span></p>
+          <ol start="4">
+            <li><b>My road.</b> Add one routine and one person who will know if you did it.</li>
+            <li><b>30 days.</b> Pick one behavior to practice, two minutes a day.</li>
+          </ol>
+        </div>
+      </div>
+      <p class="note">You can skip any step and come back. The bar at the top of each screen shows what is done and what is next.</p>
     </section>
 
     <section class="card">
@@ -64,7 +80,7 @@
       <ul>
         <li>Open the Today screen.</li>
         <li>Tap Done, Partial or Not yet for today's practice.</li>
-        <li>Add a note only when you have something to say.</li>
+        <li>If you like, tap whether you showed up as who you are.</li>
       </ul>
       <p class="note">A missed day is just information. Log it and keep going.</p>
     </section>
@@ -72,27 +88,36 @@
     <section class="card">
       <h2><span class="n">4</span> Each week <span class="t">5 minutes</span></h2>
       <ul>
-        <li>Open Weekly Reflection.</li>
+        <li>Open the weekly reflection.</li>
         <li>Answer: did I do what I said I was going to do?</li>
         <li>Check the commitments you kept, and write one line about next week.</li>
       </ul>
     </section>
 
     <section class="card">
-      <h2><span class="n">5</span> What is private</h2>
+      <h2><span class="n">5</span> Every 90 days <span class="t">A season</span></h2>
       <ul>
-        <li>Your coach sees nothing until you turn it on in Sharing.</li>
-        <li>Your Private Journal can never be shared with anyone.</li>
-        <li>Your employer sees group totals only, such as attendance.</li>
+        <li>With a coach, your 30 days are part of a season: three months back to back.</li>
+        <li>On day 30, go deeper on the same pillar or pick another one.</li>
+        <li>After month 3, review the season with your coach: your scores then and now, and who you are.</li>
       </ul>
     </section>
 
     <section class="card">
-      <h2><span class="n">6</span> If you need help</h2>
+      <h2><span class="n">6</span> What is private</h2>
       <ul>
-        <li>Open Guide in the app for short steps on every screen. On a phone it is under More.</li>
-        <li>Forgot your password? Ask your coach to reset it.</li>
-        <li>The AI Companion can help you think something through. It is an AI and it does not replace your coach.</li>
+        <li>Your coach sees nothing until you turn it on in Sharing.</li>
+        <li>Your private journal can never be shared with anyone.</li>
+        <li>Your employer sees group totals only, such as attendance.</li>
+      </ul>
+    </section>
+
+    <section class="card wide">
+      <h2><span class="n">7</span> If you need help</h2>
+      <ul>
+        <li>Open Guide in the app for short steps on every screen (on a phone, under More). Forgot your password? Ask your coach.</li>
+        <li>The AI companion can help you think something through. It is an AI and it does not replace your coach.</li>
+        <li>The whole story behind FORGE is in the book, <i>Both Hands on the Wheel</i>: <span class="addr">a.co/d/00SJkS0r</span></li>
       </ul>
     </section>
   </main>
