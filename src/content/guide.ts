@@ -182,7 +182,7 @@ export const CLIENT_GUIDE: GuideSection[] = [
     title: "Your password and your records",
     steps: [
       "To change your password, tap Password at the top of the screen on a phone, or Change password in the sidebar on a computer.",
-      "If you forget your password, ask your coach to reset it. You will pick a new one when you sign in.",
+      "If you forget your password, tap Forgot your password? on the sign-in screen. We email you a link to pick a new one. You can also ask your coach to reset it.",
       "To keep a copy of your work, open History and tap Download development summary.",
       "To start over from the beginning, open Settings and use Start over at the bottom. It erases what you have entered and keeps your login, settings and coach. It cannot be undone, so download your summary first if you want a copy.",
     ],

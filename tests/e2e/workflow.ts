@@ -413,6 +413,47 @@ const submitAndWait = async (page: Page, selector: string) => {
     await gc.close();
   });
 
+  await check("1f. forgot password: an emailed link resets it once, and the reply never reveals who has an account", async () => {
+    const gc = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const g: Page = await gc.newPage();
+    const guided = await db.user.findFirstOrThrow({ where: { name: "Guided Driver (E2E)" }, orderBy: { createdAt: "desc" } });
+    await g.goto(`${BASE}/login`);
+    await Promise.all([g.waitForURL("**/forgot"), g.click('a:has-text("Forgot your password?")')]);
+    const outbox = process.env.EMAIL_DEV_OUTBOX;
+    if (!outbox) {
+      await g.fill('input[name="email"]', guided.email);
+      await g.click('button:has-text("Send me a link")');
+      await g.waitForSelector("text=Ask your coach to reset your password.");
+      await gc.close();
+      return;
+    }
+    const sentBefore = fs.existsSync(outbox) ? fs.readFileSync(outbox, "utf8").trim().split("\n").filter(Boolean).length : 0;
+    // an unknown email gets the same reply, and no email goes out
+    await g.fill('input[name="email"]', "nobody-here@example.test");
+    await g.click('button:has-text("Send me a link")');
+    await g.waitForSelector("text=Check your email");
+    assert.equal(fs.existsSync(outbox) ? fs.readFileSync(outbox, "utf8").trim().split("\n").filter(Boolean).length : 0, sentBefore);
+    // a real account gets a link
+    await g.goto(`${BASE}/forgot`);
+    await g.fill('input[name="email"]', guided.email);
+    await g.click('button:has-text("Send me a link")');
+    await g.waitForSelector("text=Check your email");
+    const mail = JSON.parse(fs.readFileSync(outbox, "utf8").trim().split("\n").pop()!);
+    assert.equal(mail.to, guided.email);
+    const link = (mail.text as string).match(/https?:\/\/\S+\/reset\?token=[\w-]+/)![0];
+    assert.ok(!(await db.passwordResetToken.findFirst({ where: { tokenHash: link.split("token=")[1] } })), "only a hash of the token is stored");
+    await g.goto(link.replace(/^https?:\/\/[^/]+/, BASE));
+    await g.fill('input[name="next"]', "guided-new-password-1");
+    await g.fill('input[name="confirm"]', "guided-new-password-1");
+    await Promise.all([g.waitForURL("**/login?reset=1"), g.click('button:has-text("Save my new password")')]);
+    await g.waitForSelector("text=Your password is changed.");
+    await login(g, guided.email, "guided-new-password-1");
+    // the link works only once
+    await g.goto(link.replace(/^https?:\/\/[^/]+/, BASE));
+    await g.waitForSelector("text=This link has expired");
+    await gc.close();
+  });
+
   console.log("Sharing and coach access");
   const dana = await db.user.findUniqueOrThrow({ where: { email: "dana@demo.bothhands.app" } });
   const lena = await db.user.findUniqueOrThrow({ where: { email: "lena@demo.bothhands.app" } });

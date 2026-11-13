@@ -43,28 +43,29 @@ model User {
   assessments                   Assessment[]
   goals                         DevelopmentGoal[]
   commitments                   Commitment[]
-  relationships                 Relationship[]     @relation("RelOwner")
-  linkedRelations               Relationship[]     @relation("RelLinked")
+  relationships                 Relationship[]       @relation("RelOwner")
+  linkedRelations               Relationship[]       @relation("RelLinked")
   cycles                        DevelopmentCycle[]
   seasons                       Season[]
+  resetTokens                   PasswordResetToken[]
   checkIns                      DailyCheckIn[]
   weeklyReflections             WeeklyReflection[]
   journal                       JournalEntry[]
-  sharesGiven                   ShareGrant[]       @relation("ShareOwner")
-  sharesReceived                ShareGrant[]       @relation("ShareGrantee")
-  coaching                      CoachAssignment[]  @relation("AssignParticipant")
-  coachOf                       CoachAssignment[]  @relation("AssignCoach")
+  sharesGiven                   ShareGrant[]         @relation("ShareOwner")
+  sharesReceived                ShareGrant[]         @relation("ShareGrantee")
+  coaching                      CoachAssignment[]    @relation("AssignParticipant")
+  coachOf                       CoachAssignment[]    @relation("AssignCoach")
   cohortMemberships             CohortMember[]
   attendance                    Attendance[]
   eqiPriorities                 EqiPriority[]
   identity                      IdentityProfile?
   identityHistory               IdentityHistory[]
   conversations                 AiConversation[]
-  exercisesAssigned             AssignedExercise[] @relation("ExerciseParticipant")
-  exercisesGiven                AssignedExercise[] @relation("ExerciseCoach")
-  coachingSessionsAsCoach       CoachingSession[]  @relation("SessionCoach")
-  coachingSessionsAsParticipant CoachingSession[]  @relation("SessionParticipant")
-  auditEvents                   AuditEvent[]       @relation("AuditActor")
+  exercisesAssigned             AssignedExercise[]   @relation("ExerciseParticipant")
+  exercisesGiven                AssignedExercise[]   @relation("ExerciseCoach")
+  coachingSessionsAsCoach       CoachingSession[]    @relation("SessionCoach")
+  coachingSessionsAsParticipant CoachingSession[]    @relation("SessionParticipant")
+  auditEvents                   AuditEvent[]         @relation("AuditActor")
 }
 
 model Session {
@@ -472,4 +473,17 @@ model Season {
   cycles            DevelopmentCycle[]
 
   @@index([userId, status])
+}
+
+/// A forgot-password link. Only a hash of the token is stored. It works once and expires after an hour.
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, createdAt])
 }
