@@ -65,6 +65,51 @@ The demo is separate from your own ProcessIQ. Visitors only change their own bro
 5. Add the live demo link.
 6. Preview, then publish.
 
+---
+
+# Second portfolio item: Automation Opportunity Finder
+
+A separate item so you appear in automation and AI searches as well as process improvement searches. Same fictional sample data.
+
+## Text to paste
+
+**Project title** (pick one)
+
+- AI and Automation Opportunity Finder *(36 characters)*
+- Automation Assessment Tool (ProcessIQ) *(38 characters)*
+
+**Your role** *(83 of 100 characters)*
+
+> Product owner and builder: designed the scoring method, built the app with AI tools
+
+**Project description, long version** *(515 of 600 characters)*
+
+> I built an automation opportunity finder into ProcessIQ, my process improvement app. For every step it asks four plain questions: same way each time, clear rules or judgment, digital or paper, and how often. It then measures the hours of work at stake and recommends a fit: workflow automation, AI assistance, existing business software, digitize first, or not worth it yet. Each recommendation shows its reasoning and stays a hypothesis until approved. Approved ideas become tracked actions. Fictional sample data.
+
+**Project description, short version** *(291 of 300 characters)*
+
+> A tool I built that finds what to automate in a business process, and what not to. It scores each step on repetition, rules, digital information and volume, measures the hours at stake, and recommends workflow automation, AI assistance, existing software or no change. Fictional sample data.
+
+**Skills (up to 5).** Closest matches in Upwork's list, for example:
+
+1. Business Process Automation (or Workflow Automation)
+2. AI Implementation (or AI Consulting)
+3. Process Improvement
+4. Process Mapping
+5. Automation Strategy (or Business Analysis)
+
+## Media, in this order
+
+| # | File | What it shows |
+|---|---|---|
+| Cover | `processiq-automation-00-cover.jpg` | "Find what to automate, and what not to", 9.9 hours a week measured, 3 high-potential steps, 1 poor fit |
+| 1 | `processiq-automation-01-questions.jpg` | Four questions per step, and the hours at stake they produce |
+| 2 | `processiq-automation-02-opportunities.jpg` | Potential level, type of fix, idea and reasoning for each step |
+| 3 | `processiq-automation-03-action.jpg` | Approved ideas in the action plan and imported into the adoption tracker |
+| Video | `processiq-automation-demo.mp4` | 40-second walkthrough of the automation scan with captions (MP4, 3.6 MB) |
+
+Use the same live demo link as the first item: open **Analysis**, then **Automation**.
+
 ## Sources for the limits
 
 - Upwork help center, portfolio fields: https://support.upwork.com/hc/en-us/articles/360016144974

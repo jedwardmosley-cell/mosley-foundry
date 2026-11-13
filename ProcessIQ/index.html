@@ -2005,7 +2005,7 @@
     var top = el("div", "top");
     top.appendChild(el("span", "badge " + f.kind, f.kind === "question" ? "Question" : f.kind === "fact" ? "Fact" : "Hypothesis"));
     if (f.kind !== "question") top.appendChild(el("span", "chip", f.category));
-    if (f.level) top.appendChild(el("span", "chip level " + f.level.toLowerCase(), f.level + " potential"));
+    if (f.level && f.category !== f.level + " potential") top.appendChild(el("span", "chip level " + f.level.toLowerCase(), f.level + " potential"));
     if (f.source === "user") top.appendChild(el("span", "chip", "Added by you"));
     if (f.source === "claude") top.appendChild(el("span", "chip claude", "Suggested by Claude"));
     if (f.edited) top.appendChild(el("span", "chip", "Edited"));
