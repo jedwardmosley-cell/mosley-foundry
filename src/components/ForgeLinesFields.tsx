@@ -30,7 +30,7 @@ export function FiveSides({ profile, pathway, role, level, ai }: { profile: Save
             <span className="font-medium text-[15px] leading-snug">{asRole(l.question, role)}<span className="sr-only"> ({l.label})</span></span>
           </label>
           <PrefixedBox name={l.field} prefix={l.prefix} saved={profile?.[l.field] ?? ""} placeholder={examplePlaceholder(l.field, pathway, role, level)} />
-          {/* Help me find this on the left, Examples on the right, on one line. Either opens full width below. */}
+          {/* Help me with this on the left, Examples on the right, on one line. Either opens full width below. */}
           <div className="relative">
             <Picks list={{ status: IDENTITY_EXAMPLES_STATUS, options: [] }} groups={exampleGroups(l.field, pathway, role, level)} target={l.field} folded="Examples" note={l.hint} alignRight={ai} />
             {ai && <IdentityCoach field={l.field} prefix={l.prefix} corner />}
