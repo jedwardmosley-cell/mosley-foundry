@@ -24,7 +24,7 @@ export default async function Reports() {
               <div className="rounded-xl bg-paper p-3"><dd className="font-serif text-2xl">{r.reinforcingPct == null ? "·" : `${r.reinforcingPct}%`}</dd><dt className="text-xs muted">active in reinforcement</dt></div>
             </dl>
             <ul className="mt-4 grid grid-cols-6 gap-2 text-center text-xs">
-              {r.bySegment.map((s) => <li key={s.key} className="rounded-lg border border-line p-2"><span className="block font-serif text-brass">{s.key}</span>{s.pct == null ? "·" : `${s.pct}%`}</li>)}
+              {r.bySegment.map((s) => <li key={s.key} className="rounded-lg border border-line p-2"><span className="block font-serif text-ink-mute">{s.key}</span>{s.pct == null ? "·" : `${s.pct}%`}</li>)}
             </ul>
             {r.small && <p className="mt-3 text-xs text-ink-mute">Fewer than {MIN_GROUP} participants: percentages hidden.</p>}
           </Card>

@@ -10,7 +10,7 @@ export function NavLink({ href, children, variant }: { href: string; children: R
     return (
       <Link href={href} aria-current={active ? "page" : undefined}
         className={`flex flex-col items-center justify-center py-2.5 text-[11px] font-medium ${active ? "text-heading" : "text-ink-mute"}`}>
-        <span className={`mb-1 h-1 w-4 rounded-full ${active ? "bg-brass" : "bg-transparent"}`} />
+        <span className={`mb-1 h-1 w-4 rounded-full ${active ? "bg-heading" : "bg-transparent"}`} />
         {children}
       </Link>
     );

@@ -20,7 +20,7 @@ export const LEVELS: Record<IdentityLevel, {
     examples: ["I want to become someone who consistently follows through."],
     coaching: ["Reflective", "Encouraging", "Grounded", "Small, repeatable behaviors"],
     emphasis: "Clarity, consistency, self-awareness, and personal ownership.",
-    color: "#5E7A64",
+    color: "rgb(var(--ink-mute))",
   },
   ROLE: {
     n: 2,
@@ -30,7 +30,7 @@ export const LEVELS: Record<IdentityLevel, {
     examples: ["Individual contributor to manager", "Peer to supervisor", "Employee to entrepreneur", "New executive responsibilities"],
     coaching: ["Direct", "Practical", "Challenging", "Real-world decisions"],
     emphasis: "New expectations, unfamiliar decisions, capability development, and role-specific behaviors.",
-    color: "#A77B3B",
+    color: "rgb(var(--ink-soft))",
   },
   REINVENT: {
     n: 3,
@@ -44,7 +44,7 @@ export const LEVELS: Record<IdentityLevel, {
     ],
     coaching: ["Intense", "Performance-oriented", "Highly challenging", "Preparation, rehearsal, action, accountability"],
     emphasis: "Identity cues, personal standards, deliberate practice, and evidence of performance in demanding situations.",
-    color: "#1E2F4A",
+    color: "rgb(var(--heading))",
   },
 };
 
@@ -162,7 +162,7 @@ export const CHECKIN_IDENTITY = {
  * coach can suggest identity work without choosing a level for the client.
  */
 export const IDENTITY_EXERCISES: { title: string; text: string }[] = [
-  { title: "Claim who you are", text: "Open identity shift and write your statement as a present-tense claim that starts with I am. Read it out loud. Then choose the level that fits the size of change you want. It is your call, and you can change it later." },
+  { title: "Claim who you are", text: "Open Who I am and write your statement as a present-tense claim that starts with I am. Read it out loud. Then choose the level that fits the size of change you want. It is your call, and you can change it later." },
   { title: "The behavior that shows it", text: "Write one behavior another person could see you do if you had already become this person. Then do it once this week and write what happened." },
   { title: "Evidence of the week", text: "Look back at your check-ins this week. Where did you show up as who you said you are? Write two moments, and one where you did not." },
   { title: "Prepare for a demanding situation", text: "Pick one demanding situation coming up. Read your I am statement, then write how you will prepare for it and the first thing you will do when it starts." },

@@ -26,7 +26,7 @@ export default async function PlanPage() {
 
   return (
     <>
-      <PageHeader title="Your FORGE plan" />
+      <PageHeader title="My FORGE plan" />
       {pack.actionPlanIntro && (
         <details className="mb-5 text-sm">
           <summary className="cursor-pointer text-link">About your FORGE plan</summary>
@@ -41,7 +41,7 @@ export default async function PlanPage() {
             <span className="chip">Level {LEVELS[identity.level as IdentityLevel].n} · {LEVELS[identity.level as IdentityLevel].name}</span>
           </div>
           <p className="mt-2 font-serif text-lg leading-relaxed">{identity.becoming}</p>
-          <p className="mt-1 text-xs text-ink-mute">Tap to change it in identity shift.</p>
+          <p className="mt-1 text-xs text-ink-mute">Tap to change it.</p>
         </Link>
       ) : (
         <Link href="/identity" className="card block border-navy/40 ring-1 ring-navy/10 hover:border-navy">

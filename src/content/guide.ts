@@ -63,7 +63,7 @@ export const CLIENT_GUIDE: GuideSection[] = [
     id: "plan",
     title: "Your FORGE plan",
     time: "10 to 15 minutes, then a quick look each week",
-    intro: "Your plan starts with who you are. Claim it in identity shift first, then write your FORGE identity: one I am statement for each letter.",
+    intro: "Your plan starts with who you are. Claim it in Who I am first, then write your FORGE identity: one I am statement for each letter.",
     steps: [
       "Answer the question for each letter. F: who am I becoming? O: what does someone with my identity pay attention to? R: what makes this identity meaningful to me? G: who am I when I encounter my limitations? E: who am I when emotions challenge my identity?",
       "Describe who you are. Habits and tasks go in your blueprint, where the identity turns into practice.",
@@ -151,19 +151,19 @@ export const CLIENT_GUIDE: GuideSection[] = [
   },
   {
     id: "identity",
-    title: "Identity shift (optional)",
-    intro: "Some people want to strengthen who they are. Some are stepping into a new role. Some want to reinvent how they show up. Identity shift lets you say which one fits, and the coaching adjusts.",
+    title: "Who I am",
+    intro: "Some people want to strengthen who they are. Some are stepping into a new role. Some want to reinvent how they show up. Who I am is where you claim it and say which one fits. The coaching adjusts.",
     steps: [
-      "Open identity shift from your FORGE plan, your FORGE results, or More.",
+      "Open Who I am. It is step 1 of your journey, under FORGE.",
       "Finish your I am statement, then answer two short questions: why now, and the behavior that would show it. Tap a starter if you want one.",
       "Read your statement out loud. It is in the present tense on purpose. You are claiming it.",
       "Tap each level on the spectrum to read about it, then choose one. No level ranks above another, and your FORGE scores do not decide it.",
       "At Level 3 you can create a performance identity: a name, standards and an activation cue you use to prepare for demanding situations. It is a practice tool and it is still you.",
-      "Your FORGE plan, blueprint, 30-day cycle and daily check-in then show prompts that fit your level. Everything stays optional.",
+      "Your FORGE plan, blueprint, 30-day cycle and daily check-in then show prompts that fit your level.",
       "You can change your level at any time. Earlier versions are kept.",
       "On the same page you choose the AI companion's tone, what it can use, and whether your coach can see your performance identity.",
     ],
-    link: { href: "/identity", label: "Open identity shift" },
+    link: { href: "/identity", label: "Open Who I am" },
   },
   {
     id: "eqi",
@@ -208,7 +208,7 @@ export const COACH_GUIDE: GuideSection[] = [
     title: "What you can and cannot see",
     steps: [
       "A new client shows 0 of 8 areas shared. Ask them to open Sharing and turn on what they want you to see.",
-      "The eight areas are goals, FORGE scores, practice, reflections, blueprint, people, EQ-i priorities, and identity shift.",
+      "The eight areas are goals, FORGE scores, practice, reflections, blueprint, people, EQ-i priorities, and who I am.",
       "You see a written reflection only when the client marks that entry as shared.",
       "You cannot see a client's private journal or their AI conversations.",
       "The client page flags items for your attention, such as no check-ins this week or an overdue check-in with a mentor.",
@@ -245,11 +245,11 @@ export const COACH_GUIDE: GuideSection[] = [
   },
   {
     id: "identity",
-    title: "Identity shift",
+    title: "Who I am",
     steps: [
       "Clients choose their own level. You cannot set it for them.",
-      "To suggest identity work, assign one of the identity shift exercises from the program list.",
-      "You see a client's statement, level and behavior only if they turn on identity shift in Sharing. You see their performance identity only if they also tick that box.",
+      "To suggest identity work, assign one of the Who I am exercises from the program list.",
+      "You see a client's statement, level and behavior only if they turn on Who I am in Sharing. You see their performance identity only if they also tick that box.",
       "You see how often they answered yes to showing up as who they are. Their written notes on that question stay private.",
     ],
   },

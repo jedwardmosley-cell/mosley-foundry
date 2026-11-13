@@ -53,7 +53,7 @@ export function OneMoveCards({ pack, goals, priority, level }: { pack: ContentPa
                     <p className="mt-1 text-ink-soft">{rt(p.key)}</p>
                   </details>
                 )}
-                <Submit className="btn-quiet">Save {p.key}</Submit>
+                <Submit className="btn-quiet">Save my move</Submit>
               </form>
             </details>
           );

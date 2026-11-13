@@ -21,15 +21,15 @@ export function IdentitySpectrum({ initial, firstExample, persona }: { initial?:
     <div>
       <div className="relative pt-2">
         <div aria-hidden className="absolute left-[16.6%] right-[16.6%] top-[22px] h-1.5 rounded-full" style={{ background: `linear-gradient(90deg, ${LEVELS.CORE.color}, ${LEVELS.ROLE.color}, ${LEVELS.REINVENT.color})` }} />
-        <div role="radiogroup" aria-label="Identity shift spectrum" className="relative grid grid-cols-3">
+        <div role="radiogroup" aria-label="How big a change" className="relative grid grid-cols-3">
           {IDENTITY_LEVELS.map((k) => {
             const x = LEVELS[k];
             const on = level === k;
             return (
               <label key={k} className="flex flex-col items-center text-center cursor-pointer px-1">
                 <input type="radio" name="level" value={k} checked={on} onChange={() => setLevel(k)} required className="peer sr-only" />
-                <span className="h-9 w-9 rounded-full border-4 border-card flex items-center justify-center font-serif text-white text-sm shadow-sm transition-transform peer-focus-visible:ring-2 peer-focus-visible:ring-navy/50"
-                  style={{ background: x.color, transform: on ? "scale(1.3)" : "scale(1)", boxShadow: on ? `0 0 0 3px ${x.color}33` : undefined }}>{x.n}</span>
+                <span className="h-9 w-9 rounded-full border-4 border-card flex items-center justify-center font-serif text-card text-sm shadow-sm transition-transform peer-focus-visible:ring-2 peer-focus-visible:ring-navy/50"
+                  style={{ background: x.color, transform: on ? "scale(1.3)" : "scale(1)", boxShadow: on ? "0 0 0 3px rgb(var(--line))" : undefined }}>{x.n}</span>
                 <span className={`mt-2 text-[13px] leading-tight ${on ? "font-semibold text-heading" : "text-ink-soft"}`}>{x.name}</span>
               </label>
             );

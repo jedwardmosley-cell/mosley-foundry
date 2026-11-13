@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import type { CurrentUser } from "@/lib/auth";
 import { NavLink } from "./NavLink";
+import { BrandMark } from "./BrandMark";
 import { signOut } from "@/app/actions/auth";
 
 // Client menu, in journey order. The phone tab bar keeps five tabs; everything else is under More.
@@ -54,7 +55,7 @@ export function Shell({ user, children, journey }: { user: CurrentUser; children
           <div className="flex items-center gap-4 text-sm text-ink-soft"><Link href="/account/password">Password</Link><form action={signOut}><button>Sign out</button></form></div>
         </header>
         {user.isDemo && (
-          <div className="bg-brass-soft text-[13px] text-ink px-4 py-2 text-center">
+          <div className="bg-line/60 text-[13px] text-ink-soft px-4 py-2 text-center">
             Demo account. All people and data shown are fictional.
           </div>
         )}
@@ -80,9 +81,12 @@ export function Shell({ user, children, journey }: { user: CurrentUser; children
 
 function Brand({ compact = false }: { compact?: boolean }) {
   return (
-    <Link href="/" className="block">
-      <span className="font-serif text-heading text-[19px] leading-none">Both Hands on the Wheel</span>
-      {!compact && <span className="block mt-1.5 text-[11px] tracking-[0.14em] uppercase text-ink-mute">Mosley Foundry</span>}
+    <Link href="/" className="flex items-center gap-2.5">
+      <BrandMark size={compact ? 26 : 30} className="text-heading shrink-0" />
+      <span>
+        <span className="block font-serif text-heading text-[19px] leading-none">{compact ? "Both Hands" : "Both Hands on the Wheel"}</span>
+        {!compact && <span className="block mt-1.5 text-[11px] tracking-[0.14em] uppercase text-ink-mute">Mosley Foundry</span>}
+      </span>
     </Link>
   );
 }

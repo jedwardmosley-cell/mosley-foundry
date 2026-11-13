@@ -9,7 +9,7 @@ import { PILLAR_KEYS, type PillarKey } from "@/content/types";
 import { PageHeader, Card, PillarMark, Gauge, Source, Draft } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 
-export const metadata = { title: "Your FORGE Profile" };
+export const metadata = { title: "My FORGE profile" };
 
 export default async function AssessmentResult({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ focus?: string; next?: string }> }) {
   const u = await requireUser("PARTICIPANT");
@@ -32,7 +32,7 @@ export default async function AssessmentResult({ params, searchParams }: { param
 
   return (
     <>
-      <PageHeader eyebrow={`FORGE · ${fmt(a.completedAt, { month: "long", day: "numeric", year: "numeric" })}`} title="Your Score Profile">
+      <PageHeader eyebrow={`FORGE · ${fmt(a.completedAt, { month: "long", day: "numeric", year: "numeric" })}`} title="My score profile">
         Your five scores are not five separate grades. They are a pattern.
         {a.instrument === "FORGE_DRAFT" && <span className="ml-2"><Draft>Draft instrument</Draft></span>}
       </PageHeader>
@@ -57,12 +57,12 @@ export default async function AssessmentResult({ params, searchParams }: { param
         <Card>
           {r.band && <><p className="eyebrow">Reading your total: {r.band.label}</p><p className="mt-2 text-[15px] leading-relaxed">{r.band.text}</p></>}
           {pack.patternNote && <p className="quote mt-5 text-[15px]">{pack.patternNote}</p>}
-          {r.flat && <p className="mt-4 text-sm text-clay">All five scores are the same. If you had to order them from strongest to weakest, which is fifth? That one is your real lowest. Choose it below.</p>}
+          {r.flat && <p className="mt-4 text-sm text-alert">All five scores are the same. If you had to order them from strongest to weakest, which is fifth? That one is your real lowest. Choose it below.</p>}
         </Card>
       </div>
 
       {patterns.map((pt) => (
-        <Card key={pt.id} className="mt-5 border-brass/50">
+        <Card key={pt.id} className="mt-5 border-line">
           <p className="eyebrow">The pattern to watch for</p>
           <h2 className="h2 mt-1">{pt.title}</h2>
           {pt.text.map((t) => <p key={t} className="mt-2 text-[15px] leading-relaxed">{t}</p>)}
@@ -91,9 +91,9 @@ export default async function AssessmentResult({ params, searchParams }: { param
       </Card>
 
       <a href="/identity" className="card block mt-5 hover:border-navy/40">
-        <p className="eyebrow">Optional next step</p>
-        <h2 className="h2 mt-1">Identity shift spectrum</h2>
-        <p className="mt-2 text-[15px] muted">Your scores show where you are. This asks you to claim who you are and how big a change you want to make. You choose the level. Your scores do not decide it.</p>
+        <p className="eyebrow">FORGE · Step 1</p>
+        <h2 className="h2 mt-1">Who I am</h2>
+        <p className="mt-2 text-[15px] muted">Your scores show where you are. Who I am is where you claim who you are, and how big a change you are making. Your scores do not decide it.</p>
       </a>
 
       {nearest && pack.profiles.length > 0 && (

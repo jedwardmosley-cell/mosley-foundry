@@ -11,7 +11,7 @@ import { RELATIONSHIP_ROLES, SEGMENTS, CHECKIN_STATUS, DAY30_DECISIONS } from "@
 import { fmt } from "@/lib/dates";
 import type { PillarKey } from "@/content/types";
 import { PILLAR_KEYS } from "@/content/types";
-import { PageHeader, Card, PillarMark, Gauge, Field } from "@/components/ui";
+import { PageHeader, Card, PillarMark, Gauge, Field , PILLAR_FILL } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 import { removeClient } from "@/app/actions/clients";
 import { ResetPasswordForm } from "@/components/ResetPasswordForm";
@@ -36,6 +36,7 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
   const s = new Set(v.scopes);
   const flags = attentionFlags(v);
   const pk = v.profile?.priorityPillar as PillarKey | undefined;
+  const stripPillar = ((v.cycle?.pillar ?? pk ?? "F") as PillarKey);
   const scores = v.assessment ? scoresFrom(v.assessment) : null;
   const pos = v.cycle ? cyclePosition(v.cycle.startDate) : null;
   const week = v.cycle && pos ? cycleWeeks(v.cycle.template, pack).weeks[pos.week - 1] : null;
@@ -48,7 +49,7 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
     ...pack.jaysJourney.map((j, i) => ({ ref: `jay:${i}`, title: `Jay's Journey: ${j.title}`, text: [j.setup, ...j.prompts].filter(Boolean).join("\n\n") })),
     ...pack.chapters.filter((c) => c.roadTest.length).map((c) => ({ ref: `chapter:${c.number}:roadTest`, title: `Road Test: ${c.title}`, text: c.roadTest.join("\n\n") })),
     ...SEGMENTS.map((x) => ({ ref: `segment:${x.key}`, title: `Segment ${x.key} practice: ${x.title}`, text: x.practice.text })),
-    ...IDENTITY_EXERCISES.map((x, i) => ({ ref: `identity:${i}`, title: `Identity Shift: ${x.title}`, text: x.text })),
+    ...IDENTITY_EXERCISES.map((x, i) => ({ ref: `identity:${i}`, title: `Who I am: ${x.title}`, text: x.text })),
   ];
 
   return (
@@ -77,7 +78,7 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
         </Card>
         <Card>
           <p className="eyebrow">Areas requiring coaching attention</p>
-          {flags.length ? <ul className="mt-3 space-y-2">{flags.map((f) => <li key={f} className="text-[15px] text-clay">{f}</li>)}</ul> : <p className="mt-3 text-sm muted">Nothing flagged from the shared data.</p>}
+          {flags.length ? <ul className="mt-3 space-y-2">{flags.map((f) => <li key={f} className="text-[15px] text-alert">{f}</li>)}</ul> : <p className="mt-3 text-sm muted">Nothing flagged from the shared data.</p>}
         </Card>
       </div>
 
@@ -95,7 +96,7 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
               return counts.size > 0 ? <p className="mt-1 text-sm muted">Where it showed up: {[...counts].sort((a, b) => b[1] - a[1]).map(([t, n]) => `${t} (${n})`).join(" · ")}</p> : null;
             })()}
             <div className="mt-3 flex gap-1">
-              {[...v.practice].reverse().map((p) => <span key={p.date} title={`${p.date} ${p.status}`} className={`h-4 flex-1 rounded ${p.status === "DONE" ? "bg-navy" : p.status === "PARTIAL" ? "bg-brass" : "bg-line"}`} />)}
+              {[...v.practice].reverse().map((p) => <span key={p.date} title={`${p.date} ${p.status}`} className={`h-4 flex-1 rounded ${p.status === "DONE" ? PILLAR_FILL[stripPillar].full : p.status === "PARTIAL" ? PILLAR_FILL[stripPillar].part : "bg-line"}`} />)}
             </div>
           </>
         ) : <div className="mt-3"><NotShared scope="PRACTICE" /></div>}
@@ -142,7 +143,7 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
 
       {s.has("IDENTITY") && (
         <Card className="mt-5">
-          <p className="eyebrow">Identity shift</p>
+          <p className="eyebrow">Who I am</p>
           {v.identity ? (
             <>
               <p className="mt-2 text-sm"><span className="chip">Level {LEVELS[v.identity.level as IdentityLevel].n} · {LEVELS[v.identity.level as IdentityLevel].name}</span> <span className="text-ink-mute">The client chose this level.</span></p>
@@ -163,7 +164,7 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
                 return a.length ? <p className="mt-3 text-sm">Showed up as who they are, last {a.length} answers: {yes} yes · {partly} partly · {a.length - yes - partly} not yet</p> : null;
               })()}
             </>
-          ) : <p className="mt-2 text-sm muted">Sharing is on, but the client has not set up an identity shift.</p>}
+          ) : <p className="mt-2 text-sm muted">Sharing is on, but the client has not claimed who they are yet.</p>}
         </Card>
       )}
 
@@ -245,7 +246,7 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
         <form action={removeClient} className="mt-3">
           <input type="hidden" name="participantId" value={participantId} />
           <p className="text-sm muted mb-2">This takes them off your client list and clears what they shared with you. Their own records are kept. You can add them again later.</p>
-          <Submit className="btn-quiet !text-clay">Remove from my clients</Submit>
+          <Submit className="btn-quiet !text-alert">Remove from my clients</Submit>
         </form>
       </details>
     </>

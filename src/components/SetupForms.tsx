@@ -3,8 +3,8 @@ import { useActionState } from "react";
 import { createFirstAdmin, uploadContent, type SetupState } from "@/app/actions/setup";
 
 function Msg({ s }: { s: SetupState }) {
-  if (s?.error) return <p role="alert" className="text-sm text-clay">{s.error}</p>;
-  if (s?.ok) return <p role="status" className="text-sm text-sage">{s.ok}</p>;
+  if (s?.error) return <p role="alert" className="text-sm text-alert">{s.error}</p>;
+  if (s?.ok) return <p role="status" className="text-sm text-link">{s.ok}</p>;
   return null;
 }
 

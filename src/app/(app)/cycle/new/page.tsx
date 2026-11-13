@@ -34,9 +34,9 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
         <form action={startCycle} className="space-y-5">
           <CycleFocusFields pillars={pack.pillars.map((p) => ({ key: p.key, name: p.name }))} initial={fromLink ?? ((profile?.priorityPillar ?? "F") as PillarKey)} initialFocus={(sp.focus ?? "").slice(0, 500)} identityBehavior={identity?.behavior.split("\n")[0].slice(0, 300) ?? ""} />
           {continuing ? (
-            <div className="rounded-xl border border-brass/50 bg-brass-soft/40 px-4 py-3">
+            <div className="rounded-xl border border-line bg-paper px-4 py-3">
               <input type="hidden" name="season" value="continue" />
-              <p className="font-medium">Month {month} of {SEASON_LENGTH} in your season</p>
+              <p className="font-medium">Month {month} of {SEASON_LENGTH} in my season</p>
               <p className="text-sm text-ink-soft mt-0.5">{open!.cycles.map((c, i) => `Month ${i + 1}: ${pack.pillars.find((p) => p.key === c.pillar)?.name ?? c.pillar}`).join(" · ")}</p>
               <Link href="/cycle/new?season=none" className="mt-1 inline-block text-xs text-ink-mute hover:text-ink">Start this one outside the season</Link>
             </div>

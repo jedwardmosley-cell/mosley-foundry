@@ -22,7 +22,7 @@ export const SHARE_SCOPES = {
   BLUEPRINT: "Discipline by Design blueprint",
   NETWORK: "Accountability relationships (names, roles, check-in cadence)",
   EQI: "EQ-i development priorities I approve",
-  IDENTITY: "Identity shift: my I am statement, my level and my defining behavior",
+  IDENTITY: "Who I am: my I am statement, my level and my defining behavior",
 } as const;
 export type ShareScope = keyof typeof SHARE_SCOPES;
 

@@ -164,7 +164,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await pri.locator('summary:has-text("Ideas")').click();
     await pri.locator('button:has-text("one breath, one question")').click();
     assert.match(await pri.locator('input[name="oneMove"]').inputValue(), /one breath/);
-    await Promise.all([page.waitForLoadState("networkidle"), pri.locator('button:has-text("Save E")').click()]);
+    await Promise.all([page.waitForLoadState("networkidle"), pri.locator('button:has-text("Save my move")').click()]);
     const g = await db.developmentGoal.findFirstOrThrow({ where: { user: { email }, pillar: "E", segmentKey: null } });
     assert.match(g.oneMove, /one breath/);
     assert.equal(await page.locator("details[open]", { hasText: "Future Focused" }).count(), 0, "non-priority pillars start folded");
@@ -192,7 +192,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.ok(await page.locator('input[name="pillar"][value="E"]').isChecked());
   });
 
-  await check("7e. Identity shift: explore all three levels, choose one, change it later, history kept", async () => {
+  await check("7e. Who I am: explore all three levels, choose one, change it later, history kept", async () => {
     await page.goto(`${BASE}/dashboard`);
     assert.ok(!(await page.locator("main").innerText()).includes("follows through"), "no identity statement until the person writes one");
     await page.goto(`${BASE}/identity`);
@@ -205,7 +205,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.locator("label", { hasText: "Core alignment" }).click();
     await page.waitForSelector("text=Strengthen who I am.");
     assert.ok(!(await page.locator('input[name="personaName"]').isVisible()), "persona fields hidden outside Level 3");
-    await Promise.all([page.waitForURL("**/identity?saved=1"), page.click('button:has-text("Save my identity shift")')]);
+    await Promise.all([page.waitForURL("**/identity?saved=1"), page.click('button:has-text("Save who I am")')]);
     const me = await db.user.findUniqueOrThrow({ where: { email } });
     assert.equal((await db.identityProfile.findUniqueOrThrow({ where: { userId: me.id } })).level, "CORE");
     await page.goto(`${BASE}/dashboard`);
@@ -244,7 +244,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await Promise.all([page.waitForLoadState("networkidle"), card.locator('button:has-text("Add a weekly review against my standards")').click()]);
     await card.locator("text=In your blueprint").waitFor();
     assert.equal(await db.commitment.count({ where: { userId: me.id } }), before + 1, "only the one the person tapped is added");
-    const added = await db.commitment.findFirstOrThrow({ where: { userId: me.id, detail: "Identity shift" } });
+    const added = await db.commitment.findFirstOrThrow({ where: { userId: me.id, detail: "Who I am" } });
     assert.equal(added.cadence, "WEEKLY");
     await page.goto(`${BASE}/cycle/new`);
     await page.locator('button:has-text("I close every open commitment by Friday noon.")').click();
@@ -353,7 +353,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal(await g.locator('input[name="decision"][value="CONTINUE_ALONE"]').count(), 0);
     await g.locator('input[name="decision"][value="NEXT_SAME"]').check();
     await Promise.all([g.waitForURL(/\/cycle\/new\?season=continue/), g.click('button:has-text("Complete the cycle")')]);
-    await g.waitForSelector("text=Month 2 of 3 in your season");
+    await g.waitForSelector("text=Month 2 of 3 in my season");
     assert.equal(await g.inputValue('input[name="focus"]'), "Pause before I answer", "same pillar carries the behavior over");
     await Promise.all([g.waitForURL("**/cycle"), g.click('button:has-text("Start the cycle")')]);
     await g.waitForSelector("text=Season, month 2 of 3");
@@ -508,7 +508,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await dc.close();
   });
 
-  await check("9d. Identity shift sharing is the client's choice; the coach sees nothing until it is on", async () => {
+  await check("9d. Who I am sharing is the client's choice; the coach sees nothing until it is on", async () => {
     const dc = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const dp: Page = await dc.newPage();
     await login(dp, "dana@demo.bothhands.app");
@@ -517,12 +517,12 @@ const submitAndWait = async (page: Page, selector: string) => {
     await dp.locator("label", { hasText: "Identity reinvention" }).click();
     await dp.locator("summary", { hasText: "Create a performance identity" }).click();
     await dp.fill('input[name="personaName"]', "E2E-PERSONA");
-    await Promise.all([dp.waitForURL("**/identity?saved=1"), dp.click('button:has-text("Save my identity shift")')]);
+    await Promise.all([dp.waitForURL("**/identity?saved=1"), dp.click('button:has-text("Save who I am")')]);
     await page.goto(`${BASE}/coach/${dana.id}`);
     assert.ok(!(await page.content()).includes("E2E-ID"), "not visible before the client shares");
     await dp.goto(`${BASE}/sharing`);
-    await Promise.all([dp.waitForLoadState("networkidle"), dp.click('button[aria-label^="Share: Identity shift"]')]);
-    await dp.waitForSelector('button[aria-label^="Stop sharing: Identity shift"]');
+    await Promise.all([dp.waitForLoadState("networkidle"), dp.click('button[aria-label^="Share: Who I am"]')]);
+    await dp.waitForSelector('button[aria-label^="Stop sharing: Who I am"]');
     await page.goto(`${BASE}/coach/${dana.id}`);
     await page.waitForSelector("text=E2E-ID: a manager who makes hard calls on time.");
     assert.ok(!(await page.content()).includes("E2E-PERSONA"), "persona needs its own tick");

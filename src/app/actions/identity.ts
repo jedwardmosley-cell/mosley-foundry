@@ -84,7 +84,7 @@ export async function addIdentityPractice(fd: FormData) {
     : a.from === "standards" ? "Read my standards"
     : "Review my week against my standards";
   if (!title) redirect("/identity");
-  const detail = "Identity shift";
+  const detail = "Who I am";
   const exists = await db.commitment.findFirst({ where: { userId: u.id, active: true, title, detail } });
   if (!exists) await db.commitment.create({ data: { userId: u.id, area: a.area, title, detail, cadence: a.cadence } });
   revalidatePath("/blueprint");

@@ -25,7 +25,7 @@ export function CheckInForm({ existing, hasCoach, identityLevel, dark = false }:
           {OPTIONS.map((o) => (
             <label key={o.v} className="cursor-pointer">
               <input type="radio" name="status" value={o.v} defaultChecked={existing?.status === o.v} required className="peer sr-only" />
-              <span className={`block rounded-xl border py-3.5 text-center text-base font-medium peer-focus-visible:ring-2 peer-focus-visible:ring-brass ${pill}`}>
+              <span className={`block rounded-xl border py-3.5 text-center text-base font-medium peer-focus-visible:ring-2 peer-focus-visible:ring-heading/40 ${pill}`}>
                 {o.label}
               </span>
             </label>
@@ -39,7 +39,7 @@ export function CheckInForm({ existing, hasCoach, identityLevel, dark = false }:
           {(Object.entries(CHECKIN_IDENTITY.answers) as [string, string][]).map(([v, label]) => (
             <label key={v} className="cursor-pointer">
               <input type="radio" name="identityActed" value={v} defaultChecked={existing?.identityActed === v} className="peer sr-only" />
-              <span className={`block rounded-full border px-3 py-1 text-[13px] peer-focus-visible:ring-2 peer-focus-visible:ring-brass ${pill}`}>{label}</span>
+              <span className={`block rounded-full border px-3 py-1 text-[13px] peer-focus-visible:ring-2 peer-focus-visible:ring-heading/40 ${pill}`}>{label}</span>
             </label>
           ))}
         </fieldset>
@@ -62,7 +62,7 @@ export function CheckInForm({ existing, hasCoach, identityLevel, dark = false }:
           )}
         </div>
       </details>
-      <Submit className={dark ? "btn w-full bg-brass text-heading hover:bg-surface" : "btn-primary w-full"}>{existing ? "Update today" : "Log today"}</Submit>
+      <Submit className={dark ? "btn w-full bg-surface text-heading" : "btn-primary w-full"}>{existing ? "Update today" : "Log today"}</Submit>
     </form>
   );
 }

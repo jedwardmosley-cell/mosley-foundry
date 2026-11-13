@@ -9,7 +9,7 @@ import { PageHeader, PillarMark, Draft, Source } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 import { DictationHint } from "@/components/Picks";
 
-export const metadata = { title: "FORGE Self-Assessment" };
+export const metadata = { title: "Where I am" };
 
 export default async function AssessmentPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const { next } = await searchParams;
@@ -22,14 +22,14 @@ export default async function AssessmentPage({ searchParams }: { searchParams: P
 
   return (
     <>
-      <PageHeader eyebrow={useEntre ? "FORGE · for entrepreneurs" : "FORGE"} title="The FORGE Self-Assessment">
+      <PageHeader eyebrow={useEntre ? "FORGE · Step 3 · for entrepreneurs" : "FORGE · Step 3"} title="Where I am">
         {useEntre ? entrepreneur!.intro.slice(0, 3).map((t) => <p key={t} className="mb-2">{t}</p>) : (
-          <p>Read the anchors. Score yourself honestly. Then verify. Your score should reflect behavior, not intention.</p>
+          <p>Tap a score from 1 to 5 for each pillar. Score what you did this past month. The short lines under each score show what it looks like.</p>
         )}
       </PageHeader>
 
       {pack.assessmentStatus === "draft" && (
-        <div className="card mb-6 border-clay/30 bg-clay-soft/40">
+        <div className="card mb-6 border-alert/30 bg-alert-soft/40">
           <Draft>Draft assessment</Draft>
           <p className="mt-2 text-sm">The licensed content pack is not installed on this server, so this is a placeholder assessment for testing only. It is not the author&apos;s instrument and is not validated.</p>
         </div>

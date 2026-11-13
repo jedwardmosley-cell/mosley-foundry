@@ -57,7 +57,7 @@ export default async function EqiPage() {
             <Card key={e.id}>
               <div className="flex justify-between gap-3">
                 <h2 className="h3 flex items-center gap-2">{e.pillar && <PillarMark k={e.pillar as PillarKey} size="sm" />}{e.label}</h2>
-                <form action={deleteEqi}><input type="hidden" name="id" value={e.id} /><button className="text-sm text-ink-mute hover:text-clay">Remove</button></form>
+                <form action={deleteEqi}><input type="hidden" name="id" value={e.id} /><button className="text-sm text-ink-mute hover:text-alert">Remove</button></form>
               </div>
               {e.note && <p className="mt-2 text-[15px]">{e.note}</p>}
 
@@ -88,7 +88,7 @@ export default async function EqiPage() {
                 {shared && (
                   <form action={approveEqiInterpretation} className="mt-3 text-sm">
                     <input type="hidden" name="id" value={e.id} /><input type="hidden" name="approved" value="false" />
-                    <span className="chip !text-sage mr-2">Shared with coach</span>
+                    <span className="chip !text-link mr-2">Shared with coach</span>
                     <button className="btn-link">Stop sharing this one</button>
                   </form>
                 )}

@@ -11,6 +11,7 @@
   --brass: 167 123 59;  --brass-soft: 239 226 204;
   --sage: 94 122 100;  --sage-soft: 227 235 227;
   --clay: 168 92 69;  --clay-soft: 243 226 219;
+  --violet: 107 106 143;  --alert: 180 35 24;  --alert-soft: 254 228 226;
   --glow-a: 167 123 59;  --glow-b: 30 47 74;
   --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
   --font-sans: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -25,6 +26,7 @@
     --brass: 214 172 104;  --brass-soft: 58 47 30;
     --sage: 141 180 151;  --sage-soft: 30 44 36;
     --clay: 226 145 122;  --clay-soft: 58 35 29;
+    --violet: 160 158 205;  --alert: 249 112 102;  --alert-soft: 58 28 26;
     --glow-a: 214 172 104;  --glow-b: 70 110 170;
   }
 }
@@ -49,9 +51,9 @@ body {
   .btn { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-[15px] font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-navy/40 disabled:opacity-50; }
   .btn-primary { @apply btn bg-navy text-white hover:bg-navy-deep; }
   .btn-quiet { @apply btn border border-line bg-surface text-ink hover:bg-paper; }
-  .btn-link { @apply text-link underline underline-offset-4 decoration-brass/60 hover:decoration-brass; }
+  .btn-link { @apply text-link underline underline-offset-4 decoration-ink-mute/50 hover:decoration-link; }
   .chip { @apply inline-flex items-center rounded-full border border-line bg-surface px-2.5 py-0.5 text-xs font-medium text-ink-soft; }
-  .quote { @apply font-serif italic text-ink-soft border-l-2 border-brass pl-4; }
+  .quote { @apply font-serif italic text-ink-soft border-l-2 border-line pl-4; }
   .source { @apply text-xs text-ink-mute; }
   /* The soft, glowing style: light comes from the brand colors instead of hard borders. */
   .glow {
@@ -68,5 +70,5 @@ body {
     border: 1px solid rgb(var(--line) / 0.5);
     box-shadow: 0 10px 30px -22px rgb(var(--glow-b) / 0.5);
   }
-  .draft { @apply inline-flex items-center rounded-full bg-clay-soft text-clay px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide; }
+  .draft { @apply inline-flex items-center rounded-full border border-ink-mute/40 text-ink-soft px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide; }
 }

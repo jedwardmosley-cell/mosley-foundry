@@ -24,7 +24,7 @@ export default async function CoachCohorts() {
           <ul className="mt-4 divide-y divide-line">
             {r.bySegment.map((s) => (
               <li key={s.key} className="py-2 flex justify-between gap-3 text-[15px]">
-                <span><span className="text-brass font-serif mr-2">{s.key}</span>{s.title}</span>
+                <span><span className="text-ink-mute font-serif mr-2">{s.key}</span>{s.title}</span>
                 <span className="muted text-sm">{fmt(s.startsAt, { month: "short", day: "numeric", hour: "numeric" })} · {s.pct == null ? `${s.present} present` : `${s.pct}% present`}</span>
               </li>
             ))}

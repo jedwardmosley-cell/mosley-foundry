@@ -20,7 +20,7 @@ import { FORGE_IDENTITY_INTRO } from "@/content/forgeIdentityIntro";
 import { PRACTICE_STARTERS } from "@/content/forgeLines";
 import { RELATIONSHIP_ROLES, type PathwayKey } from "@/content/program";
 
-export const metadata = { title: "Your first session" };
+export const metadata = { title: "My first session" };
 
 const STEP_COPY = [
   { title: "Claim who you are", intro: "Write it as true today, the way you would say it out loud." },
@@ -46,7 +46,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
   if (step === 0 || (journey.done.drive && !sp.step)) {
     return (
       <>
-        <PageHeader eyebrow="Your first session" title="You are set up" />
+        <PageHeader eyebrow="My first session" title="You are set up" />
         <Card>
           <p className="text-[15px]">Your 30 days are under way. Each day, open Today and check in. It takes about two minutes.</p>
           <Link href="/dashboard" className="btn-primary mt-4 inline-flex">Go to Today</Link>
@@ -78,19 +78,19 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
         {JOURNEY_STEPS.map((s, i) => (
           <li key={s.key}>
             <Link href={`/start?step=${i + 1}`} aria-current={i + 1 === step ? "step" : undefined} className="block">
-              <span className={`block h-1.5 rounded-full ${i + 1 === step ? "bg-navy" : journey.done[s.key] ? "bg-sage" : "bg-line"}`} />
+              <span className={`block h-1.5 rounded-full ${i + 1 === step ? "bg-heading" : journey.done[s.key] ? "bg-navy" : "bg-line"}`} />
               <span className="sr-only">Step {i + 1}: {s.label}{journey.done[s.key] ? " (done)" : ""}</span>
             </Link>
           </li>
         ))}
       </ol>
-      <PageHeader eyebrow={`Your first session · Step ${step} of 5 · ${step <= 3 ? "FORGE" : "Discipline by Design"}`} title={copy.title}>{copy.intro}</PageHeader>
+      <PageHeader eyebrow={`My first session · Step ${step} of 5 · ${step <= 3 ? "FORGE" : "Discipline by Design"}`} title={copy.title}>{copy.intro}</PageHeader>
 
       {step === 1 && (identity ? (
         <Card>
           <p className="eyebrow">Who I am</p>
           <p className="mt-2 font-serif text-lg leading-relaxed">{identity.becoming}</p>
-          <p className="text-sm muted mt-1">Level {LEVELS[identity.level as IdentityLevel].n} · {LEVELS[identity.level as IdentityLevel].name}. You can change it any time in <Link href="/identity" className="btn-link">Identity shift</Link>.</p>
+          <p className="text-sm muted mt-1">Level {LEVELS[identity.level as IdentityLevel].n} · {LEVELS[identity.level as IdentityLevel].name}. You can change it any time in <Link href="/identity" className="btn-link">Who I am</Link>.</p>
           <Link href={next} className="btn-primary mt-4 inline-flex">{nextLabel}</Link>
         </Card>
       ) : (
@@ -195,7 +195,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
 
       {step === 5 && (
         <Card>
-          <p className="eyebrow">Your road</p>
+          <p className="eyebrow">My road</p>
           <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-[15px] [&>div:first-child]:col-span-2 [&>div:nth-child(2)]:col-span-2">
             {identity && <div><dt className="text-ink-mute text-sm">Who I am</dt><dd className="font-serif text-lg">{identity.becoming}</dd></div>}
             {!identity && profile?.destination && <div><dt className="text-ink-mute text-sm">Who I am</dt><dd className="font-serif text-lg">{profile.destination}</dd></div>}

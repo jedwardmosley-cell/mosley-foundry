@@ -48,7 +48,7 @@ export default async function NetworkPage({ searchParams }: { searchParams: Prom
           <ul className="mt-3 space-y-2.5">
             {health.map((h) => (
               <li key={h.label} className="flex items-start gap-2.5 text-[15px]">
-                <span className={`mt-0.5 h-5 w-5 shrink-0 rounded-full text-[11px] flex items-center justify-center ${h.ok ? "bg-sage text-white" : "border border-clay text-clay"}`}>{h.ok ? "✓" : "!"}</span>
+                <span className={`mt-0.5 h-5 w-5 shrink-0 rounded-full text-[11px] flex items-center justify-center ${h.ok ? "bg-navy text-white" : "border border-alert text-alert"}`}>{h.ok ? "✓" : "!"}</span>
                 <span className={h.ok ? "" : "text-ink"}>{h.label}</span>
               </li>
             ))}
@@ -63,7 +63,7 @@ export default async function NetworkPage({ searchParams }: { searchParams: Prom
           <Card key={r.id}>
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <h3 className="h3">{r.name} <span className="muted font-normal">· {RELATIONSHIP_ROLES[r.role as keyof typeof RELATIONSHIP_ROLES]}</span></h3>
-              <span className={`text-sm ${r.overdue ? "text-clay" : "muted"}`}>Every {r.cadenceDays} days · {r.overdue ? "was due" : "next"} {fmt(r.nextCheckIn)}</span>
+              <span className={`text-sm ${r.overdue ? "text-alert" : "muted"}`}>Every {r.cadenceDays} days · {r.overdue ? "was due" : "next"} {fmt(r.nextCheckIn)}</span>
             </div>
             {r.purpose && <p className="mt-1 text-[15px] text-ink-soft">{r.purpose}</p>}
             {r.checkIns.length > 0 && (
@@ -95,13 +95,13 @@ export default async function NetworkPage({ searchParams }: { searchParams: Prom
             </details>
             <div className="mt-3 flex flex-wrap items-center gap-4 text-sm">
               {r.inviteStatus === "ACCEPTED" ? (
-                <span className="chip !text-sage">Connected{r.linkedUser ? ` as ${r.linkedUser.name}` : ""}</span>
+                <span className="chip !text-link">Connected{r.linkedUser ? ` as ${r.linkedUser.name}` : ""}</span>
               ) : r.inviteStatus === "PENDING" && r.inviteToken ? (
                 <span className="text-ink-soft break-all">Invite link: <code className="text-xs">{`${host?.includes("localhost") ? "http" : "https"}://${host}/invite/${r.inviteToken}`}</code></span>
               ) : (
                 <form action={createInvite}><input type="hidden" name="id" value={r.id} /><button className="btn-link">Create invitation link</button></form>
               )}
-              <form action={removeRelationship}><input type="hidden" name="id" value={r.id} /><button className="text-ink-mute hover:text-clay">Remove</button></form>
+              <form action={removeRelationship}><input type="hidden" name="id" value={r.id} /><button className="text-ink-mute hover:text-alert">Remove</button></form>
             </div>
           </Card>
         ))}

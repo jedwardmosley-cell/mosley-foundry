@@ -3,7 +3,7 @@ import { RELATIONSHIP_ROLES } from "@/content/program";
 type Rel = { id: string; name: string; role: string; overdue: boolean };
 
 const RING: Record<string, number> = { MENTOR: 0, COACH: 0, ACCOUNTABILITY_PARTNER: 1, GROUP: 1, MENTEE: 2, DIRECT_REPORT: 2 };
-const TONE: Record<string, string> = { MENTOR: "rgb(var(--link))", COACH: "rgb(var(--link))", ACCOUNTABILITY_PARTNER: "rgb(var(--brass))", GROUP: "rgb(var(--sage))", MENTEE: "rgb(var(--clay))", DIRECT_REPORT: "rgb(var(--clay))" };
+const TONE: Record<string, string> = { MENTOR: "rgb(var(--link))", COACH: "rgb(var(--link))", ACCOUNTABILITY_PARTNER: "rgb(var(--heading))", GROUP: "rgb(var(--ink-mute))", MENTEE: "rgb(var(--ink-soft))", DIRECT_REPORT: "rgb(var(--ink-soft))" };
 
 /** You at the center. People who guide you, people beside you, people you develop. */
 export function RelationshipMap({ name, rels }: { name: string; rels: Rel[] }) {
@@ -22,7 +22,7 @@ export function RelationshipMap({ name, rels }: { name: string; rels: Rel[] }) {
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img" aria-label={`Relationship map: ${rels.length} people`}>
       <circle cx={cx} cy={cy} r={105} fill="none" stroke="rgb(var(--line))" strokeDasharray="3 5" />
       {nodes.map((n) => (
-        <line key={`l${n.id}`} x1={cx} y1={cy} x2={n.x} y2={n.y} stroke={n.overdue ? "rgb(var(--clay))" : "rgb(var(--ink-mute) / 0.5)"} strokeWidth={1.25} strokeDasharray={n.overdue ? "4 4" : undefined} />
+        <line key={`l${n.id}`} x1={cx} y1={cy} x2={n.x} y2={n.y} stroke={n.overdue ? "rgb(var(--alert))" : "rgb(var(--ink-mute) / 0.5)"} strokeWidth={1.25} strokeDasharray={n.overdue ? "4 4" : undefined} />
       ))}
       <circle cx={cx} cy={cy} r={30} fill="#15223A" />
       <text x={cx} y={cy + 4} textAnchor="middle" fontSize="12" fill="#fff" fontFamily="Georgia, serif">{name.split(" ")[0]}</text>

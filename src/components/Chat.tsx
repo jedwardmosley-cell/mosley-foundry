@@ -41,7 +41,7 @@ export function Chat({ id, messages, starter }: { id: string; messages: Msg[]; s
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); formRef.current?.requestSubmit(); } }} />
           <button className="btn-primary shrink-0" disabled={pending}>Send</button>
         </div>
-        {state?.error && <p role="alert" className="mt-2 text-sm text-clay">{state.error}</p>}
+        {state?.error && <p role="alert" className="mt-2 text-sm text-alert">{state.error}</p>}
       </form>
     </div>
   );

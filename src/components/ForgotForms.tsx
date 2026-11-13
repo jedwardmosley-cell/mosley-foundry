@@ -20,7 +20,7 @@ export function ForgotForm() {
       <h2 className="h2">Forgot your password?</h2>
       <p className="text-[15px] text-ink-soft">Enter your email and we&apos;ll send you a link to pick a new one.</p>
       <label className="block"><span className="label">Email</span><input name="email" type="email" className="input" autoComplete="email" required /></label>
-      {s?.error && <p role="alert" className="text-sm text-clay">{s.error}</p>}
+      {s?.error && <p role="alert" className="text-sm text-alert">{s.error}</p>}
       <button className="btn-primary w-full" disabled={pending}>{pending ? "One moment..." : "Send me a link"}</button>
       <p className="text-sm muted text-center"><Link className="btn-link" href="/login">Back to sign in</Link></p>
     </form>
@@ -35,7 +35,7 @@ export function ResetForm({ token }: { token: string }) {
       <input type="hidden" name="token" value={token} />
       <label className="block"><span className="label">New password</span><input name="next" type="password" className="input" autoComplete="new-password" minLength={10} required /><span className="mt-1 block text-xs text-ink-mute">At least 10 characters.</span></label>
       <label className="block"><span className="label">New password again</span><input name="confirm" type="password" className="input" autoComplete="new-password" required /></label>
-      {s?.error && <p role="alert" className="text-sm text-clay">{s.error}</p>}
+      {s?.error && <p role="alert" className="text-sm text-alert">{s.error}</p>}
       <button className="btn-primary w-full" disabled={pending}>{pending ? "Saving..." : "Save my new password"}</button>
     </form>
   );

@@ -12,7 +12,7 @@ import { Submit } from "@/components/Submit";
 import { Picks } from "@/components/Picks";
 import { IdentitySpectrum } from "@/components/IdentitySpectrum";
 
-export const metadata = { title: "Identity shift" };
+export const metadata = { title: "Who I am" };
 
 export default async function IdentityPage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
   const u = await requireUser("PARTICIPANT");
@@ -27,9 +27,9 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
 
   return (
     <>
-      <PageHeader eyebrow="Identity shift · optional" title="Who I am">Claim who you are, and choose how big a change it is. Your FORGE scores and plan stay as they are.</PageHeader>
+      <PageHeader eyebrow="FORGE · Step 1" title="Who I am">Claim who you are, and choose how big a change it is.</PageHeader>
 
-      {saved && <p role="status" className="mb-4 rounded-xl border border-sage/40 bg-sage-soft px-4 py-2.5 text-sm text-sage">Saved. Next, <Link href="/plan" className="underline">write your FORGE identity</Link> so the rest of your plan builds on who you are.</p>}
+      {saved && <p role="status" className="mb-4 rounded-xl border border-line bg-surface px-4 py-2.5 text-sm text-link">Saved. Next, <Link href="/plan" className="underline">write your FORGE identity</Link> so the rest of your plan builds on who you are.</p>}
 
       <Card>
         <form action={saveIdentity} className="space-y-6">
@@ -69,7 +69,7 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
             </details>
           </fieldset>
 
-          <Submit>{id ? "Save changes" : "Save my identity shift"}</Submit>
+          <Submit>{id ? "Save changes" : "Save who I am"}</Submit>
         </form>
       </Card>
 
@@ -103,11 +103,11 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
             </fieldset>
             <fieldset>
               <legend className="label">What my coach can see</legend>
-              <p className="text-sm text-ink-soft">Only if you turn on <Link href="/sharing" className="btn-link">Identity shift in Sharing</Link>. Check-in notes stay private.</p>
+              <p className="text-sm text-ink-soft">Only if you turn on <Link href="/sharing" className="btn-link">Who I am in Sharing</Link>. Check-in notes stay private.</p>
               {id.level === "REINVENT" && (
                 <label className="mt-2 flex items-start gap-2 text-[15px]">
                   <input type="checkbox" name="sharePersona" defaultChecked={id.sharePersona} className="mt-1 h-4 w-4 accent-navy" />
-                  <span>When identity shift is shared, include my performance identity too.</span>
+                  <span>When Who I am is shared, include my performance identity too.</span>
                 </label>
               )}
             </fieldset>
@@ -133,7 +133,7 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
 
       {id && (
         <form action={removeIdentity} className="mt-6">
-          <button className="text-sm text-ink-mute hover:text-ink">Turn off identity shift (your version is kept)</button>
+          <button className="text-sm text-ink-mute hover:text-ink">Clear who I am (earlier versions are kept)</button>
         </form>
       )}
     </>

@@ -24,7 +24,7 @@ export function HelpMeWrite({ kind, target, strip = "" }: { kind: DraftKind; tar
       <button type="button" onClick={run} disabled={pending} className="text-sm btn-link text-left">
         {pending ? "Drafting..." : "Help me write this"}
       </button>
-      {error && <span role="alert" className="text-xs text-clay mt-1">{error}</span>}
+      {error && <span role="alert" className="text-xs text-alert mt-1">{error}</span>}
       {!error && <span className="text-[11px] text-ink-mute">A starting draft from what you have recorded. Edit it until it is true, then save.</span>}
     </span>
   );

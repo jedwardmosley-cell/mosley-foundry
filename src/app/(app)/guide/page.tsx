@@ -12,7 +12,7 @@ function Sections({ prefix, sections }: { prefix: string; sections: GuideSection
       {sections.map((s, i) => (
         <details key={s.id} id={`${prefix}-${s.id}`} className="card group scroll-mt-20" open={i === 0}>
           <summary className="cursor-pointer list-none flex items-center gap-3">
-            <span className="font-serif text-xl text-brass w-7 shrink-0">{i + 1}</span>
+            <span className="font-serif text-xl text-ink-mute w-7 shrink-0">{i + 1}</span>
             <span className="flex-1">
               <span className="h3 block">{s.title}</span>
               {s.time && <span className="text-xs text-ink-mute">{s.time}</span>}

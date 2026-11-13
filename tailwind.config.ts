@@ -17,6 +17,9 @@ export default {
         brass: { DEFAULT: "rgb(var(--brass) / <alpha-value>)", soft: "rgb(var(--brass-soft) / <alpha-value>)" },
         sage: { DEFAULT: "rgb(var(--sage) / <alpha-value>)", soft: "rgb(var(--sage-soft) / <alpha-value>)" },
         clay: { DEFAULT: "rgb(var(--clay) / <alpha-value>)", soft: "rgb(var(--clay-soft) / <alpha-value>)" },
+        violet: "rgb(var(--violet) / <alpha-value>)",
+        // Errors and overdue items. Kept apart from clay, which means Emotionally Anchored.
+        alert: { DEFAULT: "rgb(var(--alert) / <alpha-value>)", soft: "rgb(var(--alert-soft) / <alpha-value>)" },
       },
       fontFamily: {
         serif: ["var(--font-serif)", "Georgia", "serif"],

@@ -9,7 +9,7 @@ import { activeSeason, nextMonth } from "@/lib/season";
 import { DAY30_DECISIONS, DAY30_CHOICES, CHECKIN_STATUS, SEASON_LENGTH } from "@/content/program";
 import { addDays, fmt, ymd } from "@/lib/dates";
 import type { PillarKey } from "@/content/types";
-import { PageHeader, Card, PillarMark, Empty, Draft, Field, Source } from "@/components/ui";
+import { PageHeader, Card, PillarMark, Empty, Draft, Field, Source , PILLAR_FILL } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 
 export const metadata = { title: "30-Day Cycle" };
@@ -24,7 +24,7 @@ export default async function CyclePage() {
     const month = season ? nextMonth(season.cycles.length) : null;
     return (
       <>
-        <PageHeader eyebrow="Discipline by Design · 30 days" title={season ? (month ? `Month ${month} of your season` : "Your season is done") : "No active cycle"} />
+        <PageHeader eyebrow="Discipline by Design · 30 days" title={season ? (month ? `Month ${month} of my season` : "My season is done") : "No active cycle"} />
         {season && month && <Empty title={`Start month ${month}`} href="/cycle/new" cta="Start">Pick the pillar and the behavior for the next 30 days.</Empty>}
         {season && !month && <Empty title="Review your season" href="/season" cta="Open the review">Three months are done. Look back, then decide what comes next.</Empty>}
         {!season && <Empty title="Start a 30-day cycle" href="/cycle/new" cta="Start">Pick one pillar and one behavior, then work on it for four weeks.</Empty>}
@@ -54,8 +54,8 @@ export default async function CyclePage() {
             const date = ymd(addDays(cycle.startDate, i));
             const c = byDate.get(date);
             const isToday = i + 1 === pos.day && !pos.finished;
-            const tone = c?.status === "DONE" ? "bg-navy text-white" : c?.status === "PARTIAL" ? "bg-brass text-white" : c?.status === "NOT_YET" ? "bg-line" : "bg-surface";
-            return <span key={i} title={`Day ${i + 1}${c ? `: ${CHECKIN_STATUS[c.status as keyof typeof CHECKIN_STATUS]}` : ""}`} className={`aspect-square rounded-md border border-line text-[10px] flex items-center justify-center ${tone} ${isToday ? "ring-2 ring-brass" : ""}`}>{i + 1}</span>;
+            const tone = c?.status === "DONE" ? `${PILLAR_FILL[p.key].full} text-white` : c?.status === "PARTIAL" ? `${PILLAR_FILL[p.key].part} text-ink` : c?.status === "NOT_YET" ? "bg-line" : "bg-surface";
+            return <span key={i} title={`Day ${i + 1}${c ? `: ${CHECKIN_STATUS[c.status as keyof typeof CHECKIN_STATUS]}` : ""}`} className={`aspect-square rounded-md border border-line text-[10px] flex items-center justify-center ${tone} ${isToday ? "ring-2 ring-heading/40" : ""}`}>{i + 1}</span>;
           })}
         </div>
         <div className="mt-3 flex items-center justify-between text-sm">

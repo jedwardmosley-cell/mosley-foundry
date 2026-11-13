@@ -20,7 +20,7 @@ export function AuthForm({ mode, next, invite }: { mode: "login" | "signup"; nex
       {next && <input type="hidden" name="next" value={next} />}
       {invite && <input type="hidden" name="invite" value={invite} />}
       {mode === "login" && <p className="-mt-2 text-right text-sm"><Link href="/forgot" className="text-ink-soft hover:text-ink">Forgot your password?</Link></p>}
-      {state?.error && <p role="alert" className="text-sm text-clay">{state.error}</p>}
+      {state?.error && <p role="alert" className="text-sm text-alert">{state.error}</p>}
       <button className="btn-primary w-full" disabled={pending}>{pending ? "One moment..." : mode === "login" ? "Sign in" : "Create account"}</button>
       <p className="text-sm muted text-center">
         {mode === "login" ? <>New here? <Link className="btn-link" href="/signup">Create an account</Link></> : <>Already have an account? <Link className="btn-link" href="/login">Sign in</Link></>}

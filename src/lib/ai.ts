@@ -115,7 +115,7 @@ export async function participantContext(userId: string) {
   const id = await db.identityProfile.findUnique({ where: { userId } });
   if (id && id.aiUse) {
     const level = { CORE: "Level 1, core alignment", ROLE: "Level 2, role transition", REINVENT: "Level 3, identity reinvention" }[id.level as "CORE"] ?? id.level;
-    lines.push(`Identity shift (participant's own choice of scope, not a ranking): ${level}`);
+    lines.push(`Who I am, size of change (participant's own choice, not a ranking): ${level}`);
     if (id.becoming) lines.push(`Identity statement, a present-tense claim in their words: ${id.becoming}`);
     if (id.behavior) lines.push(`Behavior that would show it (their words): ${id.behavior}`);
     if (id.level === "REINVENT" && id.aiUsePersona) {

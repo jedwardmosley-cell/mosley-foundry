@@ -41,7 +41,7 @@ export default async function SegmentPage({ params }: { params: Promise<{ key: s
         <p className="mt-2 text-[15px] leading-relaxed">{s.practice.text}</p>
       </Card>
       <Card className="mt-5">
-        <h2 className="h3">Your development goal for this segment</h2>
+        <h2 className="h3">My development goal for this segment</h2>
         <form action={saveGoal} className="mt-4 space-y-4">
           <input type="hidden" name="pillar" value={s.pillars[0]} />
           <input type="hidden" name="segmentKey" value={s.key} />

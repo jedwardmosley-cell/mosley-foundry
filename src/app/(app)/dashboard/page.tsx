@@ -7,7 +7,7 @@ import { cycleWeeks, cyclePosition, practiceSummary } from "@/lib/cycle";
 import { fmt, daysBetween, ymd, addDays } from "@/lib/dates";
 import { todayHeadline } from "@/lib/todayHeadline";
 import type { PillarKey } from "@/content/types";
-import { PillarMark } from "@/components/ui";
+import { PillarMark, PILLAR_FILL } from "@/components/ui";
 import { CheckInForm } from "@/components/CheckInForm";
 
 export const metadata = { title: "Today" };
@@ -44,7 +44,7 @@ export default async function Dashboard() {
   const since = w ? ymd(addDays(new Date(), -(w - 1))) : "";
   const recent = w ? d.checkIns.filter((c) => c.date >= since && (c.status === "DONE" || c.status === "PARTIAL")).length : 0;
   const head = todayHeadline({ cycle: !!(d.cycle && pos), finished: !!pos?.finished, day: pos?.day ?? 0, practiced: recent, window: w });
-  const moodTone = { strong: "text-sage", building: "text-brass", care: "text-clay", start: "text-ink-mute", ready: "text-ink-mute", decide: "text-brass" }[head.mood];
+  const moodTone = { strong: "text-link", building: "text-ink-soft", care: "text-alert", start: "text-ink-mute", ready: "text-ink-mute", decide: "text-ink-soft" }[head.mood];
   const overdue = d.relationships.filter((r) => r.nextCheckIn && daysBetween(new Date(), r.nextCheckIn) < 0).length;
 
   return (
@@ -61,7 +61,7 @@ export default async function Dashboard() {
 
         {d.cycle && week && pos ? (
           <>
-            <DayArc day={pos.day} />
+            <DayArc day={pos.day} pillar={d.cycle.pillar as PillarKey} />
             <p className="text-center text-[11px] uppercase tracking-[0.14em] text-ink-mute">Week {pos.week} · {week.phase}{d.cycle.seasonMonth ? ` · Month ${d.cycle.seasonMonth} of 3` : ""}</p>
             <Link href="/cycle" className="mt-1 block text-center text-[17px] font-medium leading-snug text-ink">{d.cycle.focus || week.work}</Link>
             {pos.finished
@@ -75,9 +75,9 @@ export default async function Dashboard() {
 
       <div className="grid grid-cols-2 gap-3">
         <Tile href="/history" label="Days practiced" value={String(practice.practiced)} word={practice.practiced ? "last 30 days" : "none yet"}>
-          <PracticeStrip checkIns={d.checkIns} />
+          <PracticeStrip checkIns={d.checkIns} pillar={(d.cycle?.pillar ?? pillarKey ?? "F") as PillarKey} />
         </Tile>
-        <Tile href="/network" label="People" value={String(dueSoon.length)} word={overdue ? `${overdue} overdue` : dueSoon.length ? "due soon" : d.relationships.length ? "all caught up" : "add someone"} tone={overdue ? "text-clay" : "text-sage"} />
+        <Tile href="/network" label="People" value={String(dueSoon.length)} word={overdue ? `${overdue} overdue` : dueSoon.length ? "due soon" : d.relationships.length ? "all caught up" : "add someone"} tone={overdue ? "text-alert" : "text-link"} />
         <Tile href="/plan" label="Who I am" wide>
           <p className="mt-2 font-serif text-[17px] leading-snug text-heading line-clamp-3">{statement || "Claim who you are."}</p>
           {d.identity?.level === "REINVENT" && d.identity.personaName && <p className="mt-1.5 text-xs text-ink-mute">Performance identity: <span className="text-ink">{d.identity.personaName}</span></p>}
@@ -98,7 +98,7 @@ export default async function Dashboard() {
             {coachItems.map((x) => (
               <li key={x.key}>
                 <Link href={x.href} className="flex items-center gap-3 px-5 py-3 hover:bg-paper/60">
-                  <span aria-hidden className="w-5 text-center text-brass">{x.icon}</span>
+                  <span aria-hidden className="w-5 text-center text-ink-mute">{x.icon}</span>
                   <span className="flex-1 text-[15px] line-clamp-1">{x.text}</span>
                   {x.side && <span className="text-xs text-ink-mute whitespace-nowrap">{x.side}</span>}
                 </Link>
@@ -124,7 +124,8 @@ function Tile({ href, label, value, word, tone = "text-ink-mute", wide = false, 
 }
 
 /** The 30 days as an arc, with today marked. */
-function DayArc({ day }: { day: number }) {
+function DayArc({ day, pillar }: { day: number; pillar: PillarKey }) {
+  const color = `rgb(var(${PILLAR_FILL[pillar].cssVar}))`;
   const r = 120, cx = 150, cy = 140;
   const t = Math.min(Math.max(day / 30, 0), 1);
   const a = Math.PI * (1 - t);
@@ -135,13 +136,13 @@ function DayArc({ day }: { day: number }) {
       <svg viewBox="0 0 300 150" className="w-full" aria-hidden>
         <defs>
           <linearGradient id="arc" x1="0" x2="1">
-            <stop offset="0" stopColor="rgb(var(--glow-b))" />
-            <stop offset="1" stopColor="rgb(var(--brass))" />
+            <stop offset="0" stopColor={color} stopOpacity="0.35" />
+            <stop offset="1" stopColor={color} />
           </linearGradient>
         </defs>
         <path d={arc(1)} fill="none" stroke="rgb(var(--ink-mute) / 0.25)" strokeWidth="3" strokeLinecap="round" />
         <path d={arc(t)} fill="none" stroke="url(#arc)" strokeWidth="4" strokeLinecap="round" />
-        <circle cx={x} cy={y} r="7" fill="rgb(var(--card))" stroke="rgb(var(--brass))" strokeWidth="3" />
+        <circle cx={x} cy={y} r="7" fill="rgb(var(--card))" stroke={color} strokeWidth="3" />
       </svg>
       <div className="absolute inset-x-0 bottom-2 text-center">
         <p className="font-serif text-[38px] leading-none text-heading">{day}</p>
@@ -151,7 +152,7 @@ function DayArc({ day }: { day: number }) {
   );
 }
 
-function PracticeStrip({ checkIns }: { checkIns: { date: string; status: string }[] }) {
+function PracticeStrip({ checkIns, pillar }: { checkIns: { date: string; status: string }[]; pillar: PillarKey }) {
   const map = new Map(checkIns.map((c) => [c.date, c.status]));
   const days = Array.from({ length: 14 }, (_, i) => {
     const d = new Date();
@@ -159,7 +160,7 @@ function PracticeStrip({ checkIns }: { checkIns: { date: string; status: string 
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
     return { key, s: map.get(key) };
   });
-  const tone = (s?: string) => (s === "DONE" ? "bg-navy" : s === "PARTIAL" ? "bg-brass" : s === "NOT_YET" ? "bg-line border border-ink-mute/30" : "bg-transparent border border-line");
+  const tone = (s?: string) => (s === "DONE" ? PILLAR_FILL[pillar].full : s === "PARTIAL" ? PILLAR_FILL[pillar].part : s === "NOT_YET" ? "bg-line border border-ink-mute/30" : "bg-transparent border border-line");
   return (
     <div className="mt-3">
       <div className="flex gap-1" role="img" aria-label="Last 14 days of practice">

@@ -12,7 +12,7 @@ import { ReadTheBook } from "@/components/ReadTheBook";
 import { DAY30_DECISIONS, SEASON_DECISIONS, SEASON_LENGTH } from "@/content/program";
 import type { PillarKey } from "@/content/types";
 
-export const metadata = { title: "Your season" };
+export const metadata = { title: "My season" };
 
 /** The season review: three months side by side, scores then and now, and the client's call on what comes next. */
 export default async function SeasonPage() {
@@ -49,7 +49,7 @@ export default async function SeasonPage() {
 
   return (
     <>
-      <PageHeader eyebrow="Discipline by Design" title={open ? "Your season" : "Your last season"}>
+      <PageHeader eyebrow="Discipline by Design" title={open ? "My season" : "My last season"}>
         Started {fmt(season.startedAt, { month: "long", day: "numeric" })}{season.completedAt ? `, closed ${fmt(season.completedAt, { month: "long", day: "numeric" })}` : ""}.
       </PageHeader>
 

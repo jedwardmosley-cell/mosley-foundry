@@ -75,7 +75,7 @@ export default async function BlueprintPage() {
       </section>
 
       {d.whosChecking.length > 0 && (
-        <Card className="mb-6 border-brass/50">
+        <Card className="mb-6 border-line">
           <p className="font-serif text-lg leading-snug">{d.whosChecking[0]}</p>
           <FromBook label="So who's checking?" className="mt-2 !mb-0">{d.whosChecking[2]}</FromBook>
         </Card>
@@ -92,14 +92,14 @@ export default async function BlueprintPage() {
               const a = item.action;
               const source = a.kind === "commit" ? (a.from === "behavior" ? identity.behavior : a.from === "cue" ? identity.personaCue : a.from === "standards" ? identity.personaStandards : "ok") : "ok";
               const title = a.kind === "commit" ? (a.from === "behavior" ? identity.behavior.split("\n")[0].trim().slice(0, 200) : a.from === "cue" ? identity.personaCue.split("\n")[0].trim().slice(0, 200) : a.from === "standards" ? "Read my standards" : "Review my week against my standards") : "";
-              const added = a.kind === "commit" && items.some((c) => c.title === title && c.detail === "Identity shift");
+              const added = a.kind === "commit" && items.some((c) => c.title === title && ["Who I am", "Identity shift", "Identity Shift"].includes(c.detail));
               return (
                 <li key={item.text} className="py-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5">
                   <span className="text-[15px]">{item.text}</span>
                   {a.kind === "link" ? (
                     <Link href={a.href} className="text-sm btn-link">{a.button}</Link>
                   ) : added ? (
-                    <span className="chip !text-sage">In your blueprint</span>
+                    <span className="chip !text-link">In your blueprint</span>
                   ) : source ? (
                     <form action={addIdentityPractice}><input type="hidden" name="index" value={i} /><button className="text-sm btn-link text-left">{a.button}</button></form>
                   ) : (
@@ -163,7 +163,7 @@ export default async function BlueprintPage() {
                         <p className="text-[15px]">{c.title}</p>
                         <p className="text-sm muted">{CADENCES[c.cadence as keyof typeof CADENCES]}{c.when ? ` · ${c.when}` : ""}{c.detail ? ` · ${c.detail}` : ""}</p>
                       </div>
-                      <form action={removeCommitment}><input type="hidden" name="id" value={c.id} /><button className="text-sm text-ink-mute hover:text-clay" aria-label={`Remove ${c.title}`}>Remove</button></form>
+                      <form action={removeCommitment}><input type="hidden" name="id" value={c.id} /><button className="text-sm text-ink-mute hover:text-alert" aria-label={`Remove ${c.title}`}>Remove</button></form>
                     </li>
                   ))}
                 </ul>
