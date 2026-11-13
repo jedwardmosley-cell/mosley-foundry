@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { parse, text } from "@/lib/validation";
 import { PRACTICE, type IdentityLevel } from "@/content/identity";
+import { FORGE_LINES, withPrefix } from "@/content/forgeLines";
 
 const schema = z.object({
   level: z.enum(["CORE", "ROLE", "REINVENT"], { errorMap: () => ({ message: "Choose a level" }) }),
@@ -84,7 +85,7 @@ export async function addIdentityPractice(fd: FormData) {
     : a.from === "standards" ? "Read my standards"
     : "Review my week against my standards";
   if (!title) redirect("/identity");
-  const detail = "Identity shift";
+  const detail = "Who I am";
   const exists = await db.commitment.findFirst({ where: { userId: u.id, active: true, title, detail } });
   if (!exists) await db.commitment.create({ data: { userId: u.id, area: a.area, title, detail, cadence: a.cadence } });
   revalidatePath("/blueprint");
@@ -102,4 +103,77 @@ export async function saveIdentityControls(fd: FormData) {
   const n = await db.identityProfile.updateMany({ where: { userId: u.id }, data: { ...d, aiUsePersona: d.aiUse && d.aiUsePersona } });
   if (!n.count) redirect("/identity");
   revalidatePath("/identity");
+}
+
+// ---------- Who I am: one activity ----------
+
+const NEXT_OK = ["/start?step=1&part=2", "/start?step=1&part=3", "/start?step=2", "/identity?saved=1"];
+
+/**
+ * Saves Who I am: the role, the kind of change, the five FORGE statements and My statement.
+ * Only the fields a form sends are changed, so the guided session can save it in parts.
+ * My statement is stored in both places older screens read (the identity profile and the profile),
+ * so Today, the coach view and the AI all show the same single statement.
+ */
+export async function saveWhoIAm(fd: FormData) {
+  const u = await requireUser("PARTICIPANT");
+  const has = (k: string) => fd.has(k);
+  const str = (k: string, max: number) => String(fd.get(k) ?? "").trim().slice(0, max);
+  const level = str("level", 10);
+  if (level && !["CORE", "ROLE", "REINVENT"].includes(level)) throw new Error("Unknown kind of change");
+
+  // The five statements and My statement live on the profile.
+  const profileData: Record<string, string> = {};
+  for (const l of FORGE_LINES) if (has(l.field)) profileData[l.field] = fd.get(`${l.field}__p`) === "1" ? withPrefix(l.prefix, str(l.field, 1500)) : str(l.field, 1500);
+  let statement: string | undefined;
+  if (has("statement")) {
+    const raw = str("statement", 3000);
+    statement = raw ? toClaim(raw) : "";
+    profileData.forgeStatement = statement;
+  }
+  if (Object.keys(profileData).length) await db.profile.update({ where: { userId: u.id }, data: profileData });
+
+  // The role, the kind of change, context and the folded performance identity live on the identity profile.
+  const idData: Record<string, string> = {};
+  if (has("role")) idData.role = str("role", 80);
+  if (has("situation")) idData.situation = str("situation", 1500);
+  if (level) idData.level = level;
+  if (statement !== undefined) idData.becoming = statement;
+  if (has("personaName")) {
+    const join = (picks: FormDataEntryValue[], other: string) => [...picks.map(String), ...other.split(",")].map((x) => x.trim()).filter(Boolean).join(", ");
+    idData.personaName = str("personaName", 120);
+    idData.personaQualities = join(fd.getAll("qualityPick"), str("personaQualities", 600));
+    idData.personaStandards = str("personaStandards", 1500);
+    idData.personaSituations = join(fd.getAll("situationPick"), str("personaSituations", 600));
+    idData.personaCue = str("personaCue", 600);
+    idData.personaBehaviors = str("personaBehaviors", 1500);
+  }
+  const prior = await db.identityProfile.findUnique({ where: { userId: u.id } });
+  const now = new Date();
+  if (!prior) {
+    // The identity profile needs a kind of change. Until one is chosen, the role waits on the next save.
+    if (idData.level) await db.identityProfile.create({ data: { ...idData, level: idData.level, userId: u.id, versionStartedAt: now } });
+  } else if (Object.keys(idData).length) {
+    const next = { ...prior, ...idData };
+    const changed = prior.level !== next.level || prior.becoming !== next.becoming || prior.role !== next.role || prior.situation !== next.situation || prior.personaName !== next.personaName;
+    if (changed && (prior.becoming || prior.role)) {
+      await db.identityHistory.create({
+        data: { userId: u.id, level: prior.level, role: prior.role, becoming: prior.becoming, situation: prior.situation, behavior: prior.behavior, personaName: prior.personaName, startedAt: prior.versionStartedAt, endedAt: now },
+      });
+    }
+    await db.identityProfile.update({ where: { userId: u.id }, data: { ...idData, ...(changed ? { versionStartedAt: now } : {}) } });
+  }
+  revalidatePath("/", "layout");
+  const nxt = String(fd.get("next") ?? "");
+  redirect(NEXT_OK.includes(nxt) ? nxt : "/identity?saved=1");
+}
+
+/** The behavior that would show it. It lives at the top of My road, since behavior is Discipline by Design. */
+export async function saveBehavior(fd: FormData) {
+  const u = await requireUser("PARTICIPANT");
+  const behavior = String(fd.get("behavior") ?? "").trim().slice(0, 1500);
+  const n = await db.identityProfile.updateMany({ where: { userId: u.id }, data: { behavior } });
+  if (!n.count) redirect("/identity");
+  revalidatePath("/blueprint");
+  revalidatePath("/cycle/new");
 }

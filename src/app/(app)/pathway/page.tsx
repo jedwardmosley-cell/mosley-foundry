@@ -29,7 +29,7 @@ export default async function PathwayPage() {
         <>
           {membership && (
             <Card className="mb-5">
-              <p className="eyebrow">Your cohort</p>
+              <p className="eyebrow">My cohort</p>
               <h2 className="h2 mt-1">{membership.cohort.name}</h2>
               <p className="text-sm muted mt-1">{DELIVERY_FORMATS[membership.cohort.deliveryFormat as keyof typeof DELIVERY_FORMATS].label}</p>
               {(() => {
@@ -49,7 +49,7 @@ export default async function PathwayPage() {
               return (
                 <Link key={s.key} href={`/pathway/segment/${s.key}`} className="card block hover:border-navy/40">
                   <div className="flex items-start gap-4">
-                    <span className="font-serif text-2xl text-brass w-8">{s.key}</span>
+                    <span className="font-serif text-2xl text-ink-mute w-8">{s.key}</span>
                     <div className="flex-1">
                       <h2 className="h3">{s.title}</h2>
                       <p className="text-[14px] text-ink-soft mt-1">{s.summary}</p>
@@ -57,7 +57,7 @@ export default async function PathwayPage() {
                         {s.pillars.map((k) => <PillarMark key={k} k={k} size="sm" />)}
                         {sess && <span>{fmt(sess.startsAt, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</span>}
                         {att && <span className="chip">{att.toLowerCase()}</span>}
-                        {hasGoal && <span className="chip !text-sage">goal set</span>}
+                        {hasGoal && <span className="chip !text-link">goal set</span>}
                       </div>
                     </div>
                   </div>

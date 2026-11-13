@@ -40,7 +40,7 @@ export async function saveStatement(fd: FormData) {
   await db.profile.update({ where: { userId: u.id }, data: d });
   revalidatePath("/plan");
   revalidatePath("/dashboard");
-  if (fromStart(fd)) redirect("/start?step=3");
+  if (fromStart(fd)) redirect("/start?step=2");
 }
 
 // ---------- FORGE assessment ----------
@@ -94,7 +94,7 @@ export async function setPriority(fd: FormData) {
   const existing = await db.developmentGoal.findFirst({ where: { userId: u.id, pillar, status: "ACTIVE" } });
   if (existing) await db.developmentGoal.update({ where: { id: existing.id }, data: { isPriority: true } });
   else await db.developmentGoal.create({ data: { userId: u.id, pillar, isPriority: true } });
-  redirect(fromStart(fd) ? "/start?step=4" : "/blueprint#one-move");
+  redirect(fromStart(fd) ? "/start?step=3" : "/blueprint#one-move");
 }
 
 // ---------- FORGE plan (development goals) ----------
@@ -143,7 +143,7 @@ export async function addCommitment(fd: FormData) {
     data: { ...d, userId: u.id, startsOn: d.startsOn ? new Date(d.startsOn + "T12:00:00") : null },
   });
   revalidatePath("/blueprint");
-  if (fromStart(fd)) redirect("/start?step=4");
+  if (fromStart(fd)) redirect("/start?step=3");
 }
 
 export async function removeCommitment(fd: FormData) {
@@ -175,7 +175,7 @@ export async function addRelationship(fd: FormData) {
     },
   });
   revalidatePath("/network");
-  if (fromStart(fd)) redirect("/start?step=4");
+  if (fromStart(fd)) redirect("/start?step=3");
 }
 
 export async function logRelationshipCheckIn(fd: FormData) {
@@ -222,15 +222,17 @@ export async function acceptInvite(fd: FormData) {
 
 // ---------- 30-day cycle ----------
 
-const startCycleSchema = z.object({ pillar: pillarKey, focus: text(500), template: z.enum(["WORKBOOK_30", "NIRS_30"]), startDate: z.string().optional(), season: z.enum(["new", "continue", ""]).default("") });
+const startCycleSchema = z.object({ pillar: pillarKey, focus: text(500), template: z.enum(["WORKBOOK_30", "NIRS_30"]), startDate: z.string().optional(), season: z.enum(["new", "continue", ""]).default(""), role: text(80) });
 
 export async function startCycle(fd: FormData) {
   const u = await participant();
-  const { season, ...d } = parse(startCycleSchema, fd);
+  const { season, role, ...d } = parse(startCycleSchema, fd);
+  // One role per 30 days. A new role here also becomes the role in Who I am.
+  if (role) await db.identityProfile.updateMany({ where: { userId: u.id, NOT: { role } }, data: { role } });
   await db.developmentCycle.updateMany({ where: { userId: u.id, status: "ACTIVE" }, data: { status: "STOPPED" } });
   const s = await seasonForNewCycle(u.id, season);
   await db.developmentCycle.create({
-    data: { userId: u.id, seasonId: s.seasonId, seasonMonth: s.seasonMonth, pillar: d.pillar, focus: d.focus, template: d.template, startDate: d.startDate ? new Date(d.startDate + "T00:00:00") : new Date(new Date().toDateString()) },
+    data: { userId: u.id, role, seasonId: s.seasonId, seasonMonth: s.seasonMonth, pillar: d.pillar, focus: d.focus, template: d.template, startDate: d.startDate ? new Date(d.startDate + "T00:00:00") : new Date(new Date().toDateString()) },
   });
   redirect("/cycle");
 }

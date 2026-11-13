@@ -9,6 +9,7 @@ const { chromium } = require("playwright");
 import { PrismaClient } from "@prisma/client";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import { hashPassword } from "../../src/lib/password";
 
 const BASE = process.env.BASE_URL ?? "http://localhost:3000";
 const db = new PrismaClient();
@@ -57,13 +58,13 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.screenshot({ path: `${shots}/01-onboarding.png`, fullPage: true });
     // a new client goes straight into the guided first session; this run takes the full pages instead
     await Promise.all([page.waitForURL("**/start"), page.locator('form:has(input[value="PERSONAL"]) button').click()]);
-    await page.waitForSelector("text=Claim who you are");
+    await page.waitForSelector("text=The role this is about");
     await page.goto(`${BASE}/assessment`);
   });
 
   let assessmentUrl = "";
   await check("2. complete a FORGE assessment", async () => {
-    await page.waitForSelector('nav[aria-label="Your journey"] >> text=Step 1 of 5');
+    await page.waitForSelector('nav[aria-label="Your journey"] >> text=Step 1 of 4');
     const scores: Record<string, number> = { F: 4, O: 3, R: 4, G: 3, E: 2 };
     for (const [k, v] of Object.entries(scores)) await page.locator(`input[name="${k}"][value="${v}"]`).check({ force: true });
     await page.locator("fieldset", { hasText: "Emotionally Anchored" }).locator("summary", { hasText: "Add a reflection" }).click();
@@ -77,17 +78,26 @@ const submitAndWait = async (page: Page, selector: string) => {
 
   await check("3. identify a development priority", async () => {
     await Promise.all([page.waitForURL(/\/blueprint(#one-move)?$/), page.click('button:has-text("my development priority")')]);
-    await page.goto(`${BASE}/plan`);
+    // the old plan address now opens Who I am: one activity
+    await Promise.all([page.waitForURL("**/identity"), page.goto(`${BASE}/plan`)]);
     const p = await db.profile.findFirst({ where: { user: { email } } });
     assert.equal(p?.priorityPillar, "E");
+    await page.locator('button:has-text("manager")').first().click();
+    assert.equal(await page.inputValue('input[name="role"]'), "manager");
+    await page.locator("label", { hasText: "Core alignment" }).click();
     await page.fill('textarea[name="destination"]', "a leader my team trusts with bad news");
     await page.fill('textarea[name="lineO"]', "a discerning leader who sees what my team needs");
-    await page.locator('button:has-text("Put my five statements together")').click();
-    assert.equal(await page.inputValue('textarea[name="forgeStatement"]'), "I am a leader my team trusts with bad news. I am a discerning leader who sees what my team needs.");
-    await submitAndWait(page, 'form:has(textarea[name="destination"]) button[type="submit"]');
+    await page.locator('button:has-text("Put my five together")').click();
+    assert.equal(await page.inputValue('textarea[name="statement"]'), "I am a leader my team trusts with bad news. I am a discerning leader who sees what my team needs.");
+    await Promise.all([page.waitForURL("**/identity?saved=1"), page.click('button:has-text("Save who I am")')]);
     const saved = await db.profile.findFirstOrThrow({ where: { user: { email } } });
     assert.equal(saved.destination, "I am a leader my team trusts with bad news");
     assert.equal(saved.lineO, "I am a discerning leader who sees what my team needs");
+    const id = await db.identityProfile.findFirstOrThrow({ where: { user: { email } } });
+    assert.equal(id.role, "manager");
+    assert.equal(id.becoming, saved.forgeStatement, "one statement, stored where every screen reads it");
+    // the five questions now carry the role
+    await page.waitForSelector("text=As a manager, who am I becoming?");
   });
 
   await check("4. create a Discipline by Design blueprint", async () => {
@@ -126,11 +136,11 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.fill('input[name="focus"]', "Pause before I answer a challenge");
     await Promise.all([page.waitForURL("**/cycle"), page.click('button:has-text("Start the cycle")')]);
     await page.waitForSelector("text=Day 1 of 30");
-    // the journey bar follows: steps 2 to 5 done, Who I am still open, and the 30 days under way
+    // the journey bar follows: all four steps done, and the 30 days under way
     await page.goto(`${BASE}/blueprint`);
     const bar = page.locator('nav[aria-label="Your journey"]');
     await bar.locator("text=Day 1 of 30").waitFor();
-    assert.equal(await bar.locator("text=(done)").count(), 4, "four steps done before identity shift");
+    assert.equal(await bar.locator("text=(done)").count(), 4, "Who I am, Where I am, My road and 30 days");
   });
 
   await check("7. record a daily reflection", async () => {
@@ -164,7 +174,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await pri.locator('summary:has-text("Ideas")').click();
     await pri.locator('button:has-text("one breath, one question")').click();
     assert.match(await pri.locator('input[name="oneMove"]').inputValue(), /one breath/);
-    await Promise.all([page.waitForLoadState("networkidle"), pri.locator('button:has-text("Save E")').click()]);
+    await Promise.all([page.waitForLoadState("networkidle"), pri.locator('button:has-text("Save my move")').click()]);
     const g = await db.developmentGoal.findFirstOrThrow({ where: { user: { email }, pillar: "E", segmentKey: null } });
     assert.match(g.oneMove, /one breath/);
     assert.equal(await page.locator("details[open]", { hasText: "Future Focused" }).count(), 0, "non-priority pillars start folded");
@@ -192,43 +202,45 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.ok(await page.locator('input[name="pillar"][value="E"]').isChecked());
   });
 
-  await check("7e. Identity shift: explore all three levels, choose one, change it later, history kept", async () => {
-    await page.goto(`${BASE}/dashboard`);
-    assert.ok(!(await page.locator("main").innerText()).includes("follows through"), "no identity statement until the person writes one");
-    await page.goto(`${BASE}/identity`);
-    await page.fill('textarea[name="claim"]', "someone who follows through on what I say.");
-    await page.fill('input[name="behavior"]', "I close every open commitment by Friday noon.");
-    for (const name of ["Core alignment", "Role transition", "Identity reinvention"]) {
-      await page.locator("label", { hasText: name }).click();
-    }
-    await page.waitForSelector("text=Deliberately construct a new performance identity.");
-    await page.locator("label", { hasText: "Core alignment" }).click();
-    await page.waitForSelector("text=Strengthen who I am.");
-    assert.ok(!(await page.locator('input[name="personaName"]').isVisible()), "persona fields hidden outside Level 3");
-    await Promise.all([page.waitForURL("**/identity?saved=1"), page.click('button:has-text("Save my identity shift")')]);
+  await check("7e. Who I am: three equal kinds, one statement on Today, behavior on My road, history kept", async () => {
     const me = await db.user.findUniqueOrThrow({ where: { email } });
-    assert.equal((await db.identityProfile.findUniqueOrThrow({ where: { userId: me.id } })).level, "CORE");
     await page.goto(`${BASE}/dashboard`);
-    // the I am statement leads the Today card
-    await page.waitForSelector("main section >> text=I am someone who follows through on what I say.");
-    // change to Level 3 with an optional performance identity
+    await page.waitForSelector('main a:has-text("Who I am · as a manager") >> text=I am a leader my team trusts with bad news.');
+    await page.goto(`${BASE}/identity`);
+    assert.ok(!(await page.content()).includes("Identity shift"), "one activity, one name");
+    for (const name of ["Core alignment", "Role transition", "Identity reinvention"]) await page.locator("label", { hasText: name }).click();
+    await page.locator("label", { hasText: "Core alignment" }).click();
+    assert.ok(!(await page.locator('input[name="personaName"]').isVisible()), "the performance identity folds under identity reinvention only");
+    await page.fill('textarea[name="statement"]', "someone who follows through on what I say.");
+    await Promise.all([page.waitForURL("**/identity?saved=1"), page.click('button:has-text("Save who I am")')]);
+    const id = await db.identityProfile.findUniqueOrThrow({ where: { userId: me.id } });
+    assert.equal(id.becoming, "I am someone who follows through on what I say.");
+    assert.equal((await db.profile.findUniqueOrThrow({ where: { userId: me.id } })).forgeStatement, id.becoming);
+    await page.goto(`${BASE}/dashboard`);
+    await page.waitForSelector('main a:has-text("Who I am") >> text=I am someone who follows through on what I say.');
+    // the behavior now opens My road
+    await page.goto(`${BASE}/blueprint`);
+    await page.fill('input[name="behavior"]', "I close every open commitment by Friday noon.");
+    await submitAndWait(page, 'form:has(input[name="behavior"]) button[type="submit"]');
+    assert.equal((await db.identityProfile.findUniqueOrThrow({ where: { userId: me.id } })).behavior, "I close every open commitment by Friday noon.");
+    // identity reinvention, with the folded performance identity
     await page.goto(`${BASE}/identity`);
     await page.locator("label", { hasText: "Identity reinvention" }).click();
     await page.locator("summary", { hasText: "Create a performance identity" }).click();
     await page.fill('input[name="personaName"]', "The Closer");
     await page.fill('textarea[name="personaStandards"]', "I finish what I start.");
-    await Promise.all([page.waitForURL("**/identity?saved=1"), page.click('button:has-text("Save changes")')]);
+    await Promise.all([page.waitForURL("**/identity?saved=1"), page.click('button:has-text("Save who I am")')]);
     await page.waitForSelector("text=Earlier versions");
     const hist = await db.identityHistory.findMany({ where: { userId: me.id } });
-    assert.equal(hist.length, 1);
-    assert.equal(hist[0].level, "CORE");
+    assert.equal(hist.length, 2);
+    assert.ok(hist.every((h) => h.level === "CORE" && h.role === "manager"));
     assert.equal(await db.assessment.count({ where: { userId: me.id } }), 1, "FORGE records untouched");
     assert.equal(await db.developmentCycle.count({ where: { userId: me.id } }), 1);
     await page.goto(`${BASE}/dashboard`);
     await page.waitForSelector("text=The Closer");
     await page.screenshot({ path: `${shots}/06e-identity-card.png` });
     const priority = await db.profile.findUniqueOrThrow({ where: { userId: me.id } });
-    assert.equal(priority.priorityPillar, "E", "choosing a level never changes the FORGE priority");
+    assert.equal(priority.priorityPillar, "E", "choosing a kind of change never changes the FORGE priority");
   });
 
   await check("7f. the level shapes the FORGE plan, blueprint, cycle and check-in, all optional", async () => {
@@ -244,7 +256,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await Promise.all([page.waitForLoadState("networkidle"), card.locator('button:has-text("Add a weekly review against my standards")').click()]);
     await card.locator("text=In your blueprint").waitFor();
     assert.equal(await db.commitment.count({ where: { userId: me.id } }), before + 1, "only the one the person tapped is added");
-    const added = await db.commitment.findFirstOrThrow({ where: { userId: me.id, detail: "Identity shift" } });
+    const added = await db.commitment.findFirstOrThrow({ where: { userId: me.id, detail: "Who I am" } });
     assert.equal(added.cadence, "WEEKLY");
     await page.goto(`${BASE}/cycle/new`);
     await page.locator('button:has-text("I close every open commitment by Friday noon.")').click();
@@ -300,32 +312,37 @@ const submitAndWait = async (page: Page, selector: string) => {
     await g.fill('input[name="password"]', "e2e-password-123");
     await Promise.all([g.waitForURL("**/onboarding"), g.click('button:has-text("Create account")')]);
     await Promise.all([g.waitForURL("**/start"), g.locator('form:has(input[value="LEADING_OTHERS"]) button').click()]);
-    // 1. who I am
-    await g.locator('summary:has-text("Examples")').first().click();
-    await g.locator('button:has-text("a leader now. My results come through other people.")').first().click();
+    // 1. who I am, part 1: the role and the kind of change
+    await g.locator('button:has-text("manager")').first().click();
     await g.locator("label", { hasText: "Role transition" }).click();
-    await Promise.all([g.waitForURL("**/start?step=2"), g.click('button:has-text("Save and continue")')]);
-    // 2. FORGE identity: the identity is offered as the first F example
+    await Promise.all([g.waitForURL("**/start?step=1&part=2"), g.click('button:has-text("Save and continue")')]);
+    // part 2: the five sides carry the role, and the examples match it (the newly promoted manager first)
+    await g.waitForSelector("text=As a manager, who am I becoming?");
     await g.locator('summary:has-text("Examples")').first().click();
-    await g.locator('button:has-text("a leader now. My results come through other people.")').first().click();
-    await Promise.all([g.waitForURL("**/start?step=3"), g.click('button:has-text("Save and continue")')]);
-    // 3. where I am: the assessment and the priority bring the client back
+    await g.waitForSelector("text=Newly promoted manager · role transition");
+    await g.locator('button:has-text("a leader measured by what my team can do.")').first().click();
+    await Promise.all([g.waitForURL("**/start?step=1&part=3"), g.click('button:has-text("Save and continue")')]);
+    // part 3: one statement
+    await g.locator('button:has-text("Put my five together")').click();
+    await Promise.all([g.waitForURL("**/start?step=2"), g.click('button:has-text("Save and continue")')]);
+    // 2. where I am: the assessment and the priority bring the client back
     await Promise.all([g.waitForURL("**/assessment?next=start"), g.click('a:has-text("Take the FORGE assessment")')]);
     for (const [k, v] of Object.entries({ F: 4, O: 3, R: 4, G: 3, E: 2 })) await g.locator(`input[name="${k}"][value="${v}"]`).check({ force: true });
     await Promise.all([g.waitForURL(/\/assessment\/[a-z0-9]+\?next=start$/), g.click('button:has-text("See my profile")')]);
-    await Promise.all([g.waitForURL("**/start?step=4"), g.click('button:has-text("my development priority")')]);
-    // 4. my road: one routine and one person
+    await Promise.all([g.waitForURL("**/start?step=3"), g.click('button:has-text("my development priority")')]);
+    // 3. my road: one routine and one person
     await g.locator('summary:has-text("Ideas")').click();
     await g.locator('button:has-text("Journaling")').click();
-    await Promise.all([g.waitForURL("**/start?step=4"), g.click('button:has-text("Add routine")')]);
+    await Promise.all([g.waitForURL("**/start?step=3"), g.click('button:has-text("Add routine")')]);
     await g.waitForSelector("text=✓ Journaling");
     await g.fill('input[name="name"]', "Pat Partner");
     await g.click('button:has-text("Add person")');
     await g.waitForSelector("text=✓ Pat Partner");
-    await Promise.all([g.waitForURL("**/start?step=5"), g.click('a:has-text("Next: start your 30 days")')]);
-    await g.waitForSelector("text=I am a leader now. My results come through other people.");
-    // 5. the 30 days
+    await Promise.all([g.waitForURL("**/start?step=4"), g.click('a:has-text("Next: start your 30 days")')]);
+    await g.waitForSelector("text=I am a leader measured by what my team can do.");
+    // 4. the 30 days, about the same role
     await Promise.all([g.waitForURL(/\/cycle\/new\?pillar=E/), g.click('a:has-text("start my 30 days")')]);
+    assert.equal(await g.inputValue('input[name="role"]'), "manager");
     await g.fill('input[name="focus"]', "Pause before I answer");
     // month 1 of a season, started 29 days ago, so today is day 30 and the review is open
     await g.locator('input[name="season"][value="new"]').check();
@@ -337,9 +354,8 @@ const submitAndWait = async (page: Page, selector: string) => {
     await g.goto(`${BASE}/start`);
     await g.waitForSelector("text=You are set up");
     await g.goto(`${BASE}/dashboard`);
-    // only the F line was written, so the bar keeps FORGE lines open as a nudge for the first week
-    assert.equal(await g.locator('nav[aria-label="Your journey"] >> text=(done)').count(), 4);
-    await g.waitForSelector('nav[aria-label="Your journey"] >> text=Still open: FORGE identity');
+    assert.equal(await g.locator('nav[aria-label="Your journey"] >> text=(done)').count(), 4, "all four steps done");
+    assert.equal((await db.developmentCycle.findFirstOrThrow({ where: { user: { name: "Guided Driver (E2E)" } }, orderBy: { createdAt: "desc" } })).role, "manager", "the 30 days keep the role");
     await gc.close();
   });
 
@@ -353,7 +369,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal(await g.locator('input[name="decision"][value="CONTINUE_ALONE"]').count(), 0);
     await g.locator('input[name="decision"][value="NEXT_SAME"]').check();
     await Promise.all([g.waitForURL(/\/cycle\/new\?season=continue/), g.click('button:has-text("Complete the cycle")')]);
-    await g.waitForSelector("text=Month 2 of 3 in your season");
+    await g.waitForSelector("text=Month 2 of 3 in my season");
     assert.equal(await g.inputValue('input[name="focus"]'), "Pause before I answer", "same pillar carries the behavior over");
     await Promise.all([g.waitForURL("**/cycle"), g.click('button:has-text("Start the cycle")')]);
     await g.waitForSelector("text=Season, month 2 of 3");
@@ -409,7 +425,90 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.ok(await db.auditEvent.findFirst({ where: { actorId: guided.id, action: "participant.start_over" } }), "logged");
     // the login still works, and the client goes back through the guided session
     await Promise.all([g.waitForURL("**/start"), g.locator('form:has(input[value="PERSONAL"]) button').click()]);
-    await g.waitForSelector("text=Claim who you are");
+    await g.waitForSelector("text=The role this is about");
+    await gc.close();
+  });
+
+  await check("1f. forgot password: an emailed link resets it once, and the reply never reveals who has an account", async () => {
+    const gc = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const g: Page = await gc.newPage();
+    const guided = await db.user.findFirstOrThrow({ where: { name: "Guided Driver (E2E)" }, orderBy: { createdAt: "desc" } });
+    await g.goto(`${BASE}/login`);
+    await Promise.all([g.waitForURL("**/forgot"), g.click('a:has-text("Forgot your password?")')]);
+    const outbox = process.env.EMAIL_DEV_OUTBOX;
+    if (!outbox) {
+      await g.fill('input[name="email"]', guided.email);
+      await g.click('button:has-text("Send me a link")');
+      await g.waitForSelector("text=Ask your coach to reset your password.");
+      await gc.close();
+      return;
+    }
+    const sentBefore = fs.existsSync(outbox) ? fs.readFileSync(outbox, "utf8").trim().split("\n").filter(Boolean).length : 0;
+    // an unknown email gets the same reply, and no email goes out
+    await g.fill('input[name="email"]', "nobody-here@example.test");
+    await g.click('button:has-text("Send me a link")');
+    await g.waitForSelector("text=Check your email");
+    assert.equal(fs.existsSync(outbox) ? fs.readFileSync(outbox, "utf8").trim().split("\n").filter(Boolean).length : 0, sentBefore);
+    // a real account gets a link
+    await g.goto(`${BASE}/forgot`);
+    await g.fill('input[name="email"]', guided.email);
+    await g.click('button:has-text("Send me a link")');
+    await g.waitForSelector("text=Check your email");
+    const mail = JSON.parse(fs.readFileSync(outbox, "utf8").trim().split("\n").pop()!);
+    assert.equal(mail.to, guided.email);
+    const link = (mail.text as string).match(/https?:\/\/\S+\/reset\?token=[\w-]+/)![0];
+    assert.ok(!(await db.passwordResetToken.findFirst({ where: { tokenHash: link.split("token=")[1] } })), "only a hash of the token is stored");
+    await g.goto(link.replace(/^https?:\/\/[^/]+/, BASE));
+    await g.fill('input[name="next"]', "guided-new-password-1");
+    await g.fill('input[name="confirm"]', "guided-new-password-1");
+    await Promise.all([g.waitForURL("**/login?reset=1"), g.click('button:has-text("Save my new password")')]);
+    await g.waitForSelector("text=Your password is changed.");
+    await login(g, guided.email, "guided-new-password-1");
+    // the link works only once
+    await g.goto(link.replace(/^https?:\/\/[^/]+/, BASE));
+    await g.waitForSelector("text=This link has expired");
+    await gc.close();
+  });
+
+  await check("1g. carry-over: saved I am claims, FORGE statements and behaviors land in the new Who I am", async () => {
+    const pw = hashPassword("carry-password-1");
+    const mk = async (tag: string, profile: Record<string, string>, identity?: Record<string, string>) => {
+      const u = await db.user.create({ data: { email: `e2e-carry-${tag}-${Date.now()}@example.test`, name: `Carry ${tag} (E2E)`, role: "PARTICIPANT", passwordHash: pw, profile: { create: { pathway: "LEADING_OTHERS", onboardedAt: new Date(), ...profile } } } });
+      if (identity) await db.identityProfile.create({ data: { userId: u.id, level: "ROLE", ...identity } });
+      return u;
+    };
+    const claimOnly = await mk("a", {}, { becoming: "I am CLAIM-ONLY." });
+    const both = await mk("b", { forgeStatement: "I am STATEMENT-B.", destination: "I am LINE-F-B" }, { becoming: "I am OLD-CLAIM-B.", behavior: "BEHAVIOR-B" });
+    const linesOnly = await mk("c", { destination: "I am LINE-F-C", lineO: "I am LINE-O-C", forgeStatement: "I am STATEMENT-C." });
+    const gc = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const g: Page = await gc.newPage();
+    // a claim and no statement: the claim is My statement, and Today shows it
+    await login(g, claimOnly.email, "carry-password-1");
+    await g.goto(`${BASE}/identity`);
+    assert.equal(await g.inputValue('textarea[name="statement"]'), "I am CLAIM-ONLY.");
+    await g.goto(`${BASE}/dashboard`);
+    await g.waitForSelector("text=I am CLAIM-ONLY.");
+    // both, and different: the statement is My statement, the old claim shows once as a note
+    await g.context().clearCookies();
+    await login(g, both.email, "carry-password-1");
+    await g.goto(`${BASE}/identity`);
+    assert.equal(await g.inputValue('textarea[name="statement"]'), "I am STATEMENT-B.");
+    await g.waitForSelector("text=Earlier I am statement:");
+    await g.waitForSelector("text=I am OLD-CLAIM-B.");
+    assert.equal(await g.inputValue('textarea[name="destination"]'), "LINE-F-B");
+    await g.goto(`${BASE}/dashboard`);
+    await g.waitForSelector("text=I am STATEMENT-B.");
+    assert.ok(!(await g.locator("main").innerText()).includes("OLD-CLAIM-B"), "Today shows My statement");
+    await g.goto(`${BASE}/blueprint`);
+    assert.equal(await g.inputValue('input[name="behavior"]'), "BEHAVIOR-B", "the behavior opens My road");
+    // the five and the statement with no identity yet: all there, and nothing is rewritten until the client saves
+    await g.context().clearCookies();
+    await login(g, linesOnly.email, "carry-password-1");
+    await g.goto(`${BASE}/identity`);
+    assert.equal(await g.inputValue('textarea[name="lineO"]'), "LINE-O-C");
+    assert.equal(await g.inputValue('textarea[name="statement"]'), "I am STATEMENT-C.");
+    const b = await db.identityProfile.findUniqueOrThrow({ where: { userId: both.id } });
+    assert.equal(b.becoming, "I am OLD-CLAIM-B.", "viewing changes nothing in the database");
     await gc.close();
   });
 
@@ -467,23 +566,23 @@ const submitAndWait = async (page: Page, selector: string) => {
     await dc.close();
   });
 
-  await check("9d. Identity shift sharing is the client's choice; the coach sees nothing until it is on", async () => {
+  await check("9d. Who I am sharing is the client's choice; the coach sees nothing until it is on", async () => {
     const dc = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const dp: Page = await dc.newPage();
     await login(dp, "dana@demo.bothhands.app");
     await dp.goto(`${BASE}/identity`);
-    await dp.fill('textarea[name="claim"]', "E2E-ID: a manager who makes hard calls on time.");
+    await dp.fill('input[name="role"]', "E2E-ROLE");
     await dp.locator("label", { hasText: "Identity reinvention" }).click();
     await dp.locator("summary", { hasText: "Create a performance identity" }).click();
     await dp.fill('input[name="personaName"]', "E2E-PERSONA");
-    await Promise.all([dp.waitForURL("**/identity?saved=1"), dp.click('button:has-text("Save my identity shift")')]);
+    await Promise.all([dp.waitForURL("**/identity?saved=1"), dp.click('button:has-text("Save who I am")')]);
     await page.goto(`${BASE}/coach/${dana.id}`);
-    assert.ok(!(await page.content()).includes("E2E-ID"), "not visible before the client shares");
+    assert.ok(!(await page.content()).includes("E2E-ROLE"), "the role is not visible before the client shares Who I am");
     await dp.goto(`${BASE}/sharing`);
-    await Promise.all([dp.waitForLoadState("networkidle"), dp.click('button[aria-label^="Share: Identity shift"]')]);
-    await dp.waitForSelector('button[aria-label^="Stop sharing: Identity shift"]');
+    await Promise.all([dp.waitForLoadState("networkidle"), dp.click('button[aria-label^="Share: Who I am"]')]);
+    await dp.waitForSelector('button[aria-label^="Stop sharing: Who I am"]');
     await page.goto(`${BASE}/coach/${dana.id}`);
-    await page.waitForSelector("text=E2E-ID: a manager who makes hard calls on time.");
+    await page.waitForSelector("text=E2E-ROLE");
     assert.ok(!(await page.content()).includes("E2E-PERSONA"), "persona needs its own tick");
     await dp.goto(`${BASE}/identity`);
     await dp.locator("summary", { hasText: "AI companion and sharing" }).click();

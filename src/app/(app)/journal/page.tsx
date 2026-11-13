@@ -30,7 +30,7 @@ export default async function JournalPage() {
                 <p className="text-xs text-ink-mute">{fmt(e.createdAt, { weekday: "short", month: "short", day: "numeric", year: "numeric" })}</p>
                 {e.title && <h2 className="h3 mt-1">{e.title}</h2>}
               </div>
-              <form action={deleteJournal}><input type="hidden" name="id" value={e.id} /><button className="text-sm text-ink-mute hover:text-clay">Delete</button></form>
+              <form action={deleteJournal}><input type="hidden" name="id" value={e.id} /><button className="text-sm text-ink-mute hover:text-alert">Delete</button></form>
             </div>
             <p className="mt-2 whitespace-pre-wrap text-[15px] leading-relaxed">{e.body}</p>
           </Card>

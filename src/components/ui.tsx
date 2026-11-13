@@ -20,8 +20,17 @@ const PILLAR_TONE: Record<PillarKey, string> = {
   F: "bg-navy text-white",
   O: "bg-sage text-white",
   R: "bg-brass text-white",
-  G: "bg-[#6B6A8F] text-white",
+  G: "bg-violet text-white",
   E: "bg-clay text-white",
+};
+
+/** Pillar colors, used only for pillar things: marks, practice squares and the 30-day arc. */
+export const PILLAR_FILL: Record<PillarKey, { full: string; part: string; cssVar: string }> = {
+  F: { full: "bg-navy", part: "bg-navy/40", cssVar: "--navy" },
+  O: { full: "bg-sage", part: "bg-sage/40", cssVar: "--sage" },
+  R: { full: "bg-brass", part: "bg-brass/40", cssVar: "--brass" },
+  G: { full: "bg-violet", part: "bg-violet/40", cssVar: "--violet" },
+  E: { full: "bg-clay", part: "bg-clay/40", cssVar: "--clay" },
 };
 
 export function PillarMark({ k, size = "md" }: { k: PillarKey; size?: "sm" | "md" | "lg" }) {
@@ -78,7 +87,7 @@ export function Field({ label, hint, children }: { label: string; hint?: string;
 
 export function Privacy({ shared }: { shared: boolean }) {
   return shared ? (
-    <span className="chip border-sage/40 text-sage">Shared with coach</span>
+    <span className="chip text-link">Shared with coach</span>
   ) : (
     <span className="chip">Private</span>
   );

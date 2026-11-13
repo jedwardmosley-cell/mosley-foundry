@@ -43,28 +43,29 @@ model User {
   assessments                   Assessment[]
   goals                         DevelopmentGoal[]
   commitments                   Commitment[]
-  relationships                 Relationship[]     @relation("RelOwner")
-  linkedRelations               Relationship[]     @relation("RelLinked")
+  relationships                 Relationship[]       @relation("RelOwner")
+  linkedRelations               Relationship[]       @relation("RelLinked")
   cycles                        DevelopmentCycle[]
   seasons                       Season[]
+  resetTokens                   PasswordResetToken[]
   checkIns                      DailyCheckIn[]
   weeklyReflections             WeeklyReflection[]
   journal                       JournalEntry[]
-  sharesGiven                   ShareGrant[]       @relation("ShareOwner")
-  sharesReceived                ShareGrant[]       @relation("ShareGrantee")
-  coaching                      CoachAssignment[]  @relation("AssignParticipant")
-  coachOf                       CoachAssignment[]  @relation("AssignCoach")
+  sharesGiven                   ShareGrant[]         @relation("ShareOwner")
+  sharesReceived                ShareGrant[]         @relation("ShareGrantee")
+  coaching                      CoachAssignment[]    @relation("AssignParticipant")
+  coachOf                       CoachAssignment[]    @relation("AssignCoach")
   cohortMemberships             CohortMember[]
   attendance                    Attendance[]
   eqiPriorities                 EqiPriority[]
   identity                      IdentityProfile?
   identityHistory               IdentityHistory[]
   conversations                 AiConversation[]
-  exercisesAssigned             AssignedExercise[] @relation("ExerciseParticipant")
-  exercisesGiven                AssignedExercise[] @relation("ExerciseCoach")
-  coachingSessionsAsCoach       CoachingSession[]  @relation("SessionCoach")
-  coachingSessionsAsParticipant CoachingSession[]  @relation("SessionParticipant")
-  auditEvents                   AuditEvent[]       @relation("AuditActor")
+  exercisesAssigned             AssignedExercise[]   @relation("ExerciseParticipant")
+  exercisesGiven                AssignedExercise[]   @relation("ExerciseCoach")
+  coachingSessionsAsCoach       CoachingSession[]    @relation("SessionCoach")
+  coachingSessionsAsParticipant CoachingSession[]    @relation("SessionParticipant")
+  auditEvents                   AuditEvent[]         @relation("AuditActor")
 }
 
 model Session {
@@ -199,6 +200,7 @@ model DevelopmentCycle {
   decision    String         @default("") // enum-ish: CONTINUE_ALONE | GO_FURTHER | NEW_CYCLE, plus free text
   completedAt DateTime?
   createdAt   DateTime       @default(now())
+  role        String         @default("") // the role this 30 days is about
   seasonId    String? // set when this cycle is one month of a 90-day season
   season      Season?        @relation(fields: [seasonId], references: [id], onDelete: SetNull)
   seasonMonth Int? // 1, 2 or 3
@@ -423,7 +425,8 @@ model IdentityProfile {
   userId            String   @id
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   level             String // enum: CORE | ROLE | REINVENT (scope of change, not a ranking)
-  becoming          String   @default("") // Who are you becoming?
+  role              String   @default("") // the role this is about, e.g. manager. One role per 30-day cycle.
+  becoming          String   @default("") // My statement: the single identity statement (kept in step with Profile.forgeStatement)
   situation         String   @default("") // What situation or chapter makes this change important?
   behavior          String   @default("") // What behavior would show it?
   // Optional performance identity (Level 3). A practice tool, not a separate personality.
@@ -449,6 +452,7 @@ model IdentityHistory {
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   level       String
+  role        String   @default("")
   becoming    String   @default("")
   situation   String   @default("")
   behavior    String   @default("")
@@ -472,4 +476,17 @@ model Season {
   cycles            DevelopmentCycle[]
 
   @@index([userId, status])
+}
+
+/// A forgot-password link. Only a hash of the token is stored. It works once and expires after an hour.
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, createdAt])
 }

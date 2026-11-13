@@ -9,7 +9,7 @@ import { PageHeader, PillarMark, Draft, Source } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 import { DictationHint } from "@/components/Picks";
 
-export const metadata = { title: "FORGE Self-Assessment" };
+export const metadata = { title: "Where I am" };
 
 export default async function AssessmentPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const { next } = await searchParams;
@@ -22,14 +22,14 @@ export default async function AssessmentPage({ searchParams }: { searchParams: P
 
   return (
     <>
-      <PageHeader eyebrow={useEntre ? "FORGE · for entrepreneurs" : "FORGE"} title="The FORGE Self-Assessment">
+      <PageHeader eyebrow={useEntre ? "FORGE · Step 3 · for entrepreneurs" : "FORGE · Step 3"} title="Where I am">
         {useEntre ? entrepreneur!.intro.slice(0, 3).map((t) => <p key={t} className="mb-2">{t}</p>) : (
-          <p>Read the anchors. Score yourself honestly. Then verify. Your score should reflect behavior, not intention.</p>
+          <p>Tap a score from 1 to 5 for each pillar. Score what you did this past month. The short lines under each score show what it looks like.</p>
         )}
       </PageHeader>
 
       {pack.assessmentStatus === "draft" && (
-        <div className="card mb-6 border-clay/30 bg-clay-soft/40">
+        <div className="card mb-6 border-alert/30 bg-alert-soft/40">
           <Draft>Draft assessment</Draft>
           <p className="mt-2 text-sm">The licensed content pack is not installed on this server, so this is a placeholder assessment for testing only. It is not the author&apos;s instrument and is not validated.</p>
         </div>
@@ -71,7 +71,7 @@ export default async function AssessmentPage({ searchParams }: { searchParams: P
               <dl className="mt-5 grid gap-3 sm:grid-cols-3">
                 {(["1", "3", "5"] as const).map((k) => (
                   <div key={k} className="rounded-xl bg-paper p-3">
-                    <dt className="font-serif text-lg text-navy-deep">{k}</dt>
+                    <dt className="font-serif text-lg text-heading">{k}</dt>
                     <dd className="text-[14px] leading-snug text-ink-soft mt-1">{brief[k]}</dd>
                   </div>
                 ))}
@@ -82,13 +82,13 @@ export default async function AssessmentPage({ searchParams }: { searchParams: P
                   {[1, 2, 3, 4, 5].map((n) => (
                     <label key={n} className="cursor-pointer">
                       <input type="radio" name={p.key} value={n} required className="peer sr-only" />
-                      <span className="block rounded-xl border border-line bg-white py-3 text-center font-serif text-lg peer-checked:bg-navy peer-checked:text-white peer-checked:border-navy peer-focus-visible:ring-2 peer-focus-visible:ring-navy/40">{n}</span>
+                      <span className="block rounded-xl border border-line bg-surface py-3 text-center font-serif text-lg peer-checked:bg-navy peer-checked:text-white peer-checked:border-navy peer-focus-visible:ring-2 peer-focus-visible:ring-navy/40">{n}</span>
                     </label>
                   ))}
                 </div>
               </div>
               <details className="mt-5">
-                <summary className="cursor-pointer text-sm text-navy">Add a reflection <span className="text-ink-mute">(optional)</span></summary>
+                <summary className="cursor-pointer text-sm text-link">Add a reflection <span className="text-ink-mute">(optional)</span></summary>
                 <label className="block mt-2">
                   <span className="block text-[14px] text-ink-soft mb-2">{e?.reflection ?? p.reflection}</span>
                   <textarea name={`refl${p.key}`} className="textarea" maxLength={4000} />

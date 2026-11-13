@@ -19,7 +19,7 @@ export default async function Conversation({ params }: { params: Promise<{ id: s
     <div className="flex flex-col">
       <div className="flex items-baseline justify-between gap-3 mb-4">
         <h1 className="h2 truncate">{c.title}</h1>
-        <form action={deleteConversation}><input type="hidden" name="id" value={c.id} /><button className="text-sm text-ink-mute hover:text-clay">Delete</button></form>
+        <form action={deleteConversation}><input type="hidden" name="id" value={c.id} /><button className="text-sm text-ink-mute hover:text-alert">Delete</button></form>
       </div>
       <p className="text-xs text-ink-mute mb-4">Kept until {fmt(c.expiresAt, { month: "long", day: "numeric" })}. Not visible to your coach or organization.</p>
       <Chat id={c.id} starter={starter} messages={c.messages.map((m) => ({ id: m.id, role: m.role, content: m.content, citations: JSON.parse(m.citations) as { id: string; ref: string }[] }))} />

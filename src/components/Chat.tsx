@@ -33,7 +33,7 @@ export function Chat({ id, messages, starter }: { id: string; messages: Msg[]; s
         <div ref={endRef} />
       </div>
       {/* Sits directly on the mobile tab bar; the solid shadow fills the gap below so text never shows through. */}
-      <form ref={formRef} action={action} className="mt-6 sticky bottom-14 md:bottom-0 z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 pt-3 pb-3 bg-paper border-t border-line shadow-[0_96px_0_0_#F6F2EA]">
+      <form ref={formRef} action={action} className="mt-6 sticky bottom-[72px] md:bottom-0 z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 pt-3 pb-3 bg-paper border-t border-line shadow-[0_96px_0_0_#F6F2EA]">
         <input type="hidden" name="id" value={id} />
         <label className="sr-only" htmlFor="msg">Message</label>
         <div className="flex gap-2 items-end">
@@ -41,7 +41,7 @@ export function Chat({ id, messages, starter }: { id: string; messages: Msg[]; s
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); formRef.current?.requestSubmit(); } }} />
           <button className="btn-primary shrink-0" disabled={pending}>Send</button>
         </div>
-        {state?.error && <p role="alert" className="mt-2 text-sm text-clay">{state.error}</p>}
+        {state?.error && <p role="alert" className="mt-2 text-sm text-alert">{state.error}</p>}
       </form>
     </div>
   );

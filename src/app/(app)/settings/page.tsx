@@ -31,7 +31,7 @@ export default async function SettingsPage() {
           <Submit>Save settings</Submit>
         </form>
         <form action={deleteAllConversations} className="mt-6 border-t border-line pt-5">
-          <button className="btn-quiet !text-clay">Delete all AI conversations now</button>
+          <button className="btn-quiet !text-alert">Delete all AI conversations now</button>
         </form>
       </Card>
       <div className="mt-6"><StartOverForm /></div>

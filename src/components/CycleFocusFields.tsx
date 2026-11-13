@@ -16,7 +16,7 @@ export function CycleFocusFields({ pillars, initial, initialFocus = "", identity
           {pillars.map((p) => (
             <label key={p.key} className="cursor-pointer">
               <input type="radio" name="pillar" value={p.key} checked={pillar === p.key} onChange={() => setPillar(p.key)} className="peer sr-only" />
-              <span className="flex flex-col items-center gap-1 rounded-xl border border-line bg-white py-3 peer-checked:border-navy peer-checked:ring-2 peer-checked:ring-navy/20 peer-focus-visible:ring-2">
+              <span className="flex flex-col items-center gap-1 rounded-xl border border-line bg-surface py-3 peer-checked:border-navy peer-checked:ring-2 peer-checked:ring-navy/20 peer-focus-visible:ring-2">
                 <PillarMark k={p.key} size="sm" /><span className="text-[11px] text-center leading-tight px-1">{p.name}</span>
               </span>
             </label>
@@ -28,7 +28,7 @@ export function CycleFocusFields({ pillars, initial, initialFocus = "", identity
           <span className="label">The behavior you will practice</span>
           <input name="focus" className="input" maxLength={500} defaultValue={initialFocus} placeholder="The situation and what you do in it" />
         </label>
-        {identityBehavior && <Picks list={{ status: "approved", options: [identityBehavior] }} target="focus" label="From who I am" />}
+        {identityBehavior && <Picks list={{ status: "approved", options: [identityBehavior] }} target="focus" label="From my road" />}
         <Picks key={pillar} list={CYCLE_FOCUS[pillar]} target="focus" label="Ideas for this pillar" />
       </div>
     </>

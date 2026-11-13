@@ -15,7 +15,7 @@ before(async () => {
   coach = (await db.user.findUniqueOrThrow({ where: { email: "coach@demo.bothhands.app" } })) as unknown as CurrentUser;
   await db.identityProfile.deleteMany({ where: { userId: dana.id } });
   await db.identityProfile.create({
-    data: { userId: dana.id, level: "REINVENT", becoming: "ID-BECOMING", situation: "ID-SITUATION", behavior: "ID-BEHAVIOR", personaName: "ID-PERSONA", personaStandards: "ID-STANDARDS", personaCue: "ID-CUE" },
+    data: { userId: dana.id, level: "REINVENT", role: "ID-ROLE", becoming: "ID-BECOMING", situation: "ID-SITUATION", behavior: "ID-BEHAVIOR", personaName: "ID-PERSONA", personaStandards: "ID-STANDARDS", personaCue: "ID-CUE" },
   });
 });
 after(async () => {
@@ -54,7 +54,10 @@ test("the tone reaches the system prompt", async () => {
 
 test("the AI gets the statement by default, the persona only when ticked, nothing when turned off", async () => {
   let ctx = await participantContext(dana.id);
-  assert.ok(ctx.includes("ID-BECOMING") && ctx.includes("ID-BEHAVIOR"));
+  assert.ok(ctx.includes("ID-ROLE") && ctx.includes("ID-BEHAVIOR"), "role and behavior");
+  assert.match(ctx, /kind of change[^\n]*identity reinvention/);
+  assert.match(ctx, /Go slower/, "coaching guidance for the kind of change");
+  assert.ok(!ctx.includes("ID-BECOMING"), "with a statement on the profile, the AI reads that one statement");
   assert.ok(!ctx.includes("ID-PERSONA") && !ctx.includes("ID-CUE"), "persona held back by default");
   await db.identityProfile.update({ where: { userId: dana.id }, data: { aiUsePersona: true } });
   ctx = await participantContext(dana.id);

@@ -6,6 +6,7 @@ import * as guide from "../src/content/guide";
 import * as identity from "../src/content/identity";
 import * as tone from "../src/lib/identityTone";
 import { FORGE_LINES } from "../src/content/forgeLines";
+import * as headline from "../src/lib/todayHeadline";
 import * as examples from "../src/content/identityExamples";
 
 const BANNED = /\b(steady|steadi\w*|drift\w*|rhythm\w*|navigat\w*|resonat\w*|lean into|under pressure|accumulat\w*|compound\w*|holds?|held|actually|honestly|genuinely|nobody|everybody)\b/i;
@@ -31,6 +32,8 @@ test("quick-pick options and the guide follow the house style", () => {
   walk(identity);
   walk(tone);
   walk(FORGE_LINES);
+  walk(headline.MOOD_LABEL);
+  for (const o of [{ cycle: false, finished: false, day: 0, practiced: 0, window: 0 }, { cycle: true, finished: true, day: 30, practiced: 0, window: 10 }, { cycle: true, finished: false, day: 2, practiced: 1, window: 2 }, { cycle: true, finished: false, day: 12, practiced: 9, window: 10 }, { cycle: true, finished: false, day: 12, practiced: 6, window: 10 }, { cycle: true, finished: false, day: 12, practiced: 2, window: 10 }, { cycle: true, finished: false, day: 12, practiced: 0, window: 10 }]) walk(headline.todayHeadline(o));
   // The author's identity examples get the same banned-word and "X, not Y" checks.
   const ex: string[] = [];
   JSON.stringify(examples, (_k, v) => { if (typeof v === "string") ex.push(v); return v; });

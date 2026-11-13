@@ -33,6 +33,8 @@ export const FOUR_THINGS = {
 export type ExamplePerson = {
   key: string;
   who: string;
+  /** The role, as in "This is about me as a ___". */
+  role: string;
   level: IdentityLevel;
   claim: string;
   lines: Record<LineField, string>;
@@ -41,6 +43,7 @@ export type ExamplePerson = {
 export const EXAMPLE_PEOPLE: ExamplePerson[] = [
   {
     key: "owner",
+    role: "owner",
     who: "Owner",
     level: "REINVENT",
     claim: "I am the owner of this business. My job is to lead it.",
@@ -54,6 +57,7 @@ export const EXAMPLE_PEOPLE: ExamplePerson[] = [
   },
   {
     key: "manager",
+    role: "manager",
     who: "Newly promoted manager",
     level: "ROLE",
     claim: "I am a leader now. My results come through other people.",
@@ -67,6 +71,7 @@ export const EXAMPLE_PEOPLE: ExamplePerson[] = [
   },
   {
     key: "project",
+    role: "project lead",
     who: "Project manager, tough assignment",
     level: "CORE",
     claim: "I am the right person for this, and I belong in the seat.",
@@ -80,6 +85,7 @@ export const EXAMPLE_PEOPLE: ExamplePerson[] = [
   },
   {
     key: "pastor",
+    role: "pastor",
     who: "Pastor stepping into the lead role",
     level: "ROLE",
     claim: "I am called to lead this church, and preaching is one part of that.",
@@ -91,29 +97,66 @@ export const EXAMPLE_PEOPLE: ExamplePerson[] = [
       lineE: "I am secure in my calling when I'm criticized.",
     },
   },
+  // Build-team drafts for the parent and coach roles, written to the author's four tests. DRAFT.
+  {
+    key: "parent",
+    who: "Parent",
+    role: "parent",
+    level: "CORE",
+    claim: "I am the parent my kids can count on.",
+    lines: {
+      destination: "I am a parent raising kids who can stand on their own.",
+      lineO: "I am a parent who sees my kids for who they are.",
+      why: "I am raising my family the way I want to be remembered.",
+      lineG: "I am a parent who can say I got it wrong and start again.",
+      lineE: "I am the calm in my house when the day falls apart.",
+    },
+  },
+  {
+    key: "coach",
+    who: "New coach",
+    role: "coach",
+    level: "ROLE",
+    claim: "I am a coach now. My work is growing the person in front of me.",
+    lines: {
+      destination: "I am a coach measured by what my clients can do without me.",
+      lineO: "I am a coach who listens for what sits under the question.",
+      why: "I am here because someone believed in me before I believed in myself.",
+      lineG: "I am still learning this craft, and I let my clients see that.",
+      lineE: "I am settled when a client pushes back.",
+    },
+  },
 ];
 
 /** The person shown first for each pathway: the one most like the client. */
 const ORDER: Record<PathwayKey, string[]> = {
-  PERSONAL: ["project", "manager", "pastor", "owner"],
-  LEADING_OTHERS: ["manager", "pastor", "project", "owner"],
-  ENTREPRENEURIAL: ["owner", "project", "manager", "pastor"],
+  PERSONAL: ["project", "parent", "manager", "coach", "pastor", "owner"],
+  LEADING_OTHERS: ["manager", "pastor", "coach", "project", "parent", "owner"],
+  ENTREPRENEURIAL: ["owner", "project", "manager", "coach", "pastor", "parent"],
 };
 
-export function peopleFor(pathway: PathwayKey): ExamplePerson[] {
-  return ORDER[pathway].map((k) => EXAMPLE_PEOPLE.find((p) => p.key === k)!);
+/**
+ * People in the order most like the client: the same role first, then the same kind of change,
+ * then the pathway order. Where nothing matches exactly, the closest person still shows, labeled.
+ */
+export function peopleFor(pathway: PathwayKey, role = "", level = ""): ExamplePerson[] {
+  const r = role.trim().toLowerCase();
+  const score = (p: ExamplePerson) => (r && p.role === r ? 2 : 0) + (level && p.level === level ? 1 : 0);
+  return ORDER[pathway].map((k) => EXAMPLE_PEOPLE.find((p) => p.key === k)!).sort((a, b) => score(b) - score(a));
 }
 
 /** Drops the leading "I am" so an example can fill a box that already shows it. */
 export const afterIAm = (s: string) => s.replace(/^I am\s+/, "");
 
 /** Example groups for one statement (or for the I am claim when field is "claim"). */
-export function exampleGroups(field: LineField | "claim", pathway: PathwayKey) {
-  return peopleFor(pathway).map((p) => ({ label: p.who, options: [afterIAm(field === "claim" ? p.claim : p.lines[field])] }));
+const KIND_NAME: Record<string, string> = { CORE: "core alignment", ROLE: "role transition", REINVENT: "identity reinvention" };
+
+export function exampleGroups(field: LineField | "claim", pathway: PathwayKey, role = "", level = "") {
+  return peopleFor(pathway, role, level).map((p) => ({ label: `${p.who} · ${KIND_NAME[p.level]}`, options: [afterIAm(field === "claim" ? p.claim : p.lines[field])] }));
 }
 
 /** Placeholder text for a box: the closest person's statement. */
-export function examplePlaceholder(field: LineField | "claim", pathway: PathwayKey) {
-  const p = peopleFor(pathway)[0];
+export function examplePlaceholder(field: LineField | "claim", pathway: PathwayKey, role = "", level = "") {
+  const p = peopleFor(pathway, role, level)[0];
   return afterIAm(field === "claim" ? p.claim : p.lines[field]);
 }

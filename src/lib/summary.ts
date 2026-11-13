@@ -21,11 +21,12 @@ export async function developmentSummary(userId: string, name: string) {
     if (d.profile.priorityPillar) L.push(`**Development priority:** ${pName(d.profile.priorityPillar)}`);
     const lines = FORGE_LINES.filter((l) => d.profile?.[l.field]);
     if (lines.length) L.push("", "## My FORGE identity", ...lines.map((l) => `- **${l.pillar}, ${l.label}:** ${d.profile![l.field]}`));
-    if (d.profile.forgeStatement) L.push("", "## FORGE statement", d.profile.forgeStatement);
+    if (d.profile.forgeStatement) L.push("", "## My statement", d.profile.forgeStatement);
   }
   if (d.identity) {
-    const lv = { CORE: "Level 1, core alignment", ROLE: "Level 2, role transition", REINVENT: "Level 3, identity reinvention" }[d.identity.level as "CORE"];
-    L.push("", "## Identity shift", `**Level:** ${lv}`, "", d.identity.becoming);
+    const lv = { CORE: "Core alignment", ROLE: "Role transition", REINVENT: "Identity reinvention" }[d.identity.level as "CORE"];
+    L.push("", "## Who I am", ...(d.identity.role ? [`**Role:** ${d.identity.role}`] : []), `**Kind of change:** ${lv}`);
+    if (!d.profile?.forgeStatement && d.identity.becoming) L.push("", d.identity.becoming);
     if (d.identity.behavior) L.push("", `**Behavior that shows it:** ${d.identity.behavior}`);
     if (d.identity.personaName) L.push(`**Performance identity:** ${d.identity.personaName}`);
   }

@@ -43,7 +43,7 @@ export function IdentityCoach({ field, prefix = "I am" }: { field: string; prefi
       <button type="button" onClick={ask} disabled={pending} className="text-sm btn-link text-left">
         {pending ? "Thinking..." : reply ? "Ask again" : "Help me find this"}
       </button>
-      {error && <p role="alert" className="text-xs text-clay mt-1">{error}</p>}
+      {error && <p role="alert" className="text-xs text-alert mt-1">{error}</p>}
       {reply && (
         <div className="mt-2 rounded-xl bg-paper p-3 text-sm" aria-live="polite">
           <p className="font-medium">{KIND_LABEL[reply.kind]}</p>

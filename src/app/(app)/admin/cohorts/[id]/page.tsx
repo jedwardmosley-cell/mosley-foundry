@@ -38,7 +38,7 @@ export default async function CohortAdmin({ params }: { params: Promise<{ id: st
       <PageHeader eyebrow="Leading Others cohort" title={cohort.name}>{DELIVERY_FORMATS[cohort.deliveryFormat as keyof typeof DELIVERY_FORMATS].label} · reinforcement {cohort.reinforceDays} days</PageHeader>
 
       {flash && (
-        <Card className="mb-5 border-brass">
+        <Card className="mb-5 border-line">
           <p className="text-[15px]">Account created for <strong>{flash.email}</strong>. Temporary password: <code className="bg-paper px-1.5 py-0.5 rounded">{flash.temp}</code></p>
           <p className="text-xs text-ink-mute mt-1">Shown once. Share it privately; ask them to change it.</p>
         </Card>
@@ -52,7 +52,7 @@ export default async function CohortAdmin({ params }: { params: Promise<{ id: st
             return (
               <form key={s.id} action={updateSession} className="grid gap-3 sm:grid-cols-[1fr_auto_auto_auto_auto] items-end rounded-xl bg-paper p-3">
                 <input type="hidden" name="id" value={s.id} /><input type="hidden" name="cohortId" value={cohort.id} />
-                <p className="text-[15px]"><span className="text-brass font-serif mr-2">{seg.key}</span>{seg.title}</p>
+                <p className="text-[15px]"><span className="text-ink-mute font-serif mr-2">{seg.key}</span>{seg.title}</p>
                 <Field label="Starts"><input type="datetime-local" name="startsAt" defaultValue={local(s.startsAt)} className="input" /></Field>
                 <Field label="Facilitator">
                   <select name="facilitatorId" defaultValue={s.facilitatorId ?? ""} className="input">
@@ -85,7 +85,7 @@ export default async function CohortAdmin({ params }: { params: Promise<{ id: st
                         <form action={markAttendance}>
                           <input type="hidden" name="cohortId" value={cohort.id} /><input type="hidden" name="sessionId" value={s.id} />
                           <input type="hidden" name="userId" value={m.userId} /><input type="hidden" name="status" value={next} />
-                          <button aria-label={`${m.user.name}, segment ${s.segmentKey}: ${st ?? "not recorded"}. Mark ${next.toLowerCase()}`} className={`h-7 w-7 rounded-md border text-xs ${st === "PRESENT" ? "bg-navy text-white border-navy" : st === "ABSENT" ? "bg-clay-soft text-clay border-clay/30" : st === "EXCUSED" ? "bg-brass-soft border-brass/30" : "bg-white border-line"}`}>
+                          <button aria-label={`${m.user.name}, segment ${s.segmentKey}: ${st ?? "not recorded"}. Mark ${next.toLowerCase()}`} className={`h-7 w-7 rounded-md border text-xs ${st === "PRESENT" ? "bg-navy text-white border-navy" : st === "ABSENT" ? "bg-alert-soft text-alert border-alert/30" : st === "EXCUSED" ? "bg-line text-ink-soft border-line" : "bg-surface border-line"}`}>
                             {st === "PRESENT" ? "✓" : st === "ABSENT" ? "×" : st === "EXCUSED" ? "E" : ""}
                           </button>
                         </form>

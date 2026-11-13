@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 function Row({ ok, label, hint }: { ok: boolean; label: string; hint?: string }) {
   return (
     <li className="flex items-start gap-3 py-2">
-      <span className={`mt-0.5 h-5 w-5 shrink-0 rounded-full text-[11px] flex items-center justify-center ${ok ? "bg-sage text-white" : "border border-clay text-clay"}`}>{ok ? "✓" : "!"}</span>
+      <span className={`mt-0.5 h-5 w-5 shrink-0 rounded-full text-[11px] flex items-center justify-center ${ok ? "bg-navy text-white" : "border border-alert text-alert"}`}>{ok ? "✓" : "!"}</span>
       <span><span className="text-[15px]">{label}</span>{hint && <span className="block text-xs text-ink-mute">{hint}</span>}</span>
     </li>
   );

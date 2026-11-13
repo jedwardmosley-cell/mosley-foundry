@@ -48,7 +48,7 @@ export default async function NetworkPage({ searchParams }: { searchParams: Prom
           <ul className="mt-3 space-y-2.5">
             {health.map((h) => (
               <li key={h.label} className="flex items-start gap-2.5 text-[15px]">
-                <span className={`mt-0.5 h-5 w-5 shrink-0 rounded-full text-[11px] flex items-center justify-center ${h.ok ? "bg-sage text-white" : "border border-clay text-clay"}`}>{h.ok ? "✓" : "!"}</span>
+                <span className={`mt-0.5 h-5 w-5 shrink-0 rounded-full text-[11px] flex items-center justify-center ${h.ok ? "bg-navy text-white" : "border border-alert text-alert"}`}>{h.ok ? "✓" : "!"}</span>
                 <span className={h.ok ? "" : "text-ink"}>{h.label}</span>
               </li>
             ))}
@@ -63,7 +63,7 @@ export default async function NetworkPage({ searchParams }: { searchParams: Prom
           <Card key={r.id}>
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <h3 className="h3">{r.name} <span className="muted font-normal">· {RELATIONSHIP_ROLES[r.role as keyof typeof RELATIONSHIP_ROLES]}</span></h3>
-              <span className={`text-sm ${r.overdue ? "text-clay" : "muted"}`}>Every {r.cadenceDays} days · {r.overdue ? "was due" : "next"} {fmt(r.nextCheckIn)}</span>
+              <span className={`text-sm ${r.overdue ? "text-alert" : "muted"}`}>Every {r.cadenceDays} days · {r.overdue ? "was due" : "next"} {fmt(r.nextCheckIn)}</span>
             </div>
             {r.purpose && <p className="mt-1 text-[15px] text-ink-soft">{r.purpose}</p>}
             {r.checkIns.length > 0 && (
@@ -78,13 +78,13 @@ export default async function NetworkPage({ searchParams }: { searchParams: Prom
               </ul>
             )}
             <details className="mt-3">
-              <summary className="cursor-pointer text-sm text-navy">Log a check-in</summary>
+              <summary className="cursor-pointer text-sm text-link">Log a check-in</summary>
               <form action={logRelationshipCheckIn} className="mt-3 grid gap-3 sm:grid-cols-2">
                 <input type="hidden" name="id" value={r.id} />
                 <Field label="Date"><input type="date" name="occurredOn" defaultValue={ymd()} className="input" /></Field>
                 <label className="flex items-center gap-2 text-sm sm:mt-7"><input type="checkbox" name="happened" defaultChecked className="h-4 w-4 accent-navy" /> It happened</label>
                 <details className="sm:col-span-2">
-                  <summary className="cursor-pointer text-sm text-navy">Lesson and agreed actions <span className="text-ink-mute">(optional)</span></summary>
+                  <summary className="cursor-pointer text-sm text-link">Lesson and agreed actions <span className="text-ink-mute">(optional)</span></summary>
                   <div className="mt-2 grid gap-3 sm:grid-cols-2">
                     <Field label="Lesson"><input name="lessons" className="input" maxLength={4000} /></Field>
                     <Field label="Agreed actions"><input name="agreedActions" className="input" maxLength={4000} /></Field>
@@ -95,13 +95,13 @@ export default async function NetworkPage({ searchParams }: { searchParams: Prom
             </details>
             <div className="mt-3 flex flex-wrap items-center gap-4 text-sm">
               {r.inviteStatus === "ACCEPTED" ? (
-                <span className="chip !text-sage">Connected{r.linkedUser ? ` as ${r.linkedUser.name}` : ""}</span>
+                <span className="chip !text-link">Connected{r.linkedUser ? ` as ${r.linkedUser.name}` : ""}</span>
               ) : r.inviteStatus === "PENDING" && r.inviteToken ? (
                 <span className="text-ink-soft break-all">Invite link: <code className="text-xs">{`${host?.includes("localhost") ? "http" : "https"}://${host}/invite/${r.inviteToken}`}</code></span>
               ) : (
                 <form action={createInvite}><input type="hidden" name="id" value={r.id} /><button className="btn-link">Create invitation link</button></form>
               )}
-              <form action={removeRelationship}><input type="hidden" name="id" value={r.id} /><button className="text-ink-mute hover:text-clay">Remove</button></form>
+              <form action={removeRelationship}><input type="hidden" name="id" value={r.id} /><button className="text-ink-mute hover:text-alert">Remove</button></form>
             </div>
           </Card>
         ))}
@@ -114,10 +114,10 @@ export default async function NetworkPage({ searchParams }: { searchParams: Prom
           <Field label="Name"><input name="name" required maxLength={120} className="input" /></Field>
           <RelationshipFields initialRole={wantedRole && wantedRole in RELATIONSHIP_ROLES ? wantedRole : undefined} />
           <details className="sm:col-span-2">
-            <summary className="cursor-pointer text-sm text-navy">Next check-in date <span className="text-ink-mute">(optional, defaults from the schedule)</span></summary>
+            <summary className="cursor-pointer text-sm text-link">Next check-in date <span className="text-ink-mute">(optional, defaults from the schedule)</span></summary>
             <div className="mt-2 max-w-xs"><Field label="Next check-in"><input type="date" name="nextCheckIn" className="input" /></Field></div>
           </details>
-          <details className="sm:col-span-2"><summary className="cursor-pointer text-sm text-navy">Email <span className="text-ink-mute">(optional, only for invitation links)</span></summary><div className="mt-2"><input type="email" name="email" aria-label="Email" className="input" /></div></details>
+          <details className="sm:col-span-2"><summary className="cursor-pointer text-sm text-link">Email <span className="text-ink-mute">(optional, only for invitation links)</span></summary><div className="mt-2"><input type="email" name="email" aria-label="Email" className="input" /></div></details>
           <div className="sm:col-span-2"><Submit>Add</Submit></div>
         </form>
         <p className="mt-4 text-xs text-ink-mute">Invited people can see that you named them. They never see your assessments, reflections, journal or plan.</p>

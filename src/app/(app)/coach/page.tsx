@@ -52,7 +52,7 @@ export default async function CoachHome() {
                   : <p className="text-sm muted">No 30 days under way</p>)}
                 {ps ? <p className="text-sm">Practice, last 30 days: {ps.done} done · {ps.partial} partial · {ps.notYet} not yet</p> : <p className="text-sm muted">Practice not shared</p>}
               </div>
-              {flags.length > 0 && <ul className="mt-3 space-y-1">{flags.map((f) => <li key={f} className="text-sm text-clay">· {f}</li>)}</ul>}
+              {flags.length > 0 && <ul className="mt-3 space-y-1">{flags.map((f) => <li key={f} className="text-sm text-alert">· {f}</li>)}</ul>}
             </Link>
           );
         })}

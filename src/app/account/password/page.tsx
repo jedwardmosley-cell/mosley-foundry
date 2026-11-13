@@ -20,7 +20,7 @@ export default async function PasswordPage() {
           : `Signed in as ${u.email}.`}
       </p>
       {reset?.passwordResetAt && (
-        <p className="mt-4 rounded-xl border border-brass bg-brass-soft/40 p-3 text-sm">
+        <p className="mt-4 rounded-xl border border-line bg-paper p-3 text-sm">
           Your password was reset by {reset.passwordResetBy ?? "your coach"} on {fmt(reset.passwordResetAt, { month: "long", day: "numeric", year: "numeric" })}. If you did not ask for that, tell them right away.
         </p>
       )}

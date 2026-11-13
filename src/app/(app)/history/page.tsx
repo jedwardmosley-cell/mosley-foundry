@@ -44,7 +44,7 @@ export default async function HistoryPage() {
                   return (
                     <tr key={a.id} className="border-t border-line">
                       <td className="py-2">{fmt(a.completedAt, { month: "short", day: "numeric", year: "numeric" })}</td>
-                      {PILLAR_KEYS.map((k) => <td key={k} className="text-center">{s[k]}{prev && s[k] !== prev[k] && <span className={`ml-1 text-xs ${s[k] > prev[k] ? "text-sage" : "text-clay"}`}>{s[k] > prev[k] ? "+" : ""}{s[k] - prev[k]}</span>}</td>)}
+                      {PILLAR_KEYS.map((k) => <td key={k} className="text-center">{s[k]}{prev && s[k] !== prev[k] && <span className={`ml-1 text-xs ${s[k] > prev[k] ? "text-link" : "text-alert"}`}>{s[k] > prev[k] ? "+" : ""}{s[k] - prev[k]}</span>}</td>)}
                       <td className="text-right font-serif">{total(s)}</td>
                     </tr>
                   );

@@ -41,14 +41,14 @@ export default async function SegmentPage({ params }: { params: Promise<{ key: s
         <p className="mt-2 text-[15px] leading-relaxed">{s.practice.text}</p>
       </Card>
       <Card className="mt-5">
-        <h2 className="h3">Your development goal for this segment</h2>
+        <h2 className="h3">My development goal for this segment</h2>
         <form action={saveGoal} className="mt-4 space-y-4">
           <input type="hidden" name="pillar" value={s.pillars[0]} />
           <input type="hidden" name="segmentKey" value={s.key} />
           <Field label="One move this week"><input name="oneMove" defaultValue={goal?.oneMove} className="input" /></Field>
           <Picks list={ONE_MOVE[s.pillars[0]]} target="oneMove" />
           <details open={!!(goal?.whereNow || goal?.whereWant)}>
-            <summary className="cursor-pointer text-sm text-navy">Where I am now and where I want to be <span className="text-ink-mute">(optional)</span></summary>
+            <summary className="cursor-pointer text-sm text-link">Where I am now and where I want to be <span className="text-ink-mute">(optional)</span></summary>
             <div className="mt-3 grid gap-4 sm:grid-cols-2">
               <Field label="Where I am now"><textarea name="whereNow" defaultValue={goal?.whereNow} className="textarea !min-h-[80px]" /></Field>
               <Field label="Where I want to be"><textarea name="whereWant" defaultValue={goal?.whereWant} className="textarea !min-h-[80px]" /></Field>

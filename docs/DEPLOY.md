@@ -32,6 +32,8 @@ Open **Settings**, then **Environment Variables**, and add:
 | `SETUP_TOKEN` | A long password you make up (20+ characters). You will type it once at the setup page. Keep it private. |
 | `ALLOW_SIGNUP` | `true` lets anyone create an account. `false` means only administrators enroll people. |
 | `ANTHROPIC_API_KEY` | Optional. Your key from console.anthropic.com, to turn on the AI Companion. |
+| `RESEND_API_KEY` | Optional. Your key from resend.com, to send forgot-password emails. See "Email" below. |
+| `EMAIL_FROM` | Optional. Who emails come from, for example `Both Hands on the Wheel <noreply@mosleyfoundry.com>`. |
 
 ## 4. Redeploy
 
@@ -61,3 +63,15 @@ This time the build creates the database tables.
 - **Setup page says the database is not connected:** repeat step 2, then step 4.
 - **"Setup token is missing or wrong":** check the value under Environment Variables, and redeploy after changing it.
 - **Assessment shows "Draft assessment":** the content pack isn't installed yet. Repeat step 5.4.
+
+## Email (forgot-password links)
+
+The app sends forgot-password emails through Resend. Until it is set up, the Forgot your password? page tells people to ask their coach.
+
+1. Create a free account at resend.com.
+2. Under **Domains**, add `mosleyfoundry.com`. Resend shows a few DNS records. Add them where your domain is managed (the same place your website's domain settings live), then click **Verify** in Resend. This can take a few minutes to an hour.
+3. Under **API Keys**, create a key with "Sending access". Copy it once. Do not paste it into a chat or a screenshot.
+4. In Vercel, add `RESEND_API_KEY` (the key) and `EMAIL_FROM` (for example `Both Hands on the Wheel <noreply@mosleyfoundry.com>`). The address must be on the domain you verified.
+5. Redeploy, then try Forgot your password? on the sign-in screen with your own email.
+
+Links in emails use the site's production address automatically. To use a custom domain later, add `APP_URL` (for example `https://app.mosleyfoundry.com`).
