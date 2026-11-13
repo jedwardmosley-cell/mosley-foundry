@@ -19,7 +19,7 @@ const GROUPS: [string, [string, string, string][]][] = [
     ["/companion", "AI companion", "Think it through, practice a hard conversation, prepare for coaching."],
     ["/pathway", "My pathway", "Program segments and work for your pathway."],
     ["/pathway/eqi", "EQ-i priorities", "Optional. For people who have had an EQ-i debrief."],
-    ["/library", "Road library", "Book prompts, road tests and workbook exercises."],
+    ["/library", "Road library", "Prompts, road tests and exercises from the book."],
   ]],
   ["Mine", [
     ["/journal", "Private journal", "Private to you and never shared."],

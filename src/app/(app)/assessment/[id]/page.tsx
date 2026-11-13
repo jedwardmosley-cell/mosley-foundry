@@ -32,7 +32,7 @@ export default async function AssessmentResult({ params, searchParams }: { param
 
   return (
     <>
-      <PageHeader eyebrow={`Section Two · ${fmt(a.completedAt, { month: "long", day: "numeric", year: "numeric" })}`} title="Your Score Profile">
+      <PageHeader eyebrow={`FORGE · ${fmt(a.completedAt, { month: "long", day: "numeric", year: "numeric" })}`} title="Your Score Profile">
         Your five scores are not five separate grades. They are a pattern.
         {a.instrument === "FORGE_DRAFT" && <span className="ml-2"><Draft>Draft instrument</Draft></span>}
       </PageHeader>
@@ -66,7 +66,6 @@ export default async function AssessmentResult({ params, searchParams }: { param
           <p className="eyebrow">The pattern to watch for</p>
           <h2 className="h2 mt-1">{pt.title}</h2>
           {pt.text.map((t) => <p key={t} className="mt-2 text-[15px] leading-relaxed">{t}</p>)}
-          <Source>{entrepreneur?.source.title}</Source>
         </Card>
       ))}
 
@@ -89,7 +88,6 @@ export default async function AssessmentResult({ params, searchParams }: { param
           <Submit>{profile?.priorityPillar === fp.key ? "This is my priority" : `Make ${fp.name} my development priority`}</Submit>
           <span className="text-sm muted">One pillar with real attention produces more than five with divided attention.</span>
         </form>
-        <Source>Personal Application Workbook, Section Two</Source>
       </Card>
 
       <a href="/identity" className="card block mt-5 hover:border-navy/40">
@@ -106,7 +104,6 @@ export default async function AssessmentResult({ params, searchParams }: { param
           <p className="mt-3 text-sm muted">{PILLAR_KEYS.map((k) => `${k} ${nearest.p.scores[k]}`).join(" · ")}</p>
           {nearest.p.designedDiscipline && <p className="mt-3 text-[15px] leading-relaxed"><span className="font-medium">Designed discipline factor. </span>{nearest.p.designedDiscipline}</p>}
           {nearest.p.lesson && <p className="mt-3 text-[15px] leading-relaxed"><span className="font-medium">The lesson. </span>{nearest.p.lesson}</p>}
-          <Source>Personal Application Workbook, Section Three</Source>
         </Card>
       )}
 
@@ -133,7 +130,6 @@ export default async function AssessmentResult({ params, searchParams }: { param
           ))}
           <Submit className="btn-quiet">Save revised scores</Submit>
         </form>
-        <Source>Personal Application Workbook, Full Behavioral Anchor Tables</Source>
       </Card>
     </>
   );

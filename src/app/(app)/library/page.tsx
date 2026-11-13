@@ -1,4 +1,5 @@
 import { requireUser } from "@/lib/auth";
+import { ReadTheBook } from "@/components/ReadTheBook";
 import { getContent } from "@/content";
 import { PageHeader, Card, PillarMark, Source, Empty } from "@/components/ui";
 
@@ -11,15 +12,16 @@ export default async function LibraryPage() {
     return (
       <>
         <PageHeader title="Road library" />
-        <Empty title="Content pack not installed">Book passages and workbook exercises appear here once the licensed content pack is installed on this server.</Empty>
+        <Empty title="Content pack not installed">Book passages and exercises appear here once the content pack is installed on this server.</Empty>
       </>
     );
   }
   return (
     <>
       <PageHeader eyebrow="Both Hands on the Wheel" title="Road library">
-        Reflection prompts, road tests and exercises from the book and the Personal Application Workbook. Pick one that hits close and do it this week.
+        Reflection prompts, road tests and exercises from Both Hands on the Wheel. Pick one that hits close and do it this week.
       </PageHeader>
+      <ReadTheBook className="-mt-3 mb-6" />
 
       <h2 className="h2 mb-3">The Rules of the Road</h2>
       <div className="space-y-3">
@@ -60,7 +62,6 @@ export default async function LibraryPage() {
             {e.quote && <p className="quote mt-3">{e.quote}</p>}
             {e.setup && <p className="mt-3 text-[15px] leading-relaxed">{e.setup}</p>}
             <ul className="mt-3 space-y-2 text-[15px]">{e.prompts.map((t) => <li key={t}>{t}</li>)}</ul>
-            <Source>Personal Application Workbook, Section Four</Source>
           </Card>
         ))}
       </div>
@@ -73,7 +74,6 @@ export default async function LibraryPage() {
             <h3 className="h3">{j.title}</h3>
             {j.setup && <p className="mt-2 text-[15px] leading-relaxed text-ink-soft">{j.setup}</p>}
             <ul className="mt-3 space-y-2 text-[15px]">{j.prompts.map((t) => <li key={t}>{t}</li>)}</ul>
-            <Source>Personal Application Workbook, Section Five</Source>
           </Card>
         ))}
       </div>

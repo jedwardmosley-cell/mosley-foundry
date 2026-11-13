@@ -62,3 +62,19 @@ test("only Both Hands on the Wheel, FORGE and Discipline by Design are capitaliz
     });
   }
 });
+
+test("the app is standalone: clients never see the workbook or worksheet named", () => {
+  const files: string[] = [];
+  const walk = (d: string) => { for (const f of readdirSync(d)) { const p = join(d, f); if (statSync(p).isDirectory()) walk(p); else if (/\.(ts|tsx)$/.test(p)) files.push(p); } };
+  walk("src");
+  // Admin-only setup screens may name the source files. Code names, comments and internal source fields are fine.
+  const adminOnly = /SetupForms\.tsx$|app\/setup\/|content\/(index|types)\.ts$/;
+  const internal = /WORKBOOK_30|basis\??: |^\s*(\*|\/\/|\/\*)|\/\/ source is internal only|To replace the book and workbook content|Never mention a workbook/;
+  for (const f of files) {
+    if (adminOnly.test(f)) continue;
+    readFileSync(f, "utf8").split("\n").forEach((line, i) => {
+      if (internal.test(line)) return;
+      assert.ok(!/workbook|worksheet|Section (One|Two|Three|Four|Five|Six|Seven|Eight)\b/i.test(line), `${f}:${i + 1} names the workbook: ${line.trim().slice(0, 120)}`);
+    });
+  }
+});

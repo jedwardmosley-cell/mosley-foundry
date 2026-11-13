@@ -205,7 +205,7 @@ export const COACH_GUIDE: GuideSection[] = [
     id: "work",
     title: "Exercises and sessions",
     steps: [
-      "On a client's page, use Assign an exercise. Pick one from the book or workbook, or write your own.",
+      "On a client's page, use Assign an exercise. Pick one from the program list, or write your own.",
       "Use Schedule a session to set a date and an agenda. The client can add a prep note before you meet.",
       "After the session, write the agreed commitments. The client sees those. Your coach notes stay private to you.",
       "The client sees open exercises, the next session and the latest commitments in a From your coach box on their Today screen.",

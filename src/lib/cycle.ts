@@ -3,8 +3,8 @@ import { NIRS_WEEKS, type CycleWeek } from "@/content/program";
 import { daysBetween } from "./dates";
 
 export const CYCLE_TEMPLATES = {
-  WORKBOOK_30: { name: "30-Day Implementation Plan", source: "Personal Application Workbook, Section Seven" },
-  NIRS_30: { name: "Name It, Interrupt It, Replace It, Sustain It", source: "Build brief (FORGE Application Workbook assignments pending)" },
+  WORKBOOK_30: { name: "30-Day Implementation Plan", source: "Personal Application Workbook, Section Seven" }, // source is internal only
+  NIRS_30: { name: "Name It, Interrupt It, Replace It, Sustain It", source: "Build brief (FORGE Application Workbook assignments pending)" }, // source is internal only
 } as const;
 export type CycleTemplate = keyof typeof CYCLE_TEMPLATES;
 

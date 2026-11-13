@@ -121,7 +121,7 @@ export default async function NetworkPage({ searchParams }: { searchParams: Prom
           <div className="sm:col-span-2"><Submit>Add</Submit></div>
         </form>
         <p className="mt-4 text-xs text-ink-mute">Invited people can see that you named them. They never see your assessments, reflections, journal or plan.</p>
-        {pack.namePeople.length > 0 && <Source>Personal Application Workbook, Section Eight; Both Hands on the Wheel, Ch. 10</Source>}
+        {pack.namePeople.length > 0 && <Source>Both Hands on the Wheel, Ch. 10</Source>}
       </Card>
     </>
   );

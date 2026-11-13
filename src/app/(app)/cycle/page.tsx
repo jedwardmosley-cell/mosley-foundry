@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ReadTheBook } from "@/components/ReadTheBook";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getContent } from "@/content";
@@ -89,6 +90,7 @@ export default async function CyclePage() {
               <div className="px-5 py-4">
                 <p className="eyebrow">Day 30 · Decide</p>
                 {decide && <p className="mt-2 text-[15px] leading-relaxed">{decide}</p>}
+                <ReadTheBook kind="deeper" className="mt-2" />
                 <form action={completeCycle} className="mt-4 space-y-4">
                   <input type="hidden" name="id" value={cycle.id} />
                   <fieldset className="space-y-2">
@@ -119,8 +121,7 @@ export default async function CyclePage() {
           </li>
         </ul>
       </Card>
-      {weeks[0]?.status !== "source" && <p className="mt-2 text-xs text-ink-mute">Week descriptions are from the build brief. Workbook assignments are pending. <Draft>Draft</Draft></p>}
-      <Source>{cycle.template === "WORKBOOK_30" ? "Personal Application Workbook, Section Seven" : "Build brief: 30-Day Development Cycle"}</Source>
+      {weeks[0]?.status !== "source" && <p className="mt-2 text-xs text-ink-mute">Week descriptions are a draft. <Draft>Draft</Draft></p>}
       {past.length > 0 && <PastCycles past={past} />}
     </>
   );
