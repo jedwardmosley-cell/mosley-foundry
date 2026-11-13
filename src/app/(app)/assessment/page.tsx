@@ -22,7 +22,7 @@ export default async function AssessmentPage({ searchParams }: { searchParams: P
 
   return (
     <>
-      <PageHeader eyebrow={useEntre ? "FORGE · Step 3 · for entrepreneurs" : "FORGE · Step 3"} title="Where I am">
+      <PageHeader eyebrow={useEntre ? "FORGE self-assessment · Step 2 · for entrepreneurs" : "FORGE self-assessment · Step 2"} title="Where I am">
         {useEntre ? entrepreneur!.intro.slice(0, 3).map((t) => <p key={t} className="mb-2">{t}</p>) : (
           <p>Tap a score from 1 to 5 for each pillar. Score what you did this past month. The short lines under each score show what it looks like.</p>
         )}
