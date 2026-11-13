@@ -82,11 +82,11 @@ model Profile {
   userId          String    @id
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   pathway         String    @default("PERSONAL") // enum: PERSONAL | LEADING_OTHERS | ENTREPRENEURIAL
-  destination     String    @default("") // F line: "I am ..." (where I am going). Was the Destination Paragraph.
-  lineO           String    @default("") // O line: "I notice ..."
-  why             String    @default("") // R line: why I am going there. Was the Why Sentence.
-  lineG           String    @default("") // G line: "I practice ..."
-  lineE           String    @default("") // E line: "When ..., I ..." (how I respond)
+  destination     String    @default("") // F: I am statement (who I am becoming). Was the Destination Paragraph.
+  lineO           String    @default("") // O: I am statement (what someone with my identity pays attention to)
+  why             String    @default("") // R: I am statement (what makes it meaningful). Was the Why Sentence.
+  lineG           String    @default("") // G: I am statement (who I am at my limits)
+  lineE           String    @default("") // E: I am statement (who I am when emotions run high)
   forgeStatement  String    @default("")
   priorityPillar  String? // enum: F | O | R | G | E
   reminderTime    String    @default("07:30")

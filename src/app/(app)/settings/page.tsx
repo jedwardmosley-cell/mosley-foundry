@@ -4,6 +4,7 @@ import { saveSettings } from "@/app/actions/participant";
 import { deleteAllConversations } from "@/app/actions/ai";
 import { PageHeader, Card, Field } from "@/components/ui";
 import { Submit } from "@/components/Submit";
+import { StartOverForm } from "@/components/StartOverForm";
 
 export const metadata = { title: "Settings" };
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -21,7 +22,7 @@ export default async function SettingsPage() {
           <label className="flex items-center gap-2 text-[15px]"><input type="checkbox" name="remindersOn" defaultChecked={p.remindersOn} className="h-4 w-4 accent-navy" /> Remind me to check in</label>
           <Field label="Time"><input type="time" name="reminderTime" defaultValue={p.reminderTime} className="input max-w-[160px]" /></Field>
           <ReminderDays days={days} />
-          <p className="text-xs text-ink-mute">Preferences are saved now. Delivery by email or push needs a mail or notification provider configured on the server (see docs/ARCHITECTURE.md).</p>
+          <p className="text-xs text-ink-mute">Reminders are not sent yet. Your choices are saved for when they are.</p>
           <h2 className="h3 pt-4 border-t border-line">AI companion</h2>
           <label className="flex items-center gap-2 text-[15px]"><input type="checkbox" name="aiEnabled" defaultChecked={p.aiEnabled} className="h-4 w-4 accent-navy" /> Use the AI companion</label>
           <Field label="Keep conversations for (days)" hint="Conversations older than this are deleted automatically.">
@@ -33,6 +34,7 @@ export default async function SettingsPage() {
           <button className="btn-quiet !text-clay">Delete all AI conversations now</button>
         </form>
       </Card>
+      <div className="mt-6"><StartOverForm /></div>
     </>
   );
 }

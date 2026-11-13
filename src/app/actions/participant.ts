@@ -479,3 +479,41 @@ export async function completeSeason(fd: FormData) {
   revalidatePath("/", "layout");
   redirect(d.decision === "NEW_SEASON" ? "/cycle/new?season=new" : "/dashboard");
 }
+
+// ---------- Start over ----------
+
+export type StartOverState = { error?: string } | undefined;
+
+/**
+ * The client erases their own development records and begins again from the pathway choice.
+ * Kept: the login, settings, coach assignments and sharing choices, and records that belong to
+ * the coach or the program (sessions, assigned exercises, cohort attendance, the audit log).
+ * Only the client can do this, and only to their own account.
+ */
+export async function startOver(_prev: StartOverState, fd: FormData): Promise<StartOverState> {
+  const u = await participant();
+  if (String(fd.get("confirm") ?? "").trim().toLowerCase() !== "start over") return { error: 'Type "start over" to confirm.' };
+  const userId = u.id;
+  await db.$transaction([
+    db.dailyCheckIn.deleteMany({ where: { userId } }),
+    db.developmentCycle.deleteMany({ where: { userId } }),
+    db.season.deleteMany({ where: { userId } }),
+    db.weeklyReflection.deleteMany({ where: { userId } }),
+    db.journalEntry.deleteMany({ where: { userId } }),
+    db.commitment.deleteMany({ where: { userId } }),
+    db.relationship.deleteMany({ where: { ownerId: userId } }),
+    db.developmentGoal.deleteMany({ where: { userId } }),
+    db.assessment.deleteMany({ where: { userId } }),
+    db.eqiPriority.deleteMany({ where: { userId } }),
+    db.identityHistory.deleteMany({ where: { userId } }),
+    db.identityProfile.deleteMany({ where: { userId } }),
+    db.aiConversation.deleteMany({ where: { userId } }),
+    db.profile.update({
+      where: { userId },
+      data: { pathway: "PERSONAL", destination: "", lineO: "", why: "", lineG: "", lineE: "", forgeStatement: "", priorityPillar: null, eqiEnabled: false, onboardedAt: null },
+    }),
+    db.auditEvent.create({ data: { actorId: userId, action: "participant.start_over", targetUserId: userId } }),
+  ]);
+  revalidatePath("/", "layout");
+  redirect("/onboarding");
+}
