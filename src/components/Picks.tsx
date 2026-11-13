@@ -6,7 +6,7 @@ import type { OptionList } from "@/content/options";
  * Tap-to-fill suggestions for a text field in the same form.
  * The field stays editable; without JavaScript the chips simply do nothing.
  */
-export function Picks({ list, target, label = "Tap to use one, then edit if you like", folded, note, groups }: { list: OptionList; target: string; label?: string; folded?: string; note?: string; groups?: { label: string; options: string[] }[] }) {
+export function Picks({ list, target, label = "Tap to use one, then edit if you like", folded, note, groups, alignRight = false }: { list: OptionList; target: string; label?: string; folded?: string; note?: string; groups?: { label: string; options: string[] }[]; alignRight?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   const fill = (text: string) => {
     const form = ref.current?.closest("form");
@@ -21,7 +21,7 @@ export function Picks({ list, target, label = "Tap to use one, then edit if you 
     return (
       <div ref={ref} className="mt-1.5">
         <details>
-          <summary className="cursor-pointer text-sm text-link">{folded}{list.status === "draft" && <span className="ml-2 draft !text-[10px]">Draft</span>}</summary>
+          <summary className={`cursor-pointer text-sm text-link ${alignRight ? "text-right" : ""}`}>{folded}{list.status === "draft" && <span className="ml-2 draft !text-[10px]">Draft</span>}</summary>
           {note && <p className="mt-2 text-xs text-ink-mute">{note}</p>}
           {groups && groups.map((g) => (
             <div key={g.label} className="mt-2.5">

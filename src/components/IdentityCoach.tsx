@@ -40,8 +40,8 @@ export function IdentityCoach({ field, prefix = "I am", corner = false }: { fiel
 
   return (
     <div ref={ref} className={corner ? "" : "mt-2"}>
-      <button type="button" onClick={ask} disabled={pending} className={`text-sm btn-link text-left ${corner ? "absolute right-0 top-1.5" : ""}`}>
-        {pending ? "Thinking..." : reply ? "Ask again" : "Help me find this"}
+      <button type="button" onClick={ask} disabled={pending} className={corner ? "absolute left-0 top-[3px] text-sm text-link hover:text-heading" : "text-sm btn-link text-left"}>
+        {corner && <span aria-hidden className="mr-1">✦</span>}{pending ? "Thinking..." : reply ? "Ask again" : "Help me find this"}
       </button>
       {error && <p role="alert" className="text-xs text-alert mt-1">{error}</p>}
       {reply && (
