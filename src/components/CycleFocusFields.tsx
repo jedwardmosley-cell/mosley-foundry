@@ -16,7 +16,7 @@ export function CycleFocusFields({ pillars, initial, initialFocus = "", identity
           {pillars.map((p) => (
             <label key={p.key} className="cursor-pointer">
               <input type="radio" name="pillar" value={p.key} checked={pillar === p.key} onChange={() => setPillar(p.key)} className="peer sr-only" />
-              <span className="flex flex-col items-center gap-1 rounded-xl border border-line bg-surface py-3 peer-checked:border-navy peer-checked:ring-2 peer-checked:ring-navy/20 peer-focus-visible:ring-2">
+              <span className="option !flex flex-col items-center gap-1 !px-0 !py-3">
                 <PillarMark k={p.key} size="sm" /><span className="text-[11px] text-center leading-tight px-1">{p.name}</span>
               </span>
             </label>

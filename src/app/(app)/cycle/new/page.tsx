@@ -34,7 +34,7 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
         <form action={startCycle} className="space-y-5">
           <div>
             <label htmlFor="role" className="label">{identity?.role ? "Still about me as..." : "The role this 30 days is about"}</label>
-            <div className="flex items-center rounded-xl border border-line bg-surface">
+            <div className="flex items-center inputbox">
               <span className="pl-3.5 pr-1.5 py-2.5 text-[15px] text-ink-soft whitespace-nowrap">This is about me as</span>
               <input id="role" name="role" defaultValue={identity?.role ?? ""} maxLength={80} placeholder="manager" className="flex-1 min-w-0 bg-transparent py-2.5 pr-3 text-[15px] focus:outline-none" />
             </div>
@@ -49,7 +49,7 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
               <Link href="/cycle/new?season=none" className="mt-1 inline-block text-xs text-ink-mute hover:text-ink">Start this one outside the season</Link>
             </div>
           ) : (
-            <label className="flex items-start gap-3 rounded-xl border border-line bg-surface px-4 py-3 cursor-pointer">
+            <label className="option !flex items-start gap-3 !py-3 cursor-pointer">
               <input type="checkbox" name="season" value="new" defaultChecked={sp.season === "new" || (coaches > 0 && sp.season !== "none")} className="mt-1 h-4 w-4 accent-navy" />
               <span><span className="font-medium">Make this month 1 of a 90-day season</span><span className="block text-sm text-ink-soft">Three 30-day cycles back to back, with a review at the end.</span></span>
             </label>
@@ -64,7 +64,7 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
                   const w = cycleWeeks(k, pack).weeks;
                   if (k === "WORKBOOK_30" && !pack.thirtyDayPlan.length) return null;
                   return (
-                    <label key={k} className="flex gap-3 rounded-xl border border-line bg-surface p-3 cursor-pointer has-[:checked]:border-navy">
+                    <label key={k} className="option !flex gap-3 !p-3 cursor-pointer">
                       <input type="radio" name="template" value={k} defaultChecked={k === defaultTemplate} className="mt-1 accent-navy" />
                       <span>
                         <span className="font-medium text-[15px]">{w.map((x) => x.phase).join(" · ")}</span>

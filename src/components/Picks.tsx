@@ -29,7 +29,7 @@ export function Picks({ list, target, label = "Tap to use one, then edit if you 
               <div className="mt-1 flex flex-wrap gap-2">
                 {g.options.map((o) => (
                   <button key={o} type="button" onClick={() => fill(o)}
-                    className="rounded-full border border-line bg-surface px-3 py-1.5 text-[13px] text-ink-soft hover:border-navy hover:text-link active:bg-paper text-left">
+                    className="pick">
                     {o}
                   </button>
                 ))}
@@ -39,7 +39,7 @@ export function Picks({ list, target, label = "Tap to use one, then edit if you 
           <div className="mt-2 flex flex-wrap gap-2">
             {list.options.map((o) => (
               <button key={o} type="button" onClick={() => fill(o)}
-                className="rounded-full border border-line bg-surface px-3 py-1.5 text-[13px] text-ink-soft hover:border-navy hover:text-link active:bg-paper text-left">
+                className="pick">
                 {o}
               </button>
             ))}
@@ -57,7 +57,7 @@ export function Picks({ list, target, label = "Tap to use one, then edit if you 
       <div className="flex flex-wrap gap-2">
         {list.options.map((o) => (
           <button key={o} type="button" onClick={() => fill(o)}
-            className="rounded-full border border-line bg-surface px-3 py-1.5 text-[13px] text-ink-soft hover:border-navy hover:text-link active:bg-paper text-left">
+            className="pick">
             {o}
           </button>
         ))}
@@ -78,7 +78,7 @@ export function TagChoices({ name, list, selected = [], legend }: { name: string
         {list.options.map((o) => (
           <label key={o} className="cursor-pointer">
             <input type="checkbox" name={name} value={o} defaultChecked={selected.includes(o)} className="peer sr-only" />
-            <span className="block rounded-full border border-line bg-surface px-3 py-1.5 text-[13px] text-ink-soft peer-checked:bg-navy peer-checked:text-white peer-checked:border-navy peer-focus-visible:ring-2 peer-focus-visible:ring-navy/40">
+            <span className="pick block peer-checked:bg-navy peer-checked:text-white peer-focus-visible:ring-4 peer-focus-visible:ring-navy/20">
               {o}
             </span>
           </label>

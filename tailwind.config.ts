@@ -9,6 +9,8 @@ export default {
         paper: "rgb(var(--paper) / <alpha-value>)",
         card: "rgb(var(--card) / <alpha-value>)",
         surface: "rgb(var(--surface) / <alpha-value>)",
+        // A soft tint of the ink color, so fields read on cards and on the page background alike.
+        field: "rgb(var(--ink) / 0.055)",
         line: "rgb(var(--line) / <alpha-value>)",
         ink: { DEFAULT: "rgb(var(--ink) / <alpha-value>)", soft: "rgb(var(--ink-soft) / <alpha-value>)", mute: "rgb(var(--ink-mute) / <alpha-value>)" },
         navy: { DEFAULT: "rgb(var(--navy) / <alpha-value>)", deep: "rgb(var(--navy-deep) / <alpha-value>)" },

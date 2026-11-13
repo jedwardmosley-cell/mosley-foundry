@@ -57,7 +57,7 @@ export default async function Dashboard() {
           <p className={`text-[11px] font-semibold uppercase tracking-[0.16em] ${moodTone}`}>{head.label}</p>
           <p className="text-xs text-ink-mute">{fmt(new Date(), { weekday: "short", month: "short", day: "numeric" })}</p>
         </div>
-        <h1 className="mt-1.5 font-serif text-[28px] sm:text-[34px] leading-[1.1] text-heading">{head.title}</h1>
+        <h1 className="mt-2 font-serif text-[32px] sm:text-[40px] leading-[1.05] tracking-[-0.02em] text-heading">{head.title}</h1>
         <p className="mt-1.5 text-[15px] text-ink-soft max-w-md">{head.line}</p>
 
         {d.cycle && week && pos ? (

@@ -40,7 +40,7 @@ export function JourneyBar({ steps, done, current, cycle }: Props) {
           {steps.map((s, i) => (
             <li key={s.key}>
               <Link href={s.href} className="block py-1.5" title={s.label}>
-                <span className={`block h-1 rounded-full ${done[s.key] ? "bg-navy" : s.key === current ? "bg-ink-mute/50" : "bg-line"}`} />
+                <span className={`block h-1 rounded-full ${done[s.key] ? "bg-navy" : s.key === current ? "bg-ink-mute/45" : "bg-ink/[0.08]"}`} />
                 <span className="sr-only">Step {i + 1}: {s.label}{done[s.key] && " (done)"}</span>
               </Link>
             </li>
@@ -52,10 +52,10 @@ export function JourneyBar({ steps, done, current, cycle }: Props) {
   }
 
   return (
-    <nav aria-label="Your journey" className="mb-6 rounded-2xl border border-line bg-card px-4 py-3">
-      <div aria-hidden className="grid grid-cols-4 gap-1.5 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-heading">
+    <nav aria-label="Your journey" className="mb-8">
+      <div aria-hidden className="grid grid-cols-4 gap-1.5 mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-brass">
         <span className="col-span-2">FORGE</span>
-        <span className="col-span-2 border-l border-line pl-1.5">Discipline by Design</span>
+        <span className="col-span-2">Discipline by Design</span>
       </div>
       <ol className="grid grid-cols-4 gap-1.5">
         {steps.map((s, i) => {
@@ -65,8 +65,8 @@ export function JourneyBar({ steps, done, current, cycle }: Props) {
           return (
             <li key={s.key}>
               <Link href={s.href} aria-current={isHere ? "step" : undefined} className="block group">
-                <span className={`block h-1.5 rounded-full ${isDone ? "bg-navy" : isNext ? "bg-ink-mute/50" : "bg-line"}`} />
-                <span className={`mt-1.5 block text-[11px] leading-tight sm:text-xs ${isHere ? "text-heading font-semibold" : isDone || isNext ? "text-ink-soft" : "text-ink-mute"} group-hover:text-link`}>
+                <span className={`block h-[5px] rounded-full transition ${isDone ? "bg-navy" : isNext ? "bg-ink-mute/45" : "bg-ink/[0.08]"} ${isHere ? "ring-2 ring-navy/15" : ""}`} />
+                <span className={`mt-2 block text-[11px] leading-tight sm:text-xs ${isHere ? "text-heading font-semibold" : isDone || isNext ? "text-ink-soft" : "text-ink-mute"} group-hover:text-link`}>
                   <span className="sr-only">Step {i + 1}: </span>{s.label}{isDone && <span className="sr-only"> (done)</span>}
                 </span>
               </Link>
@@ -74,7 +74,7 @@ export function JourneyBar({ steps, done, current, cycle }: Props) {
           );
         })}
       </ol>
-      {line && <p className="mt-2 text-[13px] text-ink-soft">{line}</p>}
+      {line && <p className="mt-3 text-[13px] text-ink-soft">{line}</p>}
     </nav>
   );
 }

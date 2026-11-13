@@ -18,7 +18,7 @@ type Saved = Partial<Record<LineField, string>> | null | undefined;
 export function FiveSides({ profile, pathway, role, level, ai }: { profile: Saved; pathway: PathwayKey; role: string; level: string; ai: boolean }) {
   return (
     <>
-      <details className="rounded-xl bg-paper px-3 py-2 text-sm">
+      <details className="rounded-2xl bg-field px-4 py-3 text-sm">
         <summary className="cursor-pointer text-link">Is it an identity?</summary>
         <ol className="mt-2 list-decimal pl-5 space-y-1 text-ink-soft">{IDENTITY_TESTS.map((t) => <li key={t}>{t}</li>)}</ol>
         <p className="mt-2 text-ink-soft">The behaviors come next, in My road and your 30 days.</p>
@@ -27,10 +27,10 @@ export function FiveSides({ profile, pathway, role, level, ai }: { profile: Save
         <div key={l.field}>
           <label htmlFor={l.field} className="flex items-center gap-2.5 mb-2">
             <PillarMark k={l.pillar} />
-            <span className="font-medium text-[15px] leading-snug">{asRole(l.question, role)}<span className="sr-only"> ({l.label})</span></span>
+            <span className="font-serif text-[18px] leading-snug text-heading">{asRole(l.question, role)}<span className="sr-only"> ({l.label})</span></span>
           </label>
           <PrefixedBox name={l.field} prefix={l.prefix} saved={profile?.[l.field] ?? ""} placeholder={examplePlaceholder(l.field, pathway, role, level)} />
-          {/* Help me find this on the left, Examples on the right, on one line. Either opens full width below. */}
+          {/* Help me with this on the left, Examples on the right, on one line. Either opens full width below. */}
           <div className="relative">
             <Picks list={{ status: IDENTITY_EXAMPLES_STATUS, options: [] }} groups={exampleGroups(l.field, pathway, role, level)} target={l.field} folded="Examples" note={l.hint} alignRight={ai} />
             {ai && <IdentityCoach field={l.field} prefix={l.prefix} corner />}
@@ -45,10 +45,10 @@ export function FiveSides({ profile, pathway, role, level, ai }: { profile: Save
 export function MyStatement({ statement, earlier, ai, hint, saved, n }: { statement: string; earlier?: string; ai: boolean; hint?: string; saved?: Saved; n?: number }) {
   return (
     <div>
-      <label htmlFor="statement" className="label">{n ? `${n}. ` : ""}My statement</label>
+      <label htmlFor="statement" className={n ? "section-title" : "label"}>{n ? <span className="step-n">{n}</span> : null}My statement</label>
       <p className="text-sm text-ink-soft mb-2">Your five lines, said as one. Start with I am. This is what you see each day.</p>
       {earlier && (
-        <p className="mb-2 rounded-xl bg-paper px-3 py-2 text-sm text-ink-soft">Earlier I am statement: <span className="text-ink">{earlier}</span></p>
+        <p className="mb-2 rounded-2xl bg-field px-4 py-3 text-sm text-ink-soft">Earlier I am statement: <span className="text-ink">{earlier}</span></p>
       )}
       {hint && (
         <details className="mb-2 text-sm">
