@@ -93,7 +93,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
             <input type="hidden" name="next" value="/start?step=1&part=2" />
             <div>
               <label htmlFor="role" className="label">The role this is about</label>
-              <div className="flex items-center rounded-xl border border-line bg-surface">
+              <div className="flex items-center inputbox">
                 <span className="pl-3.5 pr-1.5 py-2.5 text-[15px] text-ink-soft whitespace-nowrap">This is about me as</span>
                 <input id="role" name="role" defaultValue={role} maxLength={80} placeholder={ROLE_PICKS[pathway][0]} className="flex-1 min-w-0 bg-transparent py-2.5 pr-3 text-[15px] focus:outline-none" />
               </div>
@@ -105,7 +105,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
                 {IDENTITY_LEVELS.map((k) => (
                   <label key={k} className="cursor-pointer">
                     <input type="radio" name="level" value={k} required defaultChecked={identity?.level === k} className="peer sr-only" />
-                    <span className="block h-full rounded-2xl border border-line bg-surface p-4 peer-checked:border-heading peer-checked:ring-1 peer-checked:ring-heading/30">
+                    <span className="option h-full">
                       <span className="block font-medium text-[15px]">{LEVELS[k].name}</span>
                       <span className="mt-1 block text-sm text-ink-soft">{LEVELS[k].line}</span>
                     </span>

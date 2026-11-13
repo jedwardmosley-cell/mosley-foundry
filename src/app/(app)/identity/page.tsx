@@ -40,12 +40,12 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
     <>
       <PageHeader eyebrow="FORGE" title="Who I am">One identity, in your own words. Name the role it is about and the kind of change, then describe who you are from five sides.</PageHeader>
 
-      {saved && <p role="status" className="mb-4 rounded-xl border border-line bg-surface px-4 py-2.5 text-sm">Saved. Next, <Link href="/assessment" className="btn-link">see where you are today</Link>.</p>}
+      {saved && <p role="status" className="mb-4 notice">Saved. Next, <Link href="/assessment" className="btn-link">see where you are today</Link>.</p>}
 
       <form action={saveWhoIAm} className="space-y-5">
         <Card>
-          <label htmlFor="role" className="label">1. The role this is about</label>
-          <div className="flex items-center rounded-xl border border-line bg-surface focus-within:ring-2 focus-within:ring-navy/30 focus-within:border-navy">
+          <label htmlFor="role" className="section-title"><span className="step-n">1</span>The role this is about</label>
+          <div className="flex items-center inputbox">
             <span className="pl-3.5 pr-1.5 py-2.5 text-[15px] text-ink-soft whitespace-nowrap select-none">This is about me as</span>
             <input id="role" name="role" defaultValue={role} maxLength={80} placeholder={ROLE_PICKS[pathway][0]} className="flex-1 min-w-0 bg-transparent py-2.5 pr-3 text-[15px] focus:outline-none" />
           </div>
@@ -58,7 +58,7 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
         </Card>
 
         <Card>
-          <p className="label">2. The kind of change</p>
+          <p className="section-title"><span className="step-n">2</span>The kind of change</p>
           <IdentitySpectrum
             initial={id?.level as IdentityLevel | undefined}
             firstExample={FIRST_EXAMPLE[pathway]}
@@ -68,7 +68,7 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
 
         <Card className="space-y-6">
           <div>
-            <p className="label">3. Who I am, from five sides</p>
+            <p className="section-title"><span className="step-n">3</span>Who I am, from five sides</p>
             <p className="text-sm text-ink-soft">{FORGE_IDENTITY_INTRO}</p>
             <p className="mt-2 text-sm text-ink-soft">These are one identity seen five ways. They are not five separate identities.</p>
           </div>

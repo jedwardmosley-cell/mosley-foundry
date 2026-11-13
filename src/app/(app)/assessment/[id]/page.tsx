@@ -114,7 +114,7 @@ export default async function AssessmentResult({ params, searchParams }: { param
         <form action={reviseAssessment} className="mt-5 space-y-6">
           <input type="hidden" name="id" value={a.id} />
           {pack.pillars.map((p) => (
-            <details key={p.key} className="rounded-xl border border-line bg-surface p-4" open={p.key === r.focus}>
+            <details key={p.key} className="rounded-2xl bg-field p-4" open={p.key === r.focus}>
               <summary className="cursor-pointer flex items-center gap-3"><PillarMark k={p.key} size="sm" /><span className="font-medium">{p.name}</span><span className="ml-auto text-sm muted">first score {({ F: a.f, O: a.o, R: a.r, G: a.g, E: a.e })[p.key]}</span></summary>
               <p className="mt-3 text-sm muted">{p.definition}</p>
               <div className="mt-3 space-y-2">

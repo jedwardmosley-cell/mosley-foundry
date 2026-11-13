@@ -4,10 +4,10 @@ import type { PillarKey } from "@/content/types";
 
 export function PageHeader({ eyebrow, title, children }: { eyebrow?: string; title: string; children?: ReactNode }) {
   return (
-    <header className="mb-6 sm:mb-8">
-      {eyebrow && <p className="eyebrow mb-2">{eyebrow}</p>}
+    <header className="mb-7 sm:mb-10">
+      {eyebrow && <p className="eyebrow mb-3 !text-brass">{eyebrow}</p>}
       <h1 className="h1">{title}</h1>
-      {children && <div className="mt-3 muted text-[15px] leading-relaxed max-w-2xl">{children}</div>}
+      {children && <div className="mt-4 muted text-[16px] leading-relaxed max-w-xl">{children}</div>}
     </header>
   );
 }
@@ -47,7 +47,7 @@ export function Gauge({ value, max = 5, label }: { value: number; max?: number; 
   return (
     <div className="flex items-center gap-1" role="img" aria-label={`${label}: ${value} of ${max}`}>
       {Array.from({ length: max }, (_, i) => (
-        <span key={i} className={`h-1.5 w-6 rounded-full ${i < value ? "bg-navy" : "bg-line"}`} />
+        <span key={i} className={`h-1.5 w-6 rounded-full ${i < value ? "bg-navy" : "bg-ink/[0.08]"}`} />
       ))}
     </div>
   );
@@ -63,7 +63,7 @@ export function Draft({ children = "Draft for author review" }: { children?: Rea
 
 export function Empty({ title, children, href, cta }: { title: string; children?: ReactNode; href?: string; cta?: string }) {
   return (
-    <div className="rounded-2xl border border-dashed border-line p-6 text-center">
+    <div className="rounded-[24px] bg-ink/[0.03] border border-dashed border-ink/15 p-8 text-center">
       <p className="h3">{title}</p>
       {children && <p className="muted mt-1 text-sm">{children}</p>}
       {href && cta && (

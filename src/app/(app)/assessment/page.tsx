@@ -82,7 +82,7 @@ export default async function AssessmentPage({ searchParams }: { searchParams: P
                   {[1, 2, 3, 4, 5].map((n) => (
                     <label key={n} className="cursor-pointer">
                       <input type="radio" name={p.key} value={n} required className="peer sr-only" />
-                      <span className="block rounded-xl border border-line bg-surface py-3 text-center font-serif text-lg peer-checked:bg-navy peer-checked:text-white peer-checked:border-navy peer-focus-visible:ring-2 peer-focus-visible:ring-navy/40">{n}</span>
+                      <span className="block rounded-2xl bg-field py-3 text-center font-serif text-xl text-ink-soft transition hover:bg-navy/10 peer-checked:bg-navy peer-checked:text-white peer-checked:shadow-[0_8px_18px_-10px_rgb(var(--navy-deep)/0.8)] peer-focus-visible:ring-4 peer-focus-visible:ring-navy/20">{n}</span>
                     </label>
                   ))}
                 </div>

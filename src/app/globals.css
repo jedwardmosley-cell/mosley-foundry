@@ -2,73 +2,133 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Design system. Warm paper, soft layered surfaces, a real serif for what matters (Fraunces)
+ * and a clean sans for everything else (Inter). Borders are rare: depth comes from tone and shadow.
+ */
 :root {
   color-scheme: light dark;
-  /* Light: the original palette. */
-  --paper: 246 242 234;  --card: 255 253 248;  --surface: 255 255 255;  --line: 228 221 208;
-  --ink: 31 39 51;  --ink-soft: 74 84 99;  --ink-mute: 122 130 145;
-  --navy: 30 47 74;  --navy-deep: 21 34 58;  --heading: 21 34 58;  --link: 30 47 74;
-  --brass: 167 123 59;  --brass-soft: 239 226 204;
+  --paper: 245 241 234;  --card: 255 253 249;  --surface: 255 255 255;  --line: 230 223 211;
+  --ink: 28 34 45;  --ink-soft: 78 86 100;  --ink-mute: 128 134 146;
+  --navy: 30 47 74;  --navy-deep: 18 29 50;  --heading: 19 31 53;  --link: 37 62 101;
+  --brass: 167 123 59;  --brass-soft: 241 230 210;
   --sage: 94 122 100;  --sage-soft: 227 235 227;
   --clay: 168 92 69;  --clay-soft: 243 226 219;
   --violet: 107 106 143;  --alert: 180 35 24;  --alert-soft: 254 228 226;
-  --glow-a: 167 123 59;  --glow-b: 30 47 74;
-  --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
-  --font-sans: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --glow-a: 196 152 92;  --glow-b: 30 47 74;
+  --shadow: 28 34 45;
+  --font-serif: "Fraunces Variable", "Iowan Old Style", Palatino, Georgia, serif;
+  --font-sans: "Inter Variable", ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
 }
 
 /* Dark: the same palette, deepened. Follows the phone or computer setting. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: 13 17 24;  --card: 22 28 38;  --surface: 28 35 47;  --line: 44 53 68;
-    --ink: 236 231 222;  --ink-soft: 182 188 200;  --ink-mute: 136 145 160;
-    --navy: 52 82 124;  --navy-deep: 27 42 66;  --heading: 240 235 226;  --link: 170 192 224;
-    --brass: 214 172 104;  --brass-soft: 58 47 30;
+    --paper: 12 15 21;  --card: 20 25 34;  --surface: 26 32 43;  --line: 40 48 62;
+    --ink: 236 231 222;  --ink-soft: 180 186 198;  --ink-mute: 132 141 156;
+    --navy: 58 90 136;  --navy-deep: 27 42 66;  --heading: 243 238 229;  --link: 176 198 230;
+    --brass: 214 172 104;  --brass-soft: 52 42 27;
     --sage: 141 180 151;  --sage-soft: 30 44 36;
     --clay: 226 145 122;  --clay-soft: 58 35 29;
     --violet: 160 158 205;  --alert: 249 112 102;  --alert-soft: 58 28 26;
     --glow-a: 214 172 104;  --glow-b: 70 110 170;
+    --shadow: 0 0 0;
   }
 }
 
 html { -webkit-text-size-adjust: 100%; }
 body {
   @apply bg-paper text-ink font-sans antialiased;
-  background-image: radial-gradient(80% 40% at 50% 0%, rgb(var(--glow-b) / 0.10), transparent 70%);
+  font-feature-settings: "cv11", "ss01", "ss03";
+  background-image:
+    radial-gradient(90% 50% at 15% -10%, rgb(var(--glow-a) / 0.10), transparent 70%),
+    radial-gradient(70% 45% at 100% 0%, rgb(var(--glow-b) / 0.08), transparent 70%);
   background-attachment: fixed;
+}
+::selection { background: rgb(var(--brass) / 0.25); }
+.font-serif { font-variation-settings: "SOFT" 50, "WONK" 0; }
+
+/* Disclosure: a small chevron instead of the browser's triangle. */
+summary { list-style: none; }
+summary::-webkit-details-marker { display: none; }
+summary:not(.list-none)::before {
+  content: ""; display: inline-block; width: 0.5em; height: 0.5em; margin-right: 0.55em; vertical-align: 0.12em;
+  border-right: 1.6px solid currentColor; border-bottom: 1.6px solid currentColor;
+  transform: rotate(-45deg); transition: transform 0.18s ease; opacity: 0.7; flex-shrink: 0;
+}
+details[open] > summary:not(.list-none)::before { transform: rotate(45deg) translate(-0.1em, -0.1em); }
+summary { -webkit-tap-highlight-color: transparent; }
+
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: no-preference) {
+  .rise > * { animation: rise 0.42s cubic-bezier(.2,.7,.2,1) both; }
+  .rise > *:nth-child(2) { animation-delay: 40ms; }
+  .rise > *:nth-child(3) { animation-delay: 80ms; }
+  .rise > *:nth-child(4) { animation-delay: 120ms; }
+  .rise > *:nth-child(n+5) { animation-delay: 160ms; }
 }
 
 @layer components {
-  .card { @apply bg-card border border-line rounded-2xl p-5 sm:p-6; }
-  .eyebrow { @apply text-[11px] uppercase tracking-[0.14em] text-ink-mute font-semibold; }
-  .h1 { @apply font-serif text-[28px] sm:text-[34px] leading-tight text-heading; }
-  .h2 { @apply font-serif text-xl sm:text-2xl leading-snug text-heading; }
-  .h3 { @apply font-semibold text-ink text-base; }
+  .card {
+    @apply rounded-[24px] p-5 sm:p-7 bg-card;
+    border: 1px solid rgb(var(--line) / 0.45);
+    box-shadow: 0 1px 2px rgb(var(--shadow) / 0.04), 0 12px 32px -18px rgb(var(--shadow) / 0.16);
+  }
+  .eyebrow { @apply text-[11px] uppercase tracking-[0.16em] text-ink-mute font-semibold; }
+  .h1 { @apply font-serif text-[34px] sm:text-[44px] leading-[1.04] text-heading tracking-[-0.02em]; font-weight: 420; }
+  .h2 { @apply font-serif text-[22px] sm:text-[26px] leading-snug text-heading tracking-[-0.01em]; }
+  .h3 { @apply font-semibold text-heading text-[15px] tracking-[-0.005em]; }
   .muted { @apply text-ink-soft; }
-  .label { @apply block text-sm font-medium text-ink mb-1.5; }
-  .input { @apply w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-[15px] text-ink placeholder:text-ink-mute focus:outline-none focus:ring-2 focus:ring-navy/30 focus:border-navy; }
+  .label { @apply block text-[15px] font-semibold text-heading mb-2 tracking-[-0.005em]; }
+  /* A step inside a page: a brass numeral and a title. */
+  .step-n { @apply mr-2.5 font-serif text-brass font-normal; }
+  .section-title { @apply block font-serif text-[23px] sm:text-[26px] leading-tight text-heading tracking-[-0.015em] mb-4; font-weight: 420; }
+  .input {
+    @apply w-full rounded-2xl bg-field px-4 py-3 text-[15px] text-ink placeholder:text-ink-mute/80 transition;
+    border: 1px solid transparent;
+  }
+  .input:hover { border-color: rgb(var(--line)); }
+  .input:focus { @apply outline-none bg-surface; border-color: rgb(var(--navy) / 0.45); box-shadow: 0 0 0 4px rgb(var(--navy) / 0.10); }
   .textarea { @apply input min-h-[96px] leading-relaxed; }
-  .btn { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-[15px] font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-navy/40 disabled:opacity-50; }
-  .btn-primary { @apply btn bg-navy text-white hover:bg-navy-deep; }
-  .btn-quiet { @apply btn border border-line bg-surface text-ink hover:bg-paper; }
-  .btn-link { @apply text-link underline underline-offset-4 decoration-ink-mute/50 hover:decoration-link; }
-  .chip { @apply inline-flex items-center rounded-full border border-line bg-surface px-2.5 py-0.5 text-xs font-medium text-ink-soft; }
-  .quote { @apply font-serif italic text-ink-soft border-l-2 border-line pl-4; }
+  .btn { @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full px-5 py-3 text-[15px] font-medium transition focus:outline-none focus-visible:ring-4 focus-visible:ring-navy/20 disabled:opacity-50 active:scale-[0.98]; }
+  .btn-primary {
+    @apply btn text-white;
+    background: linear-gradient(180deg, rgb(var(--navy) / 0.92), rgb(var(--navy-deep)));
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.14), 0 8px 20px -10px rgb(var(--navy-deep) / 0.7);
+  }
+  .btn-primary:hover { filter: brightness(1.08); }
+  .btn-quiet { @apply btn bg-ink/[0.06] text-heading hover:bg-ink/[0.10]; }
+  .btn-link { @apply text-link font-medium decoration-transparent underline underline-offset-4 transition-colors hover:decoration-link/60; }
+  .chip { @apply inline-flex items-center rounded-full bg-ink/[0.06] px-2.5 py-1 text-xs font-medium text-ink-soft; }
+  .pick { @apply rounded-full bg-field px-3.5 py-2 text-[13px] text-ink-soft text-left transition hover:bg-navy/10 hover:text-heading active:scale-[0.98]; }
+  .quote { @apply font-serif italic text-ink-soft border-l-2 border-brass/40 pl-4; }
   .source { @apply text-xs text-ink-mute; }
-  /* The soft, glowing style: light comes from the brand colors instead of hard borders. */
+  /* The soft, glowing hero: light comes from the brand colors instead of hard borders. */
   .glow {
     background:
-      radial-gradient(120% 70% at 0% 0%, rgb(var(--glow-a) / 0.16), transparent 60%),
-      radial-gradient(110% 80% at 100% 0%, rgb(var(--glow-b) / 0.20), transparent 62%),
+      radial-gradient(120% 70% at 0% 0%, rgb(var(--glow-a) / 0.18), transparent 60%),
+      radial-gradient(110% 80% at 100% 0%, rgb(var(--glow-b) / 0.16), transparent 62%),
       rgb(var(--card));
-    border: 1px solid rgb(var(--line) / 0.55);
-    box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 18px 40px -24px rgb(var(--glow-b) / 0.45);
+    border: 1px solid rgb(var(--line) / 0.45);
+    box-shadow: 0 1px 2px rgb(var(--shadow) / 0.04), 0 24px 48px -28px rgb(var(--glow-b) / 0.45);
   }
   .tile {
-    @apply rounded-[22px] p-4;
-    background: linear-gradient(180deg, rgb(var(--card)), rgb(var(--card) / 0.86));
-    border: 1px solid rgb(var(--line) / 0.5);
-    box-shadow: 0 10px 30px -22px rgb(var(--glow-b) / 0.5);
+    @apply rounded-[22px] p-4 bg-card;
+    border: 1px solid rgb(var(--line) / 0.45);
+    box-shadow: 0 1px 2px rgb(var(--shadow) / 0.04), 0 10px 28px -20px rgb(var(--shadow) / 0.22);
   }
-  .draft { @apply inline-flex items-center rounded-full border border-ink-mute/40 text-ink-soft px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide; }
+  /* A segmented control: equal choices in one soft track. */
+  .seg { @apply grid gap-1 rounded-2xl bg-field p-1; }
+  .seg-opt { @apply block rounded-xl py-3 text-center text-[15px] font-medium text-ink-soft transition; }
+  /* A field with fixed words in front, like "This is about me as". */
+  .inputbox { @apply flex rounded-2xl bg-field transition; border: 1px solid transparent; }
+  .inputbox:hover { border-color: rgb(var(--line)); }
+  .inputbox:focus-within { @apply bg-surface; border-color: rgb(var(--navy) / 0.45); box-shadow: 0 0 0 4px rgb(var(--navy) / 0.10); }
+  /* A choice card. Selected: lifted onto a white surface with a navy ring. */
+  .option { @apply block rounded-2xl bg-field p-4 transition; border: 1px solid transparent; }
+  .option:hover { border-color: rgb(var(--line)); }
+  .peer:checked ~ .option, .option:has(:checked) { @apply bg-surface; border-color: rgb(var(--navy) / 0.55); box-shadow: 0 0 0 3px rgb(var(--navy) / 0.10), 0 8px 20px -14px rgb(var(--shadow) / 0.35); }
+  .peer:focus-visible ~ .option { box-shadow: 0 0 0 4px rgb(var(--navy) / 0.25); }
+  .notice { @apply rounded-2xl bg-sage-soft px-4 py-3 text-sm text-ink; }
+  .draft { @apply inline-flex items-center rounded-full bg-brass-soft text-brass px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em]; }
 }

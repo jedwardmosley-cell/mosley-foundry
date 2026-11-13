@@ -175,7 +175,12 @@ const submitAndWait = async (page: Page, selector: string) => {
     await pri.locator('button:has-text("one breath, one question")').click();
     assert.match(await pri.locator('input[name="oneMove"]').inputValue(), /one breath/);
     await Promise.all([page.waitForLoadState("networkidle"), pri.locator('button:has-text("Save my move")').click()]);
-    const g = await db.developmentGoal.findFirstOrThrow({ where: { user: { email }, pillar: "E", segmentKey: null } });
+    // Wait for the save to land: networkidle can resolve before the server action finishes.
+    let g = await db.developmentGoal.findFirstOrThrow({ where: { user: { email }, pillar: "E", segmentKey: null } });
+    for (let i = 0; i < 25 && !/one breath/.test(g.oneMove); i++) {
+      await page.waitForTimeout(200);
+      g = await db.developmentGoal.findFirstOrThrow({ where: { user: { email }, pillar: "E", segmentKey: null } });
+    }
     assert.match(g.oneMove, /one breath/);
     assert.equal(await page.locator("details[open]", { hasText: "Future Focused" }).count(), 0, "non-priority pillars start folded");
     await page.screenshot({ path: `${shots}/06b-plan.png`, fullPage: false });
@@ -589,7 +594,11 @@ const submitAndWait = async (page: Page, selector: string) => {
     await dp.locator('input[name="sharePersona"]').check();
     await dp.locator('input[value="SUPPORTIVE"]').check();
     await Promise.all([dp.waitForLoadState("networkidle"), dp.click('button:has-text("Save these settings")')]);
-    const row = await db.identityProfile.findUniqueOrThrow({ where: { userId: dana.id } });
+    let row = await db.identityProfile.findUniqueOrThrow({ where: { userId: dana.id } });
+    for (let i = 0; i < 25 && row.tone !== "SUPPORTIVE"; i++) {
+      await dp.waitForTimeout(200); // networkidle can resolve before the server action finishes
+      row = await db.identityProfile.findUniqueOrThrow({ where: { userId: dana.id } });
+    }
     assert.equal(row.tone, "SUPPORTIVE", "tone override saved independently of the level");
     assert.equal(row.level, "REINVENT");
     await page.goto(`${BASE}/coach/${dana.id}`);

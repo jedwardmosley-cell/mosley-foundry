@@ -9,15 +9,14 @@ export function NavLink({ href, children, variant }: { href: string; children: R
   if (variant === "tab") {
     return (
       <Link href={href} aria-current={active ? "page" : undefined}
-        className={`flex flex-col items-center justify-center py-2.5 text-[11px] font-medium ${active ? "text-heading" : "text-ink-mute"}`}>
-        <span className={`mb-1 h-1 w-4 rounded-full ${active ? "bg-heading" : "bg-transparent"}`} />
+        className={`m-1 flex flex-col items-center justify-center rounded-full py-2.5 text-[11px] font-medium transition ${active ? "bg-navy/10 text-heading" : "text-ink-mute"}`}>
         {children}
       </Link>
     );
   }
   return (
     <Link href={href} aria-current={active ? "page" : undefined}
-      className={`block rounded-lg px-3 py-2 text-[14px] ${active ? "bg-paper text-heading font-medium" : "text-ink-soft hover:text-ink hover:bg-paper/60"}`}>
+      className={`block rounded-xl px-3 py-2 text-[14px] transition ${active ? "bg-card text-heading font-medium shadow-[0_1px_2px_rgb(0_0_0/0.05),0_6px_16px_-10px_rgb(0_0_0/0.25)]" : "text-ink-soft hover:text-ink hover:bg-ink/[0.04]"}`}>
       {children}
     </Link>
   );

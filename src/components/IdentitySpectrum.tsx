@@ -27,7 +27,7 @@ export function IdentitySpectrum({ initial, firstExample, persona }: { initial?:
           return (
             <label key={k} className="cursor-pointer">
               <input type="radio" name="level" value={k} checked={level === k} onChange={() => setLevel(k)} required className="peer sr-only" />
-              <span className="block h-full rounded-2xl border border-line bg-surface p-4 transition peer-checked:border-heading peer-checked:ring-1 peer-checked:ring-heading/30 peer-focus-visible:ring-2 peer-focus-visible:ring-heading/40">
+              <span className="option h-full">
                 <span className="block font-medium text-[15px]">{x.name}</span>
                 <span className="mt-1 block text-sm text-ink-soft">{x.line}</span>
               </span>
@@ -47,7 +47,7 @@ export function IdentitySpectrum({ initial, firstExample, persona }: { initial?:
       )}
 
       <div className={level === "REINVENT" ? "mt-5" : "hidden"}>
-        <details className="rounded-2xl border border-line bg-surface p-4" open={!!persona.personaName}>
+        <details className="rounded-2xl bg-field p-4" open={!!persona.personaName}>
           <summary className="cursor-pointer font-medium">Create a performance identity <span className="text-ink-mute font-normal">(optional)</span></summary>
           <p className="mt-2 text-sm text-ink-soft">{PERSONA_NOTE}</p>
           <div className="mt-3 space-y-4">
