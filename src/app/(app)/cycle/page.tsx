@@ -5,7 +5,8 @@ import { db } from "@/lib/db";
 import { getContent } from "@/content";
 import { cycleWeeks, cyclePosition, practiceSummary, CYCLE_TEMPLATES } from "@/lib/cycle";
 import { saveWeek, completeCycle } from "@/app/actions/participant";
-import { DAY30_DECISIONS, CHECKIN_STATUS } from "@/content/program";
+import { activeSeason, nextMonth } from "@/lib/season";
+import { DAY30_DECISIONS, DAY30_CHOICES, CHECKIN_STATUS, SEASON_LENGTH } from "@/content/program";
 import { addDays, fmt, ymd } from "@/lib/dates";
 import type { PillarKey } from "@/content/types";
 import { PageHeader, Card, PillarMark, Empty, Draft, Field, Source } from "@/components/ui";
@@ -19,10 +20,14 @@ export default async function CyclePage() {
   const cycle = await db.developmentCycle.findFirst({ where: { userId: u.id, status: "ACTIVE" }, orderBy: { startDate: "desc" } });
   const past = await db.developmentCycle.findMany({ where: { userId: u.id, status: { not: "ACTIVE" } }, orderBy: { startDate: "desc" }, take: 5 });
   if (!cycle) {
+    const season = await activeSeason(u.id);
+    const month = season ? nextMonth(season.cycles.length) : null;
     return (
       <>
-        <PageHeader eyebrow="30-day development cycle" title="No active cycle" />
-        <Empty title="Start a 30-day cycle" href="/cycle/new" cta="Start">Pick one pillar and one behavior, then work on it for four weeks.</Empty>
+        <PageHeader eyebrow="Discipline by Design · 30 days" title={season ? (month ? `Month ${month} of your season` : "Your season is done") : "No active cycle"} />
+        {season && month && <Empty title={`Start month ${month}`} href="/cycle/new" cta="Start">Pick the pillar and the behavior for the next 30 days.</Empty>}
+        {season && !month && <Empty title="Review your season" href="/season" cta="Open the review">Three months are done. Look back, then decide what comes next.</Empty>}
+        {!season && <Empty title="Start a 30-day cycle" href="/cycle/new" cta="Start">Pick one pillar and one behavior, then work on it for four weeks.</Empty>}
         {past.length > 0 && <PastCycles past={past} />}
       </>
     );
@@ -38,8 +43,9 @@ export default async function CyclePage() {
 
   return (
     <>
-      <PageHeader eyebrow="Discipline by Design · 30 days" title={`Day ${pos.day} of 30`}>
+      <PageHeader eyebrow={cycle.seasonMonth ? `Discipline by Design · Season, month ${cycle.seasonMonth} of ${SEASON_LENGTH}` : "Discipline by Design · 30 days"} title={`Day ${pos.day} of 30`}>
         <span className="inline-flex items-center gap-2"><PillarMark k={p.key} size="sm" /> {cycle.focus || p.name}</span>
+        {cycle.seasonMonth && <Link href="/season" className="ml-3 text-sm btn-link">See the season</Link>}
       </PageHeader>
 
       <Card>
@@ -95,8 +101,8 @@ export default async function CyclePage() {
                   <input type="hidden" name="id" value={cycle.id} />
                   <fieldset className="space-y-2">
                     <legend className="label">Your answer</legend>
-                    {Object.entries(DAY30_DECISIONS).map(([k, v]) => (
-                      <label key={k} className="flex items-center gap-2 text-[15px]"><input type="radio" name="decision" value={k} required className="accent-navy" />{v}</label>
+                    {DAY30_CHOICES[!cycle.seasonMonth ? "none" : cycle.seasonMonth >= SEASON_LENGTH ? "lastMonth" : "midSeason"].map((k, i, all) => (
+                      <label key={k} className="flex items-center gap-2 text-[15px]"><input type="radio" name="decision" value={k} required defaultChecked={all.length === 1} className="accent-navy" />{DAY30_DECISIONS[k]}</label>
                     ))}
                   </fieldset>
                   <details>

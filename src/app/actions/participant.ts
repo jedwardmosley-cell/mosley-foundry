@@ -8,7 +8,8 @@ import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { bool, parse, pillarKey, score, text } from "@/lib/validation";
 import { addDays, ymd } from "@/lib/dates";
-import { PATHWAYS, BLUEPRINT_AREAS, RELATIONSHIP_ROLES } from "@/content/program";
+import { PATHWAYS, BLUEPRINT_AREAS, RELATIONSHIP_ROLES, DAY30_DECISIONS, SEASON_DECISIONS, type Day30Decision } from "@/content/program";
+import { seasonForNewCycle } from "@/lib/season";
 import { SHARE_SCOPES } from "@/lib/access";
 import { CHECKIN_TAGS } from "@/content/options";
 
@@ -60,6 +61,7 @@ export async function saveAssessment(fd: FormData) {
       reflections: JSON.stringify({ F: d.reflF, O: d.reflO, R: d.reflR, G: d.reflG, E: d.reflE }),
     },
   });
+  if (fd.get("next") === "/season") redirect("/season");
   redirect(`/assessment/${a.id}${fromStart(fd) ? "?next=start" : ""}`);
 }
 
@@ -220,14 +222,15 @@ export async function acceptInvite(fd: FormData) {
 
 // ---------- 30-day cycle ----------
 
-const startCycleSchema = z.object({ pillar: pillarKey, focus: text(500), template: z.enum(["WORKBOOK_30", "NIRS_30"]), startDate: z.string().optional() });
+const startCycleSchema = z.object({ pillar: pillarKey, focus: text(500), template: z.enum(["WORKBOOK_30", "NIRS_30"]), startDate: z.string().optional(), season: z.enum(["new", "continue", ""]).default("") });
 
 export async function startCycle(fd: FormData) {
   const u = await participant();
-  const d = parse(startCycleSchema, fd);
+  const { season, ...d } = parse(startCycleSchema, fd);
   await db.developmentCycle.updateMany({ where: { userId: u.id, status: "ACTIVE" }, data: { status: "STOPPED" } });
+  const s = await seasonForNewCycle(u.id, season);
   await db.developmentCycle.create({
-    data: { userId: u.id, pillar: d.pillar, focus: d.focus, template: d.template, startDate: d.startDate ? new Date(d.startDate + "T00:00:00") : new Date(new Date().toDateString()) },
+    data: { userId: u.id, seasonId: s.seasonId, seasonMonth: s.seasonMonth, pillar: d.pillar, focus: d.focus, template: d.template, startDate: d.startDate ? new Date(d.startDate + "T00:00:00") : new Date(new Date().toDateString()) },
   });
   redirect("/cycle");
 }
@@ -273,12 +276,18 @@ export async function saveWeek(fd: FormData) {
 
 export async function completeCycle(fd: FormData) {
   const u = await participant();
-  const d = parse(z.object({ id: z.string(), finalReview: text(6000).optional().default(""), decision: z.enum(["CONTINUE_ALONE", "GO_FURTHER", "NEW_CYCLE"]) }), fd);
-  const n = await db.developmentCycle.updateMany({
-    where: { id: d.id, userId: u.id },
+  const d = parse(z.object({ id: z.string(), finalReview: text(6000).optional().default(""), decision: z.enum(Object.keys(DAY30_DECISIONS) as [Day30Decision, ...Day30Decision[]]) }), fd);
+  const c = await db.developmentCycle.findFirst({ where: { id: d.id, userId: u.id } });
+  if (!c) throw new Error("Not found");
+  await db.developmentCycle.update({
+    where: { id: c.id },
     data: { finalReview: d.finalReview, decision: d.decision, status: "COMPLETED", completedAt: new Date() },
   });
-  if (!n.count) throw new Error("Not found");
+  revalidatePath("/", "layout");
+  const q = (x: Record<string, string>) => new URLSearchParams(x).toString();
+  if (d.decision === "NEXT_SAME") redirect(`/cycle/new?${q({ season: "continue", pillar: c.pillar, focus: c.focus })}`);
+  if (d.decision === "NEXT_OTHER") redirect(`/cycle/new?${q({ season: "continue" })}`);
+  if (d.decision === "END_SEASON" || d.decision === "SEASON_REVIEW") redirect("/season");
   redirect(d.decision === "NEW_CYCLE" ? "/cycle/new" : "/history");
 }
 
@@ -455,4 +464,18 @@ export async function saveSessionPrep(fd: FormData) {
   const d = parse(z.object({ id: z.string(), participantPrep: text(4000) }), fd);
   await db.coachingSession.updateMany({ where: { id: d.id, participantId: u.id }, data: { participantPrep: d.participantPrep } });
   revalidatePath("/coaching");
+}
+
+// ---------- Seasons ----------
+
+/** Closes the season with the client's review and choice. Their cycles and scores are kept. */
+export async function completeSeason(fd: FormData) {
+  const u = await participant();
+  const d = parse(z.object({ id: z.string(), review: text(6000).optional().default(""), decision: z.enum(Object.keys(SEASON_DECISIONS) as [keyof typeof SEASON_DECISIONS, ...(keyof typeof SEASON_DECISIONS)[]]) }), fd);
+  const n = await db.season.updateMany({ where: { id: d.id, userId: u.id }, data: { review: d.review, decision: d.decision, status: "COMPLETED", completedAt: new Date() } });
+  if (!n.count) throw new Error("Not found");
+  // Any cycle still open in the season ends with it.
+  await db.developmentCycle.updateMany({ where: { seasonId: d.id, userId: u.id, status: "ACTIVE" }, data: { status: "STOPPED" } });
+  revalidatePath("/", "layout");
+  redirect(d.decision === "NEW_SEASON" ? "/cycle/new?season=new" : "/dashboard");
 }

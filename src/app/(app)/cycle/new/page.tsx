@@ -8,11 +8,14 @@ import { ymd } from "@/lib/dates";
 import { PageHeader, Card, Field } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 import { CycleFocusFields } from "@/components/CycleFocusFields";
+import Link from "next/link";
+import { activeSeason, nextMonth } from "@/lib/season";
+import { SEASON_LENGTH } from "@/content/program";
 import type { PillarKey } from "@/content/types";
 
 export const metadata = { title: "Start a 30-day cycle" };
 
-export default async function NewCycle({ searchParams }: { searchParams: Promise<{ pillar?: string; focus?: string }> }) {
+export default async function NewCycle({ searchParams }: { searchParams: Promise<{ pillar?: string; focus?: string; season?: string }> }) {
   const sp = await searchParams;
   const fromLink = ["F", "O", "R", "G", "E"].includes(sp.pillar ?? "") ? (sp.pillar as PillarKey) : null;
   const u = await requireUser("PARTICIPANT");
@@ -21,12 +24,28 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
   const identity = await db.identityProfile.findUnique({ where: { userId: u.id }, select: { behavior: true } });
   const pathway = PATHWAYS[(profile?.pathway ?? "PERSONAL") as keyof typeof PATHWAYS];
   const defaultTemplate = pack.thirtyDayPlan.length ? pathway.cycleTemplate : "NIRS_30";
+  const [open, coaches] = await Promise.all([activeSeason(u.id), db.coachAssignment.count({ where: { participantId: u.id, active: true } })]);
+  const month = open ? nextMonth(open.cycles.length) : null;
+  const continuing = !!(open && month && sp.season !== "none");
   return (
     <>
       <PageHeader eyebrow="Discipline by Design" title="Start your 30 days">Pick one pillar and one behavior to practice. Checking in takes two minutes a day.</PageHeader>
       <Card>
         <form action={startCycle} className="space-y-5">
           <CycleFocusFields pillars={pack.pillars.map((p) => ({ key: p.key, name: p.name }))} initial={fromLink ?? ((profile?.priorityPillar ?? "F") as PillarKey)} initialFocus={(sp.focus ?? "").slice(0, 500)} identityBehavior={identity?.behavior.split("\n")[0].slice(0, 300) ?? ""} />
+          {continuing ? (
+            <div className="rounded-xl border border-brass/50 bg-brass-soft/40 px-4 py-3">
+              <input type="hidden" name="season" value="continue" />
+              <p className="font-medium">Month {month} of {SEASON_LENGTH} in your season</p>
+              <p className="text-sm text-ink-soft mt-0.5">{open!.cycles.map((c, i) => `Month ${i + 1}: ${pack.pillars.find((p) => p.key === c.pillar)?.name ?? c.pillar}`).join(" · ")}</p>
+              <Link href="/cycle/new?season=none" className="mt-1 inline-block text-xs text-ink-mute hover:text-ink">Start this one outside the season</Link>
+            </div>
+          ) : (
+            <label className="flex items-start gap-3 rounded-xl border border-line bg-white px-4 py-3 cursor-pointer">
+              <input type="checkbox" name="season" value="new" defaultChecked={sp.season === "new" || (coaches > 0 && sp.season !== "none")} className="mt-1 h-4 w-4 accent-navy" />
+              <span><span className="font-medium">Make this month 1 of a 90-day season</span><span className="block text-sm text-ink-soft">Three 30-day cycles back to back, with a review at the end.</span></span>
+            </label>
+          )}
           <details className="rounded-xl bg-paper px-3 py-2">
             <summary className="cursor-pointer text-sm text-navy">Structure and start date</summary>
             <fieldset className="mt-3">

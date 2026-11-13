@@ -7,8 +7,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url       = env("DATABASE_URL")          // pooled connection used by the app
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") // pooled connection used by the app
   directUrl = env("DATABASE_URL_UNPOOLED") // direct connection used to create tables
 }
 
@@ -24,46 +24,47 @@ model Organization {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  name         String
-  passwordHash String
-  role         String   @default("PARTICIPANT") // enum: PARTICIPANT | COACH | ADMIN
-  mustChangePassword Boolean @default(false) // set when an account is created with a temporary password
+  id                 String        @id @default(cuid())
+  email              String        @unique
+  name               String
+  passwordHash       String
+  role               String        @default("PARTICIPANT") // enum: PARTICIPANT | COACH | ADMIN
+  mustChangePassword Boolean       @default(false) // set when an account is created with a temporary password
   passwordResetAt    DateTime? // when a coach last reset this password; shown to the person at next sign-in
-  passwordResetBy    String?   // name of the coach who reset it
-  alsoCoach    Boolean  @default(false) // an administrator who also coaches; coach access rules still apply
-  orgId        String?
-  org          Organization? @relation(fields: [orgId], references: [id])
-  isDemo       Boolean  @default(false)
-  createdAt    DateTime @default(now())
+  passwordResetBy    String? // name of the coach who reset it
+  alsoCoach          Boolean       @default(false) // an administrator who also coaches; coach access rules still apply
+  orgId              String?
+  org                Organization? @relation(fields: [orgId], references: [id])
+  isDemo             Boolean       @default(false)
+  createdAt          DateTime      @default(now())
 
-  sessions          Session[]
-  profile           Profile?
-  assessments       Assessment[]
-  goals             DevelopmentGoal[]
-  commitments       Commitment[]
-  relationships     Relationship[]       @relation("RelOwner")
-  linkedRelations   Relationship[]       @relation("RelLinked")
-  cycles            DevelopmentCycle[]
-  checkIns          DailyCheckIn[]
-  weeklyReflections WeeklyReflection[]
-  journal           JournalEntry[]
-  sharesGiven       ShareGrant[]         @relation("ShareOwner")
-  sharesReceived    ShareGrant[]         @relation("ShareGrantee")
-  coaching          CoachAssignment[]    @relation("AssignParticipant")
-  coachOf           CoachAssignment[]    @relation("AssignCoach")
-  cohortMemberships CohortMember[]
-  attendance        Attendance[]
-  eqiPriorities     EqiPriority[]
-  identity          IdentityProfile?
-  identityHistory   IdentityHistory[]
-  conversations     AiConversation[]
-  exercisesAssigned AssignedExercise[]   @relation("ExerciseParticipant")
-  exercisesGiven    AssignedExercise[]   @relation("ExerciseCoach")
-  coachingSessionsAsCoach       CoachingSession[] @relation("SessionCoach")
-  coachingSessionsAsParticipant CoachingSession[] @relation("SessionParticipant")
-  auditEvents       AuditEvent[]         @relation("AuditActor")
+  sessions                      Session[]
+  profile                       Profile?
+  assessments                   Assessment[]
+  goals                         DevelopmentGoal[]
+  commitments                   Commitment[]
+  relationships                 Relationship[]     @relation("RelOwner")
+  linkedRelations               Relationship[]     @relation("RelLinked")
+  cycles                        DevelopmentCycle[]
+  seasons                       Season[]
+  checkIns                      DailyCheckIn[]
+  weeklyReflections             WeeklyReflection[]
+  journal                       JournalEntry[]
+  sharesGiven                   ShareGrant[]       @relation("ShareOwner")
+  sharesReceived                ShareGrant[]       @relation("ShareGrantee")
+  coaching                      CoachAssignment[]  @relation("AssignParticipant")
+  coachOf                       CoachAssignment[]  @relation("AssignCoach")
+  cohortMemberships             CohortMember[]
+  attendance                    Attendance[]
+  eqiPriorities                 EqiPriority[]
+  identity                      IdentityProfile?
+  identityHistory               IdentityHistory[]
+  conversations                 AiConversation[]
+  exercisesAssigned             AssignedExercise[] @relation("ExerciseParticipant")
+  exercisesGiven                AssignedExercise[] @relation("ExerciseCoach")
+  coachingSessionsAsCoach       CoachingSession[]  @relation("SessionCoach")
+  coachingSessionsAsParticipant CoachingSession[]  @relation("SessionParticipant")
+  auditEvents                   AuditEvent[]       @relation("AuditActor")
 }
 
 model Session {
@@ -78,57 +79,57 @@ model Session {
 // ---------- Personal development profile ----------
 
 model Profile {
-  userId          String   @id
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  pathway         String   @default("PERSONAL") // enum: PERSONAL | LEADING_OTHERS | ENTREPRENEURIAL
-  destination     String   @default("")         // F line: "I am ..." (where I am going). Was the Destination Paragraph.
-  lineO           String   @default("")         // O line: "I notice ..."
-  why             String   @default("")         // R line: why I am going there. Was the Why Sentence.
-  lineG           String   @default("")         // G line: "I practice ..."
-  lineE           String   @default("")         // E line: "When ..., I ..." (how I respond)
-  forgeStatement  String   @default("")
-  priorityPillar  String?                       // enum: F | O | R | G | E
-  reminderTime    String   @default("07:30")
-  reminderDays    String   @default("1,2,3,4,5")
-  remindersOn     Boolean  @default(false)
-  aiEnabled       Boolean  @default(true)
-  aiRetentionDays Int      @default(90)
-  eqiEnabled      Boolean  @default(false) // participant opted in to the EQ-i layer
+  userId          String    @id
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pathway         String    @default("PERSONAL") // enum: PERSONAL | LEADING_OTHERS | ENTREPRENEURIAL
+  destination     String    @default("") // F line: "I am ..." (where I am going). Was the Destination Paragraph.
+  lineO           String    @default("") // O line: "I notice ..."
+  why             String    @default("") // R line: why I am going there. Was the Why Sentence.
+  lineG           String    @default("") // G line: "I practice ..."
+  lineE           String    @default("") // E line: "When ..., I ..." (how I respond)
+  forgeStatement  String    @default("")
+  priorityPillar  String? // enum: F | O | R | G | E
+  reminderTime    String    @default("07:30")
+  reminderDays    String    @default("1,2,3,4,5")
+  remindersOn     Boolean   @default(false)
+  aiEnabled       Boolean   @default(true)
+  aiRetentionDays Int       @default(90)
+  eqiEnabled      Boolean   @default(false) // participant opted in to the EQ-i layer
   onboardedAt     DateTime?
-  updatedAt       DateTime @updatedAt
+  updatedAt       DateTime  @updatedAt
 }
 
 model Assessment {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  instrument  String   // enum: FORGE_PERSONAL | FORGE_ENTREPRENEUR | FORGE_DRAFT
-  f           Int
-  o           Int
-  r           Int
-  g           Int
-  e           Int
-  revisedF    Int?
-  revisedO    Int?
-  revisedR    Int?
-  revisedG    Int?
-  revisedE    Int?
-  reflections String   @default("{}") // JSON: { F: "...", O: "..." }
-  oneWords    String   @default("{}") // JSON: one word per pillar
-  isSecondOpinion Boolean @default(false) // future: rating from an invited observer
-  completedAt DateTime @default(now())
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  instrument      String // enum: FORGE_PERSONAL | FORGE_ENTREPRENEUR | FORGE_DRAFT
+  f               Int
+  o               Int
+  r               Int
+  g               Int
+  e               Int
+  revisedF        Int?
+  revisedO        Int?
+  revisedR        Int?
+  revisedG        Int?
+  revisedE        Int?
+  reflections     String   @default("{}") // JSON: { F: "...", O: "..." }
+  oneWords        String   @default("{}") // JSON: one word per pillar
+  isSecondOpinion Boolean  @default(false) // future: rating from an invited observer
+  completedAt     DateTime @default(now())
 }
 
 model DevelopmentGoal {
   id         String   @id @default(cuid())
   userId     String
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  pillar     String   // enum: F | O | R | G | E
+  pillar     String // enum: F | O | R | G | E
   whereNow   String   @default("")
   whereWant  String   @default("")
   oneMove    String   @default("")
   isPriority Boolean  @default(false)
-  segmentKey String?  // links a goal to a Leading Others segment
+  segmentKey String? // links a goal to a Leading Others segment
   status     String   @default("ACTIVE") // enum: ACTIVE | ACHIEVED | PAUSED
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -136,102 +137,105 @@ model DevelopmentGoal {
 
 // Discipline by Design Blueprint items (routines, learning, leadership responsibilities...)
 model Commitment {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  area      String   // enum: see BLUEPRINT_AREAS in src/content/program.ts
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  area      String // enum: see BLUEPRINT_AREAS in src/content/program.ts
   title     String
-  detail    String   @default("")
-  cadence   String   @default("WEEKLY") // enum: DAILY | WEEKLY | MONTHLY | QUARTERLY | ONCE
-  when      String   @default("")       // e.g. "Sunday 7:00 pm", "Before 7 am"
+  detail    String    @default("")
+  cadence   String    @default("WEEKLY") // enum: DAILY | WEEKLY | MONTHLY | QUARTERLY | ONCE
+  when      String    @default("") // e.g. "Sunday 7:00 pm", "Before 7 am"
   startsOn  DateTime?
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now())
 }
 
 // ---------- Accountability network ----------
 
 model Relationship {
-  id            String   @id @default(cuid())
-  ownerId       String
-  owner         User     @relation("RelOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-  name          String
-  role          String   // enum: MENTOR | COACH | ACCOUNTABILITY_PARTNER | MENTEE | GROUP | DIRECT_REPORT
-  purpose       String   @default("")
-  cadenceDays   Int      @default(14)
-  nextCheckIn   DateTime?
-  email         String?
-  linkedUserId  String?
-  linkedUser    User?    @relation("RelLinked", fields: [linkedUserId], references: [id])
-  inviteToken   String?  @unique
-  inviteStatus  String   @default("NONE") // enum: NONE | PENDING | ACCEPTED | DECLINED
-  active        Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  checkIns      RelationshipCheckIn[]
+  id           String                @id @default(cuid())
+  ownerId      String
+  owner        User                  @relation("RelOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  name         String
+  role         String // enum: MENTOR | COACH | ACCOUNTABILITY_PARTNER | MENTEE | GROUP | DIRECT_REPORT
+  purpose      String                @default("")
+  cadenceDays  Int                   @default(14)
+  nextCheckIn  DateTime?
+  email        String?
+  linkedUserId String?
+  linkedUser   User?                 @relation("RelLinked", fields: [linkedUserId], references: [id])
+  inviteToken  String?               @unique
+  inviteStatus String                @default("NONE") // enum: NONE | PENDING | ACCEPTED | DECLINED
+  active       Boolean               @default(true)
+  createdAt    DateTime              @default(now())
+  checkIns     RelationshipCheckIn[]
 }
 
 model RelationshipCheckIn {
-  id             String   @id @default(cuid())
+  id             String       @id @default(cuid())
   relationshipId String
   relationship   Relationship @relation(fields: [relationshipId], references: [id], onDelete: Cascade)
   occurredOn     DateTime
-  happened       Boolean  @default(true)
-  lessons        String   @default("")
-  agreedActions  String   @default("")
-  createdAt      DateTime @default(now())
+  happened       Boolean      @default(true)
+  lessons        String       @default("")
+  agreedActions  String       @default("")
+  createdAt      DateTime     @default(now())
 }
 
 // ---------- 30-day development cycles ----------
 
 model DevelopmentCycle {
-  id          String   @id @default(cuid())
+  id          String         @id @default(cuid())
   userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  template    String   // key into CYCLE_TEMPLATES (src/content/program.ts)
-  pillar      String   // enum: F | O | R | G | E
-  focus       String   @default("") // the behavior being worked
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  template    String // key into CYCLE_TEMPLATES (src/content/program.ts)
+  pillar      String // enum: F | O | R | G | E
+  focus       String         @default("") // the behavior being worked
   startDate   DateTime
-  status      String   @default("ACTIVE") // enum: ACTIVE | COMPLETED | STOPPED
-  weekNotes   String   @default("{}") // JSON: { "1": "...", "2": "..." }
-  weekStatus  String   @default("{}") // JSON: { "1": "DONE" | "PARTIAL" | "NOT_YET" }
-  finalReview String   @default("")
-  decision    String   @default("") // enum-ish: CONTINUE_ALONE | GO_FURTHER | NEW_CYCLE, plus free text
+  status      String         @default("ACTIVE") // enum: ACTIVE | COMPLETED | STOPPED
+  weekNotes   String         @default("{}") // JSON: { "1": "...", "2": "..." }
+  weekStatus  String         @default("{}") // JSON: { "1": "DONE" | "PARTIAL" | "NOT_YET" }
+  finalReview String         @default("")
+  decision    String         @default("") // enum-ish: CONTINUE_ALONE | GO_FURTHER | NEW_CYCLE, plus free text
   completedAt DateTime?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime       @default(now())
+  seasonId    String? // set when this cycle is one month of a 90-day season
+  season      Season?        @relation(fields: [seasonId], references: [id], onDelete: SetNull)
+  seasonMonth Int? // 1, 2 or 3
   checkIns    DailyCheckIn[]
 }
 
 model DailyCheckIn {
-  id         String   @id @default(cuid())
-  userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  cycleId    String?
-  cycle      DevelopmentCycle? @relation(fields: [cycleId], references: [id], onDelete: SetNull)
-  date       String   // YYYY-MM-DD in the participant's day
-  status     String   // enum: DONE | PARTIAL | NOT_YET
-  note       String   @default("")
-  reflection String   @default("")
-  tags       String   @default("[]") // JSON array of quick tags (where the practice showed up)
-  identityActed String @default("") // enum: "" | YES | PARTLY | NOT_YET (optional identity question)
-  identityNote  String @default("") // optional one-line answer; private to the participant
-  shared     Boolean  @default(false) // reflection text visible to coach only when true AND reflections scope granted
-  createdAt  DateTime @default(now())
+  id            String            @id @default(cuid())
+  userId        String
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cycleId       String?
+  cycle         DevelopmentCycle? @relation(fields: [cycleId], references: [id], onDelete: SetNull)
+  date          String // YYYY-MM-DD in the participant's day
+  status        String // enum: DONE | PARTIAL | NOT_YET
+  note          String            @default("")
+  reflection    String            @default("")
+  tags          String            @default("[]") // JSON array of quick tags (where the practice showed up)
+  identityActed String            @default("") // enum: "" | YES | PARTLY | NOT_YET (optional identity question)
+  identityNote  String            @default("") // optional one-line answer; private to the participant
+  shared        Boolean           @default(false) // reflection text visible to coach only when true AND reflections scope granted
+  createdAt     DateTime          @default(now())
 
   @@unique([userId, date])
 }
 
 model WeeklyReflection {
-  id         String   @id @default(cuid())
-  userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  weekOf     String   // YYYY-MM-DD (Monday)
-  built      String   @default("") // What did I build?
-  avoided    String   @default("") // What did I avoid?
-  nextWeek   String   @default("") // What does next week need?
-  didIt      String   @default("") // enum: YES | PARTIAL | NOT_YET (Did I do what I said I was going to do?)
-  held       String   @default("[]") // JSON array of Blueprint commitment ids that held this week
-  shared     Boolean  @default(false)
-  createdAt  DateTime @default(now())
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  weekOf    String // YYYY-MM-DD (Monday)
+  built     String   @default("") // What did I build?
+  avoided   String   @default("") // What did I avoid?
+  nextWeek  String   @default("") // What does next week need?
+  didIt     String   @default("") // enum: YES | PARTIAL | NOT_YET (Did I do what I said I was going to do?)
+  held      String   @default("[]") // JSON array of Blueprint commitment ids that held this week
+  shared    Boolean  @default(false)
+  createdAt DateTime @default(now())
 
   @@unique([userId, weekOf])
 }
@@ -255,7 +259,7 @@ model ShareGrant {
   owner     User     @relation("ShareOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   granteeId String
   grantee   User     @relation("ShareGrantee", fields: [granteeId], references: [id], onDelete: Cascade)
-  scope     String   // enum: see SHARE_SCOPES in src/lib/access.ts
+  scope     String // enum: see SHARE_SCOPES in src/lib/access.ts
   createdAt DateTime @default(now())
 
   @@unique([ownerId, granteeId, scope])
@@ -274,41 +278,41 @@ model CoachAssignment {
 }
 
 model CoachingSession {
-  id               String   @id @default(cuid())
-  coachId          String
-  coach            User     @relation("SessionCoach", fields: [coachId], references: [id], onDelete: Cascade)
-  participantId    String
-  participant      User     @relation("SessionParticipant", fields: [participantId], references: [id], onDelete: Cascade)
-  scheduledAt      DateTime
-  agenda           String   @default("")
-  coachNotes       String   @default("") // coach-private
-  commitments      String   @default("") // agreed commitments, visible to participant
-  participantPrep  String   @default("") // participant's own prep note, visible to coach once written
-  createdAt        DateTime @default(now())
+  id              String   @id @default(cuid())
+  coachId         String
+  coach           User     @relation("SessionCoach", fields: [coachId], references: [id], onDelete: Cascade)
+  participantId   String
+  participant     User     @relation("SessionParticipant", fields: [participantId], references: [id], onDelete: Cascade)
+  scheduledAt     DateTime
+  agenda          String   @default("")
+  coachNotes      String   @default("") // coach-private
+  commitments     String   @default("") // agreed commitments, visible to participant
+  participantPrep String   @default("") // participant's own prep note, visible to coach once written
+  createdAt       DateTime @default(now())
 }
 
 model AssignedExercise {
-  id            String   @id @default(cuid())
-  coachId       String
-  coach         User     @relation("ExerciseCoach", fields: [coachId], references: [id], onDelete: Cascade)
-  participantId String
-  participant   User     @relation("ExerciseParticipant", fields: [participantId], references: [id], onDelete: Cascade)
-  exerciseRef   String   // content key, e.g. "ed:0", "jay:2", "chapter:3:roadTest", "segment:03"
-  title         String
-  instructions  String   @default("")
-  dueOn         DateTime?
-  status        String   @default("ASSIGNED") // enum: ASSIGNED | DONE | PARTIAL | NOT_YET
-  response      String   @default("")
-  responseShared Boolean @default(false)
-  createdAt     DateTime @default(now())
+  id             String    @id @default(cuid())
+  coachId        String
+  coach          User      @relation("ExerciseCoach", fields: [coachId], references: [id], onDelete: Cascade)
+  participantId  String
+  participant    User      @relation("ExerciseParticipant", fields: [participantId], references: [id], onDelete: Cascade)
+  exerciseRef    String // content key, e.g. "ed:0", "jay:2", "chapter:3:roadTest", "segment:03"
+  title          String
+  instructions   String    @default("")
+  dueOn          DateTime?
+  status         String    @default("ASSIGNED") // enum: ASSIGNED | DONE | PARTIAL | NOT_YET
+  response       String    @default("")
+  responseShared Boolean   @default(false)
+  createdAt      DateTime  @default(now())
 }
 
 model EqiPriority {
   id                  String   @id @default(cuid())
   userId              String
   user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  label               String   // participant's own words for the development priority
-  pillar              String?  // FORGE pillar the participant links this priority to (their choice)
+  label               String // participant's own words for the development priority
+  pillar              String? // FORGE pillar the participant links this priority to (their choice)
   note                String   @default("")
   practice            String   @default("")
   coachInterpretation String   @default("") // recorded by a qualified coach
@@ -320,16 +324,16 @@ model EqiPriority {
 // ---------- Programs and cohorts ----------
 
 model Cohort {
-  id             String   @id @default(cuid())
+  id             String            @id @default(cuid())
   orgId          String
-  org            Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  org            Organization      @relation(fields: [orgId], references: [id], onDelete: Cascade)
   name           String
-  pathway        String   @default("LEADING_OTHERS")
-  deliveryFormat String   @default("THREE_DAY") // enum: THREE_DAY | THREE_WEEK
+  pathway        String            @default("LEADING_OTHERS")
+  deliveryFormat String            @default("THREE_DAY") // enum: THREE_DAY | THREE_WEEK
   startDate      DateTime
-  reinforceDays  Int      @default(30)
-  isDemo         Boolean  @default(false)
-  createdAt      DateTime @default(now())
+  reinforceDays  Int               @default(30)
+  isDemo         Boolean           @default(false)
+  createdAt      DateTime          @default(now())
   members        CohortMember[]
   sessions       TrainingSession[]
 }
@@ -346,23 +350,23 @@ model CohortMember {
 }
 
 model TrainingSession {
-  id            String   @id @default(cuid())
+  id            String       @id @default(cuid())
   cohortId      String
-  cohort        Cohort   @relation(fields: [cohortId], references: [id], onDelete: Cascade)
-  segmentKey    String   // "01".."06"
+  cohort        Cohort       @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  segmentKey    String // "01".."06"
   startsAt      DateTime
   facilitatorId String?
-  location      String   @default("")
+  location      String       @default("")
   attendance    Attendance[]
 }
 
 model Attendance {
-  id        String @id @default(cuid())
+  id        String          @id @default(cuid())
   sessionId String
   session   TrainingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   userId    String
-  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  status    String @default("PRESENT") // enum: PRESENT | ABSENT | EXCUSED
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status    String          @default("PRESENT") // enum: PRESENT | ABSENT | EXCUSED
 
   @@unique([sessionId, userId])
 }
@@ -370,24 +374,24 @@ model Attendance {
 // ---------- AI companion ----------
 
 model AiConversation {
-  id        String   @id @default(cuid())
+  id        String      @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  title     String   @default("New conversation")
-  mode      String   @default("COACH") // enum: COACH | PRACTICE | SESSION_PREP
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String      @default("New conversation")
+  mode      String      @default("COACH") // enum: COACH | PRACTICE | SESSION_PREP
   expiresAt DateTime
-  createdAt DateTime @default(now())
+  createdAt DateTime    @default(now())
   messages  AiMessage[]
 }
 
 model AiMessage {
-  id             String   @id @default(cuid())
+  id             String         @id @default(cuid())
   conversationId String
   conversation   AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  role           String   // enum: user | assistant
+  role           String // enum: user | assistant
   content        String
-  citations      String   @default("[]") // JSON array of source references
-  createdAt      DateTime @default(now())
+  citations      String         @default("[]") // JSON array of source references
+  createdAt      DateTime       @default(now())
 }
 
 // ---------- Audit ----------
@@ -418,7 +422,7 @@ model ContentPack {
 model IdentityProfile {
   userId            String   @id
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  level             String   // enum: CORE | ROLE | REINVENT (scope of change, not a ranking)
+  level             String // enum: CORE | ROLE | REINVENT (scope of change, not a ranking)
   becoming          String   @default("") // Who are you becoming?
   situation         String   @default("") // What situation or chapter makes this change important?
   behavior          String   @default("") // What behavior would show it?
@@ -431,9 +435,9 @@ model IdentityProfile {
   personaBehaviors  String   @default("")
   // AI and sharing controls (used from part 3 of the build)
   tone              String   @default("AUTO") // enum: AUTO | SUPPORTIVE | DIRECT | DEMANDING
-  aiUse             Boolean  @default(true)   // send level and statement to the AI Companion
-  aiUsePersona      Boolean  @default(false)  // also send the performance identity details
-  sharePersona      Boolean  @default(false)  // include the performance identity when Identity is shared with a coach
+  aiUse             Boolean  @default(true) // send level and statement to the AI Companion
+  aiUsePersona      Boolean  @default(false) // also send the performance identity details
+  sharePersona      Boolean  @default(false) // include the performance identity when Identity is shared with a coach
   versionStartedAt  DateTime @default(now())
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
@@ -451,4 +455,21 @@ model IdentityHistory {
   personaName String   @default("")
   startedAt   DateTime
   endedAt     DateTime @default(now())
+}
+
+/// A season: three 30-day cycles, about 90 days. The client starts it; each cycle notes its month.
+model Season {
+  id                String             @id @default(cuid())
+  userId            String
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status            String             @default("ACTIVE") // ACTIVE | COMPLETED | STOPPED
+  startAssessmentId String? // the FORGE scores at the start, for the season review
+  startStatement    String             @default("") // the I am statement at the start
+  review            String             @default("")
+  decision          String             @default("") // NEW_SEASON | KEEP_GOING | PAUSE
+  startedAt         DateTime           @default(now())
+  completedAt       DateTime?
+  cycles            DevelopmentCycle[]
+
+  @@index([userId, status])
 }

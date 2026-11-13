@@ -101,6 +101,18 @@ export const CLIENT_GUIDE: GuideSection[] = [
     link: { href: "/cycle", label: "Open your 30-day cycle" },
   },
   {
+    id: "season",
+    title: "Seasons: 90 days",
+    time: "Three 30-day cycles",
+    steps: [
+      "When you start a 30-day cycle, tick Make this month 1 of a 90-day season.",
+      "On day 30 of months 1 and 2, choose to go deeper on the same pillar or move to another one. The next month starts from there.",
+      "After month 3, open the season review. Take the FORGE assessment again to see your scores then and now, and read the I am statement you started with.",
+      "Then decide: start a new season, keep going one month at a time, or take a break.",
+    ],
+    link: { href: "/season", label: "Open your season" },
+  },
+  {
     id: "weekly",
     title: "Your weekly reflection",
     time: "5 minutes a week",
@@ -209,6 +221,15 @@ export const COACH_GUIDE: GuideSection[] = [
       "Use Schedule a session to set a date and an agenda. The client can add a prep note before you meet.",
       "After the session, write the agreed commitments. The client sees those. Your coach notes stay private to you.",
       "The client sees open exercises, the next session and the latest commitments in a From your coach box on their Today screen.",
+    ],
+  },
+  {
+    id: "seasons",
+    title: "Seasons",
+    steps: [
+      "A season is three 30-day cycles, about 90 days. The client starts it when they start a cycle. It is ticked for them by default when they have a coach.",
+      "On My clients you see Season month 2 of 3, Day 10 of 30 for clients who share their practice with you.",
+      "At the end of a season the client reviews it: scores then and now, and their I am statement. Plan a session around that review.",
     ],
   },
   {

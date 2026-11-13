@@ -56,7 +56,7 @@ export default async function Dashboard() {
         {d.cycle && week && pos ? (
           <>
             <div className={`${statement ? "mt-4 border-t border-white/15 pt-4" : ""} flex items-center justify-between gap-3`}>
-              <p className="text-xs uppercase tracking-[0.14em] text-white/60">Day {pos.day} of 30 · {week.phase}</p>
+              <p className="text-xs uppercase tracking-[0.14em] text-white/60">Day {pos.day} of 30{d.cycle.seasonMonth ? ` · Month ${d.cycle.seasonMonth} of 3` : ""} · {week.phase}</p>
               {p && <PillarMark k={p.key} size="sm" />}
             </div>
             <Link href="/cycle" className="mt-1.5 block text-xl font-medium leading-snug">{d.cycle.focus || week.work}</Link>

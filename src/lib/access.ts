@@ -78,7 +78,7 @@ export async function getCoachView(coach: CurrentUser, participantId: string) {
       : null,
     has("PRACTICE")
       ? db.developmentCycle.findFirst({ where: { userId: participantId }, orderBy: { startDate: "desc" },
-          select: { id: true, template: true, pillar: true, focus: true, startDate: true, status: true, weekStatus: true, decision: true, completedAt: true } })
+          select: { id: true, template: true, pillar: true, focus: true, startDate: true, status: true, weekStatus: true, decision: true, completedAt: true, seasonMonth: true } })
       : null,
     has("PRACTICE") || has("REFLECTIONS") || has("IDENTITY")
       ? db.dailyCheckIn.findMany({ where: { userId: participantId }, orderBy: { date: "desc" }, take: 30,

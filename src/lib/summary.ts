@@ -54,7 +54,7 @@ export async function developmentSummary(userId: string, name: string) {
     for (const c of cycles) {
       const ci = await db.dailyCheckIn.findMany({ where: { cycleId: c.id } });
       const s = practiceSummary(ci);
-      L.push(`- ${pName(c.pillar)} from ${fmt(c.startDate, { month: "short", day: "numeric", year: "numeric" })}: ${s.done} done, ${s.partial} partial, ${s.notYet} not yet. ${c.status === "COMPLETED" ? `Day 30 decision: ${DAY30_DECISIONS[c.decision as keyof typeof DAY30_DECISIONS] ?? c.decision}.` : c.status.toLowerCase()}`);
+      L.push(`- ${pName(c.pillar)} from ${fmt(c.startDate, { month: "short", day: "numeric", year: "numeric" })}${c.seasonMonth ? ` (season month ${c.seasonMonth})` : ""}: ${s.done} done, ${s.partial} partial, ${s.notYet} not yet. ${c.status === "COMPLETED" ? `Day 30 decision: ${DAY30_DECISIONS[c.decision as keyof typeof DAY30_DECISIONS] ?? c.decision}.` : c.status.toLowerCase()}`);
       if (c.finalReview) L.push(`  - Final review: ${c.finalReview}`);
     }
   }

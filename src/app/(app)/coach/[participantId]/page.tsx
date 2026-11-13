@@ -86,7 +86,7 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
         {s.has("PRACTICE") ? (
           <>
             {v.cycle && pos && week && (
-              <p className="mt-3 text-[15px]"><span className="font-medium">Day {pos.day}, {week.phase}.</span> {v.cycle.focus}{v.cycle.status === "COMPLETED" && v.cycle.decision ? ` · Day 30 decision: ${DAY30_DECISIONS[v.cycle.decision as keyof typeof DAY30_DECISIONS]}` : ""}</p>
+              <p className="mt-3 text-[15px]"><span className="font-medium">{v.cycle.seasonMonth ? `Season month ${v.cycle.seasonMonth} of 3, ` : ""}Day {pos.day}, {week.phase}.</span> {v.cycle.focus}{v.cycle.status === "COMPLETED" && v.cycle.decision ? ` · Day 30 decision: ${DAY30_DECISIONS[v.cycle.decision as keyof typeof DAY30_DECISIONS]}` : ""}</p>
             )}
             <p className="mt-2 text-sm">Last 30 entries: {practice.done} done · {practice.partial} partial · {practice.notYet} not yet</p>
             {(() => {

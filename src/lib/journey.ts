@@ -21,7 +21,7 @@ export type Journey = {
   done: Record<JourneyKey, boolean>;
   /** The first step not done, or null once the 30 days are under way. */
   current: JourneyKey | null;
-  cycle: { day: number; week: number; phase: string; finished: boolean } | null;
+  cycle: { day: number; week: number; phase: string; finished: boolean; seasonMonth: number | null } | null;
 };
 
 export async function getJourney(userId: string): Promise<Journey> {
@@ -31,7 +31,7 @@ export async function getJourney(userId: string): Promise<Journey> {
     db.assessment.findFirst({ where: { userId, isSecondOpinion: false }, select: { id: true } }),
     db.commitment.count({ where: { userId, active: true } }),
     db.relationship.count({ where: { ownerId: userId, active: true } }),
-    db.developmentCycle.findFirst({ where: { userId, status: "ACTIVE" }, orderBy: { startDate: "desc" }, select: { startDate: true, template: true } }),
+    db.developmentCycle.findFirst({ where: { userId, status: "ACTIVE" }, orderBy: { startDate: "desc" }, select: { startDate: true, template: true, seasonMonth: true } }),
   ]);
   const lines = profile ? [profile.destination, profile.lineO, profile.why, profile.lineG, profile.lineE].filter((x) => x.trim()).length : 0;
   const done: Record<JourneyKey, boolean> = {
@@ -46,7 +46,7 @@ export async function getJourney(userId: string): Promise<Journey> {
     const pos = cyclePosition(cycle.startDate);
     const { pack } = await getContent();
     const phase = cycleWeeks(cycle.template, pack).weeks[pos.week - 1]?.phase ?? "";
-    c = { ...pos, phase };
+    c = { ...pos, phase, seasonMonth: cycle.seasonMonth };
   }
   const current = done.drive ? null : (JOURNEY_STEPS.find((s) => !done[s.key])?.key ?? null);
   return { done, current, cycle: c };
