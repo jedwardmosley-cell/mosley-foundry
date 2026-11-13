@@ -4,6 +4,7 @@ import { saveGoal } from "@/app/actions/participant";
 import { PillarMark, Field } from "./ui";
 import { Submit } from "./Submit";
 import { Picks } from "./Picks";
+import { Icon } from "./Icon";
 import { LEVELS, PILLAR_PROMPTS, PILLAR_PROMPTS_STATUS, type IdentityLevel } from "@/content/identity";
 
 type Goal = { pillar: string; whereNow: string; whereWant: string; oneMove: string };
@@ -17,15 +18,15 @@ export function OneMoveCards({ pack, goals, priority, level }: { pack: ContentPa
           const isPriority = priority === p.key;
           const filled = !!(g?.whereNow || g?.whereWant || g?.oneMove);
           return (
-            <details key={p.key} open={isPriority || (!priority && p.key === "F")} className={`card group ${isPriority ? "border-navy/40 ring-1 ring-navy/10" : ""}`}>
+            <details key={p.key} open={isPriority || (!priority && p.key === "F")} className={`card group ${isPriority ? "!border-navy/25" : ""}`}>
               <summary className="cursor-pointer list-none flex items-center gap-3">
                 <PillarMark k={p.key} />
                 <div className="flex-1">
-                  <h2 className="h3">{p.name}</h2>
-                  <p className="text-sm muted">{g?.oneMove ? `One move: ${g.oneMove}` : p.short}</p>
+                  <h3 className="h3">{p.name}</h3>
+                  <p className="mt-0.5 text-sm muted line-clamp-2">{g?.oneMove ? `One move: ${g.oneMove}` : p.short}</p>
                 </div>
-                {isPriority ? <span className="chip !border-navy/30 !text-link">Priority</span> : filled ? <span className="chip">Started</span> : null}
-                <span aria-hidden className="text-ink-mute group-open:rotate-90 transition-transform">›</span>
+                {isPriority ? <span className="chip !bg-navy !text-white">Priority</span> : filled ? <span className="chip">Started</span> : null}
+                <Icon name="arrow" className="h-4 w-4 shrink-0 text-ink-mute transition-transform group-open:rotate-90" />
               </summary>
               <form action={saveGoal} className="mt-5 space-y-4">
                 <input type="hidden" name="pillar" value={p.key} />
@@ -34,7 +35,7 @@ export function OneMoveCards({ pack, goals, priority, level }: { pack: ContentPa
                 </Field>
                 <Picks list={ONE_MOVE[p.key]} target="oneMove" folded="Ideas" />
                 {level && (
-                  <p className="rounded-xl bg-paper p-3 text-sm">
+                  <p className="rounded-2xl bg-field px-4 py-3 text-sm">
                     <span className="font-medium">For {LEVELS[level as IdentityLevel].name}: </span>
                     {PILLAR_PROMPTS[p.key][level as IdentityLevel]}
                     {PILLAR_PROMPTS_STATUS === "draft" && <span className="ml-2 draft !text-[10px]">Draft</span>}

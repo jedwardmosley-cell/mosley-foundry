@@ -10,6 +10,7 @@ import { withArticle } from "@/content/whoIAm";
 import type { PillarKey } from "@/content/types";
 import { PillarMark, PILLAR_FILL } from "@/components/ui";
 import { CheckInForm } from "@/components/CheckInForm";
+import { Icon, IconBadge, type IconName } from "@/components/Icon";
 
 export const metadata = { title: "Today" };
 
@@ -35,10 +36,10 @@ export default async function Dashboard() {
   const statement = d.profile.forgeStatement || d.identity?.becoming || d.profile.destination || "";
   const dueSoon = d.relationships.filter((r) => r.nextCheckIn && daysBetween(new Date(), r.nextCheckIn) <= 2).slice(0, 3);
   const coachItems = [
-    nextSession && { key: "s", href: "/coaching", icon: "◷", text: `${fmt(nextSession.scheduledAt, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })} · Session with ${nextSession.coach.name.split(" (")[0]}`, side: nextSession.participantPrep ? "" : "Add prep" },
-    ...openExercises.map((x) => ({ key: x.id, href: "/coaching", icon: "✎", text: x.title, side: x.dueOn ? `Due ${fmt(x.dueOn)}` : "New" })),
-    lastCommitments && { key: "c", href: "/coaching", icon: "✓", text: lastCommitments.commitments, side: "Agreed" },
-  ].filter(Boolean) as { key: string; href: string; icon: string; text: string; side: string }[];
+    nextSession && { key: "s", href: "/coaching", icon: "clock", text: `${fmt(nextSession.scheduledAt, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })} · Session with ${nextSession.coach.name.split(" (")[0]}`, side: nextSession.participantPrep ? "" : "Add prep" },
+    ...openExercises.map((x) => ({ key: x.id, href: "/coaching", icon: "pencil", text: x.title, side: x.dueOn ? `Due ${fmt(x.dueOn)}` : "New" })),
+    lastCommitments && { key: "c", href: "/coaching", icon: "check", text: lastCommitments.commitments, side: "Agreed" },
+  ].filter(Boolean) as { key: string; href: string; icon: IconName; text: string; side: string }[];
 
   // The headline: the last 10 days of this cycle, or fewer early on.
   const w = pos && !pos.finished ? Math.min(10, pos.day) : 0;
@@ -75,33 +76,43 @@ export default async function Dashboard() {
       </section>
 
       <div className="grid grid-cols-2 gap-3">
-        <Tile href="/history" label="Days practiced" value={String(practice.practiced)} word={practice.practiced ? "last 30 days" : "none yet"}>
+        <Tile href="/history" icon="calendar" label="Practiced" value={String(practice.practiced)} word={practice.practiced ? "in the last 30 days" : "none yet"}>
           <PracticeStrip checkIns={d.checkIns} pillar={(d.cycle?.pillar ?? pillarKey ?? "F") as PillarKey} />
         </Tile>
-        <Tile href="/network" label="People" value={String(dueSoon.length)} word={overdue ? `${overdue} overdue` : dueSoon.length ? "due soon" : d.relationships.length ? "all caught up" : "add someone"} tone={overdue ? "text-alert" : "text-link"} />
-        <Tile href="/identity" label={d.identity?.role ? `Who I am · as ${withArticle(d.identity.role)}` : "Who I am"} wide>
-          <p className="mt-2 font-serif text-[17px] leading-snug text-heading line-clamp-3">{statement || "Claim who you are."}</p>
-          {d.identity?.level === "REINVENT" && d.identity.personaName && <p className="mt-1.5 text-xs text-ink-mute">Performance identity: <span className="text-ink">{d.identity.personaName}</span></p>}
-        </Tile>
-        <Tile href={goal?.oneMove ? "/blueprint#one-move" : "/blueprint"} label="This week" wide>
-          <p className="mt-2 text-[15px] leading-snug line-clamp-2">{goal?.oneMove || "Pick one move"}</p>
-          {p && <p className="mt-2 inline-flex items-center gap-1.5 text-xs text-ink-mute"><PillarMark k={p.key} size="sm" /> {p.name}</p>}
-        </Tile>
+        <Tile href="/network" icon="people" label="People" value={String(dueSoon.length)} word={overdue ? `${overdue} overdue` : dueSoon.length ? "due soon" : d.relationships.length ? "all caught up" : "add someone"} tone={overdue ? "text-alert" : "text-ink-mute"} />
+
+        {/* Who I am: the anchor of the day, set like a page from the book. */}
+        <Link href="/identity" className="glow col-span-2 block rounded-[22px] p-5 sm:p-6 transition hover:-translate-y-0.5">
+          <p className="flex items-center justify-between eyebrow !text-brass">{d.identity?.role ? `Who I am · as ${withArticle(d.identity.role)}` : "Who I am"}<Icon name="arrow" className="h-4 w-4 text-ink-mute" /></p>
+          <p className="mt-3 font-serif text-[21px] sm:text-[23px] leading-[1.3] tracking-[-0.01em] text-heading line-clamp-4">
+            <span aria-hidden className="mr-1 text-brass">&ldquo;</span>{statement || "Claim who you are."}
+          </p>
+          {d.identity?.level === "REINVENT" && d.identity.personaName && <p className="mt-3 text-xs text-ink-mute">Performance identity: <span className="text-ink">{d.identity.personaName}</span></p>}
+        </Link>
+
+        <Link href={goal?.oneMove ? "/blueprint#one-move" : "/blueprint"} className="tile col-span-2 flex items-center gap-4 transition hover:-translate-y-0.5">
+          {p ? <PillarMark k={p.key} /> : <IconBadge name="step" />}
+          <div className="flex-1 min-w-0">
+            <p className="text-[13px] text-ink-mute">My move this week{p ? ` · ${p.name}` : ""}</p>
+            <p className="mt-0.5 text-[15px] font-medium leading-snug text-ink line-clamp-2">{goal?.oneMove || "Pick one move"}</p>
+          </div>
+          <Icon name="arrow" className="h-4 w-4 shrink-0 text-ink-mute" />
+        </Link>
       </div>
 
       {coachItems.length > 0 && (
-        <section className="tile !p-0">
-          <div className="flex items-center justify-between px-5 pt-4">
+        <section className="tile !p-0 overflow-hidden">
+          <div className="flex items-center justify-between px-5 pt-4 pb-1">
             <p className="eyebrow">From your coach</p>
             <Link href="/coaching" className="text-sm btn-link">Open</Link>
           </div>
-          <ul className="mt-2 divide-y divide-line/60">
+          <ul>
             {coachItems.map((x) => (
-              <li key={x.key}>
-                <Link href={x.href} className="flex items-center gap-3 px-5 py-3 hover:bg-paper/60">
-                  <span aria-hidden className="w-5 text-center text-ink-mute">{x.icon}</span>
+              <li key={x.key} className="border-t border-line/50 first:border-t-0">
+                <Link href={x.href} className="flex items-center gap-3 px-5 py-3 transition hover:bg-ink/[0.03]">
+                  <IconBadge name={x.icon} className="!h-8 !w-8" />
                   <span className="flex-1 text-[15px] line-clamp-1">{x.text}</span>
-                  {x.side && <span className="text-xs text-ink-mute whitespace-nowrap">{x.side}</span>}
+                  {x.side && <span className="chip whitespace-nowrap">{x.side}</span>}
                 </Link>
               </li>
             ))}
@@ -112,13 +123,13 @@ export default async function Dashboard() {
   );
 }
 
-/** A soft tile: a label, one big number and one word, or a short line. Tapping opens the detail. */
-function Tile({ href, label, value, word, tone = "text-ink-mute", wide = false, children }: { href: string; label: string; value?: string; word?: string; tone?: string; wide?: boolean; children?: React.ReactNode }) {
+/** A soft tile: an icon, a label, one big number and a word. Tapping opens the detail. */
+function Tile({ href, icon, label, value, word, tone = "text-ink-mute", children }: { href: string; icon: IconName; label: string; value?: string; word?: string; tone?: string; children?: React.ReactNode }) {
   return (
-    <Link href={href} className={`tile block hover:-translate-y-0.5 transition-transform ${wide ? "col-span-2 sm:col-span-1" : ""}`}>
-      <p className="flex items-center justify-between text-[13px] text-ink-soft">{label}<span aria-hidden className="text-ink-mute">›</span></p>
-      {value !== undefined && <p className="mt-3 font-serif text-[40px] leading-none text-heading">{value}</p>}
-      {word && <p className={`mt-1 text-sm ${tone}`}>{word}</p>}
+    <Link href={href} className="tile block transition hover:-translate-y-0.5">
+      <p className="flex items-center gap-2.5 text-[13px] text-ink-soft"><IconBadge name={icon} className="!h-7 !w-7 [&>svg]:!h-4 [&>svg]:!w-4" />{label}<Icon name="arrow" className="ml-auto h-4 w-4 text-ink-mute" /></p>
+      {value !== undefined && <p className="mt-4 font-serif text-[44px] leading-none tracking-[-0.02em] text-heading">{value}</p>}
+      {word && <p className={`mt-1.5 text-[13px] ${tone}`}>{word}</p>}
       {children}
     </Link>
   );
@@ -161,11 +172,11 @@ function PracticeStrip({ checkIns, pillar }: { checkIns: { date: string; status:
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
     return { key, s: map.get(key) };
   });
-  const tone = (s?: string) => (s === "DONE" ? PILLAR_FILL[pillar].full : s === "PARTIAL" ? PILLAR_FILL[pillar].part : s === "NOT_YET" ? "bg-line border border-ink-mute/30" : "bg-transparent border border-line");
+  const tone = (s?: string) => (s === "DONE" ? PILLAR_FILL[pillar].full : s === "PARTIAL" ? PILLAR_FILL[pillar].part : s === "NOT_YET" ? "bg-ink/[0.14]" : "bg-ink/[0.06]");
   return (
     <div className="mt-3">
       <div className="flex gap-1" role="img" aria-label="Last 14 days of practice">
-        {days.map((d) => <span key={d.key} title={`${d.key}: ${d.s ?? "no entry"}`} className={`h-3 flex-1 rounded-sm ${tone(d.s)}`} />)}
+        {days.map((d) => <span key={d.key} title={`${d.key}: ${d.s ?? "no entry"}`} className={`h-3.5 flex-1 rounded-[4px] ${tone(d.s)}`} />)}
       </div>
     </div>
   );
