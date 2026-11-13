@@ -7,7 +7,7 @@ type Props = {
   steps: Step[];
   done: Record<string, boolean>;
   current: string | null;
-  cycle: { day: number; week: number; phase: string; finished: boolean } | null;
+  cycle: { day: number; week: number; phase: string; finished: boolean; seasonMonth?: number | null } | null;
 };
 
 /** Five steps, shown at the top of every client screen: what is done, where you are, and what comes next. */
@@ -26,7 +26,7 @@ export function JourneyBar({ steps, done, current, cycle }: Props) {
   } else if (cycle) {
     line = cycle.finished
       ? <Link href="/cycle" className="btn-link">Your 30 days are up. Open your day 30 review</Link>
-      : <Link href="/dashboard" className="hover:text-navy">Day {cycle.day} of 30 · Week {cycle.week}{cycle.phase ? `, ${cycle.phase}` : ""} · <span className="btn-link">Check in today</span></Link>;
+      : <Link href="/dashboard" className="hover:text-navy">Day {cycle.day} of 30{cycle.seasonMonth ? ` · Month ${cycle.seasonMonth} of 3` : ""} · Week {cycle.week}{cycle.phase ? `, ${cycle.phase}` : ""} · <span className="btn-link">Check in today</span></Link>;
     if (open && !cycle.finished) line = <>{line} <span className="block sm:inline mt-1 sm:mt-0 text-ink-mute">Still open: <Link href={open.href} className="btn-link">{open.label}</Link></span></>;
   } else if (next) {
     line = <>Step {n} of 5 · <Link href={`/start?step=${n}`} className="btn-link">{next.next}</Link></>;

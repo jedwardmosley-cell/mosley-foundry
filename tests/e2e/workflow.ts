@@ -327,13 +327,56 @@ const submitAndWait = async (page: Page, selector: string) => {
     // 5. the 30 days
     await Promise.all([g.waitForURL(/\/cycle\/new\?pillar=E/), g.click('a:has-text("start my 30 days")')]);
     await g.fill('input[name="focus"]', "Pause before I answer");
+    // month 1 of a season, started 29 days ago, so today is day 30 and the review is open
+    await g.locator('input[name="season"][value="new"]').check();
+    await g.locator('summary:has-text("Structure and start date")').click();
+    const ago = new Date(Date.now() - 29 * 86400000);
+    await g.fill('input[name="startDate"]', `${ago.getFullYear()}-${String(ago.getMonth() + 1).padStart(2, "0")}-${String(ago.getDate()).padStart(2, "0")}`);
     await Promise.all([g.waitForURL("**/cycle"), g.click('button:has-text("Start the cycle")')]);
+    await g.waitForSelector("text=Season, month 1 of 3");
     await g.goto(`${BASE}/start`);
     await g.waitForSelector("text=You are set up");
     await g.goto(`${BASE}/dashboard`);
     // only the F line was written, so the bar keeps FORGE lines open as a nudge for the first week
     assert.equal(await g.locator('nav[aria-label="Your journey"] >> text=(done)').count(), 4);
     await g.waitForSelector('nav[aria-label="Your journey"] >> text=Still open: FORGE identity');
+    await gc.close();
+  });
+
+  await check("1d. a 90-day season: day 30 leads into month 2, then the season review", async () => {
+    const gc = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const g: Page = await gc.newPage();
+    const guided = await db.user.findFirstOrThrow({ where: { name: "Guided Driver (E2E)" }, orderBy: { createdAt: "desc" } });
+    await login(g, guided.email, "e2e-password-123");
+    await g.goto(`${BASE}/cycle`);
+    // month 1, day 30: only the season choices are offered
+    assert.equal(await g.locator('input[name="decision"][value="CONTINUE_ALONE"]').count(), 0);
+    await g.locator('input[name="decision"][value="NEXT_SAME"]').check();
+    await Promise.all([g.waitForURL(/\/cycle\/new\?season=continue/), g.click('button:has-text("Complete the cycle")')]);
+    await g.waitForSelector("text=Month 2 of 3 in your season");
+    assert.equal(await g.inputValue('input[name="focus"]'), "Pause before I answer", "same pillar carries the behavior over");
+    await Promise.all([g.waitForURL("**/cycle"), g.click('button:has-text("Start the cycle")')]);
+    await g.waitForSelector("text=Season, month 2 of 3");
+    const cycles = await db.developmentCycle.findMany({ where: { userId: guided.id }, orderBy: { createdAt: "asc" } });
+    assert.deepEqual(cycles.map((c) => c.seasonMonth), [1, 2]);
+    assert.equal(cycles[0].seasonId, cycles[1].seasonId, "both months are in one season");
+    // the review: month rows, then close the season
+    await g.goto(`${BASE}/season`);
+    await g.waitForSelector("text=Month 2 · Emotionally Anchored");
+    await g.waitForSelector("text=Take the FORGE assessment");
+    await g.waitForSelector("text=The review opens when month 2 ends.");
+    assert.equal(await g.locator('input[name="decision"][value="KEEP_GOING"]').count(), 0, "no closing the season mid-month");
+    // jump month 2 to its day 30, then end the season there
+    await db.developmentCycle.update({ where: { id: cycles[1].id }, data: { startDate: new Date(Date.now() - 29 * 86400000) } });
+    await g.goto(`${BASE}/cycle`);
+    await g.locator('input[name="decision"][value="END_SEASON"]').check();
+    await Promise.all([g.waitForURL("**/season"), g.click('button:has-text("Complete the cycle")')]);
+    await g.locator('input[name="decision"][value="KEEP_GOING"]').check();
+    await Promise.all([g.waitForURL("**/dashboard"), g.click('button:has-text("Close the season")')]);
+    const season = await db.season.findFirstOrThrow({ where: { userId: guided.id } });
+    assert.equal(season.status, "COMPLETED");
+    assert.equal(season.decision, "KEEP_GOING");
+    assert.equal(await db.developmentCycle.count({ where: { userId: guided.id, status: "ACTIVE" } }), 0, "the open month ends with the season");
     await gc.close();
   });
 

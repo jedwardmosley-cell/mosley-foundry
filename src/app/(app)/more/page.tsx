@@ -11,6 +11,7 @@ const GROUPS: [string, [string, string, string][]][] = [
   ["Discipline by Design", [
     ["/blueprint", "4. My road", "Discipline by Design: your routines, your people, your learning."],
     ["/cycle", "5. 30 days", "Practice one behavior for 30 days, then decide what is next."],
+    ["/season", "Season", "Three 30-day cycles, about 90 days, and the review at the end."],
     ["/reflect", "Weekly reflection", "Did I do what I said I was going to do?"],
   ]],
   ["Support", [

@@ -54,6 +54,7 @@ export default async function AssessmentPage({ searchParams }: { searchParams: P
       <form action={saveAssessment} className="space-y-6">
         <input type="hidden" name="instrument" value={instrument} />
         {next === "start" && <input type="hidden" name="next" value="/start" />}
+        {next === "season" && <input type="hidden" name="next" value="/season" />}
         {pack.pillars.map((p) => {
           const e = useEntre ? entrepreneur!.pillars[p.key] : null;
           const brief = e?.brief ?? p.brief;

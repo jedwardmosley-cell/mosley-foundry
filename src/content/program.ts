@@ -164,4 +164,24 @@ export const DAY30_DECISIONS = {
   CONTINUE_ALONE: "Keep doing this work on my own",
   GO_FURTHER: "Go further, with coaching or a group",
   NEW_CYCLE: "Start a new cycle on another pillar",
+  // Inside a 90-day season (build-team wording, draft)
+  NEXT_SAME: "Next month: go deeper on the same pillar",
+  NEXT_OTHER: "Next month: work on another pillar",
+  END_SEASON: "End the season here and review it",
+  SEASON_REVIEW: "Finish the season and review it",
+} as const;
+export type Day30Decision = keyof typeof DAY30_DECISIONS;
+/** The day 30 choices shown outside a season, in months 1 and 2 of a season, and in month 3. */
+export const DAY30_CHOICES = {
+  none: ["CONTINUE_ALONE", "GO_FURTHER", "NEW_CYCLE"],
+  midSeason: ["NEXT_SAME", "NEXT_OTHER", "END_SEASON"],
+  lastMonth: ["SEASON_REVIEW"],
+} as const satisfies Record<string, readonly Day30Decision[]>;
+
+/** Seasons: three 30-day cycles, about 90 days. Build-team wording, DRAFT FOR AUTHOR REVIEW. */
+export const SEASON_LENGTH = 3;
+export const SEASON_DECISIONS = {
+  NEW_SEASON: "Start a new season",
+  KEEP_GOING: "Keep going on my own, one month at a time",
+  PAUSE: "Take a break and come back later",
 } as const;

@@ -88,7 +88,9 @@ async function main() {
   await db.relationship.create({ data: { ownerId: dana.id, name: "Thursday leaders circle", role: "GROUP", purpose: "Peer group of new managers", cadenceDays: 7, nextCheckIn: day(1) } });
   await db.relationshipCheckIn.create({ data: { relationshipId: r1.id, occurredOn: day(-10), happened: true, lessons: "I paused twice this week and the meeting went differently both times.", agreedActions: "Try the pause with my director, not just peers." } });
 
-  const cycle = await db.developmentCycle.create({ data: { userId: dana.id, template: "NIRS_30", pillar: "E", focus: "Pausing before I answer when a decision gets challenged", startDate: (() => { const d = day(-9); d.setHours(0, 0, 0, 0); return d; })(), weekNotes: JSON.stringify({ 1: "It shows up most with peers in front of my director. My jaw tightens first." }), weekStatus: JSON.stringify({ 1: "DONE" }) } });
+  const danaStart = await db.assessment.findFirstOrThrow({ where: { userId: dana.id } });
+  const season = await db.season.create({ data: { userId: dana.id, startAssessmentId: danaStart.id, startStatement: "I am a manager my team trusts with bad news.", startedAt: day(-9) } });
+  const cycle = await db.developmentCycle.create({ data: { userId: dana.id, seasonId: season.id, seasonMonth: 1, template: "NIRS_30", pillar: "E", focus: "Pausing before I answer when a decision gets challenged", startDate: (() => { const d = day(-9); d.setHours(0, 0, 0, 0); return d; })(), weekNotes: JSON.stringify({ 1: "It shows up most with peers in front of my director. My jaw tightens first." }), weekStatus: JSON.stringify({ 1: "DONE" }) } });
   const pattern = ["DONE", "DONE", "PARTIAL", "DONE", "NOT_YET", "DONE", "PARTIAL", "DONE", "DONE"];
   for (let i = 0; i < pattern.length; i++) {
     await db.dailyCheckIn.create({ data: {
