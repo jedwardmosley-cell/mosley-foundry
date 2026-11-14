@@ -36,7 +36,7 @@ export function reviewSets(): ReviewSet[] {
     },
     {
       key: "lines", title: "The five FORGE questions", where: "Who's behind the wheel, the five parts", file: "src/content/forgeLines.ts", draft: FORGE_LINES_STATUS === "draft",
-      groups: FORGE_LINES.map((l) => ({ label: `${l.pillar} · ${l.label}`, items: [l.question, `What it shapes: ${l.shapes}`, `Hint: ${l.hint}`] })),
+      groups: FORGE_LINES.map((l) => ({ label: `${l.pillar} · ${l.label}`, items: [l.question, `What it is about: ${l.shapes}`, `Hint: ${l.hint}`] })),
     },
     {
       key: "examples", title: "Identity examples", where: "Who's behind the wheel, under each question", file: "src/content/identityExamples.ts", draft: IDENTITY_EXAMPLES_STATUS === "draft",

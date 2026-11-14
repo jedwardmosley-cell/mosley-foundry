@@ -22,7 +22,7 @@ export type ForgeLine = {
   field: LineField;
   label: string;
   question: string;
-  /** The part of identity this rule works on, in one line. */
+  /** What this rule is about, in one line (the author's definition, in the app's voice). */
   shapes: string;
   /** Fixed words the statement starts with. The client finishes the sentence. */
   prefix: string;
@@ -35,7 +35,7 @@ export const FORGE_LINES: ForgeLine[] = [
     field: "destination",
     label: "Future Focused",
     question: "Who is the person I'm driving toward?",
-    shapes: "Who you see yourself as.",
+    shapes: "Where you're going.",
     prefix: "I am",
     hint: "Describe the person you are choosing to be and where that person is headed. Plans and tasks go in your blueprint.",
   },
@@ -44,7 +44,7 @@ export const FORGE_LINES: ForgeLine[] = [
     field: "lineO",
     label: "Outcome Aware",
     question: "What does the person I'm becoming pay attention to?",
-    shapes: "What you notice, and what you're used to seeing around you.",
+    shapes: "What it looks like as you get closer, and when you arrive.",
     prefix: "I am",
     hint: "Describe the kind of attention this person brings. The signals you will track go in your blueprint.",
   },
@@ -53,7 +53,7 @@ export const FORGE_LINES: ForgeLine[] = [
     field: "why",
     label: "Reason Rooted",
     question: "Why does this matter to me, and who is it for?",
-    shapes: "Why you do it, and why you are the way you are.",
+    shapes: "Why you're going.",
     prefix: "I am",
     hint: "Name the values underneath this identity, and who it is for.",
   },
@@ -62,7 +62,7 @@ export const FORGE_LINES: ForgeLine[] = [
     field: "lineG",
     label: "Growth Oriented",
     question: "Who am I when I hit a limit?",
-    shapes: "How you grow when you fall short.",
+    shapes: "The gap between where you are and where you'll be.",
     prefix: "I am",
     hint: "Describe who you are when you hit a limit. The skills you will practice go in your blueprint.",
   },
@@ -71,7 +71,7 @@ export const FORGE_LINES: ForgeLine[] = [
     field: "lineE",
     label: "Emotionally Anchored",
     question: "Who am I when the day gets ugly?",
-    shapes: "How you stay anchored when emotions run high.",
+    shapes: "The emotional state it takes to be that person and get there.",
     prefix: "I am",
     hint: "Describe who you are when emotions run high. Techniques, like a pause or a breath, go in your blueprint.",
   },
