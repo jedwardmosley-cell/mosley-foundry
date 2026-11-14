@@ -29,7 +29,7 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
   const continuing = !!(open && month && sp.season !== "none");
   return (
     <>
-      <PageHeader eyebrow="Discipline by Design" title="Start your 30 days">Pick one pillar and one behavior to practice. Checking in takes two minutes a day.</PageHeader>
+      <PageHeader eyebrow="Discipline by Design" title="Start your 30 days">Pick one pillar. Then name the moment you want to change and what you'll do instead. Checking in takes two minutes a day.</PageHeader>
       <Card>
         <form action={startCycle} className="space-y-5">
           <div>

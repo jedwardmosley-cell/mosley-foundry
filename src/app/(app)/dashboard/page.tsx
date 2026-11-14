@@ -14,7 +14,8 @@ import { Icon, IconBadge, type IconName } from "@/components/Icon";
 
 export const metadata = { title: "Today" };
 
-export default async function Dashboard() {
+export default async function Dashboard({ searchParams }: { searchParams: Promise<{ setup?: string }> }) {
+  const { setup } = await searchParams;
   const u = await requireUser("PARTICIPANT");
   const d = await loadParticipant(u.id);
   if (!d.profile?.onboardedAt) redirect("/onboarding");
@@ -51,6 +52,17 @@ export default async function Dashboard() {
 
   return (
     <div className="space-y-5">
+      {setup === "done" && <p role="status" className="notice">Week 1 setup is done. Your plan is on its way to the person who finds out.</p>}
+      {/* Mid-cycle and not set up yet: an invitation, never a gate. */}
+      {d.cycle && pos && !pos.finished && !d.cycle.setupDoneAt && (
+        <Link href={`/cycle/setup?step=${d.cycle.plan ? "share" : !d.cycle.situation ? 1 : !d.cycle.feeling ? 2 : !d.cycle.oldResponse ? 3 : !d.cycle.newResponse ? 4 : !d.cycle.gap ? 5 : "plan"}`} className="tile flex items-center gap-4 transition hover:-translate-y-0.5">
+          <span className="flex-1">
+            <span className="block text-[15px] font-medium text-heading">Finish your week 1 setup</span>
+            <span className="block text-sm text-ink-soft">Five short questions, your plan, and who finds out.</span>
+          </span>
+          <Icon name="arrow" className="h-4 w-4 shrink-0 text-ink-mute" />
+        </Link>
+      )}
 
       {/* The day, in one glowing card: how it's going, where you are in the 30 days, and today's check-in. */}
       <section className="glow rounded-[28px] p-5 pb-4 sm:p-7">
@@ -65,7 +77,7 @@ export default async function Dashboard() {
           <>
             <DayArc day={pos.day} pillar={d.cycle.pillar as PillarKey} />
             <p className="text-center text-[11px] uppercase tracking-[0.14em] text-ink-mute">Week {pos.week} · {week.phase}{d.cycle.seasonMonth ? ` · Month ${d.cycle.seasonMonth} of 3` : ""}</p>
-            <Link href="/cycle" className="mt-1 block text-center text-[17px] font-medium leading-snug text-ink">{d.cycle.focus || week.work}</Link>
+            <Link href="/cycle" className="mt-1 block text-center text-[17px] font-medium leading-snug text-ink">{d.cycle.plan || d.cycle.focus || week.work}</Link>
             {pos.finished
               ? <Link href="/cycle" className="mt-5 btn-primary w-full">Open my day 30 review</Link>
               : <div className="mt-4"><CheckInForm existing={d.todayCheckIn} hasCoach={d.coaches.length > 0} identityLevel={d.identity?.level} /></div>}

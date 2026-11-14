@@ -204,6 +204,21 @@ model DevelopmentCycle {
   seasonId    String? // set when this cycle is one month of a 90-day season
   season      Season?        @relation(fields: [seasonId], references: [id], onDelete: SetNull)
   seasonMonth Int? // 1, 2 or 3
+  // Week 1 setup: the pattern being interrupted. Private unless the client shares the PLAN scope.
+  situation   String         @default("")
+  feeling     String         @default("")
+  oldResponse String         @default("")
+  newResponse String         @default("")
+  gap         String         @default("")
+  plan        String         @default("") // "When ___ and I feel ___, I will ___." The client's wording.
+  firstGuess  String         @default("{}") // JSON: the week 1 answers as first written, kept when they change
+  weekAnswers String         @default("{}") // JSON: { "2": {...}, "3": {...}, "4": {...} }
+  partnerId   String? // the person from My people who finds out
+  shareFeeling Boolean       @default(false)
+  shareOld    Boolean        @default(false)
+  shareGap    Boolean        @default(false)
+  sharedLog   String         @default("[]") // JSON: [{ at, to, kind }] each time the client taps Send
+  setupDoneAt DateTime? // set when the client sends the plan to someone
   checkIns    DailyCheckIn[]
 }
 

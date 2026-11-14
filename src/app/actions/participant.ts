@@ -232,9 +232,10 @@ export async function startCycle(fd: FormData) {
   await db.developmentCycle.updateMany({ where: { userId: u.id, status: "ACTIVE" }, data: { status: "STOPPED" } });
   const s = await seasonForNewCycle(u.id, season);
   await db.developmentCycle.create({
-    data: { userId: u.id, role, seasonId: s.seasonId, seasonMonth: s.seasonMonth, pillar: d.pillar, focus: d.focus, template: d.template, startDate: d.startDate ? new Date(d.startDate + "T00:00:00") : new Date(new Date().toDateString()) },
+    data: { userId: u.id, role, seasonId: s.seasonId, seasonMonth: s.seasonMonth, pillar: d.pillar, focus: d.focus, newResponse: d.focus, template: d.template, startDate: d.startDate ? new Date(d.startDate + "T00:00:00") : new Date(new Date().toDateString()) },
   });
-  redirect("/cycle");
+  // Week 1 setup comes next: the situation, the feeling, the old and new response, the gap, then who finds out.
+  redirect("/cycle/setup?step=1");
 }
 
 const checkInSchema = z.object({
@@ -307,7 +308,64 @@ export async function saveWeekly(fd: FormData) {
     create: { ...record, userId: u.id },
     update: record,
   });
+  await saveLookAgain(u.id, fd);
   revalidatePath("/reflect");
+}
+
+const lookSchema = z.object({
+  look_week: z.coerce.number().int().min(2).max(4),
+  look_real: z.enum(["YES", "CLOSE", "NO", ""]).default(""),
+  look_situation: text(1500),
+  look_feeling: text(1500),
+  look_working: z.enum(["YES", "PARTLY", "NOT_YET", ""]).default(""),
+  look_gap: z.enum(["SMALLER", "SAME", "BIGGER", ""]).default(""),
+  look_note: text(1500),
+  look_keep: text(1500),
+  look_routine: bool,
+});
+
+/**
+ * Weeks 2 to 4 of the 30 days come back to the week 1 answers. Week 2 can change the situation or
+ * the feeling; the first guess is kept. Week 4 can put what keeps it going onto My road.
+ */
+async function saveLookAgain(userId: string, fd: FormData) {
+  if (!fd.get("look_week")) return;
+  const d = lookSchema.safeParse(Object.fromEntries(fd));
+  if (!d.success) return;
+  const c = await db.developmentCycle.findFirst({ where: { userId, status: "ACTIVE" }, orderBy: { startDate: "desc" } });
+  if (!c) return;
+  const w = d.data;
+  const answers = JSON.parse(c.weekAnswers || "{}") as Record<string, Record<string, string | boolean>>;
+  const prev = answers[String(w.look_week)] ?? {};
+  const data: Record<string, string> = {};
+  if (w.look_week === 2) {
+    answers["2"] = { ...prev, real: w.look_real, note: w.look_note };
+    if (w.look_situation && w.look_situation !== c.situation) data.situation = w.look_situation;
+    if (w.look_feeling && w.look_feeling !== c.feeling) data.feeling = w.look_feeling;
+  } else if (w.look_week === 3) {
+    answers["3"] = { ...prev, working: w.look_working, gap: w.look_gap, note: w.look_note };
+  } else {
+    answers["4"] = { ...prev, keep: w.look_keep };
+    if (w.look_routine && w.look_keep) {
+      const title = w.look_keep.slice(0, 200), detail = "From my 30 days";
+      const exists = await db.commitment.findFirst({ where: { userId, active: true, title, detail } });
+      if (!exists) await db.commitment.create({ data: { userId, area: "ROUTINES", title, detail, cadence: "WEEKLY" } });
+    }
+  }
+  await db.developmentCycle.update({ where: { id: c.id }, data: { ...data, weekAnswers: JSON.stringify(answers) } });
+}
+
+/** "Not this week": the send prompt after a weekly reflection goes away for that week. */
+export async function skipWeekSend(fd: FormData) {
+  const u = await participant();
+  const week = String(fd.get("week") ?? "");
+  const c = await db.developmentCycle.findFirst({ where: { userId: u.id, status: { in: ["ACTIVE", "COMPLETED"] } }, orderBy: { startDate: "desc" } });
+  if (!c || !["2", "3", "4", "30"].includes(week)) return;
+  const answers = JSON.parse(c.weekAnswers || "{}") as Record<string, Record<string, unknown>>;
+  answers[week] = { ...(answers[week] ?? {}), skipSend: true };
+  await db.developmentCycle.update({ where: { id: c.id }, data: { weekAnswers: JSON.stringify(answers) } });
+  revalidatePath("/reflect");
+  revalidatePath("/cycle");
 }
 
 // ---------- Private journal (never shareable) ----------

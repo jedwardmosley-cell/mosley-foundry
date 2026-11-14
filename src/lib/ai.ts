@@ -362,3 +362,52 @@ export function parseCoachReply(raw: string): CoachReply | null {
     return null;
   }
 }
+
+// ---------- Week 1 setup: help finding words ----------
+
+export type SetupHelpField = "situation" | "feeling" | "oldResponse" | "newResponse" | "gap";
+
+const SETUP_ASK: Record<SetupHelpField, string> = {
+  situation: "The question is: when does this pattern happen? Offer 3 to 4 short ways to name the moment plainly (where, who is there, what just happened), built only from what they wrote.",
+  feeling:
+    "The question is: what do you feel in that moment? Offer 4 to 6 single words or short phrases a person might use for a feeling or a body sensation, as options to choose from. You never state what they feel, never label, interpret or diagnose it, and never use clinical, medical or mental-health terms. Plain everyday words only.",
+  oldResponse: "The question is: what do you usually do in that moment? Offer 3 to 4 short, plain, non-judging ways to describe the usual response, built only from what they wrote.",
+  newResponse: "The question is: what does the person you're becoming do instead? Offer 3 to 4 short responses that fit their FORGE statements: one small thing they could do in that moment. Each starts with a verb.",
+  gap: "The question is: what makes the new response hard, and what do you need to learn or let go of? Offer 3 to 4 short, honest ways to put it, built only from what they wrote.",
+};
+
+/** Options for the client to choose from and edit. Saves nothing, and never decides for the client. */
+export async function setupHelp(userId: string, field: SetupHelpField, written: string, earlier: Record<string, string>): Promise<string[] | null> {
+  const client = new Anthropic();
+  const context = await participantContext(userId);
+  const msg = await client.beta.messages.create({
+    model: AI_MODEL,
+    max_tokens: 1200,
+    thinking: { type: "adaptive" },
+    output_config: { effort: "low" },
+    betas: ["server-side-fallback-2026-07-01"],
+    fallbacks: "default",
+    system: [
+      "You help a participant in Both Hands on the Wheel, a personal leadership app by Jason Mosley, find their own words for a pattern they want to interrupt over 30 days. You offer options. The participant chooses and edits.",
+      "Use only what the participant has written and recorded. Do not invent facts, names or events.",
+      "Never label, interpret or diagnose a feeling or a person. Never use clinical, medical or mental-health terms.",
+      HOUSE_STYLE,
+      'Return only a JSON array of strings, like ["first option", "second option"]. No other text.',
+      "",
+      "PARTICIPANT RECORDS:",
+      context || "(none)",
+      "",
+      "THEIR ANSWERS SO FAR:",
+      Object.entries(earlier).filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`).join("\n") || "(none)",
+    ].join("\n"),
+    messages: [{ role: "user", content: `${SETUP_ASK[field]}\n\nWhat they wrote for this question: ${written || "(nothing yet)"}` }],
+  });
+  if (msg.stop_reason === "refusal") return null;
+  const raw = msg.content.filter((b) => b.type === "text").map((b) => (b as { text: string }).text).join("").trim();
+  try {
+    const arr = JSON.parse(raw.slice(raw.indexOf("["), raw.lastIndexOf("]") + 1));
+    return Array.isArray(arr) ? arr.filter((x) => typeof x === "string").map((x: string) => plainPunctuation(x).slice(0, 200)).slice(0, 6) : null;
+  } catch {
+    return null;
+  }
+}

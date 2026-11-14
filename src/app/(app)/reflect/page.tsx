@@ -1,7 +1,10 @@
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getContent } from "@/content";
-import { saveWeekly } from "@/app/actions/participant";
+import { saveWeekly, skipWeekSend } from "@/app/actions/participant";
+import { cyclePosition } from "@/lib/cycle";
+import { WEEK_QUESTIONS, REAL_CHOICES, WORKING_CHOICES, GAP_CHOICES, FIRST_GUESS, weekMessage } from "@/content/weekOne";
+import { ShareSend } from "@/components/ShareSend";
 import { mondayOf, fmt } from "@/lib/dates";
 import { PageHeader, Card, Field, Privacy, Source } from "@/components/ui";
 import { Submit } from "@/components/Submit";
@@ -18,6 +21,26 @@ export default async function ReflectPage() {
     db.coachAssignment.findFirst({ where: { participantId: u.id, active: true } }),
     db.commitment.findMany({ where: { userId: u.id, active: true }, orderBy: { createdAt: "asc" } }),
   ]);
+  // Weeks 2 to 4 of the 30 days: the week 1 answers come back with the week's question.
+  const cycle = await db.developmentCycle.findFirst({ where: { userId: u.id, status: "ACTIVE" }, orderBy: { startDate: "desc" } });
+  const pos = cycle ? cyclePosition(cycle.startDate) : null;
+  const lookWeek = cycle?.setupDoneAt && pos && !pos.finished && pos.week >= 2 ? (pos.week as 2 | 3 | 4) : null;
+  const answers = JSON.parse(cycle?.weekAnswers || "{}") as Record<string, Record<string, string | boolean>>;
+  const thisWeek = lookWeek ? answers[String(lookWeek)] ?? null : null;
+  const first = JSON.parse(cycle?.firstGuess || "{}") as Record<string, string>;
+  const partner = cycle?.partnerId ? await db.relationship.findFirst({ where: { id: cycle.partnerId, ownerId: u.id, active: true } }) : null;
+  const sent = new Set((JSON.parse(cycle?.sharedLog || "[]") as { kind: string }[]).map((x) => x.kind));
+  const askSend = !!(lookWeek && thisWeek && partner && !thisWeek.skipSend && !sent.has(`week${lookWeek}`));
+  const seg = (name: string, choices: Record<string, string>, value?: string | boolean) => (
+    <div className="seg grid-cols-3">
+      {Object.entries(choices).map(([v, l]) => (
+        <label key={v} className="cursor-pointer">
+          <input type="radio" name={name} value={v} defaultChecked={value === v} className="peer sr-only" />
+          <span className="seg-opt !py-2.5 !text-[14px] peer-checked:bg-surface peer-checked:text-heading peer-checked:shadow-[0_1px_2px_rgb(0_0_0/0.06),0_6px_14px_-8px_rgb(0_0_0/0.3)]">{l}</span>
+        </label>
+      ))}
+    </div>
+  );
   const held = new Set(JSON.parse(current?.held ?? "[]") as string[]);
   const weekly = pack.discipline.inventory.find((i) => i.label === "Weekly")?.text;
   return (
@@ -25,9 +48,50 @@ export default async function ReflectPage() {
       <PageHeader eyebrow={`Week of ${fmt(weekOf, { month: "long", day: "numeric" })}`} title="Look back at your week and plan the next one">
         {weekly ?? "One appointment at the start of the week to decide what matters, and one at the end to look back."}
       </PageHeader>
+      {askSend && partner && cycle && lookWeek && (
+        <Card className="mb-5">
+          <h2 className="font-serif text-[24px] leading-tight text-heading">Send this to {partner.name.split(" ")[0]}?</h2>
+          <p className="mt-3 rounded-2xl bg-ink/[0.04] px-4 py-3 text-[15px]">{weekMessage(lookWeek, thisWeek as Record<string, string>, cycle.newResponse)}</p>
+          <div className="mt-4 flex items-center gap-5">
+            <ShareSend message={weekMessage(lookWeek, thisWeek as Record<string, string>, cycle.newResponse)} to={partner.id} email={partner.email} kind={`week${lookWeek}` as "week2" | "week3" | "week4"} label="Send" />
+            <form action={skipWeekSend}><input type="hidden" name="week" value={lookWeek} /><button className="text-[15px] btn-link">Not this week</button></form>
+          </div>
+        </Card>
+      )}
       <Card>
         <form action={saveWeekly} className="space-y-4">
           <input type="hidden" name="weekOf" value={weekOf} />
+          {lookWeek && cycle && (
+            <section className="space-y-3 border-b border-line/70 pb-6">
+              <input type="hidden" name="look_week" value={lookWeek} />
+              <p className="section-label">{WEEK_QUESTIONS[lookWeek].title} · look again</p>
+              <h2 className="font-serif text-[24px] leading-tight text-heading">{WEEK_QUESTIONS[lookWeek].question}</h2>
+              {lookWeek === 2 && (
+                <>
+                  <label className="block"><span className="text-xs text-ink-mute">{first.situation ? `${FIRST_GUESS} · ` : ""}The situation</span><textarea name="look_situation" defaultValue={cycle.situation} className="textarea mt-1 !min-h-[64px]" maxLength={1500} /></label>
+                  <label className="block"><span className="text-xs text-ink-mute">{first.feeling ? `${FIRST_GUESS} · ` : ""}The feeling</span><textarea name="look_feeling" defaultValue={cycle.feeling} className="textarea mt-1 !min-h-[64px]" maxLength={1500} /></label>
+                  {seg("look_real", REAL_CHOICES, thisWeek?.real)}
+                  <p className="text-xs text-ink-mute">Change the words above if it was something else. Your first guess is kept.</p>
+                </>
+              )}
+              {lookWeek === 3 && (
+                <>
+                  <p className="rounded-2xl bg-ink/[0.04] px-4 py-3 text-[15px]"><span className="block text-xs text-ink-mute">My new response</span>{cycle.newResponse}</p>
+                  <p className="section-label">Working?</p>{seg("look_working", WORKING_CHOICES, thisWeek?.working)}
+                  <p className="rounded-2xl bg-ink/[0.04] px-4 py-3 text-[15px]"><span className="block text-xs text-ink-mute">The gap</span>{cycle.gap}</p>
+                  <p className="section-label">The gap is</p>{seg("look_gap", GAP_CHOICES, thisWeek?.gap)}
+                  <textarea name="look_note" aria-label="Note" placeholder="Anything to add? (optional)" defaultValue={String(thisWeek?.note ?? "")} className="textarea !min-h-[64px]" maxLength={1500} />
+                </>
+              )}
+              {lookWeek === 4 && (
+                <>
+                  {cycle.plan && <p className="font-serif text-[18px] leading-snug text-heading">{cycle.plan}</p>}
+                  <textarea name="look_keep" aria-label="What keeps this going" placeholder="A routine, a person, a reminder, a place..." defaultValue={String(thisWeek?.keep ?? "")} className="textarea !min-h-[80px]" maxLength={1500} />
+                  <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="look_routine" className="h-4 w-4 accent-navy" /> Put it on My road as a weekly routine</label>
+                </>
+              )}
+            </section>
+          )}
           <fieldset>
             <legend className="label">Did I do what I said I was going to do?</legend>
             <div className="flex flex-wrap gap-4">

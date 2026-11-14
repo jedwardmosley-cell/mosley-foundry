@@ -7,7 +7,7 @@ import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { parse } from "@/lib/validation";
 import { addDays } from "@/lib/dates";
-import { aiAvailable, generateReply, draftField, coachIdentityLine, type AiMode, type CoachReply } from "@/lib/ai";
+import { aiAvailable, generateReply, draftField, coachIdentityLine, setupHelp, type AiMode, type CoachReply } from "@/lib/ai";
 
 export type ChatState = { error?: string } | undefined;
 
@@ -95,6 +95,26 @@ export async function coachLine(field: string, written: string): Promise<CoachRe
   try {
     const r = await coachIdentityLine(u.id, field as (typeof LINE_FIELDS)[number], String(written ?? "").slice(0, 1500));
     return r ?? { error: "No answer this time. Try again in a moment." };
+  } catch (err) {
+    if (err instanceof Anthropic.RateLimitError) return { error: "The AI is busy right now. Try again in a minute." };
+    if (err instanceof Anthropic.APIError) return { error: "The AI service could not answer right now." };
+    throw err;
+  }
+}
+
+const SETUP_FIELDS = ["situation", "feeling", "oldResponse", "newResponse", "gap"] as const;
+
+/** Help finding words on a week 1 setup screen. Returns options to choose from. Saves nothing. */
+export async function setupWords(field: string, written: string): Promise<{ options: string[] } | { error: string }> {
+  const u = await requireUser("PARTICIPANT");
+  if (!(SETUP_FIELDS as readonly string[]).includes(field)) return { error: "Unknown field." };
+  if (!aiAvailable()) return { error: "The AI companion is not turned on for this site yet." };
+  const profile = await db.profile.findUnique({ where: { userId: u.id } });
+  if (profile && !profile.aiEnabled) return { error: "You turned the AI companion off in Settings." };
+  const c = await db.developmentCycle.findFirst({ where: { userId: u.id, status: "ACTIVE" }, select: { situation: true, feeling: true, oldResponse: true, newResponse: true, gap: true } });
+  try {
+    const options = await setupHelp(u.id, field as (typeof SETUP_FIELDS)[number], String(written ?? "").slice(0, 1500), c ?? {});
+    return options?.length ? { options } : { error: "No options this time. Try writing a few words first." };
   } catch (err) {
     if (err instanceof Anthropic.RateLimitError) return { error: "The AI is busy right now. Try again in a minute." };
     if (err instanceof Anthropic.APIError) return { error: "The AI service could not answer right now." };

@@ -11,6 +11,7 @@ import { ONE_MOVE, CYCLE_FOCUS, CHECKIN_TAGS, BLUEPRINT_PICKS, RELATIONSHIP_PURP
 import { GUIDE_STATUS, CLIENT_GUIDE } from "./guide";
 import { SEGMENTS, NIRS_WEEKS, DAY30_DECISIONS, SEASON_DECISIONS } from "./program";
 import { todayHeadline } from "@/lib/todayHeadline";
+import { WEEK_ONE_STATUS, SETUP_STEPS, WHO_FINDS_OUT, WEEK_QUESTIONS, AI_FEELING_NOTE, buildPlan, shareMessage, menteeMessage, weekMessage, dayThirtyMessage } from "./weekOne";
 
 export type ReviewGroup = { label: string; items: string[] };
 export type ReviewSet = { key: string; title: string; where: string; file: string; draft: boolean; groups: ReviewGroup[] };
@@ -69,6 +70,24 @@ export function reviewSets(): ReviewSet[] {
     { key: "blueprint", title: "My road picks", where: "My road, add to an area", file: "src/content/options.ts", draft: anyDraft(BLUEPRINT_PICKS), groups: lists(BLUEPRINT_PICKS) },
     { key: "people", title: "Relationship purposes", where: "People", file: "src/content/options.ts", draft: anyDraft(RELATIONSHIP_PURPOSE), groups: lists(RELATIONSHIP_PURPOSE) },
     { key: "tags", title: "Check-in tags", where: "Today, add detail", file: "src/content/options.ts", draft: CHECKIN_TAGS.status === "draft", groups: [{ label: "Where?", items: CHECKIN_TAGS.options }] },
+    {
+      key: "weekone", title: "30 days: week 1 setup and who finds out", where: "30 days, week 1 setup, the weekly reflection and day 30", file: "src/content/weekOne.ts", draft: WEEK_ONE_STATUS === "draft",
+      groups: [
+        { label: "The five questions", items: SETUP_STEPS.map((x) => `${x.label}: ${x.question} ${x.hint}`) },
+        { label: "Help me with this, on the feeling", items: [AI_FEELING_NOTE] },
+        { label: "Who finds out?", items: [WHO_FINDS_OUT.title, WHO_FINDS_OUT.hint, `When My people is empty: ${WHO_FINDS_OUT.empty} ${WHO_FINDS_OUT.emptyHint}`] },
+        { label: "Weeks 2 to 4", items: Object.values(WEEK_QUESTIONS).map((w) => `${w.title}: ${w.question}`) },
+        { label: "Messages, with an example", items: [
+          buildPlan({ situation: "When someone pushes back on my decision in a meeting", feeling: "Heat in my chest", newResponse: "Pause and ask one question before I answer" }),
+          shareMessage({ situation: "When someone pushes back on my decision in a meeting", newResponse: "Pause and ask one question before I answer" }),
+          menteeMessage("When someone pushes back on my decision, I will pause and ask one question first."),
+          weekMessage(2, { real: "YES" }, "Pause and ask one question before I answer"),
+          weekMessage(3, { working: "PARTLY", gap: "SMALLER" }, "Pause and ask one question before I answer"),
+          weekMessage(4, { keep: "A sticky note on my laptop" }, ""),
+          dayThirtyMessage("I am a manager my team trusts with bad news.", 24),
+        ] },
+      ],
+    },
     {
       key: "today", title: "Today headlines", where: "Today, top card", file: "src/lib/todayHeadline.ts", draft: true,
       groups: [{

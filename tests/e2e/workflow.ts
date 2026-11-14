@@ -44,6 +44,24 @@ const saveThroughReveal = async (page: Page, url: string, button = "Save who I a
   await dialog.waitFor();
   await Promise.all([page.waitForURL(url), dialog.locator('button:has-text("Save")').click()]);
 };
+/** Week 1 setup: five answers, the plan, then one person who finds out. Returns the plan text. */
+const doSetup = async (page: Page, who: string, newResponse = "Pause and ask one question before I answer") => {
+  await page.waitForURL(/\/cycle\/setup\?step=1$/);
+  const answers = ["When someone pushes back on my decision in a meeting", "Heat in my chest", "I defend the decision right away", newResponse, "Letting go of needing to look like I have the answer"];
+  for (let i = 0; i < 5; i++) {
+    await page.fill('textarea[name="value"]', answers[i]);
+    assert.ok(await page.locator("text=First guess").count(), "every answer is a first guess");
+    await Promise.all([page.waitForURL(i < 4 ? new RegExp(`step=${i + 2}$`) : /step=plan$/), page.click('button:has-text("Next")')]);
+  }
+  const plan = await page.inputValue('textarea[name="plan"]');
+  assert.equal(plan, `When someone pushes back on my decision in a meeting and I feel heat in my chest, I will ${newResponse[0].toLowerCase()}${newResponse.slice(1)}.`);
+  await Promise.all([page.waitForURL(/step=share$/), page.click('button:has-text("Looks right")')]);
+  await page.locator("label", { hasText: who }).first().click();
+  const msg = await page.inputValue("textarea");
+  assert.ok(msg.endsWith("Check on me.") && !/heat|defend|letting go/i.test(msg), "only the situation and the new response by default");
+  await Promise.all([page.waitForURL("**/dashboard?setup=done"), page.click('button:has-text("Send by text or email")')]);
+  return plan;
+};
 const submitAndWait = async (page: Page, selector: string) => {
   await Promise.all([page.waitForLoadState("networkidle"), page.click(selector)]);
   await page.waitForTimeout(250);
@@ -153,12 +171,22 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.screenshot({ path: `${shots}/05-network.png`, fullPage: true });
   });
 
-  await check("6. start a 30-day development cycle", async () => {
+  await check("6. start a 30-day development cycle: week 1 setup, then who finds out", async () => {
+    // the phone's share sheet, stubbed: the message is what the client would send
+    await page.addInitScript(() => { (navigator as unknown as { share: (d: { text: string }) => Promise<void> }).share = async () => {}; });
     await page.goto(`${BASE}/cycle/new`);
-    await page.locator('button:has-text("Pausing before I answer when a decision gets challenged")').click();
-    assert.match(await page.inputValue('input[name="focus"]'), /Pausing before I answer/);
-    await page.fill('input[name="focus"]', "Pause before I answer a challenge");
-    await Promise.all([page.waitForURL("**/cycle"), page.click('button:has-text("Start the cycle")')]);
+    assert.equal(await page.locator('input[name="focus"][type="text"]').count(), 0, "the behavior box is gone: week 1 setup names it");
+    await page.click('button:has-text("Start the cycle")');
+    const plan = await doSetup(page, "Jamie Cole");
+    await page.waitForSelector("text=Week 1 setup is done");
+    const c = await db.developmentCycle.findFirstOrThrow({ where: { user: { email }, status: "ACTIVE" } });
+    assert.equal(c.plan, plan);
+    assert.equal(c.focus, "Pause and ask one question before I answer", "the coach's Practice view sees the new response, never the feeling");
+    assert.ok(c.setupDoneAt && c.partnerId, "setup is done once someone finds out");
+    assert.equal(JSON.parse(c.firstGuess).feeling, "Heat in my chest");
+    assert.equal(c.shareFeeling || c.shareOld || c.shareGap, false);
+    await page.waitForSelector(`text=${plan}`);
+    await page.goto(`${BASE}/cycle`);
     await page.waitForSelector("text=Day 1 of 30");
     // the journey bar follows: all four steps done, and the 30 days under way
     await page.goto(`${BASE}/blueprint`);
@@ -288,8 +316,8 @@ const submitAndWait = async (page: Page, selector: string) => {
     const added = await db.commitment.findFirstOrThrow({ where: { userId: me.id, detail: "Who I am" } });
     assert.equal(added.cadence, "WEEKLY");
     await page.goto(`${BASE}/cycle/new`);
-    await page.locator('button:has-text("I close every open commitment by Friday noon.")').click();
-    assert.equal(await page.inputValue('input[name="focus"]'), "I close every open commitment by Friday noon.");
+    assert.equal(await page.inputValue('input[name="focus"]'), "I close every open commitment by Friday noon.", "the behavior from My road starts the new response");
+    await page.waitForSelector("text=You'll start from: I close every open commitment by Friday noon.");
     await page.goto(`${BASE}/dashboard`);
     await page.waitForSelector("text=Showed up as who I am?");
     await page.waitForSelector('input[placeholder="Where did you meet your standard today, and where did you fall short?"]', { state: "attached" });
@@ -374,15 +402,33 @@ const submitAndWait = async (page: Page, selector: string) => {
     await g.waitForSelector("text=I am a manager measured by what my team can do.");
     // 4. the 30 days, about the same role
     await Promise.all([g.waitForURL(/\/cycle\/new\?pillar=E/), g.click('a:has-text("start my 30 days")')]);
+    // the phone's share sheet, stubbed, and loaded with a full page load so it is in place for week 1 setup
+    await g.addInitScript(() => { (navigator as unknown as { share: () => Promise<void> }).share = async () => {}; });
+    await g.reload();
     assert.equal(await g.inputValue('input[name="role"]'), "manager");
-    await g.fill('input[name="focus"]', "Pause before I answer");
     // month 1 of a season, started 29 days ago, so today is day 30 and the review is open
     await g.locator('input[name="season"][value="new"]').check();
     await g.locator('summary:has-text("Structure and start date")').click();
     const ago = new Date(Date.now() - 29 * 86400000);
     await g.fill('input[name="startDate"]', `${ago.getFullYear()}-${String(ago.getMonth() + 1).padStart(2, "0")}-${String(ago.getDate()).padStart(2, "0")}`);
-    await Promise.all([g.waitForURL("**/cycle"), g.click('button:has-text("Start the cycle")')]);
+    await g.click('button:has-text("Start the cycle")');
+    await doSetup(g, "Pat Partner", "Pause before I answer");
+    await g.goto(`${BASE}/cycle`);
     await g.waitForSelector("text=Season, month 1 of 3");
+    // day 30 of a set-up cycle: week 4 asks what keeps it going, and can put it on My road
+    await g.goto(`${BASE}/reflect`);
+    await g.waitForSelector("text=What keeps this going after day 30?");
+    await g.fill('textarea[name="look_keep"]', "A sticky note on my laptop");
+    await g.locator('input[name="look_routine"]').check();
+    await Promise.all([g.waitForLoadState("networkidle"), g.click('button:has-text("Save this week")')]);
+    await g.waitForSelector("text=Send this to Pat?");
+    const gid = (await db.user.findFirstOrThrow({ where: { name: "Guided Driver (E2E)" }, orderBy: { createdAt: "desc" } })).id;
+    assert.ok(await db.commitment.findFirst({ where: { userId: gid, title: "A sticky note on my laptop", detail: "From my 30 days" } }), "week 4 puts it on My road");
+    await g.click('button:has-text("Not this week")');
+    await g.waitForSelector("text=Send this to Pat?", { state: "detached" });
+    // day 30 offers to send the statement and the result to the same person
+    await g.goto(`${BASE}/cycle`);
+    await g.waitForSelector("text=Send your 30 days to Pat?");
     await g.goto(`${BASE}/start`);
     await g.waitForSelector("text=You are set up");
     await g.goto(`${BASE}/dashboard`);
@@ -403,7 +449,8 @@ const submitAndWait = async (page: Page, selector: string) => {
     await Promise.all([g.waitForURL(/\/cycle\/new\?season=continue/), g.click('button:has-text("Complete the cycle")')]);
     await g.waitForSelector("text=Month 2 of 3 in my season");
     assert.equal(await g.inputValue('input[name="focus"]'), "Pause before I answer", "same pillar carries the behavior over");
-    await Promise.all([g.waitForURL("**/cycle"), g.click('button:has-text("Start the cycle")')]);
+    await Promise.all([g.waitForURL(/\/cycle\/setup\?step=1$/), g.click('button:has-text("Start the cycle")')]);
+    await g.goto(`${BASE}/cycle`);
     await g.waitForSelector("text=Season, month 2 of 3");
     const cycles = await db.developmentCycle.findMany({ where: { userId: guided.id }, orderBy: { createdAt: "asc" } });
     assert.deepEqual(cycles.map((c) => c.seasonMonth), [1, 2]);
@@ -641,6 +688,9 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.ok(!j?.url().endsWith("/journal"), "coach redirected away from journal");
     const r = await page.goto(`${BASE}/coach/${lena.id}`);
     assert.equal(r?.status(), 404, "unassigned participant hidden");
+    // the 30-day plan and its answers are private until the client shares them
+    await page.goto(`${BASE}/coach/${dana.id}`);
+    await page.waitForSelector("text=Not shared: my 30-day plan");
   });
 
   await check("10b2. coach adds a client directly; the client signs in; nothing is shared by default", async () => {

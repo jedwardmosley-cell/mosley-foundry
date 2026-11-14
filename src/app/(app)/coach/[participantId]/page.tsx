@@ -84,6 +84,20 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
       </div>
 
       <Card className="mt-5">
+        <p className="eyebrow">30-day plan</p>
+        {s.has("PLAN") && v.plan ? (
+          v.plan.plan || v.plan.situation ? (
+            <div className="mt-3 space-y-2 text-[15px]">
+              {v.plan.plan && <p className="font-serif text-lg leading-snug">{v.plan.plan}</p>}
+              {[["The moment", v.plan.situation], ["The feeling", v.plan.feeling], ["What I usually do", v.plan.oldResponse], ["What I'll do instead", v.plan.newResponse], ["What makes it hard", v.plan.gap]].filter(([, t]) => t).map(([l, t]) => (
+                <p key={l}><span className="text-ink-mute">{l}: </span>{t}</p>
+              ))}
+            </div>
+          ) : <p className="mt-2 text-sm text-ink-mute">No plan yet.</p>
+        ) : <NotShared scope="PLAN" />}
+      </Card>
+
+      <Card className="mt-5">
         <p className="eyebrow">Evidence of practice</p>
         {s.has("PRACTICE") ? (
           <>
