@@ -52,7 +52,7 @@ export default async function LibraryPage() {
         ))}
       </div>
 
-      <h2 className="h2 mt-10 mb-1">Ed&apos;s Lessons</h2>
+      <h2 className="h2 mt-10 mb-1">Lessons from the road</h2>
       <p className="muted mb-3 text-[15px]">Key moments from the book, two layers deep.</p>
       <div className="space-y-3">
         {pack.edsLessons.map((e) => (

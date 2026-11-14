@@ -810,6 +810,12 @@ const submitAndWait = async (page: Page, selector: string) => {
       const text = await dp.locator("main").innerText();
       assert.ok(!/\bdraft\b/i.test(text), `no Draft mark on ${path}`);
     }
+    // Ed's name and Ed's mentor never appear (the author's request)
+    for (const path of ["/library", "/network", "/assessment"]) {
+      await dp.goto(`${BASE}${path}`);
+      for (const d of await dp.locator("details").all()) await d.evaluate((e) => ((e as HTMLDetailsElement).open = true));
+      assert.ok(!/\bEd\b|Ed's/.test(await dp.locator("main").innerText()), `no Ed on ${path}`);
+    }
     await dc.close();
     await page.goto(`${BASE}/admin/content`);
     await page.waitForSelector("text=Identity examples");

@@ -46,7 +46,7 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
 
   // Exercise menu: workbook and book items by stable reference.
   const menu = [
-    ...pack.edsLessons.map((e, i) => ({ ref: `ed:${i}`, title: `Ed's Lessons: ${e.title}`, text: [e.setup, ...e.prompts].filter(Boolean).join("\n\n") })),
+    ...pack.edsLessons.map((e, i) => ({ ref: `ed:${i}`, title: `Lessons from the road: ${e.title}`, text: [e.setup, ...e.prompts].filter(Boolean).join("\n\n") })),
     ...pack.jaysJourney.map((j, i) => ({ ref: `jay:${i}`, title: `Jay's Journey: ${j.title}`, text: [j.setup, ...j.prompts].filter(Boolean).join("\n\n") })),
     ...pack.chapters.filter((c) => c.roadTest.length).map((c) => ({ ref: `chapter:${c.number}:roadTest`, title: `Road Test: ${c.title}`, text: c.roadTest.join("\n\n") })),
     ...SEGMENTS.map((x) => ({ ref: `segment:${x.key}`, title: `Segment ${x.key} practice: ${x.title}`, text: x.practice.text })),

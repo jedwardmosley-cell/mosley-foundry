@@ -7,7 +7,7 @@ import { IDENTITY_EXERCISES } from "@/content/identity";
 export async function exerciseText(ref: string): Promise<{ title: string; text: string } | null> {
   const { pack } = await getContent();
   const [kind, a] = ref.split(":");
-  if (kind === "ed") { const e = pack.edsLessons[Number(a)]; return e ? { title: `Ed's Lessons: ${e.title}`, text: [e.setup, ...e.prompts].filter(Boolean).join("\n\n") } : null; }
+  if (kind === "ed") { const e = pack.edsLessons[Number(a)]; return e ? { title: `Lessons from the road: ${e.title}`, text: [e.setup, ...e.prompts].filter(Boolean).join("\n\n") } : null; }
   if (kind === "jay") { const j = pack.jaysJourney[Number(a)]; return j ? { title: `Jay's Journey: ${j.title}`, text: [j.setup, ...j.prompts].filter(Boolean).join("\n\n") } : null; }
   if (kind === "chapter") { const c = pack.chapters.find((x) => x.number === Number(a)); return c ? { title: `Road test: ${c.title}`, text: c.roadTest.join("\n\n") } : null; }
   if (kind === "identity") { const x = IDENTITY_EXERCISES[Number(a)]; return x ? { title: `Identity: ${x.title}`, text: x.text } : null; }

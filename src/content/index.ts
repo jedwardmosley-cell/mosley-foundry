@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { db } from "@/lib/db";
 import { publicPack } from "./public-pack";
+import { cleanPack, cleanEntrepreneur } from "./clean";
 import type { ContentPack, EntrepreneurPack, PillarKey } from "./types";
 
 type Loaded = { pack: ContentPack; entrepreneur: EntrepreneurPack | null };
@@ -43,7 +44,8 @@ export async function getContent(): Promise<Loaded> {
   if (cached && cached.stamp === stamp) return cached.value;
   const pack = readFile<ContentPack>("pack.json") ?? (await readDb<ContentPack>("pack"));
   const entrepreneur = readFile<EntrepreneurPack>("entrepreneur.json") ?? (await readDb<EntrepreneurPack>("entrepreneur"));
-  const value = { pack: pack ?? publicPack, entrepreneur };
+  // Ed's name and Ed's mentor are cleaned out of the book's text as it loads (the author's request).
+  const value = { pack: cleanPack(pack ?? publicPack), entrepreneur: entrepreneur ? cleanEntrepreneur(entrepreneur) : entrepreneur };
   cached = { stamp, value };
   return value;
 }
