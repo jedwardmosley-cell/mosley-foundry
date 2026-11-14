@@ -73,6 +73,7 @@ export default async function WeekOneSetup({ searchParams }: { searchParams: Pro
           )}
           <textarea id="value" name="value" defaultValue={cycle[s.field]} placeholder={s.placeholder} maxLength={1500} className="textarea mt-5 !min-h-[96px]" />
           <span className="chip mt-2">{FIRST_GUESS}</span>
+          {!!cycle.seasonMonth && cycle.seasonMonth > 1 && cycle[s.field] && <span className="ml-2 text-xs text-ink-mute">From last month. Change it if it&apos;s different now.</span>}
           {ai && <SetupWords field={s.field} note={s.field === "feeling" ? AI_FEELING_NOTE : undefined} />}
           <div className="mt-10 flex items-center justify-between">
             <Link href={back} className="text-[15px] btn-link">Back</Link>

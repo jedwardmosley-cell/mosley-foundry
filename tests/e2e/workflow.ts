@@ -450,6 +450,11 @@ const submitAndWait = async (page: Page, selector: string) => {
     await g.waitForSelector("text=Month 2 of 3 in my season");
     assert.equal(await g.inputValue('input[name="focus"]'), "Pause before I answer", "same pillar carries the behavior over");
     await Promise.all([g.waitForURL(/\/cycle\/setup\?step=1$/), g.click('button:has-text("Start the cycle")')]);
+    // month 2 starts from month 1's week 1 answers, to review and send again
+    assert.equal(await g.inputValue('textarea[name="value"]'), "When someone pushes back on my decision in a meeting");
+    await g.waitForSelector("text=From last month. Change it if it's different now.");
+    const m2 = await db.developmentCycle.findFirstOrThrow({ where: { userId: guided.id, seasonMonth: 2 } });
+    assert.ok(m2.plan && m2.partnerId && !m2.setupDoneAt, "the plan and the person carry over; setup is done when it is sent again");
     await g.goto(`${BASE}/cycle`);
     await g.waitForSelector("text=Season, month 2 of 3");
     const cycles = await db.developmentCycle.findMany({ where: { userId: guided.id }, orderBy: { createdAt: "asc" } });
