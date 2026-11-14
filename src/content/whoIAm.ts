@@ -15,7 +15,8 @@ export const WHO_HEADINGS = { role: "Which seat are you in?", kind: "How big a t
 /** The FORGE opening above the five letters. The first line is the author's; the rest is build-team draft. */
 export const FORGE_OPENING = {
   line: "You only ever rise to the level of who you believe you are.",
-  text: "Identity isn't a goal you check off. It's what your mind runs underneath every decision. FORGE breaks it into five parts: where you're going, what it looks like as you get closer, why you're going, the gap between where you are and where you'll be, and the emotional state it takes to be that person when you get there. Research on identity-based motivation, led by psychologist Daphna Oyserman, finds that people stick with actions that feel like \"me\" and drop the ones that don't. Get these five clear and everything you build after this has something real to stand on.",
+  /** Shown under the author's core idea from forge-source.md. Build-team draft. */
+  text: "Who you are isn't a goal you check off. It's what your mind runs underneath every decision, and FORGE breaks it into five parts: where you're going, what it looks like as you get closer, why you're going, the gap between where you are and where you'll be, and the emotional state it takes to be that person when you get there. Research on identity-based motivation, led by psychologist Daphna Oyserman, finds that people stick with actions that feel like \"me\" and drop the ones that don't.",
 };
 
 /** "This is about me as a ___." Ordered so the likeliest role for the pathway comes first. */

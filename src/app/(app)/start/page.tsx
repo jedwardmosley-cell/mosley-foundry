@@ -127,7 +127,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
           <form action={saveWhoIAm} className="space-y-6">
             <input type="hidden" name="next" value="/start?step=1&part=3" />
             <p className="text-sm text-ink-soft">Start with F. If you get stuck, save what you have and finish the rest later.</p>
-            <FiveSides profile={profile} pathway={pathway} role={role} level={identity?.level ?? ""} ai={ai} teach={forge?.cards ?? {}} rules={Object.fromEntries(pack.pillars.map((p) => [p.key, p.short]))} />
+            <FiveSides profile={profile} pathway={pathway} role={role} level={identity?.level ?? ""} ai={ai} opening={forge?.intro} teach={forge?.cards ?? {}} rules={Object.fromEntries(pack.pillars.map((p) => [p.key, p.short]))} />
             <Submit>Save and continue</Submit>
           </form>
         </Card>

@@ -16,8 +16,11 @@ export type ForgeCard = {
 };
 export type ForgeSource = {
   draft: boolean;
-  intro: { line: string; forge: string; parts: string };
+  /** Core idea: its first sentence is the line; the rest follows it. The forge: the heat and the hammer. */
+  intro: { line: string; core: string; forge: string; glance: string; parts: string };
   chapter: Partial<Record<PillarKey, { heading: string; paragraphs: string[] }>>;
+  /** The book's Selected sources, by group. */
+  bookSources: { group: string; items: string[] }[];
   cards: Partial<Record<PillarKey, ForgeCard>>;
 };
 
@@ -36,17 +39,31 @@ const paras = (s = "") => s.split(/\n\s*\n/).map((p) => p.replace(/\s*\n\s*/g, "
 const text = (s = "") => paras(s).join("\n\n");
 
 export function parseForgeSource(md: string): ForgeSource {
-  const top = sections(md, 1);
-  const titleKey = (prefix: string) => Object.keys(top).find((k) => k.startsWith(prefix)) ?? "";
-  const intro = sections(top[titleKey("Intro")] ?? "", 2);
+  // The author's text comes first. The app's notes and cards follow, each under its own top heading.
+  const cut = (h: string) => { const i = md.search(new RegExp(`^# ${h}\\s*$`, "m")); return i < 0 ? md.length : i; };
+  const appAt = Math.min(cut("App notes"), cut("Cards"));
+  const book = sections(md.slice(0, appAt), 2);
+  const app = md.slice(appAt);
+  const notes = sections(app.slice(0, Math.max(0, cut("Cards") - appAt)), 2);
+  const leaveOut = (notes["Leave out"] ?? "").split("\n").filter((l) => l.trim().startsWith("- ")).map((l) => l.trim().slice(2).toLowerCase());
+  const keep = (p: string) => !leaveOut.some((w) => p.toLowerCase().includes(w));
+
   const chapter: ForgeSource["chapter"] = {};
-  for (const [k, body] of Object.entries(sections(top[titleKey("Chapter 9")] ?? "", 2))) {
-    const h = sections(body, 3);
-    const heading = Object.keys(h)[0];
-    if (heading && /^[FORGE]$/.test(k)) chapter[k as PillarKey] = { heading, paragraphs: paras(h[heading]) };
+  const ORDER: PillarKey[] = ["F", "O", "R", "G", "E"];
+  for (const [heading, body] of Object.entries(book)) {
+    const m = heading.match(/^Rule (\d)\b/);
+    if (m && ORDER[Number(m[1]) - 1]) chapter[ORDER[Number(m[1]) - 1]] = { heading, paragraphs: paras(body).filter(keep) };
   }
+  const core = paras(book["Core idea"]);
+  const firstSentence = core[0]?.match(/^[^.!?]+[.!?]/)?.[0] ?? "";
+  const glanceKey = Object.keys(book).find((k) => /^FORGE at a Glance/i.test(k)) ?? "";
+  const glance = paras(book[glanceKey]);
+  const sourcesKey = Object.keys(book).find((k) => /^Selected sources/i.test(k)) ?? "";
+  const bookSources = Object.entries(sections(book[sourcesKey] ?? "", 3)).map(([group, body]) => ({ group, items: paras(body) }));
+  const lastE = chapter.E?.paragraphs.at(-1) ?? "";
+
   const cards: ForgeSource["cards"] = {};
-  for (const [k, body] of Object.entries(sections(top[titleKey("Cards")] ?? "", 2))) {
+  for (const [k, body] of Object.entries(sections(app.slice(Math.max(0, cut("Cards") - appAt)), 2))) {
     if (!/^[FORGE]$/.test(k)) continue;
     const c = sections(body, 3);
     const beforeLines = (c["Before you write"] ?? "").split("\n").map((l) => l.trim()).filter(Boolean);
@@ -65,9 +82,16 @@ export function parseForgeSource(md: string): ForgeSource {
     };
   }
   return {
-    draft: !/^Status:\s*approved/im.test(md),
-    intro: { line: text(intro["Line"]), forge: text(intro["Forge"]), parts: text(intro["Parts"]) },
+    draft: !/^Status:\s*approved/im.test(app),
+    intro: {
+      line: firstSentence,
+      core: [core[0]?.slice(firstSentence.length).trim(), ...core.slice(1)].filter(Boolean).join("\n\n"),
+      forge: text(book["The forge"]),
+      glance: glance.filter((p) => !/^[FORGE], /.test(p)).join(" "),
+      parts: /Five parts of one driver/.test(lastE) ? "Five parts of one driver." : "",
+    },
     chapter,
+    bookSources,
     cards,
   };
 }
