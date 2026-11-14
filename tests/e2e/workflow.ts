@@ -96,6 +96,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.fill('textarea[name="reflE"]', "When my numbers get questioned in front of my boss, I get sharp.");
     await page.screenshot({ path: `${shots}/02-assessment.png`, fullPage: false });
     await Promise.all([page.waitForURL(/\/assessment\/[a-z0-9]+$/), page.click('button:has-text("See my profile")')]);
+    assert.ok(!/in the wild/i.test(await page.locator("main").innerText()), "FORGE in the Wild is retired");
     assessmentUrl = page.url();
     await page.waitForSelector("text=16 / 25");
     await page.screenshot({ path: `${shots}/03-profile.png`, fullPage: true });

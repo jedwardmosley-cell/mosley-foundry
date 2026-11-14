@@ -26,9 +26,6 @@ export default async function AssessmentResult({ params, searchParams }: { param
   const patterns = a.instrument === "FORGE_ENTREPRENEUR" ? entrepreneurPatterns(entrepreneur, s) : [];
   const words = JSON.parse(a.oneWords || "{}") as Record<string, string>;
   const revised = a.revisedF != null;
-  const nearest = pack.profiles
-    .map((p) => ({ p, d: PILLAR_KEYS.reduce((n, k) => n + Math.abs((p.scores[k] ?? 3) - s[k]), 0) }))
-    .sort((x, y) => x.d - y.d)[0];
 
   return (
     <>
@@ -96,16 +93,6 @@ export default async function AssessmentResult({ params, searchParams }: { param
         <p className="mt-2 text-[15px] muted">Your scores show where you are. Who's behind the wheel is where you claim who you are, and how big a change you are making. Your scores do not decide it.</p>
       </a>
 
-      {nearest && pack.profiles.length > 0 && (
-        <Card className="mt-5">
-          <p className="eyebrow">FORGE in the Wild · closest pattern</p>
-          <h2 className="h2 mt-1">{nearest.p.name}</h2>
-          <p className="muted text-sm">{nearest.p.subtitle} · a fictitious composite drawn from the book</p>
-          <p className="mt-3 text-sm muted">{PILLAR_KEYS.map((k) => `${k} ${nearest.p.scores[k]}`).join(" · ")}</p>
-          {nearest.p.designedDiscipline && <p className="mt-3 text-[15px] leading-relaxed"><span className="font-medium">Designed discipline factor. </span>{nearest.p.designedDiscipline}</p>}
-          {nearest.p.lesson && <p className="mt-3 text-[15px] leading-relaxed"><span className="font-medium">The lesson. </span>{nearest.p.lesson}</p>}
-        </Card>
-      )}
 
       <Card className="mt-5">
         <p className="eyebrow">Verify</p>
