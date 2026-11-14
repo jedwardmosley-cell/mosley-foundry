@@ -28,7 +28,15 @@ export default async function ContentReview() {
       ...src.bookSources.map((g) => ({ label: `Selected sources: ${g.group}`, items: g.items })),
     ] : [{ label: "Not installed", items: ["Upload forge-source.md at /setup to see it here."] }],
   };
-  const sets = [bookSet, forgeSet, ...reviewSets()];
+  const g = src?.guide;
+  const guideSet: ReviewSet = {
+    key: "guide", title: g?.title ?? "The FORGE Framework guide", where: "Library, each rule's full guide, and What this means on Who's behind the wheel", file: "forge-source.md (uploaded at /setup)", draft: src?.draft ?? true,
+    groups: g
+      ? [...g.intro, ...(["F", "O", "R", "G", "E"] as const).map((k) => g.rules[k]).filter((r) => !!r).map((r) => ({ heading: r!.heading, md: `${r!.md}\n\nIn practice: ${r!.practice}` })), ...g.outro]
+          .map((x) => ({ label: x.heading, items: x.md.split(/\n{2,}/).map((p) => p.replace(/\*\*|\*/g, "")) }))
+      : [{ label: "Not installed", items: ["Upload forge-source.md at /setup to see it here."] }],
+  };
+  const sets = [guideSet, bookSet, forgeSet, ...reviewSets()];
   const drafts = sets.filter((s) => s.draft);
   return (
     <>

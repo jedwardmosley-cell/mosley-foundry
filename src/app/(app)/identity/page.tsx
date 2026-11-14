@@ -72,7 +72,7 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
 
         <Card className="scroll-mt-20" id="forge">
           <p className="section-title"><span className="step-n">3</span>{WHO_HEADINGS.forge}</p>
-          <FiveSides profile={profile} pathway={pathway} role={role} level={level} ai={ai} teach={forge?.cards ?? {}} rules={rules} opening={forge?.intro} />
+          <FiveSides profile={profile} pathway={pathway} role={role} level={level} ai={ai} teach={forge?.cards ?? {}} rules={rules} opening={forge?.intro} guide={forge?.guide?.rules ?? {}} />
         </Card>
 
         <Card>

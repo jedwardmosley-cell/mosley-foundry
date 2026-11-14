@@ -1,6 +1,7 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { getContent } from "@/content";
+import { getForgeSource } from "@/content/forgeSource";
 import { SEGMENTS, PATHWAYS } from "@/content/program";
 import { db } from "./db";
 import { scoresFrom } from "./forge";
@@ -18,15 +19,22 @@ export const aiAvailable = () => Boolean(process.env.ANTHROPIC_API_KEY);
 
 export type Chunk = { id: string; ref: string; text: string };
 
-let chunkCache: { pack: unknown; chunks: Chunk[] } | null = null;
+let chunkCache: { pack: unknown; guide: unknown; chunks: Chunk[] } | null = null;
 
 /** Approved sources: the licensed pack (book + workbook), the entrepreneur worksheet, and the program brief. */
 export async function buildChunks(): Promise<Chunk[]> {
   const { pack, entrepreneur } = await getContent();
-  if (chunkCache && chunkCache.pack === pack) return chunkCache.chunks;
+  const guide = (await getForgeSource())?.guide ?? null;
+  if (chunkCache && chunkCache.pack === pack && chunkCache.guide === guide) return chunkCache.chunks;
   const out: Chunk[] = [];
   const add = (ref: string, text: string) => text.trim() && out.push({ id: `S${out.length + 1}`, ref, text });
 
+  // The author's teaching guide, The FORGE Framework: Five Rules for the Road.
+  const plain = (md: string) => md.replace(/\*\*|\*/g, "").replace(/^\|.*$/gm, (row) => row.replace(/\|/g, " ").trim());
+  if (guide) {
+    for (const s of [...guide.intro, ...guide.outro]) add(`${guide.title}: ${s.heading}`, plain(s.md));
+    for (const r of Object.values(guide.rules)) if (r) add(`${guide.title}: ${r.heading}`, plain(r.md) + (r.practice ? ` In practice: ${r.practice}` : ""));
+  }
   for (const p of pack.pillars) {
     add(`FORGE ${p.key}: ${p.name}`, `${p.name}. ${p.short} ${p.definition} ` + p.anchors.map((a) => `${a.score} ${a.level}: ${a.text}`).join(" "));
     add(`FORGE ${p.key}: if this is your lowest score`, p.lowest.map((g) => `Score ${g.min} to ${g.max}: ${g.text}`).join(" "));
@@ -52,7 +60,7 @@ export async function buildChunks(): Promise<Chunk[]> {
     for (const pt of entrepreneur.patterns) add(`FORGE for entrepreneurs: ${pt.title}`, pt.text.join(" "));
     add(`FORGE Ahead session: building a business`, entrepreneur.owner.fourBuilds.map((b) => `${b.label}: ${b.detail}. ${b.signal}`).join(" ") + " " + entrepreneur.owner.howToBuild + " " + entrepreneur.owner.sellableTest);
   }
-  chunkCache = { pack, chunks: out };
+  chunkCache = { pack, guide, chunks: out };
   return out;
 }
 

@@ -6,6 +6,7 @@ import { FORGE_LINES } from "@/content/forgeLines";
 import { BOOK } from "@/content/book";
 import type { PillarKey } from "@/content/types";
 import { PillarMark } from "@/components/ui";
+import { GuideText } from "@/components/GuideText";
 
 export const metadata = { title: "FORGE guide" };
 
@@ -22,6 +23,8 @@ export default async function ForgeGuide({ params }: { params: Promise<{ letter:
   const src = await getForgeSource();
   const card = src?.cards[key];
   const chapter = src?.chapter[key];
+  // The author's teaching guide is the guide. The chapter text is the fallback when the guide is missing.
+  const taught = src?.guide?.rules[key];
   return (
     <article className="max-w-2xl">
       <Link href={`/identity#${key.toLowerCase()}`} className="text-sm btn-link">Back to {line.label}</Link>
@@ -32,7 +35,11 @@ export default async function ForgeGuide({ params }: { params: Promise<{ letter:
         {card?.rule && <p className="mt-2 font-serif text-[22px] text-ink-soft">{card.rule}</p>}
       </header>
 
-      {chapter && (
+      {taught ? (
+        <section className="mt-10">
+          <GuideText md={taught.md} />
+        </section>
+      ) : chapter && (
         <section className="mt-10">
           <h2 className="section-label">From Chapter 9, The Rules of the Road</h2>
           <div className="mt-3 space-y-4 font-serif text-[18px] leading-[1.6] text-heading">
@@ -53,17 +60,17 @@ export default async function ForgeGuide({ params }: { params: Promise<{ letter:
             <h2 className="section-label">How it connects</h2>
             <p className="mt-2 text-[16px] leading-relaxed">{card.connects}</p>
           </section>
-          {card.roadTest && (
+          {(taught?.practice || card.roadTest) && (
             <section className="mt-10 rounded-[22px] bg-ink/[0.04] px-5 py-5">
-              <h2 className="section-label">Road test</h2>
-              <p className="mt-2 text-[16px] leading-relaxed">{card.roadTest}</p>
+              <h2 className="section-label">In practice</h2>
+              <p className="mt-2 text-[16px] leading-relaxed">{taught?.practice ? taught.practice[0].toUpperCase() + taught.practice.slice(1) : card.roadTest}</p>
             </section>
           )}
         </>
       )}
 
       <p className="mt-12 border-t border-line/60 pt-6 text-[15px] text-ink-soft">
-        The full story is in <a href={BOOK.url} target="_blank" rel="noopener noreferrer" className="btn-link">Both Hands on the Wheel</a>.
+        The full story behind each rule is in <a href={BOOK.url} target="_blank" rel="noopener noreferrer" className="btn-link">Both Hands on the Wheel</a>.
       </p>
     </article>
   );
