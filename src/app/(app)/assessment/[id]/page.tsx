@@ -92,8 +92,8 @@ export default async function AssessmentResult({ params, searchParams }: { param
 
       <a href="/identity" className="card block mt-5 hover:border-navy/40">
         <p className="eyebrow">FORGE · Step 1</p>
-        <h2 className="h2 mt-1">Who I am</h2>
-        <p className="mt-2 text-[15px] muted">Your scores show where you are. Who I am is where you claim who you are, and how big a change you are making. Your scores do not decide it.</p>
+        <h2 className="h2 mt-1">Who's behind the wheel</h2>
+        <p className="mt-2 text-[15px] muted">Your scores show where you are. Who's behind the wheel is where you claim who you are, and how big a change you are making. Your scores do not decide it.</p>
       </a>
 
       {nearest && pack.profiles.length > 0 && (

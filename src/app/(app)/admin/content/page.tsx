@@ -1,13 +1,25 @@
 import { requireUser } from "@/lib/auth";
 import { PageHeader, Draft } from "@/components/ui";
-import { reviewSets } from "@/content/review";
+import { reviewSets, type ReviewSet } from "@/content/review";
+import { getForgeSource } from "@/content/forgeSource";
 
 export const metadata = { title: "Content review" };
 
 /** The author's view of every draft wording set. Clients never see Draft marks. */
 export default async function ContentReview() {
   await requireUser("ADMIN");
-  const sets = reviewSets();
+  const src = await getForgeSource();
+  // The FORGE teaching cards come from forge-source.md, which is uploaded privately at /setup.
+  const forgeSet: ReviewSet = {
+    key: "forge", title: "FORGE teaching cards", where: "Who's behind the wheel, What this means, and the full guides", file: "forge-source.md (uploaded at /setup)", draft: src?.draft ?? true,
+    groups: src
+      ? (["F", "O", "R", "G", "E"] as const).filter((k) => src.cards[k]).map((k) => {
+          const c = src.cards[k]!;
+          return { label: `${k} · ${c.rule}`, items: [c.means, `From the road: ${c.road} ${c.roadMore}`.trim(), `Why it works: ${c.why} ${c.whyMore}`.trim(), `Sources: ${c.sources}`, `How it connects: ${c.connects}`, `Before you write: ${[c.beforeIntro, ...c.before].filter(Boolean).join(" ")}`] };
+        })
+      : [{ label: "Not installed", items: ["Upload forge-source.md at /setup to see the cards here."] }],
+  };
+  const sets = [forgeSet, ...reviewSets()];
   const drafts = sets.filter((s) => s.draft);
   return (
     <>

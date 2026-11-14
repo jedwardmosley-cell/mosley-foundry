@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { withArticle } from "@/content/whoIAm";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getContent } from "@/content";
@@ -16,6 +17,8 @@ export default async function AssessmentPage({ searchParams }: { searchParams: P
   const u = await requireUser("PARTICIPANT");
   const { pack, entrepreneur } = await getContent();
   const profile = await db.profile.findUnique({ where: { userId: u.id } });
+  const identity = await db.identityProfile.findUnique({ where: { userId: u.id }, select: { role: true, becoming: true } });
+  const statement = profile?.forgeStatement || identity?.becoming || "";
   const past = await db.assessment.findMany({ where: { userId: u.id, isSecondOpinion: false }, orderBy: { completedAt: "desc" } });
   const useEntre = profile?.pathway === "ENTREPRENEURIAL" && !!entrepreneur;
   const instrument = pack.assessmentStatus === "draft" ? "FORGE_DRAFT" : useEntre ? "FORGE_ENTREPRENEUR" : "FORGE_PERSONAL";
@@ -27,6 +30,15 @@ export default async function AssessmentPage({ searchParams }: { searchParams: P
           <p>Tap a score from 1 to 5 for each pillar. Score what you did this past month. The short lines under each score show what it looks like.</p>
         )}
       </PageHeader>
+
+      {/* The scores are read against the identity the client claimed, so FORGE links straight through. */}
+      {(statement || identity?.role) && (
+        <Link href="/identity" className="glow mb-6 block rounded-[22px] p-5 sm:p-6">
+          <p className="section-label">{identity?.role ? `Rate yourself as ${withArticle(identity.role)}` : "Rate yourself against who you claimed"}</p>
+          {statement && <p className="mt-2 font-serif text-[18px] leading-snug text-heading line-clamp-3">{statement}</p>}
+          <p className="mt-3 text-sm text-ink-soft">Score each pillar as the person you described. The lowest one is where your focus goes next.</p>
+        </Link>
+      )}
 
       {pack.assessmentStatus === "draft" && (
         <div className="card mb-6 border-alert/30 bg-alert-soft/40">

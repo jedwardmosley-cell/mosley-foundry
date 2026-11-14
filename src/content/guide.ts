@@ -23,7 +23,7 @@ export const CLIENT_GUIDE: GuideSection[] = [
     title: "How it fits together",
     intro: "Everything in the app follows one path in two parts. FORGE is who is behind the wheel. Discipline by Design is how you drive. The bar at the top of each screen shows the four steps.",
     steps: [
-      "Who I am (FORGE). Name the role this is about and the kind of change, describe who you are from five sides, and say it in one statement.",
+      "Who's behind the wheel (FORGE). Name the seat you're in and how big a turn this is, work through the five parts of FORGE, and say it in one statement.",
       "Where I am (FORGE). Score the five pillars to see how close you are today, and pick one pillar to work on.",
       "My road (Discipline by Design). Name the behavior that would show it, then set up the routines and people that reinforce who you are.",
       "30 days (Discipline by Design). Practice one behavior for 30 days with a two-minute daily check-in. On day 30, decide what comes next.",
@@ -36,7 +36,7 @@ export const CLIENT_GUIDE: GuideSection[] = [
     time: "About 15 minutes, one time",
     intro: "After you pick your pathway, the app walks you through the four steps one screen at a time. Your coach can also go through it with you.",
     steps: [
-      "Who I am, in three short parts: the role and the kind of change, then the five sides, then your statement. Start with F. You can finish the rest during your first week.",
+      "Who's behind the wheel, in three short parts: your seat and how big a turn, then the five parts of FORGE, then your statement. Start with F. You can finish the rest during your first week.",
       "Take the FORGE assessment, then pick one pillar to work on first.",
       "Add one routine and one person who will know whether you did it.",
       "Choose one behavior and start your 30 days.",
@@ -46,19 +46,19 @@ export const CLIENT_GUIDE: GuideSection[] = [
   },
   {
     id: "identity",
-    title: "Who I am",
+    title: "Who's behind the wheel",
     time: "10 to 15 minutes, then a look at the start of each week",
-    intro: "Who I am is one activity. It describes one identity: yours, in one role, for this season.",
+    intro: "Who's behind the wheel is the FORGE framework applied to you: one identity, in one role, for this season.",
     steps: [
-      "Name the role this is about: This is about me as a manager, a parent, an owner, or your own words. One role for each 30 days. It can be a role you already have and want to go deeper in.",
-      "Choose the kind of change: core alignment, role transition or identity reinvention. None ranks above another. You choose, and you can change it later.",
-      "Answer the five FORGE questions, each in your role. F: who am I becoming? O: what does someone with my identity pay attention to? R: what makes this identity meaningful to me? G: who am I when I encounter my limitations? E: who am I when emotions challenge my identity?",
+      "Which seat are you in? This is about me as a manager, a parent, an owner, or your own words. One role for each 30 days. It can be a role you already have and want to go deeper in.",
+      "How big a turn is this? Core alignment, role transition or identity reinvention. None ranks above another. You choose, and you can change it later.",
+      "Work through the five parts of FORGE, each in your role. Each one shows its rule from the book and what it shapes. Open What this means to read the rule, the research behind it and the questions to think through before you write.",
       "Each answer starts with I am and describes who you are. Habits and tasks go in My road. If the AI companion is on, Help me with this tells you whether you wrote a goal, a habit, a value or an identity.",
       "Your statement starts from your five lines. Edit it into one paragraph that sounds like you. This is what Today shows. Read it out loud at the start of each week.",
       "With identity reinvention you can also create a performance identity, folded under that choice: a name, standards and an activation cue. It is a practice tool and it is still you.",
       "Earlier versions are kept. At the bottom you choose the AI companion's tone, what it can use, and whether your coach can see your performance identity.",
     ],
-    link: { href: "/identity", label: "Open Who I am" },
+    link: { href: "/identity", label: "Open Who's behind the wheel" },
   },
   {
     id: "daily",
@@ -229,11 +229,11 @@ export const COACH_GUIDE: GuideSection[] = [
   },
   {
     id: "identity",
-    title: "Who I am",
+    title: "Who's behind the wheel",
     steps: [
       "Clients choose their own level. You cannot set it for them.",
-      "To suggest identity work, assign one of the Who I am exercises from the program list.",
-      "You see a client's statement, level and behavior only if they turn on Who I am in Sharing. You see their performance identity only if they also tick that box.",
+      "To suggest identity work, assign one of the identity exercises from the program list.",
+      "You see a client's statement, level and behavior only if they turn on Who's behind the wheel in Sharing. You see their performance identity only if they also tick that box.",
       "You see how often they answered yes to showing up as who they are. Their written notes on that question stay private.",
     ],
   },

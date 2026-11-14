@@ -94,7 +94,7 @@ export default async function SeasonPage() {
 
       {(season.startStatement || statementNow) && (
         <Card className="mt-5">
-          <p className="eyebrow">Who I am</p>
+          <p className="eyebrow">Who's behind the wheel</p>
           {season.startStatement && season.startStatement !== statementNow && <p className="mt-2 text-sm text-ink-mute">At the start: {season.startStatement}</p>}
           <p className="mt-2 font-serif text-lg leading-snug">{statementNow || season.startStatement}</p>
           <p className="mt-2 text-sm text-ink-soft">Is it still true? <Link href="/identity" className="btn-link">Update it</Link> if it has grown.</p>

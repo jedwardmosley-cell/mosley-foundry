@@ -7,6 +7,17 @@ import type { IdentityLevel } from "./identity";
  */
 export const WHO_I_AM_STATUS: "draft" | "approved" = "draft";
 
+/** The page's name, from the book. The menu, the journey bar and Today all use it. */
+export const WHO_TITLE = "Who's behind the wheel";
+export const WHO_INTRO = "This is the FORGE framework, applied to you. Name the seat you're in and how big a turn this is, then work through the five parts of one driver. Together they become one statement, and everything after this page is built on it.";
+export const WHO_HEADINGS = { role: "Which seat are you in?", kind: "How big a turn is this?", forge: "The five parts of one driver", statement: "My statement" };
+
+/** The FORGE opening above the five letters. The first line is the author's; the rest is build-team draft. */
+export const FORGE_OPENING = {
+  line: "You only ever rise to the level of who you believe you are.",
+  text: "Identity isn't a goal you check off. It's what your mind runs underneath every decision: who you see yourself as, what you notice, why you do what you do, how you grow, and how you stay anchored when emotions run high. Research on identity-based motivation, led by psychologist Daphna Oyserman, finds that people stick with actions that feel like \"me\" and drop the ones that don't. Get these five clear and everything you build after this has something real to stand on.",
+};
+
 /** "This is about me as a ___." Ordered so the likeliest role for the pathway comes first. */
 export const ROLE_PICKS: Record<PathwayKey, string[]> = {
   PERSONAL: ["parent", "project lead", "manager", "coach", "pastor", "owner"],

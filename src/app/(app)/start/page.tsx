@@ -15,16 +15,16 @@ import { Picks } from "@/components/Picks";
 import { FiveSides, MyStatement } from "@/components/ForgeLinesFields";
 import { RelationshipFields } from "@/components/RelationshipFields";
 import { LEVELS, IDENTITY_LEVELS, type IdentityLevel } from "@/content/identity";
-import { ROLE_PICKS, WHO_I_AM_STATUS, KIND_NOTE, withArticle } from "@/content/whoIAm";
+import { ROLE_PICKS, WHO_I_AM_STATUS, KIND_NOTE, WHO_TITLE, WHO_HEADINGS, withArticle } from "@/content/whoIAm";
 import { BLUEPRINT_PICKS } from "@/content/options";
-import { FORGE_IDENTITY_INTRO } from "@/content/forgeIdentityIntro";
+import { getForgeSource } from "@/content/forgeSource";
 import { PRACTICE_STARTERS } from "@/content/forgeLines";
 import { RELATIONSHIP_ROLES, type PathwayKey } from "@/content/program";
 
 export const metadata = { title: "My first session" };
 
 const STEP_COPY = [
-  { title: "Who I am", intro: "One identity, in your own words. Three short parts." },
+  { title: WHO_TITLE, intro: "The FORGE framework, applied to you. Three short parts." },
   { title: "See where you are today", intro: "Score the five pillars against the person you just described, then pick one to work on." },
   { title: "Design your road", intro: "One routine that reinforces who you are, and one person who will know if you did it." },
   { title: "Start your 30 days", intro: "Practice one behavior for 30 days, two minutes a day." },
@@ -56,13 +56,14 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
     );
   }
 
-  const [profile, identity, assessment, commitments, people, { pack, entrepreneur }] = await Promise.all([
+  const [profile, identity, assessment, commitments, people, { pack, entrepreneur }, forge] = await Promise.all([
     db.profile.findUnique({ where: { userId: u.id } }),
     db.identityProfile.findUnique({ where: { userId: u.id }, select: { level: true, becoming: true, role: true } }),
     db.assessment.findFirst({ where: { userId: u.id, isSecondOpinion: false }, orderBy: { completedAt: "desc" }, select: { id: true } }),
     db.commitment.findMany({ where: { userId: u.id, active: true }, select: { id: true, title: true, when: true } }),
     db.relationship.findMany({ where: { ownerId: u.id, active: true }, select: { id: true, name: true, role: true } }),
     getContent(),
+    getForgeSource(),
   ]);
   const pathway = (profile?.pathway ?? "PERSONAL") as PathwayKey;
   const part = [1, 2, 3].includes(Number(sp.part)) ? Number(sp.part) : 1;
@@ -94,7 +95,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
           <form action={saveWhoIAm} className="space-y-6">
             <input type="hidden" name="next" value="/start?step=1&part=2" />
             <div>
-              <label htmlFor="role" className="label">The role this is about</label>
+              <label htmlFor="role" className="label">{WHO_HEADINGS.role}</label>
               <div className="flex items-center inputbox">
                 <span className="pl-3.5 pr-1.5 py-2.5 text-[15px] text-ink-soft whitespace-nowrap">This is about me as</span>
                 <input id="role" name="role" defaultValue={role} maxLength={80} placeholder={withArticle(ROLE_PICKS[pathway][0])} className="flex-1 min-w-0 bg-transparent py-2.5 pr-3 text-[15px] focus:outline-none" />
@@ -102,7 +103,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
               <Picks list={{ status: WHO_I_AM_STATUS, options: ROLE_PICKS[pathway] }} target="role" label="Tap one, or write your own" />
             </div>
             <fieldset>
-              <legend className="label">The kind of change</legend>
+              <legend className="label">{WHO_HEADINGS.kind}</legend>
               <div className="grid gap-2 sm:grid-cols-3">
                 {IDENTITY_LEVELS.map((k) => (
                   <label key={k} className="cursor-pointer">
@@ -125,8 +126,8 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
         <Card>
           <form action={saveWhoIAm} className="space-y-6">
             <input type="hidden" name="next" value="/start?step=1&part=3" />
-            <p className="text-sm text-ink-soft">{FORGE_IDENTITY_INTRO} Start with F. If you get stuck, save what you have and finish the rest later.</p>
-            <FiveSides profile={profile} pathway={pathway} role={role} level={identity?.level ?? ""} ai={ai} />
+            <p className="text-sm text-ink-soft">Start with F. If you get stuck, save what you have and finish the rest later.</p>
+            <FiveSides profile={profile} pathway={pathway} role={role} level={identity?.level ?? ""} ai={ai} teach={forge?.cards ?? {}} rules={Object.fromEntries(pack.pillars.map((p) => [p.key, p.short]))} />
             <Submit>Save and continue</Submit>
           </form>
         </Card>
@@ -206,8 +207,8 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
         <Card>
           <p className="eyebrow">My road</p>
           <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-[15px] [&>div:first-child]:col-span-2 [&>div:nth-child(2)]:col-span-2">
-            {identity && <div><dt className="text-ink-mute text-sm">Who I am</dt><dd className="font-serif text-lg">{identity.becoming}</dd></div>}
-            {!identity && profile?.destination && <div><dt className="text-ink-mute text-sm">Who I am</dt><dd className="font-serif text-lg">{profile.destination}</dd></div>}
+            {identity && <div><dt className="text-ink-mute text-sm">Who's behind the wheel</dt><dd className="font-serif text-lg">{identity.becoming}</dd></div>}
+            {!identity && profile?.destination && <div><dt className="text-ink-mute text-sm">Who's behind the wheel</dt><dd className="font-serif text-lg">{profile.destination}</dd></div>}
             {priority && <div><dt className="text-ink-mute text-sm">My focus</dt><dd className="flex items-center gap-2"><PillarMark k={priority.key} /> {priority.name}</dd></div>}
             {commitments[0] && <div><dt className="text-ink-mute text-sm">My routines</dt><dd>{commitments.length}</dd></div>}
             {people[0] && <div><dt className="text-ink-mute text-sm">My people</dt><dd>{people.length}</dd></div>}

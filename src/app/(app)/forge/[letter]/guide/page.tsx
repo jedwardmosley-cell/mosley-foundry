@@ -24,7 +24,7 @@ export default async function ForgeGuide({ params }: { params: Promise<{ letter:
   const chapter = src?.chapter[key];
   return (
     <article className="max-w-2xl">
-      <Link href={`/forge/${key.toLowerCase()}`} className="text-sm btn-link">Back to {key}</Link>
+      <Link href={`/identity#${key.toLowerCase()}`} className="text-sm btn-link">Back to {line.label}</Link>
       <header className="mt-6">
         <PillarMark k={key} size="lg" />
         <p className="mt-4 section-label">The full guide</p>

@@ -1,42 +1,99 @@
 import { FORGE_LINES, combineLines, type LineField } from "@/content/forgeLines";
 import type { PathwayKey } from "@/content/program";
-import { asRole } from "@/content/whoIAm";
-import { PillarMark } from "./ui";
+import Link from "next/link";
+import type { CSSProperties } from "react";
+import { asRole, FORGE_OPENING } from "@/content/whoIAm";
+import type { ForgeCard } from "@/content/forgeParse";
+import type { PillarKey } from "@/content/types";
+import { PillarMark, PILLAR_FILL } from "./ui";
 import { PrefixedBox } from "./PrefixedBox";
 import { Picks } from "./Picks";
 import { HelpMeWrite } from "./HelpMeWrite";
 import { IdentityCoach } from "./IdentityCoach";
+import { ExampleLine } from "./ExampleLine";
 import { exampleGroups, examplePlaceholder, IDENTITY_EXAMPLES_STATUS, IDENTITY_TESTS } from "@/content/identityExamples";
 
 type Saved = Partial<Record<LineField, string>> | null | undefined;
+type Teach = Partial<Record<PillarKey, Partial<ForgeCard>>>;
 
 /**
- * F, O, R, G, E: one identity seen from five sides. Each question carries the role
- * ("As a manager, who am I becoming?"), and the examples match the role and the kind of change.
+ * The five parts of one driver: FORGE, applied to the client's role. Each letter shows its name,
+ * the book's rule line and the part of identity it shapes. "What this means" opens the teaching
+ * from forge-source.md. Then the question, the I am line and one example.
  */
-export function FiveSides({ profile, pathway, role, level, ai }: { profile: Saved; pathway: PathwayKey; role: string; level: string; ai: boolean }) {
+export function FiveSides({ profile, pathway, role, level, ai, teach = {}, rules = {} }: {
+  profile: Saved; pathway: PathwayKey; role: string; level: string; ai: boolean; teach?: Teach; rules?: Partial<Record<PillarKey, string>>;
+}) {
   return (
-    <>
-      <details className="rounded-2xl bg-field px-4 py-3 text-sm">
-        <summary className="cursor-pointer text-link">Is it an identity?</summary>
-        <ol className="mt-2 list-decimal pl-5 space-y-1 text-ink-soft">{IDENTITY_TESTS.map((t) => <li key={t}>{t}</li>)}</ol>
-        <p className="mt-2 text-ink-soft">The behaviors come next, in My road and your 30 days.</p>
-      </details>
-      {FORGE_LINES.map((l) => (
-        <div key={l.field}>
-          <label htmlFor={l.field} className="flex items-center gap-2.5 mb-2">
-            <PillarMark k={l.pillar} />
-            <span className="font-serif text-[18px] leading-snug text-heading">{asRole(l.question, role)}<span className="sr-only"> ({l.label})</span></span>
-          </label>
-          <PrefixedBox name={l.field} prefix={l.prefix} saved={profile?.[l.field] ?? ""} placeholder={examplePlaceholder(l.field, pathway, role, level)} />
-          {/* Help me with this on the left, Examples on the right, on one line. Either opens full width below. */}
-          <div className="relative">
-            <Picks list={{ status: IDENTITY_EXAMPLES_STATUS, options: [] }} groups={exampleGroups(l.field, pathway, role, level)} target={l.field} folded="Examples" note={l.hint} alignRight={ai} />
-            {ai && <IdentityCoach field={l.field} prefix={l.prefix} corner />}
-          </div>
-        </div>
-      ))}
-    </>
+    <div className="space-y-2">
+      <div className="pb-4">
+        <p className="font-serif text-[22px] sm:text-[24px] leading-snug text-heading">{FORGE_OPENING.line}</p>
+        <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">{FORGE_OPENING.text}</p>
+        <details className="mt-3 text-sm">
+          <summary className="cursor-pointer text-link font-medium">Is it an identity?</summary>
+          <ol className="mt-2 list-decimal pl-5 space-y-1 text-ink-soft">{IDENTITY_TESTS.map((t) => <li key={t}>{t}</li>)}</ol>
+          <p className="mt-2 text-ink-soft">The behaviors come next, in My road and your 30 days.</p>
+        </details>
+      </div>
+      {FORGE_LINES.map((l) => {
+        const t = teach[l.pillar];
+        const rule = t?.rule || rules[l.pillar] || "";
+        const tone = { "--pc": `var(${PILLAR_FILL[l.pillar].cssVar})` } as CSSProperties;
+        return (
+          <section key={l.field} id={l.pillar.toLowerCase()} style={tone} className="scroll-mt-24 border-t border-line/60 pt-6 pb-2">
+            <header className="flex items-start gap-3.5">
+              <PillarMark k={l.pillar} />
+              <div className="min-w-0">
+                <h3 className="font-serif text-[22px] leading-tight text-heading">{l.label}</h3>
+                {rule && <p className="mt-0.5 font-serif text-[17px] italic" style={{ color: "rgb(var(--pc))" }}>{rule}</p>}
+                <p className="mt-1.5 text-sm text-ink-soft">{l.shapes}</p>
+              </div>
+            </header>
+
+            {t?.means && (
+              <details className="mt-4 rounded-2xl px-4 py-3" style={{ background: "rgb(var(--pc) / 0.06)" }}>
+                <summary className="cursor-pointer text-[15px] font-medium text-link">What this means</summary>
+                <div className="mt-3 space-y-4 text-[15px] leading-relaxed text-ink">
+                  <p>{t.means}</p>
+                  {t.road && (
+                    <div>
+                      <p className="section-label">From the road</p>
+                      <p className="mt-1.5 font-serif text-[17px] leading-[1.5] text-heading">{t.road}</p>
+                      {t.roadMore && <p className="mt-2 font-serif text-[17px] leading-[1.5] text-heading">{t.roadMore}</p>}
+                    </div>
+                  )}
+                  {t.why && (
+                    <div>
+                      <p className="section-label">Why it works</p>
+                      <p className="mt-1.5">{t.why}</p>
+                    </div>
+                  )}
+                  {t.connects && <p className="text-ink-soft">{t.connects}</p>}
+                  {!!t.before?.length && (
+                    <div>
+                      <p className="section-label">Before you write</p>
+                      {t.beforeIntro && <p className="mt-1.5">{t.beforeIntro}</p>}
+                      <ul className="mt-2 space-y-1.5">
+                        {t.before.map((q) => <li key={q} className="flex gap-2.5"><span aria-hidden className="mt-[0.65em] h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: "rgb(var(--pc))" }} />{q}</li>)}
+                      </ul>
+                    </div>
+                  )}
+                  <Link href={`/forge/${l.pillar.toLowerCase()}/guide`} className="inline-block text-sm btn-link">Read the full guide</Link>
+                </div>
+              </details>
+            )}
+
+            <label htmlFor={l.field} className="mt-5 mb-2 block text-[15px] font-medium text-heading">{asRole(l.question, role)}<span className="sr-only"> ({l.label})</span></label>
+            <PrefixedBox name={l.field} prefix={l.prefix} saved={profile?.[l.field] ?? ""} placeholder="" />
+            <ExampleLine target={l.field} text={examplePlaceholder(l.field, pathway, role, level)} />
+            <div className="relative">
+              <Picks list={{ status: IDENTITY_EXAMPLES_STATUS, options: [] }} groups={exampleGroups(l.field, pathway, role, level).slice(1)} target={l.field} folded="More examples" note={l.hint} alignRight={ai} />
+              {ai && <IdentityCoach field={l.field} prefix={l.prefix} corner />}
+            </div>
+          </section>
+        );
+      })}
+    </div>
   );
 }
 

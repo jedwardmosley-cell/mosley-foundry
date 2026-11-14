@@ -4,7 +4,7 @@
  * To approve a set, change its status constant in the file named under "Lives in" to "approved".
  */
 import { IDENTITY_EXAMPLES_STATUS, EXAMPLE_PEOPLE, IDENTITY_TESTS } from "./identityExamples";
-import { WHO_I_AM_STATUS, ROLE_PICKS, KIND_NOTE } from "./whoIAm";
+import { WHO_I_AM_STATUS, ROLE_PICKS, KIND_NOTE, WHO_TITLE, WHO_INTRO, WHO_HEADINGS, FORGE_OPENING } from "./whoIAm";
 import { FORGE_LINES_STATUS, FORGE_LINES, PRACTICE_STARTERS } from "./forgeLines";
 import { LEVELS, IDENTITY_LEVELS, PILLAR_PROMPTS_STATUS, PILLAR_PROMPTS, PICKS_STATUS, SITUATION_PICKS, BEHAVIOR_PICKS, QUALITY_PICKS, PERSONA_SITUATION_PICKS, CUE_PICKS, STANDARD_PICKS } from "./identity";
 import { ONE_MOVE, CYCLE_FOCUS, CHECKIN_TAGS, BLUEPRINT_PICKS, RELATIONSHIP_PURPOSE, type OptionList } from "./options";
@@ -24,26 +24,29 @@ const anyDraft = (r: Record<string, OptionList>) => Object.values(r).some((v) =>
 export function reviewSets(): ReviewSet[] {
   return [
     {
-      key: "who", title: "Who I am: roles and kinds of change", where: "Who I am, steps 1 and 2", file: "src/content/whoIAm.ts", draft: WHO_I_AM_STATUS === "draft",
+      key: "who", title: "Who's behind the wheel: seats, kinds of change and the FORGE opening", where: "Who's behind the wheel, steps 1 to 3", file: "src/content/whoIAm.ts", draft: WHO_I_AM_STATUS === "draft",
       groups: [
         ...Object.entries(ROLE_PICKS).map(([k, v]) => ({ label: `Role picks, ${PATHWAY_NAME[k]}`, items: v })),
         { label: "Kinds of change", items: IDENTITY_LEVELS.map((k) => `${LEVELS[k].name}: ${LEVELS[k].line}`) },
         { label: "Note under the kinds", items: [KIND_NOTE] },
+        { label: "Page title and intro", items: [WHO_TITLE, WHO_INTRO] },
+        { label: "Headings", items: Object.values(WHO_HEADINGS) },
+        { label: "FORGE opening", items: [FORGE_OPENING.line, FORGE_OPENING.text] },
       ],
     },
     {
-      key: "lines", title: "The five FORGE questions", where: "Who I am, the five sides", file: "src/content/forgeLines.ts", draft: FORGE_LINES_STATUS === "draft",
-      groups: FORGE_LINES.map((l) => ({ label: `${l.pillar} · ${l.label}`, items: [l.question, `Hint: ${l.hint}`] })),
+      key: "lines", title: "The five FORGE questions", where: "Who's behind the wheel, the five parts", file: "src/content/forgeLines.ts", draft: FORGE_LINES_STATUS === "draft",
+      groups: FORGE_LINES.map((l) => ({ label: `${l.pillar} · ${l.label}`, items: [l.question, `What it shapes: ${l.shapes}`, `Hint: ${l.hint}`] })),
     },
     {
-      key: "examples", title: "Identity examples", where: "Who I am, under each question", file: "src/content/identityExamples.ts", draft: IDENTITY_EXAMPLES_STATUS === "draft",
+      key: "examples", title: "Identity examples", where: "Who's behind the wheel, under each question", file: "src/content/identityExamples.ts", draft: IDENTITY_EXAMPLES_STATUS === "draft",
       groups: [
         { label: "The four tests", items: IDENTITY_TESTS },
         ...EXAMPLE_PEOPLE.map((p) => ({ label: `${p.who} · ${LEVELS[p.level].name.toLowerCase()}`, items: [p.claim, ...FORGE_LINES.map((l) => `${l.pillar}: ${p.lines[l.field]}`)] })),
       ],
     },
     {
-      key: "picks", title: "Identity quick picks", where: "Who I am and My road", file: "src/content/identity.ts", draft: PICKS_STATUS === "draft",
+      key: "picks", title: "Identity quick picks", where: "Who's behind the wheel and My road", file: "src/content/identity.ts", draft: PICKS_STATUS === "draft",
       groups: [
         ...Object.entries(SITUATION_PICKS).map(([k, v]) => ({ label: `Situation, ${PATHWAY_NAME[k]}`, items: v })),
         ...Object.entries(BEHAVIOR_PICKS).map(([k, v]) => ({ label: `Behavior, ${PATHWAY_NAME[k]}`, items: v })),

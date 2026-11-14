@@ -5,8 +5,8 @@ import { db } from "@/lib/db";
 import { saveWhoIAm, removeIdentity, saveIdentityControls } from "@/app/actions/identity";
 import { TONE_LABELS, type ToneSetting } from "@/lib/identityTone";
 import { LEVELS, FIRST_EXAMPLE, PICKS_STATUS, SITUATION_PICKS, type IdentityLevel } from "@/content/identity";
-import { ROLE_PICKS, WHO_I_AM_STATUS, withArticle } from "@/content/whoIAm";
-import { FORGE_IDENTITY_INTRO } from "@/content/forgeIdentityIntro";
+import { ROLE_PICKS, WHO_I_AM_STATUS, WHO_TITLE, WHO_INTRO, WHO_HEADINGS, withArticle } from "@/content/whoIAm";
+import { getForgeSource } from "@/content/forgeSource";
 import { FiveSides, MyStatement } from "@/components/ForgeLinesFields";
 import { aiAvailable } from "@/lib/ai";
 import { getContent } from "@/content";
@@ -18,7 +18,7 @@ import { StatementReveal } from "@/components/StatementReveal";
 import { Picks } from "@/components/Picks";
 import { IdentitySpectrum } from "@/components/IdentitySpectrum";
 
-export const metadata = { title: "Who I am" };
+export const metadata = { title: "Who's behind the wheel" };
 
 export default async function IdentityPage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
   const u = await requireUser("PARTICIPANT");
@@ -36,17 +36,19 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
   const earlier = profile?.forgeStatement && id?.becoming && id.becoming !== profile.forgeStatement ? id.becoming : "";
   const ai = aiAvailable() && profile?.aiEnabled !== false;
   const { pack, entrepreneur } = await getContent();
+  const forge = await getForgeSource();
+  const rules = Object.fromEntries(pack.pillars.map((p) => [p.key, p.short]));
   const hint = profile?.pathway === "ENTREPRENEURIAL" && entrepreneur ? entrepreneur.forgeStatementPrompt : pack.forgeStatementPrompt;
 
   return (
     <>
-      <PageHeader eyebrow="FORGE" title="Who I am">One identity, in your own words. Name the role it is about and the kind of change, then describe who you are from five sides.</PageHeader>
+      <PageHeader eyebrow="FORGE" title={WHO_TITLE}>{WHO_INTRO}</PageHeader>
 
       {saved && <p role="status" className="mb-4 notice">Saved. Next, <Link href="/assessment" className="btn-link">see where you are today</Link>.</p>}
 
       <form action={saveWhoIAm} className="space-y-5">
         <Card>
-          <label htmlFor="role" className="section-title"><span className="step-n">1</span>The role this is about</label>
+          <label htmlFor="role" className="section-title"><span className="step-n">1</span>{WHO_HEADINGS.role}</label>
           <div className="flex items-center inputbox">
             <span className="pl-3.5 pr-1.5 py-2.5 text-[15px] text-ink-soft whitespace-nowrap select-none">This is about me as</span>
             <input id="role" name="role" defaultValue={role} maxLength={80} placeholder={withArticle(ROLE_PICKS[pathway][0])} className="flex-1 min-w-0 bg-transparent py-2.5 pr-3 text-[15px] focus:outline-none" />
@@ -60,7 +62,7 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
         </Card>
 
         <Card>
-          <p className="section-title"><span className="step-n">2</span>The kind of change</p>
+          <p className="section-title"><span className="step-n">2</span>{WHO_HEADINGS.kind}</p>
           <IdentitySpectrum
             initial={id?.level as IdentityLevel | undefined}
             firstExample={FIRST_EXAMPLE[pathway]}
@@ -68,13 +70,9 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
           />
         </Card>
 
-        <Card className="space-y-6">
-          <div>
-            <p className="section-title"><span className="step-n">3</span>Who I am, from five sides</p>
-            <p className="text-sm text-ink-soft">{FORGE_IDENTITY_INTRO}</p>
-            <p className="mt-2 text-sm text-ink-soft">These are one identity seen five ways. They are not five separate identities.</p>
-          </div>
-          <FiveSides profile={profile} pathway={pathway} role={role} level={level} ai={ai} />
+        <Card className="scroll-mt-20" id="forge">
+          <p className="section-title"><span className="step-n">3</span>{WHO_HEADINGS.forge}</p>
+          <FiveSides profile={profile} pathway={pathway} role={role} level={level} ai={ai} teach={forge?.cards ?? {}} rules={rules} />
         </Card>
 
         <Card>
@@ -114,11 +112,11 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
             </fieldset>
             <fieldset>
               <legend className="label">What my coach can see</legend>
-              <p className="text-sm text-ink-soft">Only if you turn on <Link href="/sharing" className="btn-link">Who I am in Sharing</Link>. Check-in notes stay private.</p>
+              <p className="text-sm text-ink-soft">Only if you turn on <Link href="/sharing" className="btn-link">Who's behind the wheel in Sharing</Link>. Check-in notes stay private.</p>
               {id.level === "REINVENT" && (
                 <label className="mt-2 flex items-start gap-2 text-[15px]">
                   <input type="checkbox" name="sharePersona" defaultChecked={id.sharePersona} className="mt-1 h-4 w-4 accent-navy" />
-                  <span>When Who I am is shared, include my performance identity too.</span>
+                  <span>When Who's behind the wheel is shared, include my performance identity too.</span>
                 </label>
               )}
             </fieldset>

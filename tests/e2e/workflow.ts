@@ -65,7 +65,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.screenshot({ path: `${shots}/01-onboarding.png`, fullPage: true });
     // a new client goes straight into the guided first session; this run takes the full pages instead
     await Promise.all([page.waitForURL("**/start"), page.locator('form:has(input[value="PERSONAL"]) button').click()]);
-    await page.waitForSelector("text=The role this is about");
+    await page.waitForSelector("text=Which seat are you in?");
     await page.goto(`${BASE}/assessment`);
   });
 
@@ -108,7 +108,20 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal(id.role, "manager");
     assert.equal(id.becoming, saved.forgeStatement, "one statement, stored where every screen reads it");
     // the five questions now carry the role
-    await page.waitForSelector("text=As a manager, who am I becoming?");
+    await page.waitForSelector("text=As a manager, who is the person I'm driving toward?");
+    // FORGE is taught on the page: the opening, each rule from the book, and what this means with the research
+    await page.waitForSelector("text=You only ever rise to the level of who you believe you are.");
+    assert.equal(await page.locator("h1", { hasText: "Who's behind the wheel" }).count(), 1);
+    await page.waitForSelector("text=Know your destination.");
+    assert.equal(await page.locator('summary:has-text("What this means")').count(), 5, "every letter teaches before it asks");
+    const f = page.locator("section#f");
+    await f.locator('summary:has-text("What this means")').click();
+    await f.locator("text=possible selves").waitFor();
+    assert.ok(!(await f.innerText()).includes("Steve Jobs"));
+    // the assessment reads the scores against the identity the client claimed
+    await page.goto(`${BASE}/assessment`);
+    await page.waitForSelector("text=Rate yourself as a manager");
+    await page.goto(`${BASE}/identity`);
   });
 
   await check("4. create a Discipline by Design blueprint", async () => {
@@ -221,7 +234,7 @@ const submitAndWait = async (page: Page, selector: string) => {
   await check("7e. Who I am: three equal kinds, one statement on Today, behavior on My road, history kept", async () => {
     const me = await db.user.findUniqueOrThrow({ where: { email } });
     await page.goto(`${BASE}/dashboard`);
-    await page.waitForSelector('main a:has-text("Who I am · as a manager") >> text=I am a leader my team trusts with bad news.');
+    await page.waitForSelector(`main a:has-text("Who's behind the wheel · as a manager") >> text=I am a leader my team trusts with bad news.`);
     await page.goto(`${BASE}/identity`);
     assert.ok(!(await page.content()).includes("Identity shift"), "one activity, one name");
     for (const name of ["Core alignment", "Role transition", "Identity reinvention"]) await page.locator("label", { hasText: name }).click();
@@ -233,7 +246,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal(id.becoming, "I am someone who follows through on what I say.");
     assert.equal((await db.profile.findUniqueOrThrow({ where: { userId: me.id } })).forgeStatement, id.becoming);
     await page.goto(`${BASE}/dashboard`);
-    await page.waitForSelector('main a:has-text("Who I am") >> text=I am someone who follows through on what I say.');
+    await page.waitForSelector(`main a:has-text("Who's behind the wheel") >> text=I am someone who follows through on what I say.`);
     // the behavior now opens My road
     await page.goto(`${BASE}/blueprint`);
     await page.fill('input[name="behavior"]', "I close every open commitment by Friday noon.");
@@ -333,10 +346,12 @@ const submitAndWait = async (page: Page, selector: string) => {
     await g.locator("label", { hasText: "Role transition" }).click();
     await Promise.all([g.waitForURL("**/start?step=1&part=2"), g.click('button:has-text("Save and continue")')]);
     // part 2: the five sides carry the role, and the examples match it (the newly promoted manager first)
-    await g.waitForSelector("text=As a manager, who am I becoming?");
-    await g.locator('summary:has-text("Examples")').first().click();
-    await g.waitForSelector("text=Newly promoted manager · role transition");
-    await g.locator('button:has-text("a manager measured by what my team can do.")').first().click();
+    await g.waitForSelector("text=As a manager, who is the person I'm driving toward?");
+    // the closest example (the newly promoted manager) shows under the question; tapping it fills the box
+    await g.locator('button:has-text("I am a manager measured by what my team can do.")').first().click();
+    assert.equal(await g.inputValue('textarea[name="destination"]'), "a manager measured by what my team can do.");
+    await g.locator('summary:has-text("More examples")').first().click();
+    await g.waitForSelector("text=Project manager, tough assignment · core alignment");
     await Promise.all([g.waitForURL("**/start?step=1&part=3"), g.click('button:has-text("Save and continue")')]);
     // part 3: one statement
     assert.ok((await g.inputValue('textarea[name="statement"]')).startsWith("I am "), "the statement starts from the five lines");
@@ -441,7 +456,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.ok(await db.auditEvent.findFirst({ where: { actorId: guided.id, action: "participant.start_over" } }), "logged");
     // the login still works, and the client goes back through the guided session
     await Promise.all([g.waitForURL("**/start"), g.locator('form:has(input[value="PERSONAL"]) button').click()]);
-    await g.waitForSelector("text=The role this is about");
+    await g.waitForSelector("text=Which seat are you in?");
     await gc.close();
   });
 
@@ -595,8 +610,8 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.goto(`${BASE}/coach/${dana.id}`);
     assert.ok(!(await page.content()).includes("E2E-ROLE"), "the role is not visible before the client shares Who I am");
     await dp.goto(`${BASE}/sharing`);
-    await Promise.all([dp.waitForLoadState("networkidle"), dp.click('button[aria-label^="Share: Who I am"]')]);
-    await dp.waitForSelector('button[aria-label^="Stop sharing: Who I am"]');
+    await Promise.all([dp.waitForLoadState("networkidle"), dp.click(`button[aria-label^="Share: Who's behind the wheel"]`)]);
+    await dp.waitForSelector(`button[aria-label^="Stop sharing: Who's behind the wheel"]`);
     await page.goto(`${BASE}/coach/${dana.id}`);
     await page.waitForSelector("text=E2E-ROLE");
     assert.ok(!(await page.content()).includes("E2E-PERSONA"), "persona needs its own tick");
