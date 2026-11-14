@@ -203,7 +203,7 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
 
       {s.has("EQI") && (
         <Card className="mt-5">
-          <p className="eyebrow">EQ-i development priorities (participant-approved)</p>
+          <p className="eyebrow">What they're working on from their feedback (shared one at a time)</p>
           {v.eqi.length === 0 && <p className="mt-2 text-sm muted">None approved.</p>}
           {v.eqi.map((e) => (
             <div key={e.id} className="mt-4 rounded-xl bg-paper p-3">

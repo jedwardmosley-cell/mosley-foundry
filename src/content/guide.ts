@@ -157,7 +157,7 @@ export const CLIENT_GUIDE: GuideSection[] = [
       "Open Where I am, then My feedback, and tap Add feedback.",
       "Choose where it came from, then write your own summary, attach a file of your own notes, or both. Please don't upload the full report.",
       "Tag the FORGE pillars it speaks to. Your results on Where I am will show it.",
-      "Add one or two priorities in your own words. For each, pick a pillar and a practice, then practice it for 30 days or add it to My road.",
+      "Under What I'm working on from this, add one or two things in your own words. For each, pick a pillar and a practice, then practice it for 30 days or add it to My road. These are separate from your development priority, the one pillar you pick after the assessment.",
       "Each entry is private. You choose whether your coach sees it, and whether the AI companion can read your summary. The AI never opens the file.",
     ],
     link: { href: "/feedback", label: "Open My feedback" },
@@ -193,7 +193,7 @@ export const COACH_GUIDE: GuideSection[] = [
     title: "What you can and cannot see",
     steps: [
       "A new client shows 0 of 8 areas shared. Ask them to open Sharing and turn on what they want you to see.",
-      "The eight areas are goals, FORGE scores, practice, reflections, My road, people, EQ-i priorities, and who I am.",
+      "Each area has its own switch: goals, FORGE scores, practice, reflections, My road, people, what I'm working on from my feedback, My feedback, Who's behind the wheel, and My 30-day plan.",
       "You see a written reflection only when the client marks that entry as shared.",
       "You cannot see a client's private journal or their AI conversations.",
       "The client page flags items for your attention, such as no check-ins this week or an overdue check-in with a mentor.",
@@ -222,8 +222,8 @@ export const COACH_GUIDE: GuideSection[] = [
     id: "eqi",
     title: "After an EQ-i debrief",
     steps: [
-      "Ask the client to open EQ-i priorities and turn the section on.",
-      "They write their priorities in their own words, link each one to a FORGE pillar, and tap Share with you.",
+      "Ask the client to open My feedback, under Where I am, and add their own summary of the debrief.",
+      "Under What I'm working on from this, they add what they took from it in their own words, link each to a FORGE pillar, and tap Share with you.",
       "You can add your interpretation on the client's page. It goes back to the client to approve before you see it again.",
     ],
     note: "The app stores no EQ-i scores or reports.",
@@ -285,7 +285,7 @@ export const ADMIN_GUIDE: GuideSection[] = [
     steps: [
       "Reports shows group totals: enrolled, attendance by session, completion, and activity in the 30 days after training.",
       "Percentages appear only for groups of 5 or more, so no single person can be picked out.",
-      "Reports never include scores, reflections, journals, EQ-i priorities or coaching notes.",
+      "Reports never include scores, reflections, journals, My feedback or coaching notes.",
     ],
     link: { href: "/admin/reports", label: "Open Reports" },
   },

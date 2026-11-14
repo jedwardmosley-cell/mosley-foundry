@@ -87,38 +87,32 @@ export default async function FeedbackEntry({ params, searchParams }: { params: 
         <Link href={`/feedback/${f.id}?edit=1`} className="mt-4 inline-block text-sm btn-link">Edit</Link>
       </Card>
 
-      <h2 className="h2 mt-10 mb-4">Priorities from this feedback</h2>
-      <div className="space-y-4">
+      <h2 className="h2 mt-10 mb-4">What I&apos;m working on from this</h2>
+      <div className="space-y-3">
         {f.priorities.map((e) => {
           const shared = e.participantApproved && !!eqiGrant;
+          const pillarName = e.pillar ? pillarNames[e.pillar] : "";
           return (
-            <Card key={e.id}>
-              <div className="flex justify-between gap-3">
-                <h3 className="h3 flex items-center gap-2">{e.pillar && <PillarMark k={e.pillar as PillarKey} size="sm" />}{e.label}</h3>
-                <form action={deleteEqi}><input type="hidden" name="id" value={e.id} /><button className="text-sm text-ink-mute hover:text-alert">Remove</button></form>
+            <Card key={e.id} className="!py-5">
+              <div className="flex items-start gap-3">
+                {e.pillar ? <PillarMark k={e.pillar as PillarKey} size="sm" /> : <span className="h-6 w-6 shrink-0 rounded-full border border-dashed border-ink/25" />}
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-[16px] font-medium leading-snug text-heading">{e.label}</h3>
+                  <p className="mt-0.5 text-sm text-ink-soft">
+                    {pillarName || "No pillar yet"} · {e.practice ? <>Practice: {e.practice}</> : "No practice yet"}
+                    {shared && <> · <span className="text-ink-mute">Shared with my coach</span></>}
+                  </p>
+                </div>
               </div>
-              {e.note && <p className="mt-2 text-[15px]">{e.note}</p>}
-              <form action={updateEqi} className="mt-4 grid gap-3 sm:grid-cols-2">
-                <input type="hidden" name="id" value={e.id} />
-                <Field label="FORGE pillar this connects to" hint="Your call. Pick the pillar where this shows up most."><PillarSelect value={e.pillar} /></Field>
-                <Field label="Practice I will try"><input name="practice" defaultValue={e.practice} maxLength={1500} className="input" /></Field>
-                <div className="sm:col-span-2"><Submit className="btn-quiet">Save</Submit></div>
-              </form>
-              <div className="mt-4 flex flex-wrap gap-2 border-t border-line/70 pt-4">
-                {e.pillar ? (
-                  <Link href={`/cycle/new?pillar=${e.pillar}&focus=${encodeURIComponent(e.practice || e.label)}`} className="btn-quiet">Practice this for 30 days</Link>
-                ) : <span className="self-center text-sm text-ink-mute">Choose a pillar to practice this for 30 days.</span>}
-                {e.practice
-                  ? <form action={addEqiToBlueprint}><input type="hidden" name="id" value={e.id} /><button className="btn-quiet">Add to My road</button></form>
-                  : <span className="self-center text-sm text-ink-mute">Add a practice to put it on My road.</span>}
-                {coaches.length > 0 && !shared && <form action={shareEqi}><input type="hidden" name="id" value={e.id} /><button className="btn-quiet">Share this priority with {coachName}</button></form>}
+              {e.note && <p className="mt-3 text-[15px]">{e.note}</p>}
+
+              {/* The three ways to put it to work, on one row. */}
+              <div className="mt-4 flex flex-wrap gap-2">
+                {e.pillar && <Link href={`/cycle/new?pillar=${e.pillar}&focus=${encodeURIComponent(e.practice || e.label)}`} className="btn-quiet !px-4 !py-2 text-sm">Practice this for 30 days</Link>}
+                {e.practice && <form action={addEqiToBlueprint}><input type="hidden" name="id" value={e.id} /><button className="btn-quiet !px-4 !py-2 text-sm">Add to My road</button></form>}
+                {coaches.length > 0 && !shared && <form action={shareEqi}><input type="hidden" name="id" value={e.id} /><button className="btn-quiet !px-4 !py-2 text-sm">Share with {coachName}</button></form>}
               </div>
-              {shared && (
-                <form action={approveEqiInterpretation} className="mt-3 text-sm">
-                  <input type="hidden" name="id" value={e.id} /><input type="hidden" name="approved" value="false" />
-                  <span className="chip mr-2">Shared with my coach</span><button className="btn-link">Stop sharing this one</button>
-                </form>
-              )}
+
               {e.coachInterpretation && (
                 <div className="mt-4 rounded-2xl bg-ink/[0.04] p-4">
                   <p className="text-xs text-ink-mute">Your coach wrote this after your debrief</p>
@@ -131,19 +125,33 @@ export default async function FeedbackEntry({ params, searchParams }: { params: 
                   )}
                 </div>
               )}
+
+              <details className="mt-3 text-sm" open={!e.pillar || !e.practice}>
+                <summary className="cursor-pointer font-medium text-link">{!e.pillar || !e.practice ? "Add a pillar and a practice" : "Edit"}</summary>
+                <form action={updateEqi} className="mt-3 grid gap-3 sm:grid-cols-2">
+                  <input type="hidden" name="id" value={e.id} />
+                  <Field label="FORGE pillar this connects to" hint="Your call. Pick the pillar where this shows up most."><PillarSelect value={e.pillar} /></Field>
+                  <Field label="Practice I will try"><input name="practice" defaultValue={e.practice} maxLength={1500} className="input" placeholder="One small thing you could do" /></Field>
+                  <div className="flex flex-wrap items-center gap-4 sm:col-span-2">
+                    <Submit className="btn-quiet">Save</Submit>
+                    {shared && <button formAction={approveEqiInterpretation} name="approved" value="false" className="btn-link">Stop sharing this one</button>}
+                  </div>
+                </form>
+                <form action={deleteEqi} className="mt-2"><input type="hidden" name="id" value={e.id} /><button className="text-ink-mute hover:text-alert">Remove</button></form>
+              </details>
             </Card>
           );
         })}
-        <Card>
-          <h3 className="h3">Add a priority</h3>
-          <form action={addEqi} className="mt-3 space-y-3">
+        <details className="card !py-5" open={f.priorities.length === 0}>
+          <summary className="cursor-pointer text-[16px] font-medium text-link">Add something I&apos;m working on</summary>
+          <form action={addEqi} className="mt-4 space-y-3">
             <input type="hidden" name="feedbackId" value={f.id} />
-            <Field label="Priority from this feedback" hint="Your own words. For example: Shutting down debate when time is short"><input name="label" required maxLength={200} className="input" /></Field>
+            <Field label="What I'm working on" hint="Your own words. For example: Speaking up for what my team needs"><input name="label" required maxLength={200} className="input" /></Field>
             <Field label="FORGE pillar this connects to"><PillarSelect /></Field>
             <Field label="Practice I will try (optional)"><input name="practice" maxLength={1500} className="input" /></Field>
-            <Submit>Add priority</Submit>
+            <Submit>Add</Submit>
           </form>
-        </Card>
+        </details>
       </div>
 
       <section className="mt-10">
