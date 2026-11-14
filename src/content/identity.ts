@@ -25,7 +25,7 @@ export const LEVELS: Record<IdentityLevel, {
   ROLE: {
     n: 2,
     name: "Role transition",
-    line: "Become effective in a new role.",
+    line: "Grow into a new role.",
     forWhom: "For people transitioning into a new set of responsibilities, expectations, or circumstances.",
     examples: ["Individual contributor to manager", "Peer to supervisor", "Employee to entrepreneur", "New executive responsibilities"],
     coaching: ["Direct", "Practical", "Challenging", "Real-world decisions"],
@@ -35,7 +35,7 @@ export const LEVELS: Record<IdentityLevel, {
   REINVENT: {
     n: 3,
     name: "Identity reinvention",
-    line: "Deliberately construct a new performance identity.",
+    line: "Become someone new.",
     forWhom: "For people pursuing a significant personal or professional transformation.",
     examples: [
       "A hesitant leader deliberately practicing confident executive presence",
@@ -162,7 +162,7 @@ export const CHECKIN_IDENTITY = {
  * coach can suggest identity work without choosing a level for the client.
  */
 export const IDENTITY_EXERCISES: { title: string; text: string }[] = [
-  { title: "Claim who you are", text: "Open Who I am and write your statement as a present-tense claim that starts with I am. Read it out loud. Then choose the level that fits the size of change you want. It is your call, and you can change it later." },
+  { title: "Claim who you are", text: "Open Who's behind the wheel and write your statement as a present-tense claim that starts with I am. Read it out loud. Then choose the level that fits the size of change you want. It is your call, and you can change it later." },
   { title: "The behavior that shows it", text: "Write one behavior another person could see you do if you had already become this person. Then do it once this week and write what happened." },
   { title: "Evidence of the week", text: "Look back at your check-ins this week. Where did you show up as who you said you are? Write two moments, and one where you did not." },
   { title: "Prepare for a demanding situation", text: "Pick one demanding situation coming up. Read your I am statement, then write how you will prepare for it and the first thing you will do when it starts." },

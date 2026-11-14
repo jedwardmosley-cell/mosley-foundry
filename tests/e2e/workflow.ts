@@ -37,6 +37,13 @@ const login = async (page: Page, email: string, password = "demo-password-1") =>
 const logout = async (page: Page) => {
   await page.context().clearCookies();
 };
+/** Who I am saves through the statement reveal: the button opens the full statement, and Save is on that screen. */
+const saveThroughReveal = async (page: Page, url: string, button = "Save who I am") => {
+  await page.click(`button:has-text("${button}")`);
+  const dialog = page.locator('[role="dialog"]');
+  await dialog.waitFor();
+  await Promise.all([page.waitForURL(url), dialog.locator('button:has-text("Save")').click()]);
+};
 const submitAndWait = async (page: Page, selector: string) => {
   await Promise.all([page.waitForLoadState("networkidle"), page.click(selector)]);
   await page.waitForTimeout(250);
@@ -58,7 +65,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.screenshot({ path: `${shots}/01-onboarding.png`, fullPage: true });
     // a new client goes straight into the guided first session; this run takes the full pages instead
     await Promise.all([page.waitForURL("**/start"), page.locator('form:has(input[value="PERSONAL"]) button').click()]);
-    await page.waitForSelector("text=The role this is about");
+    await page.waitForSelector("text=Which seat are you in?");
     await page.goto(`${BASE}/assessment`);
   });
 
@@ -87,9 +94,13 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.locator("label", { hasText: "Core alignment" }).click();
     await page.fill('textarea[name="destination"]', "a leader my team trusts with bad news");
     await page.fill('textarea[name="lineO"]', "a discerning leader who sees what my team needs");
-    await page.locator('button:has-text("Put my five together")').click();
-    assert.equal(await page.inputValue('textarea[name="statement"]'), "I am a leader my team trusts with bad news. I am a discerning leader who sees what my team needs.");
-    await Promise.all([page.waitForURL("**/identity?saved=1"), page.click('button:has-text("Save who I am")')]);
+    // the reveal: with no statement yet, it starts from the five, fills the screen, and Save is there
+    await page.click('button:has-text("Save who I am")');
+    const reveal = page.locator('[role="dialog"]');
+    await reveal.locator("text=This is who's behind the wheel.").waitFor();
+    assert.ok((await reveal.innerText()).includes("I am a leader my team trusts with bad news. I am a discerning leader who sees what my team needs."));
+    assert.equal(await page.locator('button:has-text("Put my five together")').count(), 0, "one button for the statement");
+    await Promise.all([page.waitForURL("**/identity?saved=1"), reveal.locator('button:has-text("Save")').click()]);
     const saved = await db.profile.findFirstOrThrow({ where: { user: { email } } });
     assert.equal(saved.destination, "I am a leader my team trusts with bad news");
     assert.equal(saved.lineO, "I am a discerning leader who sees what my team needs");
@@ -97,7 +108,20 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal(id.role, "manager");
     assert.equal(id.becoming, saved.forgeStatement, "one statement, stored where every screen reads it");
     // the five questions now carry the role
-    await page.waitForSelector("text=As a manager, who am I becoming?");
+    await page.waitForSelector("text=As a manager, who is the person I'm driving toward?");
+    // FORGE is taught on the page: the opening, each rule from the book, and what this means with the research
+    await page.waitForSelector("text=You only ever rise to the level of who you believe you are.");
+    assert.equal(await page.locator("h1", { hasText: "Who's behind the wheel" }).count(), 1);
+    await page.waitForSelector("text=Know your destination.");
+    assert.equal(await page.locator('summary:has-text("What this means")').count(), 5, "every letter teaches before it asks");
+    const f = page.locator("section#f");
+    await f.locator('summary:has-text("What this means")').click();
+    await f.locator("text=possible selves").waitFor();
+    assert.ok(!(await f.innerText()).includes("Steve Jobs"));
+    // the assessment reads the scores against the identity the client claimed
+    await page.goto(`${BASE}/assessment`);
+    await page.waitForSelector("text=Rate yourself as a manager");
+    await page.goto(`${BASE}/identity`);
   });
 
   await check("4. create a Discipline by Design blueprint", async () => {
@@ -210,19 +234,19 @@ const submitAndWait = async (page: Page, selector: string) => {
   await check("7e. Who I am: three equal kinds, one statement on Today, behavior on My road, history kept", async () => {
     const me = await db.user.findUniqueOrThrow({ where: { email } });
     await page.goto(`${BASE}/dashboard`);
-    await page.waitForSelector('main a:has-text("Who I am · as a manager") >> text=I am a leader my team trusts with bad news.');
+    await page.waitForSelector(`main a:has-text("Who's behind the wheel · as a manager") >> text=I am a leader my team trusts with bad news.`);
     await page.goto(`${BASE}/identity`);
     assert.ok(!(await page.content()).includes("Identity shift"), "one activity, one name");
     for (const name of ["Core alignment", "Role transition", "Identity reinvention"]) await page.locator("label", { hasText: name }).click();
     await page.locator("label", { hasText: "Core alignment" }).click();
     assert.ok(!(await page.locator('input[name="personaName"]').isVisible()), "the performance identity folds under identity reinvention only");
     await page.fill('textarea[name="statement"]', "someone who follows through on what I say.");
-    await Promise.all([page.waitForURL("**/identity?saved=1"), page.click('button:has-text("Save who I am")')]);
+    await saveThroughReveal(page, "**/identity?saved=1");
     const id = await db.identityProfile.findUniqueOrThrow({ where: { userId: me.id } });
     assert.equal(id.becoming, "I am someone who follows through on what I say.");
     assert.equal((await db.profile.findUniqueOrThrow({ where: { userId: me.id } })).forgeStatement, id.becoming);
     await page.goto(`${BASE}/dashboard`);
-    await page.waitForSelector('main a:has-text("Who I am") >> text=I am someone who follows through on what I say.');
+    await page.waitForSelector(`main a:has-text("Who's behind the wheel") >> text=I am someone who follows through on what I say.`);
     // the behavior now opens My road
     await page.goto(`${BASE}/blueprint`);
     await page.fill('input[name="behavior"]', "I close every open commitment by Friday noon.");
@@ -234,7 +258,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.locator("summary", { hasText: "Create a performance identity" }).click();
     await page.fill('input[name="personaName"]', "The Closer");
     await page.fill('textarea[name="personaStandards"]', "I finish what I start.");
-    await Promise.all([page.waitForURL("**/identity?saved=1"), page.click('button:has-text("Save who I am")')]);
+    await saveThroughReveal(page, "**/identity?saved=1");
     await page.waitForSelector("text=Earlier versions");
     const hist = await db.identityHistory.findMany({ where: { userId: me.id } });
     assert.equal(hist.length, 2);
@@ -322,14 +346,16 @@ const submitAndWait = async (page: Page, selector: string) => {
     await g.locator("label", { hasText: "Role transition" }).click();
     await Promise.all([g.waitForURL("**/start?step=1&part=2"), g.click('button:has-text("Save and continue")')]);
     // part 2: the five sides carry the role, and the examples match it (the newly promoted manager first)
-    await g.waitForSelector("text=As a manager, who am I becoming?");
-    await g.locator('summary:has-text("Examples")').first().click();
-    await g.waitForSelector("text=Newly promoted manager · role transition");
-    await g.locator('button:has-text("a leader measured by what my team can do.")').first().click();
+    await g.waitForSelector("text=As a manager, who is the person I'm driving toward?");
+    // the closest example (the newly promoted manager) shows under the question; tapping it fills the box
+    await g.locator('button:has-text("I am a manager measured by what my team can do.")').first().click();
+    assert.equal(await g.inputValue('textarea[name="destination"]'), "a manager measured by what my team can do.");
+    await g.locator('summary:has-text("More examples")').first().click();
+    await g.waitForSelector("text=Project manager, tough assignment · core alignment");
     await Promise.all([g.waitForURL("**/start?step=1&part=3"), g.click('button:has-text("Save and continue")')]);
     // part 3: one statement
-    await g.locator('button:has-text("Put my five together")').click();
-    await Promise.all([g.waitForURL("**/start?step=2"), g.click('button:has-text("Save and continue")')]);
+    assert.ok((await g.inputValue('textarea[name="statement"]')).startsWith("I am "), "the statement starts from the five lines");
+    await saveThroughReveal(g, "**/start?step=2", "Save and continue");
     // 2. where I am: the assessment and the priority bring the client back
     await Promise.all([g.waitForURL("**/assessment?next=start"), g.click('a:has-text("Take the FORGE assessment")')]);
     for (const [k, v] of Object.entries({ F: 4, O: 3, R: 4, G: 3, E: 2 })) await g.locator(`input[name="${k}"][value="${v}"]`).check({ force: true });
@@ -344,7 +370,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await g.click('button:has-text("Add person")');
     await g.waitForSelector("text=✓ Pat Partner");
     await Promise.all([g.waitForURL("**/start?step=4"), g.click('a:has-text("Next: start your 30 days")')]);
-    await g.waitForSelector("text=I am a leader measured by what my team can do.");
+    await g.waitForSelector("text=I am a manager measured by what my team can do.");
     // 4. the 30 days, about the same role
     await Promise.all([g.waitForURL(/\/cycle\/new\?pillar=E/), g.click('a:has-text("start my 30 days")')]);
     assert.equal(await g.inputValue('input[name="role"]'), "manager");
@@ -430,7 +456,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.ok(await db.auditEvent.findFirst({ where: { actorId: guided.id, action: "participant.start_over" } }), "logged");
     // the login still works, and the client goes back through the guided session
     await Promise.all([g.waitForURL("**/start"), g.locator('form:has(input[value="PERSONAL"]) button').click()]);
-    await g.waitForSelector("text=The role this is about");
+    await g.waitForSelector("text=Which seat are you in?");
     await gc.close();
   });
 
@@ -580,12 +606,12 @@ const submitAndWait = async (page: Page, selector: string) => {
     await dp.locator("label", { hasText: "Identity reinvention" }).click();
     await dp.locator("summary", { hasText: "Create a performance identity" }).click();
     await dp.fill('input[name="personaName"]', "E2E-PERSONA");
-    await Promise.all([dp.waitForURL("**/identity?saved=1"), dp.click('button:has-text("Save who I am")')]);
+    await saveThroughReveal(dp, "**/identity?saved=1");
     await page.goto(`${BASE}/coach/${dana.id}`);
     assert.ok(!(await page.content()).includes("E2E-ROLE"), "the role is not visible before the client shares Who I am");
     await dp.goto(`${BASE}/sharing`);
-    await Promise.all([dp.waitForLoadState("networkidle"), dp.click('button[aria-label^="Share: Who I am"]')]);
-    await dp.waitForSelector('button[aria-label^="Stop sharing: Who I am"]');
+    await Promise.all([dp.waitForLoadState("networkidle"), dp.click(`button[aria-label^="Share: Who's behind the wheel"]`)]);
+    await dp.waitForSelector(`button[aria-label^="Stop sharing: Who's behind the wheel"]`);
     await page.goto(`${BASE}/coach/${dana.id}`);
     await page.waitForSelector("text=E2E-ROLE");
     assert.ok(!(await page.content()).includes("E2E-PERSONA"), "persona needs its own tick");
@@ -716,6 +742,22 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.locator("a", { hasText: "Spring Manager Cohort" }).click();
     await page.waitForSelector("text=Attendance");
     await page.screenshot({ path: `${shots}/10-admin-cohort.png`, fullPage: true });
+  });
+
+  await check("10d. clients never see Draft marks; the admin sees every draft set in Content review", async () => {
+    const dc = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const dp: Page = await dc.newPage();
+    await login(dp, "dana@demo.bothhands.app");
+    for (const path of ["/dashboard", "/identity", "/assessment", "/blueprint", "/cycle", "/cycle/new", "/network", "/guide", "/pathway/segment/01"]) {
+      await dp.goto(`${BASE}${path}`);
+      for (const d of await dp.locator("details").all()) await d.evaluate((e) => ((e as HTMLDetailsElement).open = true));
+      const text = await dp.locator("main").innerText();
+      assert.ok(!/\bdraft\b/i.test(text), `no Draft mark on ${path}`);
+    }
+    await dc.close();
+    await page.goto(`${BASE}/admin/content`);
+    await page.waitForSelector("text=Identity examples");
+    assert.ok((await page.locator("main .draft").count()) > 5, "draft sets are marked for the admin");
   });
 
   await check("11. admin turns on coaching, assigns self, sees only what is shared", async () => {

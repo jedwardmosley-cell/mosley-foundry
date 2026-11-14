@@ -30,6 +30,7 @@ export function ContentForm() {
       <label className="block"><span className="label">Setup token</span><input name="token" type="password" required className="input" /></label>
       <label className="block"><span className="label">pack.json (book and workbook)</span><input name="pack" type="file" accept="application/json,.json" className="block text-sm" /></label>
       <label className="block"><span className="label">entrepreneur.json (FORGE Worksheet for Entrepreneurs)</span><input name="entrepreneur" type="file" accept="application/json,.json" className="block text-sm" /></label>
+      <label className="block"><span className="label">forge-source.md (FORGE teaching cards)</span><input name="forge" type="file" accept="text/markdown,.md" className="block text-sm" /></label>
       <Msg s={s} />
       <button className="btn-primary" disabled={pending}>{pending ? "Uploading..." : "Install content"}</button>
     </form>

@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { getContent } from "@/content";
 import { SEGMENTS, BLUEPRINT_AREAS } from "@/content/program";
 import { saveGoal, addCommitment } from "@/app/actions/participant";
-import { PageHeader, Card, PillarMark, Draft, Field } from "@/components/ui";
+import { PageHeader, Card, PillarMark, Field } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 import { Picks } from "@/components/Picks";
 import { ONE_MOVE, BLUEPRINT_PICKS } from "@/content/options";
@@ -37,7 +37,7 @@ export default async function SegmentPage({ params }: { params: Promise<{ key: s
         </Card>
       )}
       <Card className="mt-5">
-        <div className="flex items-center gap-2"><p className="eyebrow">Practice</p><Draft /></div>
+        <p className="eyebrow">Practice</p>
         <p className="mt-2 text-[15px] leading-relaxed">{s.practice.text}</p>
       </Card>
       <Card className="mt-5">

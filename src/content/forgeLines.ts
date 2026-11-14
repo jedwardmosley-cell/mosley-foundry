@@ -22,6 +22,8 @@ export type ForgeLine = {
   field: LineField;
   label: string;
   question: string;
+  /** The part of identity this rule works on, in one line. */
+  shapes: string;
   /** Fixed words the statement starts with. The client finishes the sentence. */
   prefix: string;
   hint: string;
@@ -32,7 +34,8 @@ export const FORGE_LINES: ForgeLine[] = [
     pillar: "F",
     field: "destination",
     label: "Future Focused",
-    question: "Who am I becoming?",
+    question: "Who is the person I'm driving toward?",
+    shapes: "Who you see yourself as.",
     prefix: "I am",
     hint: "Describe the person you are choosing to be and where that person is headed. Plans and tasks go in your blueprint.",
   },
@@ -40,7 +43,8 @@ export const FORGE_LINES: ForgeLine[] = [
     pillar: "O",
     field: "lineO",
     label: "Outcome Aware",
-    question: "What does someone with my identity pay attention to?",
+    question: "What does the person I'm becoming pay attention to?",
+    shapes: "What you notice, and what you're used to seeing around you.",
     prefix: "I am",
     hint: "Describe the kind of attention this person brings. The signals you will track go in your blueprint.",
   },
@@ -48,7 +52,8 @@ export const FORGE_LINES: ForgeLine[] = [
     pillar: "R",
     field: "why",
     label: "Reason Rooted",
-    question: "What makes this identity meaningful to me?",
+    question: "Why does this matter to me, and who is it for?",
+    shapes: "Why you do it, and why you are the way you are.",
     prefix: "I am",
     hint: "Name the values underneath this identity, and who it is for.",
   },
@@ -56,7 +61,8 @@ export const FORGE_LINES: ForgeLine[] = [
     pillar: "G",
     field: "lineG",
     label: "Growth Oriented",
-    question: "Who am I when I encounter my limitations?",
+    question: "Who am I when I hit a limit?",
+    shapes: "How you grow when you fall short.",
     prefix: "I am",
     hint: "Describe who you are when you hit a limit. The skills you will practice go in your blueprint.",
   },
@@ -64,7 +70,8 @@ export const FORGE_LINES: ForgeLine[] = [
     pillar: "E",
     field: "lineE",
     label: "Emotionally Anchored",
-    question: "Who am I when emotions challenge my identity?",
+    question: "Who am I when the day gets ugly?",
+    shapes: "How you stay anchored when emotions run high.",
     prefix: "I am",
     hint: "Describe who you are when emotions run high. Techniques, like a pause or a breath, go in your blueprint.",
   },
@@ -129,4 +136,9 @@ export function combineLines(lines: Partial<Record<LineField, string>>) {
     .filter(Boolean)
     .map((t) => (/[.!?]$/.test(t) ? t : `${t}.`))
     .join(" ");
+}
+
+/** Just the five lines from a saved profile, for client components. */
+export function fiveLines(p: Partial<Record<LineField, string | null>> | null | undefined): Partial<Record<LineField, string>> {
+  return Object.fromEntries(FORGE_LINES.map((l) => [l.field, p?.[l.field] ?? ""]));
 }

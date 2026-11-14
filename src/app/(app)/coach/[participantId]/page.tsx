@@ -50,7 +50,7 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
     ...pack.jaysJourney.map((j, i) => ({ ref: `jay:${i}`, title: `Jay's Journey: ${j.title}`, text: [j.setup, ...j.prompts].filter(Boolean).join("\n\n") })),
     ...pack.chapters.filter((c) => c.roadTest.length).map((c) => ({ ref: `chapter:${c.number}:roadTest`, title: `Road Test: ${c.title}`, text: c.roadTest.join("\n\n") })),
     ...SEGMENTS.map((x) => ({ ref: `segment:${x.key}`, title: `Segment ${x.key} practice: ${x.title}`, text: x.practice.text })),
-    ...IDENTITY_EXERCISES.map((x, i) => ({ ref: `identity:${i}`, title: `Who I am: ${x.title}`, text: x.text })),
+    ...IDENTITY_EXERCISES.map((x, i) => ({ ref: `identity:${i}`, title: `Identity: ${x.title}`, text: x.text })),
   ];
 
   return (
@@ -144,7 +144,7 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
 
       {s.has("IDENTITY") && (
         <Card className="mt-5">
-          <p className="eyebrow">Who I am</p>
+          <p className="eyebrow">Who's behind the wheel</p>
           {v.identity ? (
             <>
               <p className="mt-2 text-sm">{v.identity.role && <span className="font-medium">As {withArticle(v.identity.role)} · </span>}<span className="chip">{LEVELS[v.identity.level as IdentityLevel].name}</span> <span className="text-ink-mute">The client chose this kind of change.</span></p>

@@ -4,6 +4,7 @@ import { timingSafeEqual } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { hashPassword } from "@/lib/password";
+import { clearForgeCache } from "@/content/forgeSource";
 import { clearContentCache } from "@/content";
 
 export type SetupState = { error?: string; ok?: string; values?: Record<string, string> } | undefined;
@@ -61,8 +62,18 @@ export async function uploadContent(_: SetupState, fd: FormData): Promise<SetupS
     await db.contentPack.upsert({ where: { key }, create: { key, json: JSON.stringify(json) }, update: { json: JSON.stringify(json) } });
     done.push(f.name);
   }
+  // The FORGE teaching cards: markdown, stored as text.
+  const forge = fd.get("forge");
+  if (forge instanceof File && forge.size > 0) {
+    if (forge.size > 2_000_000) return { error: `${forge.name} is too large.` };
+    const md = await forge.text();
+    if (!/^# Cards/m.test(md) || !/^# Chapter 9/m.test(md)) return { error: `${forge.name} does not look like the forge-source.md file.` };
+    await db.contentPack.upsert({ where: { key: "forge-source" }, create: { key: "forge-source", json: JSON.stringify({ md }) }, update: { json: JSON.stringify({ md }) } });
+    done.push(forge.name);
+  }
   if (!done.length) return { error: "Choose at least one file." };
   clearContentCache();
+  clearForgeCache();
   revalidatePath("/", "layout");
   return { ok: `Installed: ${done.join(", ")}` };
 }

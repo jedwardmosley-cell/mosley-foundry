@@ -62,6 +62,8 @@ summary:not(.list-none)::before {
 details[open] > summary:not(.list-none)::before { transform: rotate(45deg) translate(-0.1em, -0.1em); }
 summary { -webkit-tap-highlight-color: transparent; }
 
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+.reveal { animation: fade 0.45s ease both; }
 @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: no-preference) {
   .rise > * { animation: rise 0.42s cubic-bezier(.2,.7,.2,1) both; }
@@ -77,6 +79,7 @@ summary { -webkit-tap-highlight-color: transparent; }
     border: 1px solid rgb(var(--line) / 0.45);
     box-shadow: 0 1px 2px rgb(var(--shadow) / 0.04), 0 12px 32px -18px rgb(var(--shadow) / 0.16);
   }
+  .section-label { @apply text-[11px] uppercase tracking-[0.16em] font-semibold text-ink-mute; }
   .eyebrow { @apply text-[11px] uppercase tracking-[0.16em] text-ink-mute font-semibold; }
   .h1 { @apply font-serif text-[34px] sm:text-[44px] leading-[1.04] text-heading tracking-[-0.02em]; font-weight: 420; }
   .h2 { @apply font-serif text-[22px] sm:text-[26px] leading-snug text-heading tracking-[-0.01em]; }
@@ -95,7 +98,7 @@ summary { -webkit-tap-highlight-color: transparent; }
   .input:hover { border-color: rgb(var(--line)); }
   .input:focus { @apply outline-none bg-surface; border-color: rgb(var(--navy) / 0.45); box-shadow: 0 0 0 4px rgb(var(--navy) / 0.10); }
   .textarea { @apply input min-h-[96px] leading-relaxed; }
-  .btn { @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full px-5 py-3 text-[15px] font-medium transition focus:outline-none focus-visible:ring-4 focus-visible:ring-navy/20 disabled:opacity-50 active:scale-[0.98]; }
+  .btn { @apply inline-flex items-center justify-center gap-2 text-center rounded-full px-5 py-3 text-[15px] font-medium transition focus:outline-none focus-visible:ring-4 focus-visible:ring-navy/20 disabled:opacity-50 active:scale-[0.98]; }
   .btn-primary {
     @apply btn text-white;
     background: linear-gradient(180deg, rgb(var(--navy) / 0.92), rgb(var(--navy-deep)));

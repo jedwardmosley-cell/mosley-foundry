@@ -25,7 +25,7 @@ export async function developmentSummary(userId: string, name: string) {
   }
   if (d.identity) {
     const lv = { CORE: "Core alignment", ROLE: "Role transition", REINVENT: "Identity reinvention" }[d.identity.level as "CORE"];
-    L.push("", "## Who I am", ...(d.identity.role ? [`**Role:** ${d.identity.role}`] : []), `**Kind of change:** ${lv}`);
+    L.push("", "## Who's behind the wheel", ...(d.identity.role ? [`**Role:** ${d.identity.role}`] : []), `**Kind of change:** ${lv}`);
     if (!d.profile?.forgeStatement && d.identity.becoming) L.push("", d.identity.becoming);
     if (d.identity.behavior) L.push("", `**Behavior that shows it:** ${d.identity.behavior}`);
     if (d.identity.personaName) L.push(`**Performance identity:** ${d.identity.personaName}`);

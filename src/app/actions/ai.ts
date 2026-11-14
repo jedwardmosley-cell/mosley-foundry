@@ -66,7 +66,7 @@ export async function deleteAllConversations() {
 
 export type DraftKind = "destination" | "lineO" | "why" | "lineG" | "lineE" | "forgeStatement";
 
-/** "Help me write this": returns draft text for the participant to edit. Saves nothing. */
+/** "Help me with this" (drafts): returns draft text for the participant to edit. Saves nothing. */
 export async function draftWithAI(kind: DraftKind): Promise<{ text: string } | { error: string }> {
   const u = await requireUser("PARTICIPANT");
   if (!["destination", "lineO", "why", "lineG", "lineE", "forgeStatement"].includes(kind)) return { error: "Unknown field." };

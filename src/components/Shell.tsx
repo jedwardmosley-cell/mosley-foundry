@@ -8,7 +8,7 @@ import { signOut } from "@/app/actions/auth";
 // Client menu, in journey order. The phone tab bar keeps five tabs; everything else is under More.
 const PARTICIPANT_NAV: NavItem[] = [
   { href: "/dashboard", label: "Today", mobile: true },
-  { href: "/identity", label: "1. Who I am", tab: "Who I am", mobile: true, group: "FORGE" },
+  { href: "/identity", label: "1. Who's behind the wheel", tab: "FORGE", mobile: true, group: "FORGE" },
   { href: "/assessment", label: "2. Where I am", group: "FORGE" },
   { href: "/blueprint", label: "3. My road", group: "Discipline by Design" },
   { href: "/cycle", label: "4. 30 days", group: "Discipline by Design" },
@@ -29,6 +29,7 @@ const COACH_NAV = [
 const ADMIN_NAV = [
   { href: "/admin", label: "Programs", mobile: true },
   { href: "/admin/reports", label: "Reports", mobile: true },
+  { href: "/admin/content", label: "Content review", tab: "Review", mobile: true },
 ];
 
 export function Shell({ user, children, journey }: { user: CurrentUser; children: ReactNode; journey?: ReactNode }) {
@@ -106,13 +107,22 @@ function AccountMenu({ user }: { user: CurrentUser }) {
   );
 }
 
+/** Desktop: the person's initials and name open a small menu with password and sign out. */
 function UserBox({ user }: { user: CurrentUser }) {
+  const role = user.role === "ADMIN" && user.alsoCoach ? "Administrator and coach" : ({ PARTICIPANT: "Participant", COACH: "Coach", ADMIN: "Administrator" } as Record<string, string>)[user.role];
   return (
-    <div className="border-t border-line/60 pt-4 text-sm">
-      <div className="flex items-center gap-2.5"><span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-navy/10 text-xs font-semibold text-heading">{initials(user.name)}</span><p className="font-medium text-ink truncate">{user.name}</p></div>
-      <p className="text-ink-mute text-xs">{user.role === "ADMIN" && user.alsoCoach ? "Administrator and coach" : ({ PARTICIPANT: "Participant", COACH: "Coach", ADMIN: "Administrator" } as Record<string, string>)[user.role]}</p>
-      <Link href="/account/password" className="mt-2 block text-ink-soft hover:text-ink text-sm">Change password</Link>
-      <form action={signOut} className="mt-1"><button className="text-ink-soft hover:text-ink text-sm">Sign out</button></form>
-    </div>
+    <details className="relative border-t border-line/60 pt-4">
+      <summary className="list-none cursor-pointer flex items-center gap-2.5 rounded-xl p-1.5 -m-1.5 hover:bg-ink/[0.04]" aria-label="Account">
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-navy/10 text-xs font-semibold text-heading">{initials(user.name)}</span>
+        <span className="min-w-0">
+          <span className="block text-sm font-medium text-ink truncate">{user.name}</span>
+          <span className="block text-xs text-ink-mute">{role}</span>
+        </span>
+      </summary>
+      <div className="absolute bottom-full left-0 mb-2 w-52 rounded-2xl bg-card p-2 text-[15px] shadow-[0_20px_44px_-16px_rgb(0_0_0/0.4)] border border-line/50">
+        <Link href="/account/password" className="block rounded-xl px-3 py-2 hover:bg-ink/[0.05]">Change password</Link>
+        <form action={signOut}><button className="w-full text-left rounded-xl px-3 py-2 hover:bg-ink/[0.05]">Sign out</button></form>
+      </div>
+    </details>
   );
 }

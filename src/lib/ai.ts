@@ -224,7 +224,7 @@ export async function purgeExpired(userId: string) {
   await db.aiConversation.deleteMany({ where: { userId, expiresAt: { lt: new Date() } } });
 }
 
-// ---------- "Help me write this" drafts ----------
+// ---------- "Help me with this" drafts ----------
 
 export type DraftKind = LineField | "forgeStatement";
 

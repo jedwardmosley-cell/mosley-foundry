@@ -62,7 +62,7 @@ export const EXAMPLE_PEOPLE: ExamplePerson[] = [
     level: "ROLE",
     claim: "I am a leader now. My results come through other people.",
     lines: {
-      destination: "I am a leader measured by what my team can do.",
+      destination: "I am a manager measured by what my team can do.",
       lineO: "I am a leader who puts people before tasks.",
       why: "I am the boss I needed when I was coming up.",
       lineG: "I am new at this and not ashamed of it. I can lead while I learn.",

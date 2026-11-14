@@ -9,7 +9,7 @@ import { getContent } from "@/content";
  * Every step stays optional. The bar only shows what is done and what comes next.
  */
 export const JOURNEY_STEPS = [
-  { key: "identity", label: "Who I am", next: "Claim who you are", href: "/identity" },
+  { key: "identity", label: "Who's behind the wheel", next: "Claim who you are", href: "/identity" },
   { key: "today", label: "Where I am", next: "See where you are today and pick one pillar", href: "/assessment" },
   { key: "road", label: "My road", next: "Design your road: one routine and one person", href: "/blueprint" },
   { key: "drive", label: "30 days", next: "Start your 30 days", href: "/cycle" },

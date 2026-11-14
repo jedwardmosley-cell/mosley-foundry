@@ -83,7 +83,7 @@ export default async function BlueprintPage() {
               </div>
             </form>
           ) : (
-            <p className="text-[15px]">Start with <Link href="/identity" className="btn-link">Who I am</Link>. Then name the behavior that would show it.</p>
+            <p className="text-[15px]">Start with <Link href="/identity" className="btn-link">Who's behind the wheel</Link>. Then name the behavior that would show it.</p>
           )}
         </div>
       </section>
