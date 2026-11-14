@@ -10,8 +10,7 @@ import { PrefixedBox } from "./PrefixedBox";
 import { Picks } from "./Picks";
 import { HelpMeWrite } from "./HelpMeWrite";
 import { IdentityCoach } from "./IdentityCoach";
-import { ExampleLine } from "./ExampleLine";
-import { exampleGroups, examplePlaceholder, IDENTITY_EXAMPLES_STATUS, IDENTITY_TESTS } from "@/content/identityExamples";
+import { exampleGroups, IDENTITY_EXAMPLES_STATUS, IDENTITY_TESTS } from "@/content/identityExamples";
 
 type Saved = Partial<Record<LineField, string>> | null | undefined;
 type Teach = Partial<Record<PillarKey, Partial<ForgeCard>>>;
@@ -94,9 +93,8 @@ export function FiveSides({ profile, pathway, role, level, ai, teach = {}, rules
 
             <label htmlFor={l.field} className="mt-5 mb-2 block text-[15px] font-medium text-heading">{asRole(l.question, role)}<span className="sr-only"> ({l.label})</span></label>
             <PrefixedBox name={l.field} prefix={l.prefix} saved={profile?.[l.field] ?? ""} placeholder="" />
-            <ExampleLine target={l.field} text={examplePlaceholder(l.field, pathway, role, level)} />
             <div className="relative">
-              <Picks list={{ status: IDENTITY_EXAMPLES_STATUS, options: [] }} groups={exampleGroups(l.field, pathway, role, level).slice(1)} target={l.field} folded="More examples" note={l.hint} alignRight={ai} />
+              <Picks list={{ status: IDENTITY_EXAMPLES_STATUS, options: [] }} groups={exampleGroups(l.field, pathway, role, level)} target={l.field} folded="Examples" note={l.hint} alignRight={ai} />
               {ai && <IdentityCoach field={l.field} prefix={l.prefix} corner />}
             </div>
           </section>
