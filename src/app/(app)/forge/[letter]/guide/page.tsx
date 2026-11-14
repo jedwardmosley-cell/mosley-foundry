@@ -46,6 +46,7 @@ export default async function ForgeGuide({ params }: { params: Promise<{ letter:
           <section id="why" className="mt-10 scroll-mt-20">
             <h2 className="section-label">Why it works</h2>
             <p className="mt-2 text-[16px] leading-relaxed">{card.why}</p>
+            {card.whyMore && <p className="mt-3 text-[16px] leading-relaxed">{card.whyMore}</p>}
             <p className="mt-2 text-sm text-ink-mute">{card.sources}</p>
           </section>
           <section className="mt-10">

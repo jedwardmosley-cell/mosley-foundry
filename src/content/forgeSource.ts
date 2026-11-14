@@ -2,7 +2,8 @@ import "server-only";
 import fs from "node:fs";
 import path from "node:path";
 import { db } from "@/lib/db";
-import type { PillarKey } from "./types";
+import { parseForgeSource, type ForgeSource } from "./forgeParse";
+export type { ForgeSource, ForgeCard } from "./forgeParse";
 
 /**
  * FORGE SOURCE: all FORGE teaching comes from one markdown file, forge-source.md: Chapter 9
@@ -10,88 +11,36 @@ import type { PillarKey } from "./types";
  * It is book text, so it lives with the licensed pack (never in the public repo): a local file in
  * development, or uploaded to the database in production. Without it, cards show only the rule line.
  */
-export type ForgeCard = {
-  rule: string;
-  means: string;
-  road: string;
-  roadMore: string;
-  why: string;
-  sources: string;
-  connects: string;
-  beforeIntro: string;
-  before: string[];
-  roadTest: string;
-};
-export type ForgeSource = {
-  draft: boolean;
-  intro: { line: string; forge: string; parts: string };
-  chapter: Partial<Record<PillarKey, { heading: string; paragraphs: string[] }>>;
-  cards: Partial<Record<PillarKey, ForgeCard>>;
-};
+// Cached until the uploaded file changes: the stamp is the upload time in the database,
+// so a new upload at /setup shows on every server at once.
+let cached: { stamp: string; value: ForgeSource | null } | null = null;
+export function clearForgeCache() { cached = null; }
 
-/** Splits markdown into sections by a heading level: { title: body }. */
-function sections(md: string, level: number): Record<string, string> {
-  const mark = "#".repeat(level) + " ";
-  const out: Record<string, string> = {};
-  let key = "";
-  for (const line of md.split("\n")) {
-    if (line.startsWith(mark)) { key = line.slice(mark.length).trim(); out[key] = ""; continue; }
-    if (key) out[key] += line + "\n";
+function readLocal(): string | null {
+  try {
+    return fs.readFileSync(path.join(process.cwd(), "src", "content", "licensed", "forge-source.md"), "utf8");
+  } catch {
+    return null;
   }
-  return out;
 }
-const paras = (s = "") => s.split(/\n\s*\n/).map((p) => p.replace(/\s*\n\s*/g, " ").trim()).filter(Boolean);
-const text = (s = "") => paras(s).join("\n\n");
-
-export function parseForgeSource(md: string): ForgeSource {
-  const top = sections(md, 1);
-  const titleKey = (prefix: string) => Object.keys(top).find((k) => k.startsWith(prefix)) ?? "";
-  const intro = sections(top[titleKey("Intro")] ?? "", 2);
-  const chapter: ForgeSource["chapter"] = {};
-  for (const [k, body] of Object.entries(sections(top[titleKey("Chapter 9")] ?? "", 2))) {
-    const h = sections(body, 3);
-    const heading = Object.keys(h)[0];
-    if (heading && /^[FORGE]$/.test(k)) chapter[k as PillarKey] = { heading, paragraphs: paras(h[heading]) };
-  }
-  const cards: ForgeSource["cards"] = {};
-  for (const [k, body] of Object.entries(sections(top[titleKey("Cards")] ?? "", 2))) {
-    if (!/^[FORGE]$/.test(k)) continue;
-    const c = sections(body, 3);
-    const beforeLines = (c["Before you write"] ?? "").split("\n").map((l) => l.trim()).filter(Boolean);
-    cards[k as PillarKey] = {
-      rule: text(c["Rule"]),
-      means: text(c["What it means"]),
-      road: text(c["From the road"]),
-      roadMore: text(c["From the road, more"]),
-      why: text(c["Why it works"]),
-      sources: text(c["Sources"]),
-      connects: text(c["How it connects"]),
-      beforeIntro: beforeLines.filter((l) => !l.startsWith("- ")).join(" "),
-      before: beforeLines.filter((l) => l.startsWith("- ")).map((l) => l.slice(2)),
-      roadTest: text(c["Road test"]),
-    };
-  }
-  return {
-    draft: !/^Status:\s*approved/im.test(md),
-    intro: { line: text(intro["Line"]), forge: text(intro["Forge"]), parts: text(intro["Parts"]) },
-    chapter,
-    cards,
-  };
-}
-
-let cached: ForgeSource | null | undefined;
 
 export async function getForgeSource(): Promise<ForgeSource | null> {
-  if (cached !== undefined && process.env.NODE_ENV === "production") return cached;
-  let md: string | null = null;
+  const local = readLocal();
+  if (local) return parseForgeSource(local); // development: always the file on disk
+  let row: { json: string; updatedAt: Date } | null = null;
   try {
-    md = fs.readFileSync(path.join(process.cwd(), "src", "content", "licensed", "forge-source.md"), "utf8");
+    row = await db.contentPack.findUnique({ where: { key: "forge-source" }, select: { json: true, updatedAt: true } });
   } catch {
-    try {
-      const row = await db.contentPack.findUnique({ where: { key: "forge-source" } });
-      md = row ? (JSON.parse(row.json) as { md: string }).md : null;
-    } catch { md = null; }
+    return cached?.value ?? null; // database unreachable: keep what we had
   }
-  cached = md ? parseForgeSource(md) : null;
-  return cached;
+  const stamp = row ? String(row.updatedAt.getTime()) : "none";
+  if (cached && cached.stamp === stamp) return cached.value;
+  let value: ForgeSource | null = null;
+  try {
+    value = row ? parseForgeSource((JSON.parse(row.json) as { md: string }).md) : null;
+  } catch {
+    value = null;
+  }
+  cached = { stamp, value };
+  return value;
 }
