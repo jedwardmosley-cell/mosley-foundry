@@ -1,0 +1,27 @@
+# Sends the daily check-in reminder emails. Every 15 minutes it asks the app which reminders are due;
+# the app sends at most one per client per day, at the time each client chose in Settings.
+# Needs, under the repository's Settings > Secrets and variables > Actions:
+#   secret   CRON_SECRET  (the same value as CRON_SECRET in Vercel)
+#   variable APP_URL      (for example https://mosley-foundry.vercel.app)
+# Until both are set, the job does nothing and passes.
+name: Check-in reminders
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+permissions: {}
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ask the app to send due reminders
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          APP_URL: ${{ vars.APP_URL }}
+        run: |
+          if [ -z "$CRON_SECRET" ] || [ -z "$APP_URL" ]; then
+            echo "CRON_SECRET or APP_URL is not set yet. Nothing to do."
+            exit 0
+          fi
+          curl -fsS --max-time 60 -H "Authorization: Bearer $CRON_SECRET" "${APP_URL%/}/api/cron/reminders"

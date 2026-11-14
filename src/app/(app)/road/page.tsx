@@ -1,9 +1,10 @@
+import { DAY_CHOICES as DAY_LABELS, isScheduled, scheduleOf, daysToText } from "@/lib/schedule";
 import { requireUser } from "@/lib/auth";
 import { ReadTheBook } from "@/components/ReadTheBook";
 import { db } from "@/lib/db";
 import { getContent } from "@/content";
 import { BLUEPRINT_AREAS } from "@/content/program";
-import { addCommitment, removeCommitment } from "@/app/actions/participant";
+import { addCommitment, removeCommitment, updateCommitmentSchedule } from "@/app/actions/participant";
 import { PageHeader, Card, Source, Field } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 import Link from "next/link";
@@ -22,7 +23,7 @@ export const metadata = { title: "My road" };
 
 const CADENCES = { DAILY: "Daily", WEEKLY: "Weekly", MONTHLY: "Monthly", QUARTERLY: "Quarterly", ONCE: "One time" };
 const AREA_ICON: Record<string, IconName> = { ROUTINES: "sun", WEEKLY: "calendar", RELATIONSHIPS: "people", LEARNING: "book", LEADERSHIP: "flag", REVIEW: "repeat" };
-const DAY_CHOICES = ["", "Every day", "Weekdays", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const DAY_CHOICES = DAY_LABELS.map((d) => d.label);
 
 export default async function MyRoadPage() {
   const u = await requireUser("PARTICIPANT");
@@ -132,6 +133,7 @@ export default async function MyRoadPage() {
       )}
 
       <SectionHead title="My system" sub="The routines and reviews that keep you on the road." />
+      <p className="-mt-2 mb-4 text-sm text-ink-soft">Want these on your phone? <Link href="/settings" className="btn-link">Put them on your calendar</Link>.</p>
       <div className="card !p-0 divide-y divide-line/60">
         {BLUEPRINT_AREAS.map((area) => {
           if (area.key === "ACCOUNTABILITY" || PEOPLE_AREAS.includes(area.key)) return null;
@@ -155,9 +157,11 @@ export default async function MyRoadPage() {
                       <div>
                         <p className="text-[15px]">{c.title}</p>
                         <p className="text-sm muted">{CADENCES[c.cadence as keyof typeof CADENCES]}{c.when ? ` · ${c.when}` : ""}{c.detail ? ` · ${c.detail}` : ""}</p>
+                        <ScheduleEdit c={c} />
                       </div>
                       <form action={removeCommitment}><input type="hidden" name="id" value={c.id} /><button className="text-[13px] text-ink-mute hover:text-alert" aria-label={`Remove ${c.title}`}>Remove</button></form>
                     </li>
+
                   ))}
                 </ul>
               )}
@@ -250,6 +254,28 @@ function FromBook({ label, children, className = "" }: { label: string; children
       <summary className="cursor-pointer text-link">{label}</summary>
       <div className="mt-2 text-ink-soft leading-relaxed">{children}</div>
       {label.startsWith("From the book") && <ReadTheBook kind="passage" className="mt-2" />}
+    </details>
+  );
+}
+
+/** Sets or changes a routine's day and time. Routines with one show up on the client's calendar link. */
+function ScheduleEdit({ c }: { c: { id: string; cadence: string; when: string; days: string; time: string; startsOn: Date | null } }) {
+  const on = isScheduled(c);
+  const s = scheduleOf(c);
+  const dayLabel = s.days.length ? daysToText(s.days) : "";
+  return (
+    <details className="mt-1 text-sm">
+      <summary className="cursor-pointer text-link">{on ? "Change day or time" : "Set a day and time for my calendar"}</summary>
+      <form action={updateCommitmentSchedule} className="mt-2 flex flex-wrap items-end gap-2">
+        <input type="hidden" name="id" value={c.id} />
+        <label className="block"><span className="sr-only">Which days</span>
+          <select name="whenDays" defaultValue={DAY_CHOICES.includes(dayLabel) ? dayLabel : ""} className="input !py-2 max-w-[180px]">
+            {DAY_CHOICES.map((d) => <option key={d} value={d}>{d || "Any day"}</option>)}
+          </select>
+        </label>
+        <label className="block"><span className="sr-only">Time</span><input type="time" name="whenTime" defaultValue={s.time} className="input !py-2 max-w-[150px]" /></label>
+        <Submit className="btn-quiet !px-4 !py-2 text-sm">Save</Submit>
+      </form>
     </details>
   );
 }
