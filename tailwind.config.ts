@@ -17,6 +17,7 @@ export default {
         heading: "rgb(var(--heading) / <alpha-value>)",
         link: "rgb(var(--link) / <alpha-value>)",
         brass: { DEFAULT: "rgb(var(--brass) / <alpha-value>)", soft: "rgb(var(--brass-soft) / <alpha-value>)" },
+        gold: { DEFAULT: "rgb(var(--gold) / <alpha-value>)", soft: "rgb(var(--gold-soft) / <alpha-value>)", hi: "rgb(var(--gold-hi) / <alpha-value>)" },
         sage: { DEFAULT: "rgb(var(--sage) / <alpha-value>)", soft: "rgb(var(--sage-soft) / <alpha-value>)" },
         clay: { DEFAULT: "rgb(var(--clay) / <alpha-value>)", soft: "rgb(var(--clay-soft) / <alpha-value>)" },
         violet: "rgb(var(--violet) / <alpha-value>)",

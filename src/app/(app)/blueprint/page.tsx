@@ -13,6 +13,7 @@ import { addIdentityPractice, saveBehavior } from "@/app/actions/identity";
 import { withArticle } from "@/content/whoIAm";
 import { Picks } from "@/components/Picks";
 import { OneMoveCards } from "@/components/OneMoveCards";
+import { Icon, IconBadge, type IconName } from "@/components/Icon";
 import { FORGE_LINES, PRACTICE_STARTERS } from "@/content/forgeLines";
 import type { PathwayKey } from "@/content/program";
 import type { PillarKey } from "@/content/types";
@@ -20,6 +21,7 @@ import type { PillarKey } from "@/content/types";
 export const metadata = { title: "Discipline by Design blueprint" };
 
 const CADENCES = { DAILY: "Daily", WEEKLY: "Weekly", MONTHLY: "Monthly", QUARTERLY: "Quarterly", ONCE: "One time" };
+const AREA_ICON: Record<string, IconName> = { ROUTINES: "sun", WEEKLY: "calendar", RELATIONSHIPS: "people", LEARNING: "book", LEADERSHIP: "flag", REVIEW: "repeat" };
 const DAY_CHOICES = ["", "Every day", "Weekdays", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 export default async function BlueprintPage() {
@@ -62,54 +64,55 @@ export default async function BlueprintPage() {
         {d.intro[0] ? <><p>{d.intro.find((t) => t.startsWith("It's the deliberate construction"))}</p><p className="mt-2">{d.intro.find((t) => t.startsWith("The question isn't"))}</p></> : "The deliberate construction of the routines, relationships, environments, and accountability structures that support sustained development."}
       </FromBook>
 
-      {(identity?.becoming || profile?.forgeStatement) && (
-        <Link href="/identity" className="mb-4 block rounded-2xl bg-navy-deep p-5 text-white hover:bg-navy">
-          <p className="text-xs uppercase tracking-[0.14em] text-white/60">This road reinforces{identity?.role ? ` · as ${withArticle(identity.role)}` : ""}</p>
-          <p className="mt-2 font-serif text-[18px] leading-snug line-clamp-3">{profile?.forgeStatement || identity?.becoming}</p>
-        </Link>
-      )}
-
-      {/* Behavior belongs in Discipline by Design, so it opens My road. */}
-      <Card className="mb-6">
-        {identity ? (
-          <form action={saveBehavior} className="space-y-2">
-            <label htmlFor="behavior" className="label">What behavior would show I&apos;ve become this person?</label>
-            <input id="behavior" name="behavior" defaultValue={identity.behavior} maxLength={1500} className="input" placeholder="Something another person could see me do" />
-            <Picks list={{ status: PICKS_STATUS, options: BEHAVIOR_PICKS[pathway] }} target="behavior" folded="Examples" />
-            <Submit className="btn-quiet">Save</Submit>
-          </form>
-        ) : (
-          <p className="text-[15px]">Start with <Link href="/identity" className="btn-link">Who I am</Link>. Then name the behavior that would show it.</p>
+      {/* Who I am, then the behavior that shows it: the road starts from the person. */}
+      <section className="mb-10 overflow-hidden rounded-[24px] shadow-[0_24px_48px_-28px_rgb(var(--navy-deep)/0.8)]">
+        {(identity?.becoming || profile?.forgeStatement) && (
+          <Link href="/identity" className="block bg-[linear-gradient(150deg,rgb(var(--navy)),rgb(var(--navy-deep)))] px-5 py-6 sm:px-7 text-white transition hover:brightness-110">
+            <p className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.16em] text-[#F8CC78]">This road reinforces{identity?.role ? ` · as ${withArticle(identity.role)}` : ""}<Icon name="arrow" className="h-4 w-4 text-white/50" /></p>
+            <p className="mt-3 font-serif text-[20px] sm:text-[22px] leading-[1.3] tracking-[-0.01em] line-clamp-4"><span aria-hidden className="mr-1 text-[#F8CC78]">&ldquo;</span>{profile?.forgeStatement || identity?.becoming}</p>
+          </Link>
         )}
-      </Card>
+        <div className="bg-card px-5 py-5 sm:px-7 sm:py-6">
+          {identity ? (
+            <form action={saveBehavior} className="space-y-2">
+              <label htmlFor="behavior" className="label">What behavior would show I&apos;ve become this person?</label>
+              <input id="behavior" name="behavior" defaultValue={identity.behavior} maxLength={1500} className="input" placeholder="Something another person could see me do" />
+              <div className="flex items-start justify-between gap-3">
+                <Picks list={{ status: PICKS_STATUS, options: BEHAVIOR_PICKS[pathway] }} target="behavior" folded="Examples" />
+                <Submit className="btn-quiet !py-2 mt-1.5 shrink-0">Save</Submit>
+              </div>
+            </form>
+          ) : (
+            <p className="text-[15px]">Start with <Link href="/identity" className="btn-link">Who I am</Link>. Then name the behavior that would show it.</p>
+          )}
+        </div>
+      </section>
 
-      <section id="one-move" className="mb-6 scroll-mt-20">
-        <h2 className="h3 mb-3">One move this week</h2>
+      <section id="one-move" className="mb-10 scroll-mt-20">
+        <SectionHead title="One move this week" />
         {!focus && <p className="mb-3 text-sm muted">Pick a focus pillar from your assessment results first.</p>}
         <OneMoveCards pack={pack} goals={goals} priority={focus} level={identity?.level} />
       </section>
 
       {d.whosChecking.length > 0 && (
-        <Card className="mb-6 border-line">
-          <p className="font-serif text-lg leading-snug">{d.whosChecking[0]}</p>
-          <FromBook label="So who's checking?" className="mt-2 !mb-0">{d.whosChecking[2]}</FromBook>
-        </Card>
+        <figure className="mb-10 border-l-2 border-gold/60 pl-5">
+          <blockquote className="font-serif text-[21px] sm:text-[24px] leading-[1.3] tracking-[-0.01em] text-heading">{d.whosChecking[0]}</blockquote>
+          <FromBook label="So who's checking?" className="mt-3 !mb-0">{d.whosChecking[2]}</FromBook>
+        </figure>
       )}
 
       {identity && (
-        <Card className="mb-6" >
-          <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-            <h2 className="h3">Identity practice</h2>
-            <Link href="/identity" className="chip whitespace-nowrap">{LEVELS[identity.level as IdentityLevel].name}</Link>
-          </div>
-          <ul className="mt-3 divide-y divide-line">
+        <section className="mb-10">
+          <SectionHead title="Identity practice" meta={<Link href="/identity" className="chip whitespace-nowrap">{LEVELS[identity.level as IdentityLevel].name}</Link>} />
+          <Card className="!py-2">
+          <ul className="divide-y divide-line/60">
             {PRACTICE[identity.level as IdentityLevel].map((item, i) => {
               const a = item.action;
               const source = a.kind === "commit" ? (a.from === "behavior" ? identity.behavior : a.from === "cue" ? identity.personaCue : a.from === "standards" ? identity.personaStandards : "ok") : "ok";
               const title = a.kind === "commit" ? (a.from === "behavior" ? identity.behavior.split("\n")[0].trim().slice(0, 200) : a.from === "cue" ? identity.personaCue.split("\n")[0].trim().slice(0, 200) : a.from === "standards" ? "Read my standards" : "Review my week against my standards") : "";
               const added = a.kind === "commit" && items.some((c) => c.title === title && ["Who I am", "Identity shift", "Identity Shift"].includes(c.detail));
               return (
-                <li key={item.text} className="py-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5">
+                <li key={item.text} className="py-3.5 flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5">
                   <span className="text-[15px]">{item.text}</span>
                   {a.kind === "link" ? (
                     <Link href={a.href} className="text-sm btn-link">{a.button}</Link>
@@ -124,61 +127,36 @@ export default async function BlueprintPage() {
               );
             })}
           </ul>
-        </Card>
+          </Card>
+        </section>
       )}
 
-      <div className="space-y-4">
+      <SectionHead title="My system" sub="The routines and reviews that keep you on the road." />
+      <div className="card !p-0 divide-y divide-line/60">
         {BLUEPRINT_AREAS.map((area) => {
-          if (area.key === "ACCOUNTABILITY") {
-            return (
-              <Card key="PEOPLE">
-                <div className="flex items-baseline justify-between gap-3">
-                  <h2 className="h3">My people</h2>
-                  <span className="text-xs muted">{peopleNamed} of {peopleRows.length} named</span>
-                </div>
-                <ul className="mt-3 divide-y divide-line">
-                  {peopleRows.map((row) => {
-                    const named = rels.filter((x) => row.roles.includes(x.role));
-                    return (
-                      <li key={row.label} className="py-3 flex items-start justify-between gap-4">
-                        <div>
-                          <p className="text-[15px] font-medium">{row.label}</p>
-                          {named.length > 0
-                            ? <p className="text-[15px]">{named.map((x) => x.name).join(", ")}</p>
-                            : <p className="text-sm text-ink-mute">Not named yet</p>}
-                        </div>
-                        {named.length > 0
-                          ? <Link href="/network" className="text-sm btn-link shrink-0">Check-ins</Link>
-                          : <Link href={`/network?role=${row.add}#add`} className="text-sm btn-link shrink-0">Add</Link>}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </Card>
-            );
-          }
-          if (PEOPLE_AREAS.includes(area.key)) return null;
+          if (area.key === "ACCOUNTABILITY" || PEOPLE_AREAS.includes(area.key)) return null;
           const mine = items.filter((i) => i.area === area.key);
           const people: typeof rels = [];
           const text = inv(area.inventory);
           return (
-            <Card key={area.key}>
-              <div className="flex items-baseline justify-between gap-3">
-                <h2 className="h3">{area.label}</h2>
-                <span className="text-xs muted">{mine.length + people.length || ""}</span>
+            <section key={area.key} className="px-5 py-5 sm:px-7">
+              <div className="flex items-center gap-3">
+                <IconBadge name={AREA_ICON[area.key] ?? "target"} />
+                <h3 className="h3 flex-1 leading-snug">{area.label}</h3>
+                {mine.length + people.length > 0 && <span className="chip">{mine.length + people.length}</span>}
               </div>
               {(mine.length > 0 || people.length > 0) && (
-                <ul className="mt-3 divide-y divide-line">
+                <ul className="mt-3 divide-y divide-line/60">
                   {people.map((r) => (
                     <li key={r.id} className="py-2 flex justify-between text-[15px]"><span>{r.name}</span><Link href="/network" className="text-sm btn-link">every {r.cadenceDays} days</Link></li>
                   ))}
                   {mine.map((c) => (
-                    <li key={c.id} className="py-2 flex items-start justify-between gap-3">
+                    <li key={c.id} className="py-3 flex items-start justify-between gap-3">
                       <div>
                         <p className="text-[15px]">{c.title}</p>
                         <p className="text-sm muted">{CADENCES[c.cadence as keyof typeof CADENCES]}{c.when ? ` · ${c.when}` : ""}{c.detail ? ` · ${c.detail}` : ""}</p>
                       </div>
-                      <form action={removeCommitment}><input type="hidden" name="id" value={c.id} /><button className="text-sm text-ink-mute hover:text-alert" aria-label={`Remove ${c.title}`}>Remove</button></form>
+                      <form action={removeCommitment}><input type="hidden" name="id" value={c.id} /><button className="text-[13px] text-ink-mute hover:text-alert" aria-label={`Remove ${c.title}`}>Remove</button></form>
                     </li>
                   ))}
                 </ul>
@@ -213,10 +191,33 @@ export default async function BlueprintPage() {
                     <Submit className="btn-quiet">Add</Submit>
                   </form>
                 </details>
-            </Card>
+            </section>
           );
         })}
       </div>
+      <section className="mt-10">
+        <SectionHead title="My people" meta={<span className="chip">{peopleNamed} of {peopleRows.length} named</span>} />
+        <Card>
+                <ul className="-my-2 divide-y divide-line/60">
+                  {peopleRows.map((row) => {
+                    const named = rels.filter((x) => row.roles.includes(x.role));
+                    return (
+                      <li key={row.label} className="py-3 flex items-center justify-between gap-4">
+                        <div>
+                          <p className="text-[13px] text-ink-mute">{row.label}</p>
+                          {named.length > 0
+                            ? <p className="text-[15px]">{named.map((x) => x.name).join(", ")}</p>
+                            : <p className="text-[15px] text-ink-mute/80">Not named yet</p>}
+                        </div>
+                        {named.length > 0
+                          ? <Link href="/network" className="text-sm btn-link shrink-0">Check-ins</Link>
+                          : <Link href={`/network?role=${row.add}#add`} className="btn-quiet !px-3.5 !py-1.5 text-sm shrink-0"><Icon name="plus" className="h-3.5 w-3.5" />Add</Link>}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </Card>
+      </section>
       {d.inventory.length > 0 && (
         <FromBook label="From the book: your coach, your feed, your engine" className="mt-6">
           {d.inventory.filter((i) => ["Your coach", "Your feed", "Your engine"].includes(i.label)).map((i) => (
@@ -226,6 +227,19 @@ export default async function BlueprintPage() {
         </FromBook>
       )}
     </>
+  );
+}
+
+/** A section title on the page: serif, with an optional note or chip on the right. */
+function SectionHead({ title, sub, meta }: { title: string; sub?: string; meta?: React.ReactNode }) {
+  return (
+    <div className="mb-4">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="h2">{title}</h2>
+        {meta}
+      </div>
+      {sub && <p className="mt-1 text-sm text-ink-soft">{sub}</p>}
+    </div>
   );
 }
 
