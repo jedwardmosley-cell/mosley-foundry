@@ -67,8 +67,13 @@ export async function uploadContent(_: SetupState, fd: FormData): Promise<SetupS
   const forge = fd.get("forge");
   if (forge instanceof File && forge.size > 0) {
     if (forge.size > 2_000_000) return { error: `${forge.name} is too large.` };
-    const md = await forge.text();
-    if (!/^# Cards/m.test(md) || !/^#{1,2} Rule 1\b/m.test(md)) return { error: `${forge.name} does not look like the forge-source.md file.` };
+    // Phones can add a byte-order mark or Windows line endings. Neither matters.
+    const md = (await forge.text()).replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n");
+    const hasBook = /^#{1,2} Rule 1\b/m.test(md);
+    const hasCards = /^# Cards\s*$/m.test(md);
+    if (!hasBook && !hasCards) return { error: `${forge.name} does not look like forge-source.md. It has neither the Rule sections nor the teaching cards.` };
+    if (!hasCards) return { error: `${forge.name} has the book text but not the app's teaching cards. Upload the combined forge-source.md from the build team: it ends with a section called Cards.` };
+    if (!hasBook) return { error: `${forge.name} has the teaching cards but not the book's Rule sections. Upload the combined forge-source.md from the build team.` };
     await db.contentPack.upsert({ where: { key: "forge-source" }, create: { key: "forge-source", json: JSON.stringify({ md }) }, update: { json: JSON.stringify({ md }) } });
     done.push(forge.name);
   }
