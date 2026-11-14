@@ -24,6 +24,8 @@ export type ForgeSource = {
   cards: Partial<Record<PillarKey, ForgeCard>>;
   /** The author's teaching guide: the Library, the full guide per rule, and What this means. */
   guide: ForgeGuide | null;
+  /** Standalone exercises from the book's stories: no names, nothing that assumes the book. */
+  exercises: { group: string; items: { title: string; theme: string; setup: string; prompts: string[] }[] }[];
 };
 
 export type GuideSection = { heading: string; md: string };
@@ -130,5 +132,15 @@ export function parseForgeSource(md: string): ForgeSource {
     bookSources,
     cards,
     guide: parseGuide(top["Guide"]),
+    exercises: Object.entries(sections(top["Exercises"] ?? "", 2)).map(([group, body]) => ({
+      group,
+      items: Object.entries(sections(body, 3)).map(([title, raw]) => {
+        const lines = raw.split("\n");
+        const theme = lines.find((l) => /^Theme:/.test(l))?.replace(/^Theme:\s*/, "").trim() ?? "";
+        const prompts = lines.filter((l) => l.trim().startsWith("- ")).map((l) => l.trim().slice(2));
+        const setup = text(lines.filter((l) => !/^Theme:/.test(l) && !l.trim().startsWith("- ")).join("\n"));
+        return { title, theme, setup, prompts };
+      }),
+    })).filter((g) => g.items.length),
   };
 }

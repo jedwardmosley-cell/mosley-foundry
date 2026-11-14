@@ -13,7 +13,8 @@ export const metadata = { title: "Library" };
 /** The Library is the author's teaching guide, The FORGE Framework: Five Rules for the Road. */
 export default async function LibraryPage() {
   await requireUser();
-  const g = (await getForgeSource())?.guide;
+  const src = await getForgeSource();
+  const g = src?.guide;
   if (!g) {
     return (
       <>
@@ -66,6 +67,25 @@ export default async function LibraryPage() {
         <section key={s.heading} className="mt-10">
           <h2 className="h2 mb-4">{s.heading}</h2>
           <GuideText md={s.md} />
+        </section>
+      ))}
+
+      {/* Exercises from the book's stories, rewritten to stand on their own. */}
+      {(src?.exercises ?? []).map((grp) => (
+        <section key={grp.group} className="mt-12">
+          <h2 className="h2 mb-1">{grp.group}</h2>
+          <p className="mb-4 text-[15px] text-ink-soft">{/questions/i.test(grp.group) ? "Questions worth sitting with. Pick one that hits close and write your answer this week." : "A short story and two layers of questions. Pick one that hits close and do it this week."}</p>
+          <div className="space-y-3">
+            {grp.items.map((x) => (
+              <details key={x.title} className="card !py-4">
+                <summary className="cursor-pointer text-[16px] font-medium text-heading">{x.title}{x.theme && <span className="ml-2 text-sm font-normal text-ink-mute">{x.theme}</span>}</summary>
+                {x.setup && <p className="mt-3 font-serif text-[17px] leading-[1.55] text-heading">{x.setup}</p>}
+                <ol className="mt-4 space-y-3 text-[15px] leading-relaxed">
+                  {x.prompts.map((pr, i) => <li key={i} className="rounded-2xl bg-ink/[0.04] px-4 py-3">{pr}</li>)}
+                </ol>
+              </details>
+            ))}
+          </div>
         </section>
       ))}
 

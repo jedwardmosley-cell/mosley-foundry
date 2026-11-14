@@ -36,7 +36,11 @@ export default async function ContentReview() {
           .map((x) => ({ label: x.heading, items: x.md.split(/\n{2,}/).map((p) => p.replace(/\*\*|\*/g, "")) }))
       : [{ label: "Not installed", items: ["Upload forge-source.md at /setup to see it here."] }],
   };
-  const sets = [guideSet, bookSet, forgeSet, ...reviewSets()];
+  const exSet: ReviewSet = {
+    key: "exercises", title: "Exercises from the book's stories", where: "Library, and the coach's exercise list", file: "forge-source.md (uploaded at /setup)", draft: src?.draft ?? true,
+    groups: (src?.exercises ?? []).flatMap((grp) => grp.items.map((x) => ({ label: `${grp.group}: ${x.title}`, items: [x.setup, ...x.prompts] }))),
+  };
+  const sets = [guideSet, exSet, bookSet, forgeSet, ...reviewSets()];
   const drafts = sets.filter((s) => s.draft);
   return (
     <>

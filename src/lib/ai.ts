@@ -52,7 +52,7 @@ export async function buildChunks(): Promise<Chunk[]> {
   if (d.whosChecking.length) add("Book, Ch. 10 Discipline by Design, So Who's Checking?", d.whosChecking.join(" "));
   if (d.leadingOthers.length) add("Book, Ch. 10 Discipline by Design, Now the Part That Isn't About You", d.leadingOthers.join(" "));
   for (const e of pack.edsLessons) add(`Lessons from the road: ${e.title} (${e.chapter})`, [e.quote, e.setup, ...e.prompts].filter(Boolean).join(" "));
-  for (const j of pack.jaysJourney) add(`Jay's Journey: ${j.title}`, [j.setup, ...j.prompts].filter(Boolean).join(" "));
+  for (const j of pack.jaysJourney) add(`Questions for the road: ${j.title}`, [j.setup, ...j.prompts].filter(Boolean).join(" "));
   for (const p of pack.profiles) add(`FORGE in the Wild: ${p.name}`, [p.subtitle, p.designedDiscipline, p.lesson].filter(Boolean).join(" "));
   if (pack.thirtyDayPlan.length) add("The 30-day implementation plan", pack.thirtyDayPlan.map((w) => `${w.label} ${w.focus}: ${w.work}`).join(" "));
   for (const s of SEGMENTS) add(`Leading Others program, Segment ${s.key}: ${s.title} (program brief)`, s.summary);
