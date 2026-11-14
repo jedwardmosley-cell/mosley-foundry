@@ -22,10 +22,10 @@ export function HelpMeWrite({ kind, target, strip = "" }: { kind: DraftKind; tar
   return (
     <span ref={ref} className="inline-flex flex-col">
       <button type="button" onClick={run} disabled={pending} className="text-sm btn-link text-left">
-        <span aria-hidden className="mr-1">✦</span>{pending ? "Drafting..." : "Help me with this"}
+        <span aria-hidden className="mr-1">✦</span>{pending ? "Writing..." : "Help me with this"}
       </button>
       {error && <span role="alert" className="text-xs text-alert mt-1">{error}</span>}
-      {!error && <span className="text-[11px] text-ink-mute">A starting draft from what you have recorded. Edit it until it is true, then save.</span>}
+      {!error && <span className="text-[11px] text-ink-mute">A starting point from what you have recorded. Edit it until it is true, then save.</span>}
     </span>
   );
 }
