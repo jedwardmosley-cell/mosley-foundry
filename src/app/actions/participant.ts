@@ -231,8 +231,20 @@ export async function startCycle(fd: FormData) {
   if (role) await db.identityProfile.updateMany({ where: { userId: u.id, NOT: { role } }, data: { role } });
   await db.developmentCycle.updateMany({ where: { userId: u.id, status: "ACTIVE" }, data: { status: "STOPPED" } });
   const s = await seasonForNewCycle(u.id, season);
+  // Month 2 or 3 of a season starts from last month's week 1 answers. The client reviews them in
+  // week 1 setup and sends the plan again; last month's person is already picked.
+  const last = s.seasonId && s.seasonMonth && s.seasonMonth > 1
+    ? await db.developmentCycle.findFirst({ where: { userId: u.id, seasonId: s.seasonId }, orderBy: { startDate: "desc" } })
+    : null;
+  const carried = last && (last.situation || last.newResponse)
+    ? {
+        situation: last.situation, feeling: last.feeling, oldResponse: last.oldResponse, newResponse: last.newResponse || d.focus, gap: last.gap, plan: last.plan,
+        firstGuess: JSON.stringify({ situation: last.situation, feeling: last.feeling, oldResponse: last.oldResponse, newResponse: last.newResponse, gap: last.gap }),
+        partnerId: last.partnerId, shareFeeling: last.shareFeeling, shareOld: last.shareOld, shareGap: last.shareGap,
+      }
+    : { newResponse: d.focus };
   await db.developmentCycle.create({
-    data: { userId: u.id, role, seasonId: s.seasonId, seasonMonth: s.seasonMonth, pillar: d.pillar, focus: d.focus, newResponse: d.focus, template: d.template, startDate: d.startDate ? new Date(d.startDate + "T00:00:00") : new Date(new Date().toDateString()) },
+    data: { userId: u.id, role, seasonId: s.seasonId, seasonMonth: s.seasonMonth, pillar: d.pillar, focus: carried.newResponse || d.focus, template: d.template, startDate: d.startDate ? new Date(d.startDate + "T00:00:00") : new Date(new Date().toDateString()), ...carried },
   });
   // Week 1 setup comes next: the situation, the feeling, the old and new response, the gap, then who finds out.
   redirect("/cycle/setup?step=1");
