@@ -48,7 +48,7 @@ export async function recordEqiInterpretation(fd: FormData) {
   const d = parse(z.object({ id: z.string(), participantId: z.string(), coachInterpretation: text(3000) }), fd);
   const c = await coachFor(d.participantId);
   const scopes = await grantedScopes(c, d.participantId);
-  if (!scopes.has("EQI")) throw new Error("The participant has not shared EQ-i priorities.");
+  if (!scopes.has("EQI")) throw new Error("The participant has not shared what they're working on from their feedback.");
   // Recording resets approval: the participant must approve the new wording before it is shared again.
   await db.eqiPriority.updateMany({
     where: { id: d.id, userId: d.participantId, participantApproved: true },

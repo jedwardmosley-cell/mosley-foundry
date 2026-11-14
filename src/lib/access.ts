@@ -21,7 +21,7 @@ export const SHARE_SCOPES = {
   REFLECTIONS: "Reflections I mark as shared",
   BLUEPRINT: "My road: my routines, commitments and people areas (Discipline by Design)",
   NETWORK: "Accountability relationships (names, roles, check-in cadence)",
-  EQI: "EQ-i development priorities I approve",
+  EQI: "What I'm working on from my feedback, each one I share",
   IDENTITY: "Who's behind the wheel: my statement, my kind of change and my defining behavior",
   FEEDBACK: "My feedback: the 360 and EQ-i summaries I choose to share, one at a time",
   PLAN: "My 30-day plan: the moment, the feeling, what I usually do, what I'll do instead, and what makes it hard",

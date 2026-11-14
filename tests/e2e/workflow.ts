@@ -263,13 +263,13 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal(file.status(), 200);
     assert.equal(file.headers()["content-type"], "application/pdf");
     // a priority from it, put to work
-    const add = page.locator("form", { hasText: "Priority from this feedback" });
+    const add = page.locator("form", { hasText: "What I'm working on" });
     await add.locator('input[name="label"]').fill("Impulse control in budget meetings");
     await add.locator('select[name="pillar"]').selectOption("E");
     await add.locator('input[name="practice"]').fill("One breath before I answer");
-    await Promise.all([page.waitForLoadState("networkidle"), add.locator('button:has-text("Add priority")').click()]);
+    await Promise.all([page.waitForLoadState("networkidle"), add.locator('button:has-text("Add")').click()]);
     await page.waitForSelector("text=Practice this for 30 days");
-    assert.equal(await page.locator('button:has-text("Share this priority")').count(), 0, "no share button without a coach");
+    assert.equal(await page.locator('button:has-text("Share with")').count(), 0, "no share button without a coach");
     await Promise.all([page.waitForURL("**/road"), page.click('button:has-text("Add to My road")')]);
     await page.waitForSelector("text=One breath before I answer");
     // the AI switch turns on for this entry only
