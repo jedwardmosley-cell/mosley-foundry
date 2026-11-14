@@ -66,6 +66,7 @@ model User {
   coachingSessionsAsCoach       CoachingSession[]    @relation("SessionCoach")
   coachingSessionsAsParticipant CoachingSession[]    @relation("SessionParticipant")
   auditEvents                   AuditEvent[]         @relation("AuditActor")
+  feedback                      Feedback[]
 }
 
 model Session {
@@ -186,40 +187,40 @@ model RelationshipCheckIn {
 // ---------- 30-day development cycles ----------
 
 model DevelopmentCycle {
-  id          String         @id @default(cuid())
-  userId      String
-  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  template    String // key into CYCLE_TEMPLATES (src/content/program.ts)
-  pillar      String // enum: F | O | R | G | E
-  focus       String         @default("") // the behavior being worked
-  startDate   DateTime
-  status      String         @default("ACTIVE") // enum: ACTIVE | COMPLETED | STOPPED
-  weekNotes   String         @default("{}") // JSON: { "1": "...", "2": "..." }
-  weekStatus  String         @default("{}") // JSON: { "1": "DONE" | "PARTIAL" | "NOT_YET" }
-  finalReview String         @default("")
-  decision    String         @default("") // enum-ish: CONTINUE_ALONE | GO_FURTHER | NEW_CYCLE, plus free text
-  completedAt DateTime?
-  createdAt   DateTime       @default(now())
-  role        String         @default("") // the role this 30 days is about
-  seasonId    String? // set when this cycle is one month of a 90-day season
-  season      Season?        @relation(fields: [seasonId], references: [id], onDelete: SetNull)
-  seasonMonth Int? // 1, 2 or 3
+  id           String         @id @default(cuid())
+  userId       String
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  template     String // key into CYCLE_TEMPLATES (src/content/program.ts)
+  pillar       String // enum: F | O | R | G | E
+  focus        String         @default("") // the behavior being worked
+  startDate    DateTime
+  status       String         @default("ACTIVE") // enum: ACTIVE | COMPLETED | STOPPED
+  weekNotes    String         @default("{}") // JSON: { "1": "...", "2": "..." }
+  weekStatus   String         @default("{}") // JSON: { "1": "DONE" | "PARTIAL" | "NOT_YET" }
+  finalReview  String         @default("")
+  decision     String         @default("") // enum-ish: CONTINUE_ALONE | GO_FURTHER | NEW_CYCLE, plus free text
+  completedAt  DateTime?
+  createdAt    DateTime       @default(now())
+  role         String         @default("") // the role this 30 days is about
+  seasonId     String? // set when this cycle is one month of a 90-day season
+  season       Season?        @relation(fields: [seasonId], references: [id], onDelete: SetNull)
+  seasonMonth  Int? // 1, 2 or 3
   // Week 1 setup: the pattern being interrupted. Private unless the client shares the PLAN scope.
-  situation   String         @default("")
-  feeling     String         @default("")
-  oldResponse String         @default("")
-  newResponse String         @default("")
-  gap         String         @default("")
-  plan        String         @default("") // "When ___ and I feel ___, I will ___." The client's wording.
-  firstGuess  String         @default("{}") // JSON: the week 1 answers as first written, kept when they change
-  weekAnswers String         @default("{}") // JSON: { "2": {...}, "3": {...}, "4": {...} }
-  partnerId   String? // the person from My people who finds out
-  shareFeeling Boolean       @default(false)
-  shareOld    Boolean        @default(false)
-  shareGap    Boolean        @default(false)
-  sharedLog   String         @default("[]") // JSON: [{ at, to, kind }] each time the client taps Send
-  setupDoneAt DateTime? // set when the client sends the plan to someone
-  checkIns    DailyCheckIn[]
+  situation    String         @default("")
+  feeling      String         @default("")
+  oldResponse  String         @default("")
+  newResponse  String         @default("")
+  gap          String         @default("")
+  plan         String         @default("") // "When ___ and I feel ___, I will ___." The client's wording.
+  firstGuess   String         @default("{}") // JSON: the week 1 answers as first written, kept when they change
+  weekAnswers  String         @default("{}") // JSON: { "2": {...}, "3": {...}, "4": {...} }
+  partnerId    String? // the person from My people who finds out
+  shareFeeling Boolean        @default(false)
+  shareOld     Boolean        @default(false)
+  shareGap     Boolean        @default(false)
+  sharedLog    String         @default("[]") // JSON: [{ at, to, kind }] each time the client taps Send
+  setupDoneAt  DateTime? // set when the client sends the plan to someone
+  checkIns     DailyCheckIn[]
 }
 
 model DailyCheckIn {
@@ -325,17 +326,43 @@ model AssignedExercise {
 }
 
 model EqiPriority {
-  id                  String   @id @default(cuid())
+  id                  String    @id @default(cuid())
   userId              String
-  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   label               String // participant's own words for the development priority
   pillar              String? // FORGE pillar the participant links this priority to (their choice)
-  note                String   @default("")
-  practice            String   @default("")
-  coachInterpretation String   @default("") // recorded by a qualified coach
+  note                String    @default("")
+  practice            String    @default("")
+  coachInterpretation String    @default("") // recorded by a qualified coach
   interpretationBy    String?
-  participantApproved Boolean  @default(false)
-  createdAt           DateTime @default(now())
+  participantApproved Boolean   @default(false)
+  createdAt           DateTime  @default(now())
+  feedbackId          String? // the My feedback entry this priority came from
+  feedback            Feedback? @relation(fields: [feedbackId], references: [id], onDelete: SetNull)
+}
+
+// The client's own summary of a 360 or an EQ-i debrief. Never the vendor report.
+// Private by default: the coach sees an entry only when the client shares it, and the AI
+// companion reads the summary (never the file) only when the client turns that on.
+model Feedback {
+  id         String        @id @default(cuid())
+  userId     String
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  source     String // enum: CCL_360 | EQI | OTHER_360 | OTHER
+  title      String
+  takenOn    DateTime?
+  summary    String        @default("")
+  pillars    String        @default("[]") // JSON: the FORGE pillars the client says it speaks to
+  ownSummary Boolean       @default(false) // the client confirmed this is their own summary, not the full report
+  shareCoach Boolean       @default(false)
+  allowAi    Boolean       @default(false)
+  fileName   String?
+  fileType   String?
+  fileSize   Int?
+  fileData   Bytes?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  priorities EqiPriority[]
 }
 
 // ---------- Programs and cohorts ----------

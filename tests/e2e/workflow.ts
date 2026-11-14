@@ -244,25 +244,49 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.screenshot({ path: `${shots}/06b-plan.png`, fullPage: false });
   });
 
-  await check("7c. EQ-i is optional: opt in, link a priority to a pillar, put it to work", async () => {
+  await check("7c. My feedback: own summary and file, private, tagged to a pillar, put to work", async () => {
+    // the old EQ-i address lands on My feedback
     await page.goto(`${BASE}/pathway/eqi`);
-    await page.waitForSelector("text=you can skip this");
-    await submitAndWait(page, 'button:has-text("I have had my EQ-i debrief")');
-    const add = page.locator("form", { hasText: "Priority from my debrief" });
+    await page.waitForURL("**/feedback");
+    await Promise.all([page.waitForURL("**/feedback/new"), page.click('a:has-text("Add feedback")')]);
+    await page.locator("label", { hasText: "EQ-i 2.0" }).click();
+    await page.fill('textarea[name="summary"]', "MY-SUMMARY: I go quiet and then react when a budget gets questioned.");
+    await page.setInputFiles('input[name="file"]', { name: "my-notes.pdf", mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.4 my own notes") });
+    await page.locator("label", { hasText: "Emotionally Anchored" }).click();
+    await page.locator('input[name="ownSummary"]').check();
+    await Promise.all([page.waitForURL(/\/feedback\/[a-z0-9]+$/), page.click('button:has-text("Save")')]);
+    await page.waitForSelector("text=MY-SUMMARY");
+    const fb = await db.feedback.findFirstOrThrow({ where: { user: { email } } });
+    assert.equal(fb.shareCoach || fb.allowAi, false, "private, and off for the AI, by default");
+    assert.equal(fb.ownSummary, true);
+    const file = await page.request.get(`${BASE}/feedback/${fb.id}/file`);
+    assert.equal(file.status(), 200);
+    assert.equal(file.headers()["content-type"], "application/pdf");
+    // a priority from it, put to work
+    const add = page.locator("form", { hasText: "Priority from this feedback" });
     await add.locator('input[name="label"]').fill("Impulse control in budget meetings");
     await add.locator('select[name="pillar"]').selectOption("E");
-    await add.locator("summary").click();
     await add.locator('input[name="practice"]').fill("One breath before I answer");
     await Promise.all([page.waitForLoadState("networkidle"), add.locator('button:has-text("Add priority")').click()]);
-    await page.waitForSelector("text=Start a 30-day cycle on Emotionally Anchored");
-    assert.equal(await page.locator('button:has-text("Share with")').count(), 0, "no share button without a coach");
-    await page.screenshot({ path: `${shots}/06c-eqi.png`, fullPage: true });
-    await Promise.all([page.waitForURL("**/road"), page.click('button:has-text("Add the practice to My road")')]);
+    await page.waitForSelector("text=Practice this for 30 days");
+    assert.equal(await page.locator('button:has-text("Share this priority")').count(), 0, "no share button without a coach");
+    await Promise.all([page.waitForURL("**/road"), page.click('button:has-text("Add to My road")')]);
     await page.waitForSelector("text=One breath before I answer");
-    await page.goto(`${BASE}/pathway/eqi`);
-    await Promise.all([page.waitForURL(/\/cycle\/new\?pillar=E/), page.click('a:has-text("Start a 30-day cycle on Emotionally Anchored")')]);
+    // the AI switch turns on for this entry only
+    await page.goto(`${BASE}/feedback/${fb.id}`);
+    await Promise.all([page.waitForLoadState("networkidle"), page.click('button[aria-label="Let the AI companion use my summary"]')]);
+    await page.waitForSelector('button[aria-label="Let the AI companion use my summary"][aria-checked="true"]');
+    // practicing it for 30 days warns that the current 30 days would end
+    await Promise.all([page.waitForURL(/\/cycle\/new\?pillar=E/), page.click('a:has-text("Practice this for 30 days")')]);
     assert.equal(await page.inputValue('input[name="focus"]'), "One breath before I answer");
     assert.ok(await page.locator('input[name="pillar"][value="E"]').isChecked());
+    await page.waitForSelector("text=Starting a new one ends it.");
+    await page.waitForSelector('button:has-text("Start anyway")');
+    // the results page says where the feedback points, and that it is a different measure
+    const a = await db.assessment.findFirstOrThrow({ where: { user: { email } }, orderBy: { completedAt: "desc" } });
+    await page.goto(`${BASE}/assessment/${a.id}`);
+    await page.waitForSelector("text=My feedback points to Emotionally Anchored");
+    await page.waitForSelector("text=It isn't the same measure as your FORGE scores.");
   });
 
   await check("7e. Who I am: three equal kinds, one statement on Today, behavior on My road, history kept", async () => {

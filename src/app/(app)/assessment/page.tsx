@@ -47,6 +47,14 @@ export default async function AssessmentPage({ searchParams }: { searchParams: P
         </div>
       )}
 
+      <Link href="/feedback" className="tile mb-6 flex items-center gap-4 transition hover:-translate-y-0.5">
+        <span className="flex-1">
+          <span className="block text-[15px] font-medium text-heading">My feedback</span>
+          <span className="block text-sm text-ink-soft">Had a 360 or an EQ-i debrief? Add your own summary and connect it to FORGE.</span>
+        </span>
+        <span aria-hidden className="text-ink-mute">›</span>
+      </Link>
+
       {past.length > 0 && (
         <div className="card mb-6">
           <p className="eyebrow">Previous readings</p>

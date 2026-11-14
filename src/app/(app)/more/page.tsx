@@ -18,7 +18,7 @@ const GROUPS: [string, [string, string, string][]][] = [
     ["/network", "People", "Log check-ins with the people on your road."],
     ["/companion", "AI companion", "Think it through, practice a hard conversation, prepare for coaching."],
     ["/pathway", "My pathway", "Program segments and work for your pathway."],
-    ["/pathway/eqi", "EQ-i priorities", "Optional. For people who have had an EQ-i debrief."],
+    ["/feedback", "My feedback", "Your own summary of a 360 or an EQ-i debrief, connected to FORGE. Private unless you share it."],
     ["/library", "Library", "The FORGE Framework: the five rules for the road, and how to put each one into practice."],
   ]],
   ["Mine", [

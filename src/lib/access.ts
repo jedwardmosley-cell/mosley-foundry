@@ -23,6 +23,7 @@ export const SHARE_SCOPES = {
   NETWORK: "Accountability relationships (names, roles, check-in cadence)",
   EQI: "EQ-i development priorities I approve",
   IDENTITY: "Who's behind the wheel: my statement, my kind of change and my defining behavior",
+  FEEDBACK: "My feedback: the 360 and EQ-i summaries I choose to share, one at a time",
   PLAN: "My 30-day plan: the moment, the feeling, what I usually do, what I'll do instead, and what makes it hard",
 } as const;
 export type ShareScope = keyof typeof SHARE_SCOPES;
@@ -118,6 +119,12 @@ export async function getCoachView(coach: CurrentUser, participantId: string) {
     note: has("REFLECTIONS") && c.shared ? c.note : null,
   }));
 
+  // My feedback: entries the client shared one at a time, and only with the FEEDBACK scope. Never the file bytes here.
+  const feedback = has("FEEDBACK")
+    ? await db.feedback.findMany({ where: { userId: participantId, shareCoach: true }, orderBy: { createdAt: "desc" },
+        select: { id: true, source: true, title: true, takenOn: true, summary: true, pillars: true, fileName: true } })
+    : [];
+
   // The 30-day plan and the week 1 answers are private until the client shares PLAN.
   const plan = has("PLAN")
     ? await db.developmentCycle.findFirst({ where: { userId: participantId }, orderBy: { startDate: "desc" },
@@ -125,7 +132,7 @@ export async function getCoachView(coach: CurrentUser, participantId: string) {
     : null;
 
   await audit(coach, "coach.view", participantId, [...scopes].join(","));
-  return { participant, scopes: [...scopes], profile, goals, assessment, cycle, practice, weekly, commitments, relationships, eqi, identity, plan };
+  return { participant, scopes: [...scopes], profile, goals, assessment, cycle, practice, weekly, commitments, relationships, eqi, identity, plan, feedback };
 }
 
 /** Coach-side data the coach created: sessions and assigned exercises. Participant responses honor responseShared. */

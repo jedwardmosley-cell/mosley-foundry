@@ -19,7 +19,6 @@ export default async function PathwayPage() {
     include: { cohort: { include: { sessions: { orderBy: { startsAt: "asc" }, include: { attendance: { where: { userId: u.id } } } } } } },
   });
   const goals = await db.developmentGoal.findMany({ where: { userId: u.id, segmentKey: { not: null } } });
-  const eqiCount = await db.eqiPriority.count({ where: { userId: u.id } });
 
   return (
     <>
@@ -90,20 +89,13 @@ export default async function PathwayPage() {
 
       {profile.pathway === "PERSONAL" && (
         <Card>
-          <p className="text-[15px]">Your pathway runs on the core: the FORGE assessment, your FORGE plan, My road (Discipline by Design), your people, and 30-day cycles. The <Link href="/library" className="btn-link">Road library</Link> has the book&apos;s road tests and exercises.</p>
+          <p className="text-[15px]">Your pathway runs on the core: the FORGE assessment, your FORGE plan, My road (Discipline by Design), your people, and 30-day cycles. The <Link href="/library" className="btn-link">Library</Link> has the FORGE guide and exercises.</p>
         </Card>
       )}
 
-      <Link href="/pathway/eqi" className="card block mt-5 hover:border-navy/40">
-        <div className="flex items-baseline justify-between gap-3">
-          <h2 className="h3">EQ-i priorities</h2>
-          <span className="chip">{profile.eqiEnabled ? `${eqiCount} added` : "Optional"}</span>
-        </div>
-        <p className="text-sm muted mt-1">
-          {profile.eqiEnabled
-            ? "Connect what you learned in your EQ-i debrief to a FORGE pillar, a practice and a 30-day cycle."
-            : "If you have taken the EQ-i 2.0 and had a debrief, you can connect it to your FORGE work here. If you have not, skip this."}
-        </p>
+      <Link href="/feedback" className="card block mt-5 hover:border-navy/40">
+        <h2 className="h3">My feedback</h2>
+        <p className="text-sm muted mt-1">Had a 360 or an EQ-i debrief? Add your own summary and connect it to a FORGE pillar, a practice and your 30 days.</p>
       </Link>
 
       <Card className="mt-8">
