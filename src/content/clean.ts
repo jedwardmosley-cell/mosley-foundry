@@ -30,7 +30,8 @@ function walk<T>(v: T): T {
 
 export function cleanPack(pack: ContentPack): ContentPack {
   const p = walk(pack);
-  return { ...p, edsLessons: p.edsLessons.filter((e) => !/^The Mentor$/i.test(e.title) && !/\bmentor\b/i.test(e.setup ?? "")) };
+  // FORGE in the Wild (the workbook's composite profiles) is retired at the author's request.
+  return { ...p, profiles: [], edsLessons: p.edsLessons.filter((e) => !/^The Mentor$/i.test(e.title) && !/\bmentor\b/i.test(e.setup ?? "")) };
 }
 
 export function cleanEntrepreneur(p: EntrepreneurPack): EntrepreneurPack {
