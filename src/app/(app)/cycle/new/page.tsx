@@ -68,7 +68,6 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
                       <input type="radio" name="template" value={k} defaultChecked={k === defaultTemplate} className="mt-1 accent-navy" />
                       <span>
                         <span className="font-medium text-[15px]">{w.map((x) => x.phase).join(" · ")}</span>
-                        {w[0]?.status !== "source" && <span className="block text-xs text-ink-mute mt-0.5">Draft</span>}
                       </span>
                     </label>
                   );

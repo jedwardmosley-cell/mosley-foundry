@@ -21,7 +21,7 @@ export function Picks({ list, target, label = "Tap to use one, then edit if you 
     return (
       <div ref={ref} className="mt-1.5">
         <details>
-          <summary className={`cursor-pointer text-sm text-link ${alignRight ? "text-right" : ""}`}>{folded}{list.status === "draft" && <span className="ml-2 draft !text-[10px]">Draft</span>}</summary>
+          <summary className={`cursor-pointer text-sm text-link ${alignRight ? "text-right" : ""}`}>{folded}</summary>
           {note && <p className="mt-2 text-xs text-ink-mute">{note}</p>}
           {groups && groups.map((g) => (
             <div key={g.label} className="mt-2.5">
@@ -52,7 +52,6 @@ export function Picks({ list, target, label = "Tap to use one, then edit if you 
     <div ref={ref} className="mt-2">
       <p className="text-xs text-ink-mute mb-1.5">
         {label}
-        {list.status === "draft" && <span className="ml-2 draft !text-[10px]">Draft options</span>}
       </p>
       <div className="flex flex-wrap gap-2">
         {list.options.map((o) => (
@@ -72,7 +71,6 @@ export function TagChoices({ name, list, selected = [], legend }: { name: string
     <fieldset>
       <legend className="label">
         {legend} <span className="text-ink-mute font-normal">(optional)</span>
-        {list.status === "draft" && <span className="ml-2 draft !text-[10px]">Draft options</span>}
       </legend>
       <div className="flex flex-wrap gap-2">
         {list.options.map((o) => (

@@ -1,11 +1,10 @@
-import { FORGE_LINES, type LineField } from "@/content/forgeLines";
+import { FORGE_LINES, combineLines, type LineField } from "@/content/forgeLines";
 import type { PathwayKey } from "@/content/program";
 import { asRole } from "@/content/whoIAm";
 import { PillarMark } from "./ui";
 import { PrefixedBox } from "./PrefixedBox";
 import { Picks } from "./Picks";
 import { HelpMeWrite } from "./HelpMeWrite";
-import { CombineLines } from "./CombineLines";
 import { IdentityCoach } from "./IdentityCoach";
 import { exampleGroups, examplePlaceholder, IDENTITY_EXAMPLES_STATUS, IDENTITY_TESTS } from "@/content/identityExamples";
 
@@ -56,11 +55,9 @@ export function MyStatement({ statement, earlier, ai, hint, saved, n }: { statem
           <p className="mt-1 text-ink-soft">{hint}</p>
         </details>
       )}
-      <textarea id="statement" name="statement" defaultValue={statement} className="textarea min-h-[120px]" maxLength={3000} />
-      <div className="mt-2 flex flex-wrap gap-x-6 gap-y-2">
-        <CombineLines target="statement" saved={saved ?? {}} />
-        {ai && <HelpMeWrite kind="forgeStatement" target="statement" />}
-      </div>
+      {/* Starts from the five lines when there is no statement yet. Nothing is saved until the client saves. */}
+      <textarea id="statement" name="statement" defaultValue={statement || combineLines(saved ?? {})} className="textarea min-h-[120px]" maxLength={3000} />
+      {ai && <div className="mt-2"><HelpMeWrite kind="forgeStatement" target="statement" /></div>}
     </div>
   );
 }

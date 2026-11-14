@@ -54,7 +54,7 @@ export const CLIENT_GUIDE: GuideSection[] = [
       "Choose the kind of change: core alignment, role transition or identity reinvention. None ranks above another. You choose, and you can change it later.",
       "Answer the five FORGE questions, each in your role. F: who am I becoming? O: what does someone with my identity pay attention to? R: what makes this identity meaningful to me? G: who am I when I encounter my limitations? E: who am I when emotions challenge my identity?",
       "Each answer starts with I am and describes who you are. Habits and tasks go in My road. If the AI companion is on, Help me with this tells you whether you wrote a goal, a habit, a value or an identity.",
-      "Tap Put my five together to start your statement, then edit it into one paragraph that sounds like you. This is what Today shows. Read it out loud at the start of each week.",
+      "Your statement starts from your five lines. Edit it into one paragraph that sounds like you. This is what Today shows. Read it out loud at the start of each week.",
       "With identity reinvention you can also create a performance identity, folded under that choice: a name, standards and an activation cue. It is a practice tool and it is still you.",
       "Earlier versions are kept. At the bottom you choose the AI companion's tone, what it can use, and whether your coach can see your performance identity.",
     ],

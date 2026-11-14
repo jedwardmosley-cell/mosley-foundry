@@ -9,7 +9,7 @@ import { activeSeason, nextMonth } from "@/lib/season";
 import { DAY30_DECISIONS, DAY30_CHOICES, CHECKIN_STATUS, SEASON_LENGTH } from "@/content/program";
 import { addDays, fmt, ymd } from "@/lib/dates";
 import type { PillarKey } from "@/content/types";
-import { PageHeader, Card, PillarMark, Empty, Draft, Field, Source , PILLAR_FILL } from "@/components/ui";
+import { PageHeader, Card, PillarMark, Empty, Field, Source, PILLAR_FILL } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 
 export const metadata = { title: "30-Day Cycle" };
@@ -127,7 +127,6 @@ export default async function CyclePage() {
           </li>
         </ul>
       </Card>
-      {weeks[0]?.status !== "source" && <p className="mt-2 text-xs text-ink-mute">Week descriptions are a draft. <Draft>Draft</Draft></p>}
       {past.length > 0 && <PastCycles past={past} />}
     </>
   );

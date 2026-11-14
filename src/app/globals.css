@@ -62,6 +62,8 @@ summary:not(.list-none)::before {
 details[open] > summary:not(.list-none)::before { transform: rotate(45deg) translate(-0.1em, -0.1em); }
 summary { -webkit-tap-highlight-color: transparent; }
 
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+.reveal { animation: fade 0.45s ease both; }
 @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: no-preference) {
   .rise > * { animation: rise 0.42s cubic-bezier(.2,.7,.2,1) both; }
@@ -95,7 +97,7 @@ summary { -webkit-tap-highlight-color: transparent; }
   .input:hover { border-color: rgb(var(--line)); }
   .input:focus { @apply outline-none bg-surface; border-color: rgb(var(--navy) / 0.45); box-shadow: 0 0 0 4px rgb(var(--navy) / 0.10); }
   .textarea { @apply input min-h-[96px] leading-relaxed; }
-  .btn { @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full px-5 py-3 text-[15px] font-medium transition focus:outline-none focus-visible:ring-4 focus-visible:ring-navy/20 disabled:opacity-50 active:scale-[0.98]; }
+  .btn { @apply inline-flex items-center justify-center gap-2 text-center rounded-full px-5 py-3 text-[15px] font-medium transition focus:outline-none focus-visible:ring-4 focus-visible:ring-navy/20 disabled:opacity-50 active:scale-[0.98]; }
   .btn-primary {
     @apply btn text-white;
     background: linear-gradient(180deg, rgb(var(--navy) / 0.92), rgb(var(--navy-deep)));

@@ -5,7 +5,7 @@ import { PillarMark, Field } from "./ui";
 import { Submit } from "./Submit";
 import { Picks } from "./Picks";
 import { Icon } from "./Icon";
-import { LEVELS, PILLAR_PROMPTS, PILLAR_PROMPTS_STATUS, type IdentityLevel } from "@/content/identity";
+import { LEVELS, PILLAR_PROMPTS, type IdentityLevel } from "@/content/identity";
 
 type Goal = { pillar: string; whereNow: string; whereWant: string; oneMove: string };
 
@@ -38,7 +38,6 @@ export function OneMoveCards({ pack, goals, priority, level }: { pack: ContentPa
                   <p className="rounded-2xl bg-field px-4 py-3 text-sm">
                     <span className="font-medium">For {LEVELS[level as IdentityLevel].name}: </span>
                     {PILLAR_PROMPTS[p.key][level as IdentityLevel]}
-                    {PILLAR_PROMPTS_STATUS === "draft" && <span className="ml-2 draft !text-[10px]">Draft</span>}
                   </p>
                 )}
                 <details open={!!(g?.whereNow || g?.whereWant)}>

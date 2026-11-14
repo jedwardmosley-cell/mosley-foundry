@@ -130,3 +130,8 @@ export function combineLines(lines: Partial<Record<LineField, string>>) {
     .map((t) => (/[.!?]$/.test(t) ? t : `${t}.`))
     .join(" ");
 }
+
+/** Just the five lines from a saved profile, for client components. */
+export function fiveLines(p: Partial<Record<LineField, string | null>> | null | undefined): Partial<Record<LineField, string>> {
+  return Object.fromEntries(FORGE_LINES.map((l) => [l.field, p?.[l.field] ?? ""]));
+}

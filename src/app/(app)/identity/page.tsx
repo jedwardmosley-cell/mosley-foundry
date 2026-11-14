@@ -1,10 +1,11 @@
+import { fiveLines } from "@/content/forgeLines";
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { saveWhoIAm, removeIdentity, saveIdentityControls } from "@/app/actions/identity";
 import { TONE_LABELS, type ToneSetting } from "@/lib/identityTone";
 import { LEVELS, FIRST_EXAMPLE, PICKS_STATUS, SITUATION_PICKS, type IdentityLevel } from "@/content/identity";
-import { ROLE_PICKS, WHO_I_AM_STATUS } from "@/content/whoIAm";
+import { ROLE_PICKS, WHO_I_AM_STATUS, withArticle } from "@/content/whoIAm";
 import { FORGE_IDENTITY_INTRO } from "@/content/forgeIdentityIntro";
 import { FiveSides, MyStatement } from "@/components/ForgeLinesFields";
 import { aiAvailable } from "@/lib/ai";
@@ -13,6 +14,7 @@ import type { PathwayKey } from "@/content/program";
 import { fmt } from "@/lib/dates";
 import { PageHeader, Card } from "@/components/ui";
 import { Submit } from "@/components/Submit";
+import { StatementReveal } from "@/components/StatementReveal";
 import { Picks } from "@/components/Picks";
 import { IdentitySpectrum } from "@/components/IdentitySpectrum";
 
@@ -47,7 +49,7 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
           <label htmlFor="role" className="section-title"><span className="step-n">1</span>The role this is about</label>
           <div className="flex items-center inputbox">
             <span className="pl-3.5 pr-1.5 py-2.5 text-[15px] text-ink-soft whitespace-nowrap select-none">This is about me as</span>
-            <input id="role" name="role" defaultValue={role} maxLength={80} placeholder={ROLE_PICKS[pathway][0]} className="flex-1 min-w-0 bg-transparent py-2.5 pr-3 text-[15px] focus:outline-none" />
+            <input id="role" name="role" defaultValue={role} maxLength={80} placeholder={withArticle(ROLE_PICKS[pathway][0])} className="flex-1 min-w-0 bg-transparent py-2.5 pr-3 text-[15px] focus:outline-none" />
           </div>
           <Picks list={{ status: WHO_I_AM_STATUS, options: ROLE_PICKS[pathway] }} target="role" label="Tap one, or write your own. One role for each 30 days." />
           <details className="mt-4" open={!!id?.situation}>
@@ -76,10 +78,10 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
         </Card>
 
         <Card>
-          <MyStatement n={4} statement={statement} earlier={earlier} ai={ai} hint={hint} />
+          <MyStatement n={4} statement={statement} earlier={earlier} ai={ai} hint={hint} saved={profile} />
         </Card>
 
-        <Submit>Save who I am</Submit>
+        <StatementReveal saved={fiveLines(profile)} />
       </form>
 
       {id && (

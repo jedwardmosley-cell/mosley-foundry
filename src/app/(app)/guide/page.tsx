@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { canCoach } from "@/lib/roles";
-import { CLIENT_GUIDE, COACH_GUIDE, ADMIN_GUIDE, GUIDE_STATUS, type GuideSection } from "@/content/guide";
-import { PageHeader, Draft } from "@/components/ui";
+import { CLIENT_GUIDE, COACH_GUIDE, ADMIN_GUIDE, type GuideSection } from "@/content/guide";
+import { PageHeader } from "@/components/ui";
 
 export const metadata = { title: "Guide" };
 
@@ -40,7 +40,6 @@ export default async function GuidePage() {
     <>
       <PageHeader eyebrow="How to use the app" title="Guide">
         Short steps for each part of the app. Tap a section to open it.
-        {GUIDE_STATUS === "draft" && <span className="ml-2"><Draft>Draft guide</Draft></span>}
       </PageHeader>
 
       {u.role === "PARTICIPANT" && <Sections prefix="client" sections={CLIENT_GUIDE} />}

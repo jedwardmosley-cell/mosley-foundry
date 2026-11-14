@@ -1,3 +1,4 @@
+import { fiveLines } from "@/content/forgeLines";
 import Link from "next/link";
 import { ReadTheBook } from "@/components/ReadTheBook";
 import { requireUser } from "@/lib/auth";
@@ -9,11 +10,12 @@ import { saveWhoIAm } from "@/app/actions/identity";
 import { addCommitment, addRelationship } from "@/app/actions/participant";
 import { PageHeader, Card, PillarMark, Field } from "@/components/ui";
 import { Submit } from "@/components/Submit";
+import { StatementReveal } from "@/components/StatementReveal";
 import { Picks } from "@/components/Picks";
 import { FiveSides, MyStatement } from "@/components/ForgeLinesFields";
 import { RelationshipFields } from "@/components/RelationshipFields";
 import { LEVELS, IDENTITY_LEVELS, type IdentityLevel } from "@/content/identity";
-import { ROLE_PICKS, WHO_I_AM_STATUS, KIND_NOTE } from "@/content/whoIAm";
+import { ROLE_PICKS, WHO_I_AM_STATUS, KIND_NOTE, withArticle } from "@/content/whoIAm";
 import { BLUEPRINT_PICKS } from "@/content/options";
 import { FORGE_IDENTITY_INTRO } from "@/content/forgeIdentityIntro";
 import { PRACTICE_STARTERS } from "@/content/forgeLines";
@@ -95,7 +97,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
               <label htmlFor="role" className="label">The role this is about</label>
               <div className="flex items-center inputbox">
                 <span className="pl-3.5 pr-1.5 py-2.5 text-[15px] text-ink-soft whitespace-nowrap">This is about me as</span>
-                <input id="role" name="role" defaultValue={role} maxLength={80} placeholder={ROLE_PICKS[pathway][0]} className="flex-1 min-w-0 bg-transparent py-2.5 pr-3 text-[15px] focus:outline-none" />
+                <input id="role" name="role" defaultValue={role} maxLength={80} placeholder={withArticle(ROLE_PICKS[pathway][0])} className="flex-1 min-w-0 bg-transparent py-2.5 pr-3 text-[15px] focus:outline-none" />
               </div>
               <Picks list={{ status: WHO_I_AM_STATUS, options: ROLE_PICKS[pathway] }} target="role" label="Tap one, or write your own" />
             </div>
@@ -136,7 +138,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
             <input type="hidden" name="next" value="/start?step=2" />
             <MyStatement statement={profile?.forgeStatement || identity?.becoming || ""} ai={ai} saved={profile}
               hint={profile?.pathway === "ENTREPRENEURIAL" && entrepreneur ? entrepreneur.forgeStatementPrompt : pack.forgeStatementPrompt} />
-            <Submit>Save and continue</Submit>
+            <StatementReveal label="Save and continue" saved={fiveLines(profile)} />
           </form>
         </Card>
       )}

@@ -99,7 +99,7 @@ export default async function AssessmentPage({ searchParams }: { searchParams: P
           );
         })}
         <div className="flex items-center gap-4">
-          <Submit>See my profile</Submit>
+          <Submit className="btn-primary shrink-0">See my profile</Submit>
           <p className="text-sm muted">Your answers are private. You decide later what, if anything, your coach sees.</p>
         </div>
         {pack.kind !== "licensed" && !useEntre && <Source>Draft placeholder</Source>}
