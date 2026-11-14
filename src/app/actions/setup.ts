@@ -10,9 +10,10 @@ import { clearContentCache } from "@/content";
 export type SetupState = { error?: string; ok?: string; values?: Record<string, string> } | undefined;
 
 function tokenOk(given: unknown) {
-  const expected = process.env.SETUP_TOKEN ?? "";
+  // Spaces or a line break around the token, from copying it out of Vercel, don't count.
+  const expected = (process.env.SETUP_TOKEN ?? "").trim();
   if (expected.length < 16 || typeof given !== "string") return false;
-  const a = Buffer.from(given), b = Buffer.from(expected);
+  const a = Buffer.from(given.trim()), b = Buffer.from(expected);
   return a.length === b.length && timingSafeEqual(a, b);
 }
 
@@ -67,7 +68,7 @@ export async function uploadContent(_: SetupState, fd: FormData): Promise<SetupS
   if (forge instanceof File && forge.size > 0) {
     if (forge.size > 2_000_000) return { error: `${forge.name} is too large.` };
     const md = await forge.text();
-    if (!/^# Cards/m.test(md) || !/^# Chapter 9/m.test(md)) return { error: `${forge.name} does not look like the forge-source.md file.` };
+    if (!/^# Cards/m.test(md) || !/^#{1,2} Rule 1\b/m.test(md)) return { error: `${forge.name} does not look like the forge-source.md file.` };
     await db.contentPack.upsert({ where: { key: "forge-source" }, create: { key: "forge-source", json: JSON.stringify({ md }) }, update: { json: JSON.stringify({ md }) } });
     done.push(forge.name);
   }

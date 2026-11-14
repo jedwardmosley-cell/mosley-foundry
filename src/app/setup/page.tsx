@@ -48,7 +48,7 @@ export default async function SetupPage() {
       {dbOk && tokenSet && (
         <section className="card mt-6">
           <h2 className="h2">{hasAdmin ? "Content pack" : "2. Install the content pack"}</h2>
-          <p className="text-sm muted mt-1 mb-4">Upload the two files you received. They are stored in your private database, never in the public code repository. Uploading again replaces them.</p>
+          <p className="text-sm muted mt-1 mb-4">Upload the files you received. You can upload one at a time. They are stored in your private database, never in the public code repository. Uploading again replaces them.</p>
           <ContentForm />
         </section>
       )}
