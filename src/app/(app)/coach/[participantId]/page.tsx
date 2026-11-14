@@ -183,6 +183,24 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
         </Card>
       )}
 
+      <Card className="mt-5">
+        <p className="eyebrow">My feedback</p>
+        {s.has("FEEDBACK") ? (
+          v.feedback.length ? (
+            <ul className="mt-3 space-y-4">
+              {v.feedback.map((f) => (
+                <li key={f.id}>
+                  <p className="text-[15px] font-medium">{f.title}{f.takenOn ? <span className="font-normal text-ink-mute"> · {f.takenOn.toLocaleDateString("en-US", { month: "long", year: "numeric" })}</span> : null}</p>
+                  {f.summary && <p className="mt-1 whitespace-pre-line font-serif text-[16px] leading-relaxed">{f.summary}</p>}
+                  {(JSON.parse(f.pillars || "[]") as string[]).length > 0 && <p className="mt-1 text-sm text-ink-mute">Linked to FORGE {(JSON.parse(f.pillars) as string[]).join(", ")}</p>}
+                  {f.fileName && <a href={`/feedback/${f.id}/file`} target="_blank" rel="noopener" className="mt-1 inline-block text-sm btn-link">{f.fileName}</a>}
+                </li>
+              ))}
+            </ul>
+          ) : <p className="mt-2 text-sm text-ink-mute">Nothing shared yet.</p>
+        ) : <NotShared scope="FEEDBACK" />}
+      </Card>
+
       {s.has("EQI") && (
         <Card className="mt-5">
           <p className="eyebrow">EQ-i development priorities (participant-approved)</p>

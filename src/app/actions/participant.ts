@@ -454,7 +454,7 @@ export async function setEqiEnabled(fd: FormData) {
   const u = await participant();
   const { on } = parse(z.object({ on: bool }), fd);
   await db.profile.update({ where: { userId: u.id }, data: { eqiEnabled: on } });
-  revalidatePath("/pathway/eqi");
+  revalidatePath("/feedback", "layout");
   revalidatePath("/pathway");
   revalidatePath("/dashboard");
 }
@@ -463,17 +463,18 @@ const eqiPillar = z.enum(["F", "O", "R", "G", "E", ""]).default("");
 
 export async function addEqi(fd: FormData) {
   const u = await participant();
-  const d = parse(z.object({ label: z.string().trim().min(1).max(200), note: text(1500), practice: text(1500), pillar: eqiPillar }), fd);
-  await db.eqiPriority.create({ data: { label: d.label, note: d.note, practice: d.practice, pillar: d.pillar || null, userId: u.id } });
+  const d = parse(z.object({ label: z.string().trim().min(1).max(200), note: text(1500), practice: text(1500), pillar: eqiPillar, feedbackId: z.string().optional() }), fd);
+  const feedback = d.feedbackId ? await db.feedback.findFirst({ where: { id: d.feedbackId, userId: u.id }, select: { id: true } }) : null;
+  await db.eqiPriority.create({ data: { label: d.label, note: d.note, practice: d.practice, pillar: d.pillar || null, userId: u.id, feedbackId: feedback?.id ?? null } });
   await db.profile.update({ where: { userId: u.id }, data: { eqiEnabled: true } });
-  revalidatePath("/pathway/eqi");
+  revalidatePath("/feedback", "layout");
 }
 
 export async function updateEqi(fd: FormData) {
   const u = await participant();
   const d = parse(z.object({ id: z.string(), practice: text(1500), pillar: eqiPillar }), fd);
   await db.eqiPriority.updateMany({ where: { id: d.id, userId: u.id }, data: { practice: d.practice, pillar: d.pillar || null } });
-  revalidatePath("/pathway/eqi");
+  revalidatePath("/feedback", "layout");
   revalidatePath("/dashboard");
 }
 
@@ -483,7 +484,7 @@ export async function addEqiToBlueprint(fd: FormData) {
   const { id } = parse(z.object({ id: z.string() }), fd);
   const e = await db.eqiPriority.findFirst({ where: { id, userId: u.id } });
   if (!e || !e.practice) throw new Error("Add a practice first.");
-  const detail = `From my EQ-i priority: ${e.label}`;
+  const detail = `From my feedback: ${e.label}`;
   const exists = await db.commitment.findFirst({ where: { userId: u.id, active: true, title: e.practice, detail } });
   if (!exists) await db.commitment.create({ data: { userId: u.id, area: "ROUTINES", title: e.practice, detail, cadence: "DAILY" } });
   redirect("/road");
@@ -504,7 +505,7 @@ export async function shareEqi(fd: FormData) {
       update: {},
     });
   }
-  revalidatePath("/pathway/eqi");
+  revalidatePath("/feedback", "layout");
   revalidatePath("/sharing");
 }
 
@@ -512,14 +513,14 @@ export async function approveEqiInterpretation(fd: FormData) {
   const u = await participant();
   const d = parse(z.object({ id: z.string(), approved: bool }), fd);
   await db.eqiPriority.updateMany({ where: { id: d.id, userId: u.id }, data: { participantApproved: d.approved } });
-  revalidatePath("/pathway/eqi");
+  revalidatePath("/feedback", "layout");
 }
 
 export async function deleteEqi(fd: FormData) {
   const u = await participant();
   const { id } = parse(z.object({ id: z.string() }), fd);
   await db.eqiPriority.deleteMany({ where: { id, userId: u.id } });
-  revalidatePath("/pathway/eqi");
+  revalidatePath("/feedback", "layout");
 }
 
 // ---------- Coach-assigned exercises and session prep (participant side) ----------
@@ -577,6 +578,7 @@ export async function startOver(_prev: StartOverState, fd: FormData): Promise<St
     db.developmentGoal.deleteMany({ where: { userId } }),
     db.assessment.deleteMany({ where: { userId } }),
     db.eqiPriority.deleteMany({ where: { userId } }),
+    db.feedback.deleteMany({ where: { userId } }),
     db.identityHistory.deleteMany({ where: { userId } }),
     db.identityProfile.deleteMany({ where: { userId } }),
     db.aiConversation.deleteMany({ where: { userId } }),

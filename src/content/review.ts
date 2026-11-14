@@ -11,6 +11,7 @@ import { ONE_MOVE, CYCLE_FOCUS, CHECKIN_TAGS, BLUEPRINT_PICKS, RELATIONSHIP_PURP
 import { GUIDE_STATUS, CLIENT_GUIDE } from "./guide";
 import { SEGMENTS, NIRS_WEEKS, DAY30_DECISIONS, SEASON_DECISIONS } from "./program";
 import { todayHeadline } from "@/lib/todayHeadline";
+import { FEEDBACK_STATUS, FEEDBACK_SOURCES, FEEDBACK_COPY } from "./feedback";
 import { WEEK_ONE_STATUS, SETUP_STEPS, WHO_FINDS_OUT, WEEK_QUESTIONS, AI_FEELING_NOTE, buildPlan, shareMessage, menteeMessage, weekMessage, dayThirtyMessage } from "./weekOne";
 
 export type ReviewGroup = { label: string; items: string[] };
@@ -70,6 +71,10 @@ export function reviewSets(): ReviewSet[] {
     { key: "blueprint", title: "My road picks", where: "My road, add to an area", file: "src/content/options.ts", draft: anyDraft(BLUEPRINT_PICKS), groups: lists(BLUEPRINT_PICKS) },
     { key: "people", title: "Relationship purposes", where: "People", file: "src/content/options.ts", draft: anyDraft(RELATIONSHIP_PURPOSE), groups: lists(RELATIONSHIP_PURPOSE) },
     { key: "tags", title: "Check-in tags", where: "Today, add detail", file: "src/content/options.ts", draft: CHECKIN_TAGS.status === "draft", groups: [{ label: "Where?", items: CHECKIN_TAGS.options }] },
+    {
+      key: "feedback", title: "My feedback", where: "Where I am, My feedback", file: "src/content/feedback.ts", draft: FEEDBACK_STATUS === "draft",
+      groups: [{ label: "Sources", items: Object.values(FEEDBACK_SOURCES) }, { label: "Wording", items: Object.values(FEEDBACK_COPY) }],
+    },
     {
       key: "weekone", title: "30 days: week 1 setup and who finds out", where: "30 days, week 1 setup, the weekly reflection and day 30", file: "src/content/weekOne.ts", draft: WEEK_ONE_STATUS === "draft",
       groups: [

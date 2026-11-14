@@ -1,3 +1,4 @@
+import { cyclePosition } from "@/lib/cycle";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getContent } from "@/content";
@@ -27,9 +28,19 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
   const [open, coaches] = await Promise.all([activeSeason(u.id), db.coachAssignment.count({ where: { participantId: u.id, active: true } })]);
   const month = open ? nextMonth(open.cycles.length) : null;
   const continuing = !!(open && month && sp.season !== "none");
+  // Starting a new 30 days ends one that is running. Say so before the client starts.
+  const running = await db.developmentCycle.findFirst({ where: { userId: u.id, status: "ACTIVE" }, orderBy: { startDate: "desc" }, select: { startDate: true } });
+  const runningPos = running ? cyclePosition(running.startDate) : null;
   return (
     <>
       <PageHeader eyebrow="Discipline by Design" title="Start your 30 days">Pick one pillar. Then name the moment you want to change and what you'll do instead. Checking in takes two minutes a day.</PageHeader>
+      {runningPos && !runningPos.finished && (
+        <p role="note" className="mb-5 rounded-2xl bg-gold-soft px-4 py-3 text-[15px] text-ink">
+          You&apos;re on day {runningPos.day} of your current 30 days. Starting a new one ends it. Your check-ins are kept.{" "}
+          <Link href="/cycle" className="btn-link">Keep my current 30 days</Link>
+          {sp.focus ? <> or <Link href="/feedback" className="btn-link">add it to My road for now</Link></> : null}.
+        </p>
+      )}
       <Card>
         <form action={startCycle} className="space-y-5">
           <div>
@@ -76,7 +87,7 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
             </fieldset>
             <Field label="Start date"><input type="date" name="startDate" defaultValue={ymd()} className="input max-w-[200px]" /></Field>
           </details>
-          <Submit>Start the cycle</Submit>
+          <Submit>{runningPos && !runningPos.finished ? "Start anyway" : "Start the cycle"}</Submit>
         </form>
       </Card>
     </>

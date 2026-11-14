@@ -103,6 +103,8 @@ export async function participantContext(userId: string) {
     db.eqiPriority.findMany({ where: { userId }, select: { label: true, practice: true, pillar: true } }),
     db.relationship.findMany({ where: { ownerId: userId, active: true }, select: { name: true, role: true, purpose: true, nextCheckIn: true } }),
   ]);
+  // My feedback: the client's own summary, only for entries they allowed. Never the file.
+  const feedback = await db.feedback.findMany({ where: { userId, allowAi: true }, select: { source: true, title: true, summary: true, pillars: true }, take: 5, orderBy: { createdAt: "desc" } });
   const lines: string[] = [];
   if (profile) {
     lines.push(`Pathway: ${PATHWAYS[profile.pathway as keyof typeof PATHWAYS]?.name ?? profile.pathway}`);
@@ -119,6 +121,7 @@ export async function participantContext(userId: string) {
   if (checkIns.length) lines.push(`Recent check-ins: ${checkIns.map((c) => `${c.date} ${c.status}`).join(", ")}`);
   for (const s of sessions) if (s.commitments) lines.push(`Coaching commitments from ${s.scheduledAt.toDateString()}: ${s.commitments}`);
   for (const e of eqi) lines.push(`EQ-i development priority (participant's own words, no scores): ${e.label}${e.pillar ? `; linked by the participant to FORGE ${e.pillar}` : ""}${e.practice ? `; practice: ${e.practice}` : ""}`);
+  for (const f of feedback) if (f.summary) lines.push(`My feedback, the participant's own summary of a ${f.source === "EQI" ? "EQ-i debrief" : f.source.includes("360") ? "360" : "feedback"} (${f.title}; their words, not the report; do not interpret it as scores)${JSON.parse(f.pillars || "[]").length ? `, which they linked to FORGE ${JSON.parse(f.pillars).join(", ")}` : ""}: ${f.summary.slice(0, 2000)}`);
   for (const r of rels) lines.push(`Relationship: ${r.name} (${r.role})${r.purpose ? `, purpose: ${r.purpose}` : ""}`);
   // Identity shift: sent only if the participant left "use with the AI companion" on.
   // The performance identity is sent only if they also ticked that box.

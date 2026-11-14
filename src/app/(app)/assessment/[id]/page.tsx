@@ -1,4 +1,6 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import { FEEDBACK_COPY } from "@/content/feedback";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getContent } from "@/content";
@@ -26,6 +28,9 @@ export default async function AssessmentResult({ params, searchParams }: { param
   const patterns = a.instrument === "FORGE_ENTREPRENEUR" ? entrepreneurPatterns(entrepreneur, s) : [];
   const words = JSON.parse(a.oneWords || "{}") as Record<string, string>;
   const revised = a.revisedF != null;
+  // My feedback, if the client tagged it to pillars: their own reading, shown beside the scores, never as a score.
+  const fb = await db.feedback.findFirst({ where: { userId: u.id, NOT: { pillars: "[]" } }, orderBy: [{ takenOn: "desc" }, { createdAt: "desc" }], select: { id: true, title: true, takenOn: true, pillars: true } });
+  const fbPillars = fb ? (JSON.parse(fb.pillars) as PillarKey[]) : [];
 
   return (
     <>
@@ -86,6 +91,14 @@ export default async function AssessmentResult({ params, searchParams }: { param
           <span className="text-sm muted">One pillar with real attention produces more than five with divided attention.</span>
         </form>
       </Card>
+
+      {fb && fbPillars.length > 0 && (
+        <Link href={`/feedback/${fb.id}`} className="card mt-5 block hover:border-navy/40">
+          <p className="eyebrow">From my feedback</p>
+          <h2 className="h2 mt-1 flex flex-wrap items-center gap-2">{fbPillars.map((k) => <PillarMark key={k} k={k} size="sm" />)} My feedback points to {fbPillars.map((k) => pack.pillars.find((p) => p.key === k)?.name).join(" and ")}</h2>
+          <p className="mt-2 text-[15px] muted">{fb.title}{fb.takenOn ? `, ${fmt(fb.takenOn, { month: "long", year: "numeric" })}` : ""}. {FEEDBACK_COPY.notSameMeasure}</p>
+        </Link>
+      )}
 
       <a href="/identity" className="card block mt-5 hover:border-navy/40">
         <p className="eyebrow">FORGE · Step 1</p>
