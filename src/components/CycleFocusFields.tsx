@@ -1,11 +1,9 @@
 "use client";
 import { useState } from "react";
 import type { PillarKey } from "@/content/types";
-import { CYCLE_FOCUS } from "@/content/options";
 import { PillarMark } from "./ui";
-import { Picks } from "./Picks";
 
-/** Pillar choice plus pillar-specific starter behaviors for the 30-day cycle. */
+/** Pillar choice for the 30-day cycle. The behavior itself comes from week 1 setup. */
 export function CycleFocusFields({ pillars, initial, initialFocus = "", identityBehavior = "" }: { pillars: { key: PillarKey; name: string }[]; initial: PillarKey; initialFocus?: string; identityBehavior?: string }) {
   const [pillar, setPillar] = useState<PillarKey>(initial);
   return (
@@ -23,14 +21,12 @@ export function CycleFocusFields({ pillars, initial, initialFocus = "", identity
           ))}
         </div>
       </fieldset>
-      <div>
-        <label className="block">
-          <span className="label">The behavior you will practice</span>
-          <input name="focus" className="input" maxLength={500} defaultValue={initialFocus} placeholder="The situation and what you do in it" />
-        </label>
-        {identityBehavior && <Picks list={{ status: "approved", options: [identityBehavior] }} target="focus" label="From my road" />}
-        <Picks key={pillar} list={CYCLE_FOCUS[pillar]} target="focus" label="Ideas for this pillar" />
-      </div>
+      {/* The behavior now comes from week 1 setup. One carried in (from EQ-i, My road or last month) starts the new response. */}
+      <input type="hidden" name="focus" value={initialFocus || identityBehavior} />
+      <p className="text-sm text-ink-soft">
+        Next, five short questions name the moment you want to change and what you&apos;ll do instead.
+        {(initialFocus || identityBehavior) && <> You&apos;ll start from: <span className="text-ink">{initialFocus || identityBehavior}</span></>}
+      </p>
     </>
   );
 }

@@ -4,7 +4,9 @@ import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getContent } from "@/content";
 import { cycleWeeks, cyclePosition, practiceSummary, CYCLE_TEMPLATES } from "@/lib/cycle";
-import { saveWeek, completeCycle } from "@/app/actions/participant";
+import { saveWeek, completeCycle, skipWeekSend } from "@/app/actions/participant";
+import { dayThirtyMessage } from "@/content/weekOne";
+import { ShareSend } from "@/components/ShareSend";
 import { activeSeason, nextMonth } from "@/lib/season";
 import { DAY30_DECISIONS, DAY30_CHOICES, CHECKIN_STATUS, SEASON_LENGTH } from "@/content/program";
 import { addDays, fmt, ymd } from "@/lib/dates";
@@ -40,6 +42,12 @@ export default async function CyclePage() {
   const notes = JSON.parse(cycle.weekNotes) as Record<string, string>;
   const wstat = JSON.parse(cycle.weekStatus) as Record<string, string>;
   const sum = practiceSummary(checkIns);
+  // Day 30: offer to send the statement and the result to the person who found out in week 1.
+  const partner = cycle.partnerId ? await db.relationship.findFirst({ where: { id: cycle.partnerId, ownerId: u.id, active: true } }) : null;
+  const profileRow = partner ? await db.profile.findUnique({ where: { userId: u.id }, select: { forgeStatement: true } }) : null;
+  const sentKinds = new Set((JSON.parse(cycle.sharedLog || "[]") as { kind: string }[]).map((x) => x.kind));
+  const skipped = !!(JSON.parse(cycle.weekAnswers || "{}") as Record<string, { skipSend?: boolean }>)["30"]?.skipSend;
+  const day30Text = dayThirtyMessage(profileRow?.forgeStatement || "", sum.done + sum.partial);
 
   return (
     <>
@@ -97,6 +105,16 @@ export default async function CyclePage() {
                 <p className="eyebrow">Day 30 · Decide</p>
                 {decide && <p className="mt-2 text-[15px] leading-relaxed">{decide}</p>}
                 <ReadTheBook kind="deeper" className="mt-2" />
+                {partner && (pos.day >= 30 || pos.finished) && !sentKinds.has("day30") && !skipped && (
+                  <div className="mt-4 rounded-2xl bg-ink/[0.04] px-4 py-4">
+                    <p className="font-serif text-[20px] leading-tight text-heading">Send your 30 days to {partner.name.split(" ")[0]}?</p>
+                    <p className="mt-2 whitespace-pre-line text-[15px]">{day30Text}</p>
+                    <div className="mt-3 flex items-center gap-5">
+                      <ShareSend message={day30Text} to={partner.id} email={partner.email} kind="day30" label="Send" />
+                      <form action={skipWeekSend}><input type="hidden" name="week" value="30" /><button className="text-[15px] btn-link">Not now</button></form>
+                    </div>
+                  </div>
+                )}
                 <form action={completeCycle} className="mt-4 space-y-4">
                   <input type="hidden" name="id" value={cycle.id} />
                   <fieldset className="space-y-2">

@@ -13,7 +13,7 @@ type Props = {
 /** Five steps, shown at the top of every client screen: what is done, where you are, and what comes next. */
 export function JourneyBar({ steps, done, current, cycle }: Props) {
   const path = usePathname();
-  if (path.startsWith("/onboarding") || path.startsWith("/account") || path.startsWith("/start") || path.startsWith("/forge")) return null;
+  if (path.startsWith("/onboarding") || path.startsWith("/account") || path.startsWith("/start") || path.startsWith("/forge") || path.startsWith("/cycle/setup")) return null;
   const here = steps.find((s) => path === s.href || path.startsWith(s.href + "/"))?.key;
   const next = steps.find((s) => s.key === current);
   const n = next ? steps.indexOf(next) + 1 : 0;
