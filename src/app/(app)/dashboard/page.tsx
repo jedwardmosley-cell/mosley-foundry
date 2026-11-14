@@ -102,7 +102,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
           {d.identity?.level === "REINVENT" && d.identity.personaName && <p className="mt-3 text-xs text-ink-mute">Performance identity: <span className="text-ink">{d.identity.personaName}</span></p>}
         </Link>
 
-        <Link href={goal?.oneMove ? "/blueprint#one-move" : "/blueprint"} className="tile col-span-2 flex items-center gap-4 transition hover:-translate-y-0.5">
+        <Link href={goal?.oneMove ? "/road#one-move" : "/road"} className="tile col-span-2 flex items-center gap-4 transition hover:-translate-y-0.5">
           {p ? <PillarMark k={p.key} /> : <IconBadge name="step" />}
           <div className="flex-1 min-w-0">
             <p className="text-[13px] text-ink-mute">My move this week{p ? ` · ${p.name}` : ""}</p>

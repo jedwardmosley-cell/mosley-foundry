@@ -37,8 +37,8 @@ export function JourneyBar({ steps, done, current, cycle, identityMissing = [] }
   // On Today during the 30 days, the bar is one thin strip; the big card says the rest.
   if (cycle && path === "/dashboard") {
     return (
-      <nav aria-label="Your journey" className="mb-4 flex items-center gap-3">
-        <ol className="grid flex-1 grid-cols-4 gap-1">
+      <nav aria-label="Your journey" className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1">
+        <ol className="grid flex-1 min-w-[150px] grid-cols-4 gap-1">
           {steps.map((s, i) => (
             <li key={s.key}>
               <Link href={s.href} className="block py-1.5" title={s.label}>
@@ -48,7 +48,7 @@ export function JourneyBar({ steps, done, current, cycle, identityMissing = [] }
             </li>
           ))}
         </ol>
-        {line && <span className="text-xs whitespace-nowrap">{line}</span>}
+        {line && <span className="text-xs">{line}</span>}
       </nav>
     );
   }

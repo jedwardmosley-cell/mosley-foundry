@@ -59,7 +59,7 @@ export default async function SegmentPage({ params }: { params: Promise<{ key: s
       </Card>
       <Card className="mt-5">
         <h2 className="h3">Turn it into a Discipline by Design commitment</h2>
-        <p className="text-sm muted mt-1">Goes into your blueprint under {area.label.toLowerCase()}.</p>
+        <p className="text-sm muted mt-1">Goes on My road under {area.label.toLowerCase()}.</p>
         <form action={addCommitment} className="mt-4 grid gap-3 sm:grid-cols-2">
           <input type="hidden" name="area" value={area.key} />
           <input type="hidden" name="detail" value={`Segment ${s.key}: ${s.title}`} />
@@ -69,7 +69,7 @@ export default async function SegmentPage({ params }: { params: Promise<{ key: s
           </div>
           <Field label="When (optional)"><input name="when" className="input" /></Field>
           <input type="hidden" name="cadence" value="WEEKLY" />
-          <div className="sm:col-span-2"><Submit className="btn-quiet">Add to blueprint</Submit></div>
+          <div className="sm:col-span-2"><Submit className="btn-quiet">Add to My road</Submit></div>
         </form>
       </Card>
     </>

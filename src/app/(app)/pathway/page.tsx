@@ -83,14 +83,14 @@ export default async function PathwayPage() {
             ))}
           </ul>
           <p className="mt-4 text-[15px]">{entrepreneur.owner.howToBuild}</p>
-          <p className="mt-4 text-sm"><Link href="/blueprint" className="btn-link">Put your first build in the blueprint</Link> under Leadership responsibilities.</p>
+          <p className="mt-4 text-sm"><Link href="/road" className="btn-link">Put your first build on My road</Link> under Leadership responsibilities.</p>
           <Source>{entrepreneur.owner.source}</Source>
         </Card>
       )}
 
       {profile.pathway === "PERSONAL" && (
         <Card>
-          <p className="text-[15px]">Your pathway runs on the core: the FORGE assessment, your FORGE plan, the Discipline by Design blueprint, your people, and 30-day cycles. The <Link href="/library" className="btn-link">Road library</Link> has the book&apos;s road tests and exercises.</p>
+          <p className="text-[15px]">Your pathway runs on the core: the FORGE assessment, your FORGE plan, My road (Discipline by Design), your people, and 30-day cycles. The <Link href="/library" className="btn-link">Road library</Link> has the book&apos;s road tests and exercises.</p>
         </Card>
       )}
 

@@ -94,7 +94,7 @@ export async function setPriority(fd: FormData) {
   const existing = await db.developmentGoal.findFirst({ where: { userId: u.id, pillar, status: "ACTIVE" } });
   if (existing) await db.developmentGoal.update({ where: { id: existing.id }, data: { isPriority: true } });
   else await db.developmentGoal.create({ data: { userId: u.id, pillar, isPriority: true } });
-  redirect(fromStart(fd) ? "/start?step=3" : "/blueprint#one-move");
+  redirect(fromStart(fd) ? "/start?step=3" : "/road#one-move");
 }
 
 // ---------- FORGE plan (development goals) ----------
@@ -112,11 +112,11 @@ export async function saveGoal(fd: FormData) {
   if (existing) await db.developmentGoal.update({ where: { id: existing.id }, data: d });
   else await db.developmentGoal.create({ data: { ...d, userId: u.id } });
   revalidatePath("/plan");
-  revalidatePath("/blueprint");
+  revalidatePath("/road");
   revalidatePath("/pathway");
 }
 
-// ---------- Discipline by Design blueprint ----------
+// ---------- Discipline by Design: My road ----------
 
 const commitmentSchema = z.object({
   area: z.enum(BLUEPRINT_AREAS.map((a) => a.key) as [string, ...string[]]),
@@ -142,7 +142,7 @@ export async function addCommitment(fd: FormData) {
   await db.commitment.create({
     data: { ...d, userId: u.id, startsOn: d.startsOn ? new Date(d.startsOn + "T12:00:00") : null },
   });
-  revalidatePath("/blueprint");
+  revalidatePath("/road");
   if (fromStart(fd)) redirect("/start?step=3");
 }
 
@@ -150,7 +150,7 @@ export async function removeCommitment(fd: FormData) {
   const u = await participant();
   const { id } = parse(z.object({ id: z.string() }), fd);
   await db.commitment.updateMany({ where: { id, userId: u.id }, data: { active: false } });
-  revalidatePath("/blueprint");
+  revalidatePath("/road");
 }
 
 // ---------- Accountability network ----------
@@ -477,7 +477,7 @@ export async function updateEqi(fd: FormData) {
   revalidatePath("/dashboard");
 }
 
-/** Puts the practice for an EQ-i priority into the blueprint as a daily routine. */
+/** Puts the practice for an EQ-i priority onto My road as a daily routine. */
 export async function addEqiToBlueprint(fd: FormData) {
   const u = await participant();
   const { id } = parse(z.object({ id: z.string() }), fd);
@@ -486,7 +486,7 @@ export async function addEqiToBlueprint(fd: FormData) {
   const detail = `From my EQ-i priority: ${e.label}`;
   const exists = await db.commitment.findFirst({ where: { userId: u.id, active: true, title: e.practice, detail } });
   if (!exists) await db.commitment.create({ data: { userId: u.id, area: "ROUTINES", title: e.practice, detail, cadence: "DAILY" } });
-  redirect("/blueprint");
+  redirect("/road");
 }
 
 /** One step to share an EQ-i priority: approves the item and turns on EQ-i sharing for the assigned coach. */

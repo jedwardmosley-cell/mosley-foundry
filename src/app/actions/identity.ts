@@ -67,7 +67,7 @@ export async function removeIdentity() {
 }
 
 /**
- * Adds one identity practice to the blueprint from the participant's own words.
+ * Adds one identity practice to My road from the participant's own words.
  * The participant can change or remove it like any other commitment.
  */
 export async function addIdentityPractice(fd: FormData) {
@@ -88,7 +88,7 @@ export async function addIdentityPractice(fd: FormData) {
   const detail = "Who I am";
   const exists = await db.commitment.findFirst({ where: { userId: u.id, active: true, title, detail } });
   if (!exists) await db.commitment.create({ data: { userId: u.id, area: a.area, title, detail, cadence: a.cadence } });
-  revalidatePath("/blueprint");
+  revalidatePath("/road");
 }
 
 /** The participant's controls for tone, AI use and coach sharing of the performance identity. */
@@ -174,6 +174,6 @@ export async function saveBehavior(fd: FormData) {
   const behavior = String(fd.get("behavior") ?? "").trim().slice(0, 1500);
   const n = await db.identityProfile.updateMany({ where: { userId: u.id }, data: { behavior } });
   if (!n.count) redirect("/identity");
-  revalidatePath("/blueprint");
+  revalidatePath("/road");
   revalidatePath("/cycle/new");
 }

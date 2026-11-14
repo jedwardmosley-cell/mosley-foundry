@@ -151,7 +151,7 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
 
       {s.has("BLUEPRINT") && v.commitments.length > 0 && (
         <Card className="mt-5">
-          <p className="eyebrow">Blueprint</p>
+          <p className="eyebrow">My road</p>
           <ul className="mt-3 space-y-1 text-[15px]">{v.commitments.map((c) => <li key={c.id}>{c.title}{c.when ? <span className="muted"> · {c.when}</span> : null}</li>)}</ul>
         </Card>
       )}

@@ -10,7 +10,7 @@ const PARTICIPANT_NAV: NavItem[] = [
   { href: "/dashboard", label: "Today", mobile: true },
   { href: "/identity", label: "1. Who's behind the wheel", tab: "FORGE", mobile: true, group: "FORGE" },
   { href: "/assessment", label: "2. Where I am", group: "FORGE" },
-  { href: "/blueprint", label: "3. My road", group: "Discipline by Design" },
+  { href: "/road", label: "3. My road", group: "Discipline by Design" },
   { href: "/cycle", label: "4. 30 days", group: "Discipline by Design" },
   { href: "/reflect", label: "Weekly reflection", group: "Discipline by Design" },
   { href: "/network", label: "People", mobile: true, group: "Support" },
