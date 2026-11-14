@@ -10,6 +10,7 @@ import { withArticle } from "@/content/whoIAm";
 import type { PillarKey } from "@/content/types";
 import { PillarMark, PILLAR_FILL } from "@/components/ui";
 import { CheckInForm } from "@/components/CheckInForm";
+import { TimezoneSync } from "@/components/Timezone";
 import { Icon, IconBadge, type IconName } from "@/components/Icon";
 
 export const metadata = { title: "Today" };
@@ -52,6 +53,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
 
   return (
     <div className="space-y-5">
+      <TimezoneSync saved={d.profile.timezone} />
       {setup === "done" && <p role="status" className="notice">Week 1 setup is done. Your plan is on its way to the person who finds out.</p>}
       {/* Mid-cycle and not set up yet: an invitation, never a gate. */}
       {d.cycle && pos && !pos.finished && !d.cycle.setupDoneAt && (

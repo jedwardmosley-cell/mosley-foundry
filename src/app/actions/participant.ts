@@ -1,6 +1,8 @@
 "use server";
 import { FORGE_LINES, withPrefix } from "@/content/forgeLines";
 import { z } from "zod";
+import { parseDays } from "@/lib/schedule";
+import { validTimezone } from "@/lib/reminders";
 import { randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -139,11 +141,22 @@ export async function addCommitment(fd: FormData) {
   const u = await participant();
   const { whenDays, whenTime, ...d } = parse(commitmentSchema, fd);
   if (!d.when) d.when = [whenDays, fmtTime(whenTime)].filter(Boolean).join(", ");
+  const days = parseDays(whenDays).join(",");
   await db.commitment.create({
-    data: { ...d, userId: u.id, startsOn: d.startsOn ? new Date(d.startsOn + "T12:00:00") : null },
+    data: { ...d, days, time: whenTime, userId: u.id, startsOn: d.startsOn ? new Date(d.startsOn + "T12:00:00") : null },
   });
   revalidatePath("/road");
   if (fromStart(fd)) redirect("/start?step=3");
+}
+
+/** Sets a routine's days and time, so it can go on the calendar. The rest of the routine is kept. */
+export async function updateCommitmentSchedule(fd: FormData) {
+  const u = await participant();
+  const d = parse(z.object({ id: z.string(), whenDays: text(40), whenTime: z.string().regex(/^(\d{2}:\d{2})?$/).default("") }), fd);
+  const days = parseDays(d.whenDays);
+  const when = [d.whenDays, fmtTime(d.whenTime)].filter(Boolean).join(", ");
+  await db.commitment.updateMany({ where: { id: d.id, userId: u.id }, data: { days: days.join(","), time: d.whenTime, when } });
+  revalidatePath("/road");
 }
 
 export async function removeCommitment(fd: FormData) {
@@ -434,16 +447,29 @@ export async function saveSettings(fd: FormData) {
     remindersOn: bool,
     reminderTime: z.string().regex(/^\d{2}:\d{2}$/),
     reminderDays: z.string().regex(/^[0-6](,[0-6])*$/).or(z.literal("")),
+    reminderBy: z.enum(["EMAIL", "CALENDAR", "BOTH"]).default("EMAIL"),
+    weeklyOn: bool,
+    weeklySlot: z.enum(["SUN_PM", "MON_AM"]).default("SUN_PM"),
+    timezone: z.string().max(64).default(""),
     aiEnabled: bool,
     aiRetentionDays: z.coerce.number().int().min(1).max(365),
   }), fd);
-  await db.profile.update({ where: { userId: u.id }, data: d });
+  const { timezone, ...rest } = d;
+  await db.profile.update({ where: { userId: u.id }, data: { ...rest, ...(validTimezone(timezone) ? { timezone } : {}) } });
   // Shorten retention on existing conversations to match.
   const convos = await db.aiConversation.findMany({ where: { userId: u.id } });
   for (const c of convos) {
     const cap = addDays(c.createdAt, d.aiRetentionDays);
     if (cap < c.expiresAt) await db.aiConversation.update({ where: { id: c.id }, data: { expiresAt: cap } });
   }
+  revalidatePath("/settings");
+}
+
+/** Turns on the private calendar link, or gives it a new address so the old one stops working. */
+export async function setCalendarLink(fd: FormData) {
+  const u = await participant();
+  const { mode } = parse(z.object({ mode: z.enum(["ON", "RESET", "OFF"]) }), fd);
+  await db.profile.update({ where: { userId: u.id }, data: { calendarToken: mode === "OFF" ? null : randomBytes(24).toString("base64url") } });
   revalidatePath("/settings");
 }
 

@@ -94,6 +94,13 @@ model Profile {
   reminderTime    String    @default("07:30")
   reminderDays    String    @default("1,2,3,4,5")
   remindersOn     Boolean   @default(false)
+  reminderBy      String    @default("EMAIL") // enum: EMAIL | CALENDAR | BOTH. How the daily check-in reminder arrives.
+  timezone        String    @default("") // IANA name from the client's browser, e.g. America/New_York. Email reminders wait until it is known.
+  lastReminderOn  String    @default("") // YYYY-MM-DD in the client's day: the last day a reminder email went out, so one day never gets two
+  weeklyOn        Boolean   @default(true) // the weekly plan email. On unless the client turns it off.
+  weeklySlot      String    @default("SUN_PM") // enum: SUN_PM (Sunday 6 pm) | MON_AM (Monday 7 am), the client's local time
+  lastWeeklyOn    String    @default("") // YYYY-MM-DD in the client's day: the last weekly email, so one week never gets two
+  calendarToken   String? // the private calendar link (looked up with findFirst; no unique constraint, so the production build needs no data-loss flag). Null means the link is off.
   aiEnabled       Boolean   @default(true)
   aiRetentionDays Int       @default(90)
   eqiEnabled      Boolean   @default(false) // participant opted in to the EQ-i layer
@@ -147,6 +154,8 @@ model Commitment {
   detail    String    @default("")
   cadence   String    @default("WEEKLY") // enum: DAILY | WEEKLY | MONTHLY | QUARTERLY | ONCE
   when      String    @default("") // e.g. "Sunday 7:00 pm", "Before 7 am"
+  days      String    @default("") // 0-6 comma list (0 = Sunday). Empty: read from "when" for older entries.
+  time      String    @default("") // HH:MM, the client's local time. Empty: read from "when" for older entries.
   startsOn  DateTime?
   active    Boolean   @default(true)
   createdAt DateTime  @default(now())
