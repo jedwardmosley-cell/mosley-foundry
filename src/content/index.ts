@@ -3,6 +3,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { db } from "@/lib/db";
 import { publicPack } from "./public-pack";
+import { cleanPack, cleanEntrepreneur } from "./clean";
+import { getForgeSource } from "./forgeSource";
 import type { ContentPack, EntrepreneurPack, PillarKey } from "./types";
 
 type Loaded = { pack: ContentPack; entrepreneur: EntrepreneurPack | null };
@@ -43,7 +45,15 @@ export async function getContent(): Promise<Loaded> {
   if (cached && cached.stamp === stamp) return cached.value;
   const pack = readFile<ContentPack>("pack.json") ?? (await readDb<ContentPack>("pack"));
   const entrepreneur = readFile<EntrepreneurPack>("entrepreneur.json") ?? (await readDb<EntrepreneurPack>("entrepreneur"));
-  const value = { pack: pack ?? publicPack, entrepreneur };
+  // Ed's name and Ed's mentor are cleaned out of the book's text as it loads (the author's request).
+  const cleaned = cleanPack(pack ?? publicPack);
+  // The book's stories, rewritten to stand on their own, replace Ed's Lessons and Jay's Journey when installed.
+  const ex = (await getForgeSource())?.exercises ?? [];
+  const lessons = ex.find((g) => /lessons/i.test(g.group))?.items;
+  const questions = ex.find((g) => /questions/i.test(g.group))?.items;
+  if (lessons?.length) cleaned.edsLessons = lessons.map((x) => ({ chapter: x.theme, title: x.title, setup: x.setup, prompts: x.prompts }));
+  if (questions?.length) cleaned.jaysJourney = questions.map((x) => ({ title: x.title, setup: x.setup, prompts: x.prompts }));
+  const value = { pack: cleaned, entrepreneur: entrepreneur ? cleanEntrepreneur(entrepreneur) : entrepreneur };
   cached = { stamp, value };
   return value;
 }

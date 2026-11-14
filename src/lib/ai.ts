@@ -1,6 +1,7 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { getContent } from "@/content";
+import { getForgeSource } from "@/content/forgeSource";
 import { SEGMENTS, PATHWAYS } from "@/content/program";
 import { db } from "./db";
 import { scoresFrom } from "./forge";
@@ -18,15 +19,22 @@ export const aiAvailable = () => Boolean(process.env.ANTHROPIC_API_KEY);
 
 export type Chunk = { id: string; ref: string; text: string };
 
-let chunkCache: { pack: unknown; chunks: Chunk[] } | null = null;
+let chunkCache: { pack: unknown; guide: unknown; chunks: Chunk[] } | null = null;
 
 /** Approved sources: the licensed pack (book + workbook), the entrepreneur worksheet, and the program brief. */
 export async function buildChunks(): Promise<Chunk[]> {
   const { pack, entrepreneur } = await getContent();
-  if (chunkCache && chunkCache.pack === pack) return chunkCache.chunks;
+  const guide = (await getForgeSource())?.guide ?? null;
+  if (chunkCache && chunkCache.pack === pack && chunkCache.guide === guide) return chunkCache.chunks;
   const out: Chunk[] = [];
   const add = (ref: string, text: string) => text.trim() && out.push({ id: `S${out.length + 1}`, ref, text });
 
+  // The author's teaching guide, The FORGE Framework: Five Rules for the Road.
+  const plain = (md: string) => md.replace(/\*\*|\*/g, "").replace(/^\|.*$/gm, (row) => row.replace(/\|/g, " ").trim());
+  if (guide) {
+    for (const s of [...guide.intro, ...guide.outro]) add(`${guide.title}: ${s.heading}`, plain(s.md));
+    for (const r of Object.values(guide.rules)) if (r) add(`${guide.title}: ${r.heading}`, plain(r.md) + (r.practice ? ` In practice: ${r.practice}` : ""));
+  }
   for (const p of pack.pillars) {
     add(`FORGE ${p.key}: ${p.name}`, `${p.name}. ${p.short} ${p.definition} ` + p.anchors.map((a) => `${a.score} ${a.level}: ${a.text}`).join(" "));
     add(`FORGE ${p.key}: if this is your lowest score`, p.lowest.map((g) => `Score ${g.min} to ${g.max}: ${g.text}`).join(" "));
@@ -43,8 +51,8 @@ export async function buildChunks(): Promise<Chunk[]> {
   for (const i of d.inventory) add(`Book, Ch. 10 Discipline by Design, Design Inventory: ${i.label}`, i.text);
   if (d.whosChecking.length) add("Book, Ch. 10 Discipline by Design, So Who's Checking?", d.whosChecking.join(" "));
   if (d.leadingOthers.length) add("Book, Ch. 10 Discipline by Design, Now the Part That Isn't About You", d.leadingOthers.join(" "));
-  for (const e of pack.edsLessons) add(`Ed's Lessons: ${e.title} (${e.chapter})`, [e.quote, e.setup, ...e.prompts].filter(Boolean).join(" "));
-  for (const j of pack.jaysJourney) add(`Jay's Journey: ${j.title}`, [j.setup, ...j.prompts].filter(Boolean).join(" "));
+  for (const e of pack.edsLessons) add(`Lessons from the road: ${e.title} (${e.chapter})`, [e.quote, e.setup, ...e.prompts].filter(Boolean).join(" "));
+  for (const j of pack.jaysJourney) add(`Questions for the road: ${j.title}`, [j.setup, ...j.prompts].filter(Boolean).join(" "));
   for (const p of pack.profiles) add(`FORGE in the Wild: ${p.name}`, [p.subtitle, p.designedDiscipline, p.lesson].filter(Boolean).join(" "));
   if (pack.thirtyDayPlan.length) add("The 30-day implementation plan", pack.thirtyDayPlan.map((w) => `${w.label} ${w.focus}: ${w.work}`).join(" "));
   for (const s of SEGMENTS) add(`Leading Others program, Segment ${s.key}: ${s.title} (program brief)`, s.summary);
@@ -52,7 +60,7 @@ export async function buildChunks(): Promise<Chunk[]> {
     for (const pt of entrepreneur.patterns) add(`FORGE for entrepreneurs: ${pt.title}`, pt.text.join(" "));
     add(`FORGE Ahead session: building a business`, entrepreneur.owner.fourBuilds.map((b) => `${b.label}: ${b.detail}. ${b.signal}`).join(" ") + " " + entrepreneur.owner.howToBuild + " " + entrepreneur.owner.sellableTest);
   }
-  chunkCache = { pack, chunks: out };
+  chunkCache = { pack, guide, chunks: out };
   return out;
 }
 

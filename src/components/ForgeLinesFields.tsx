@@ -10,6 +10,7 @@ import { PrefixedBox } from "./PrefixedBox";
 import { Picks } from "./Picks";
 import { HelpMeWrite } from "./HelpMeWrite";
 import { IdentityCoach } from "./IdentityCoach";
+import { GuideText } from "./GuideText";
 import { exampleGroups, IDENTITY_EXAMPLES_STATUS, IDENTITY_TESTS } from "@/content/identityExamples";
 
 type Saved = Partial<Record<LineField, string>> | null | undefined;
@@ -20,10 +21,12 @@ type Teach = Partial<Record<PillarKey, Partial<ForgeCard>>>;
  * the book's rule line and the part of identity it shapes. "What this means" opens the teaching
  * from forge-source.md. Then the question, the I am line and one example.
  */
-export function FiveSides({ profile, pathway, role, level, ai, teach = {}, rules = {}, opening }: {
+export function FiveSides({ profile, pathway, role, level, ai, teach = {}, rules = {}, opening, guide = {} }: {
   profile: Saved; pathway: PathwayKey; role: string; level: string; ai: boolean; teach?: Teach; rules?: Partial<Record<PillarKey, string>>;
   /** The author's Core idea and forge passage, from forge-source.md. */
   opening?: { line: string; core: string; forge: string };
+  /** The author's teaching guide, per rule. When present, it is What this means. */
+  guide?: Partial<Record<PillarKey, { md: string }>>;
 }) {
   return (
     <div className="space-y-2">
@@ -58,26 +61,26 @@ export function FiveSides({ profile, pathway, role, level, ai, teach = {}, rules
               </div>
             </header>
 
-            {t?.means && (
+            {(t?.means || guide[l.pillar]) && (
               <details className="mt-4 rounded-2xl px-4 py-3" style={{ background: "rgb(var(--pc) / 0.06)" }}>
                 <summary className="cursor-pointer text-[15px] font-medium text-link">What this means</summary>
                 <div className="mt-3 space-y-4 text-[15px] leading-relaxed text-ink">
-                  <p>{t.means}</p>
-                  {t.road && (
+                  {guide[l.pillar] ? <GuideText md={guide[l.pillar]!.md} className="!text-[15px]" /> : <p>{t?.means}</p>}
+                  {t?.road && !guide[l.pillar] && (
                     <div>
                       <p className="section-label">From the road</p>
                       <p className="mt-1.5 font-serif text-[17px] leading-[1.5] text-heading">{t.road}</p>
                       {t.roadMore && <p className="mt-2 font-serif text-[17px] leading-[1.5] text-heading">{t.roadMore}</p>}
                     </div>
                   )}
-                  {t.why && (
+                  {t?.why && (
                     <div>
                       <p className="section-label">Why it works</p>
                       <p className="mt-1.5">{t.why}</p>
                     </div>
                   )}
-                  {t.connects && <p className="text-ink-soft">{t.connects}</p>}
-                  {!!t.before?.length && (
+                  {t?.connects && <p className="text-ink-soft">{t.connects}</p>}
+                  {!!t?.before?.length && (
                     <div>
                       <p className="section-label">Before you write</p>
                       {t.beforeIntro && <p className="mt-1.5">{t.beforeIntro}</p>}

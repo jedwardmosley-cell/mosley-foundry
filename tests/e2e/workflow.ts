@@ -810,6 +810,23 @@ const submitAndWait = async (page: Page, selector: string) => {
       const text = await dp.locator("main").innerText();
       assert.ok(!/\bdraft\b/i.test(text), `no Draft mark on ${path}`);
     }
+    // the Library is the author's teaching guide, and nothing else
+    await dp.goto(`${BASE}/library`);
+    await dp.waitForSelector("text=The FORGE Framework: Five Rules for the Road");
+    const lib = await dp.locator("main").innerText();
+    for (const t of ["What FORGE is", "Future Focused", "Emotionally Anchored", "In practice", "How the five work together", "When emotion takes the wheel"]) assert.ok(lib.toLowerCase().includes(t.toLowerCase()), `Library has ${t}`);
+    assert.ok(!/Jay's Journey|The Rules of the Road|\bJay\b/.test(lib), "the old Library content is gone, and no one from the book is named");
+    assert.ok(lib.includes("Questions for the road") && lib.includes("The Flight You Keep Missing"), "the stories' concepts stand on their own as exercises");
+    // each rule's full guide teaches from the guide, with the research
+    await dp.goto(`${BASE}/forge/f/guide`);
+    await dp.waitForSelector("text=The destination is a person, not a number.");
+    await dp.waitForSelector("text=possible selves");
+        // Ed's name and Ed's mentor never appear (the author's request)
+    for (const path of ["/library", "/network", "/assessment"]) {
+      await dp.goto(`${BASE}${path}`);
+      for (const d of await dp.locator("details").all()) await d.evaluate((e) => ((e as HTMLDetailsElement).open = true));
+      assert.ok(!/\bEd\b|Ed's/.test(await dp.locator("main").innerText()), `no Ed on ${path}`);
+    }
     await dc.close();
     await page.goto(`${BASE}/admin/content`);
     await page.waitForSelector("text=Identity examples");
