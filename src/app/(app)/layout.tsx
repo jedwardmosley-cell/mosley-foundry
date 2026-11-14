@@ -10,7 +10,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (user.mustChangePassword) redirect("/account/password");
   const journey = user.role === "PARTICIPANT" ? await getJourney(user.id) : null;
   return (
-    <Shell user={user} journey={journey && <JourneyBar steps={JOURNEY_STEPS.map((s) => ({ ...s }))} done={journey.done} current={journey.current} cycle={journey.cycle} />}>
+    <Shell user={user} journey={journey && <JourneyBar steps={JOURNEY_STEPS.map((s) => ({ ...s }))} done={journey.done} current={journey.current} cycle={journey.cycle} identityMissing={journey.identityMissing} />}>
       {children}
     </Shell>
   );

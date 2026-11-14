@@ -44,6 +44,7 @@ export default async function CyclePage() {
   const sum = practiceSummary(checkIns);
   // Day 30: offer to send the statement and the result to the person who found out in week 1.
   const partner = cycle.partnerId ? await db.relationship.findFirst({ where: { id: cycle.partnerId, ownerId: u.id, active: true } }) : null;
+  const planPartner = partner;
   const profileRow = partner ? await db.profile.findUnique({ where: { userId: u.id }, select: { forgeStatement: true } }) : null;
   const sentKinds = new Set((JSON.parse(cycle.sharedLog || "[]") as { kind: string }[]).map((x) => x.kind));
   const skipped = !!(JSON.parse(cycle.weekAnswers || "{}") as Record<string, { skipSend?: boolean }>)["30"]?.skipSend;
@@ -55,6 +56,27 @@ export default async function CyclePage() {
         <span className="inline-flex items-center gap-2"><PillarMark k={p.key} size="sm" /> {cycle.focus || p.name}</span>
         {cycle.seasonMonth && <Link href="/season" className="ml-3 text-sm btn-link">See the season</Link>}
       </PageHeader>
+
+      {/* My plan for these 30 days, from week 1 setup. Until it is done, the way in is here. */}
+      {cycle.setupDoneAt && cycle.plan ? (
+        <Card className="mb-5">
+          <p className="section-label">My plan for 30 days</p>
+          <p className="mt-2 font-serif text-[20px] leading-snug text-heading">{cycle.plan}</p>
+          <p className="mt-3 text-sm text-ink-soft">
+            {planPartner ? <>{planPartner.name.split(" ")[0]} checks on me. </> : null}
+            {pos.week >= 2 && !pos.finished ? <>This week&apos;s question is in your <Link href="/reflect" className="btn-link">weekly reflection</Link>. </> : null}
+            <Link href="/cycle/setup?step=1" className="btn-link">Change my answers</Link>
+          </p>
+        </Card>
+      ) : !pos.finished && (
+        <Link href={`/cycle/setup?step=${cycle.plan ? "share" : !cycle.situation ? 1 : !cycle.feeling ? 2 : !cycle.oldResponse ? 3 : !cycle.newResponse ? 4 : !cycle.gap ? 5 : "plan"}`} className="card mb-5 flex items-center gap-4 !py-5 transition hover:-translate-y-0.5">
+          <span className="flex-1">
+            <span className="block text-[16px] font-medium text-heading">{cycle.situation ? "Finish your week 1 setup" : "Start your week 1 setup"}</span>
+            <span className="block text-sm text-ink-soft">Five short questions: the moment you want to change, what you feel, what you usually do, what you&apos;ll do instead, and what makes it hard. Then your plan, and who finds out.</span>
+          </span>
+          <span aria-hidden className="text-ink-mute">›</span>
+        </Link>
+      )}
 
       <Card>
         <div className="grid grid-cols-10 gap-1.5" role="img" aria-label={`${sum.done} done, ${sum.partial} partial, ${sum.notYet} not yet`}>

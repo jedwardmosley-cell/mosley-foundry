@@ -21,7 +21,18 @@ export type Journey = {
   /** The first step not done, or null once the 30 days are under way. */
   current: JourneyKey | null;
   cycle: { day: number; week: number; phase: string; finished: boolean; seasonMonth: number | null } | null;
+  /** What Who's behind the wheel still needs, in the client's words: "your seat", "how big a turn", "your statement". */
+  identityMissing: string[];
 };
+
+/** The three things Who's behind the wheel needs to count as done. */
+export function identityGaps(identity: { role: string; level: string; becoming: string } | null, statement: string) {
+  return [
+    !identity?.role.trim() && "your seat",
+    !identity?.level && "how big a turn",
+    !(statement.trim() || identity?.becoming.trim()) && "your statement",
+  ].filter(Boolean) as string[];
+}
 
 export async function getJourney(userId: string): Promise<Journey> {
   const [identity, profile, assessment, commitments, people, cycle] = await Promise.all([
@@ -34,7 +45,7 @@ export async function getJourney(userId: string): Promise<Journey> {
   ]);
   const done: Record<JourneyKey, boolean> = {
     // Who I am is done with a role, a kind of change and a statement. The five help build the statement.
-    identity: !!(identity?.role.trim() && identity.level && (profile?.forgeStatement.trim() || identity.becoming.trim())),
+    identity: identityGaps(identity, profile?.forgeStatement ?? "").length === 0,
     today: !!assessment && !!profile?.priorityPillar,
     road: commitments > 0 && people > 0,
     drive: !!cycle,
@@ -47,5 +58,5 @@ export async function getJourney(userId: string): Promise<Journey> {
     c = { ...pos, phase, seasonMonth: cycle.seasonMonth };
   }
   const current = done.drive ? null : (JOURNEY_STEPS.find((s) => !done[s.key])?.key ?? null);
-  return { done, current, cycle: c };
+  return { done, current, cycle: c, identityMissing: identityGaps(identity, profile?.forgeStatement ?? "") };
 }
