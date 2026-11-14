@@ -1,7 +1,8 @@
 import { timingSafeEqual } from "node:crypto";
 import { db } from "@/lib/db";
 import { appUrl, emailAvailable, sendEmail } from "@/lib/email";
-import { reminderDue, reminderEmail } from "@/lib/reminders";
+import { reminderDue, reminderEmail, weeklyDue, weeklyEmail } from "@/lib/reminders";
+import { weeklyDigestFor } from "@/lib/weekly";
 import { cyclePosition } from "@/lib/cycle";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +16,7 @@ function authorized(req: Request) {
 }
 
 /**
- * Sends the daily check-in reminder emails that are due. A scheduler calls this every 15 minutes
+ * Sends the daily check-in reminders and weekly plan emails that are due. A scheduler calls this every 15 minutes
  * (.github/workflows/reminders.yml) with the CRON_SECRET. Safe to call more often: each client gets at most one a day.
  */
 async function run(req: Request) {
@@ -47,7 +48,21 @@ async function run(req: Request) {
     const msg = reminderEmail({ name: p.user.name, day: pos && !pos.finished ? pos.day : null, people: people.map((x) => x.name), appUrl: appUrl() });
     if (await sendEmail({ to: p.user.email, ...msg })) sent++;
   }
-  return Response.json({ checked: profiles.length, sent });
+  // The weekly plan email: Sunday evening or Monday morning, the client's choice.
+  const weekly = await db.profile.findMany({
+    where: { weeklyOn: true, timezone: { not: "" }, user: { isDemo: false, role: "PARTICIPANT" } },
+    select: { userId: true, weeklyOn: true, weeklySlot: true, timezone: true, lastWeeklyOn: true, user: { select: { email: true, name: true } } },
+  });
+  let weeklySent = 0;
+  for (const p of weekly) {
+    const r = weeklyDue(p, now);
+    if (!r.due) continue;
+    const claimed = await db.profile.updateMany({ where: { userId: p.userId, lastWeeklyOn: { not: r.ymd } }, data: { lastWeeklyOn: r.ymd } });
+    if (!claimed.count) continue;
+    const digest = await weeklyDigestFor(p.userId, p.user.name, p.timezone, p.weeklySlot, appUrl(), now);
+    if (await sendEmail({ to: p.user.email, ...weeklyEmail(digest) })) weeklySent++;
+  }
+  return Response.json({ checked: profiles.length, sent, weeklyChecked: weekly.length, weeklySent });
 }
 
 export const GET = run;

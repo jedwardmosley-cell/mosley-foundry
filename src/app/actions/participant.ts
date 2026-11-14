@@ -448,6 +448,8 @@ export async function saveSettings(fd: FormData) {
     reminderTime: z.string().regex(/^\d{2}:\d{2}$/),
     reminderDays: z.string().regex(/^[0-6](,[0-6])*$/).or(z.literal("")),
     reminderBy: z.enum(["EMAIL", "CALENDAR", "BOTH"]).default("EMAIL"),
+    weeklyOn: bool,
+    weeklySlot: z.enum(["SUN_PM", "MON_AM"]).default("SUN_PM"),
     timezone: z.string().max(64).default(""),
     aiEnabled: bool,
     aiRetentionDays: z.coerce.number().int().min(1).max(365),

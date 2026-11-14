@@ -2,6 +2,7 @@ import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { saveSettings, setCalendarLink } from "@/app/actions/participant";
 import { appUrl, emailAvailable } from "@/lib/email";
+import { WEEKLY_SLOTS } from "@/lib/reminders";
 import { TimezoneField } from "@/components/Timezone";
 import { CopyLink } from "@/components/CopyLink";
 import { deleteAllConversations } from "@/app/actions/ai";
@@ -22,7 +23,7 @@ export default async function SettingsPage() {
       <PageHeader title="Settings" />
       <Card>
         {/* Keyed on the saved values, so after Save the fields show what was saved. */}
-        <form key={[p.remindersOn, p.reminderTime, p.reminderDays, p.reminderBy, p.aiEnabled, p.aiRetentionDays].join("|")} action={saveSettings} className="space-y-5">
+        <form key={[p.remindersOn, p.reminderTime, p.reminderDays, p.reminderBy, p.weeklyOn, p.weeklySlot, p.aiEnabled, p.aiRetentionDays].join("|")} action={saveSettings} className="space-y-5">
           <h2 className="h3">Daily check-in reminder</h2>
           <label className="flex items-center gap-2 text-[15px]"><input type="checkbox" name="remindersOn" defaultChecked={p.remindersOn} className="h-4 w-4 accent-navy" /> Remind me to check in</label>
           <Field label="Time"><input type="time" name="reminderTime" defaultValue={p.reminderTime} className="input max-w-[160px]" /></Field>
@@ -43,6 +44,17 @@ export default async function SettingsPage() {
             One reminder a day at most, and none once you&apos;ve checked in. The email says only that it&apos;s time to check in, never what you&apos;re working on.
             {" "}Calendar alerts need your calendar link below.
             {!emailAvailable() && " Email reminders aren't switched on for this app yet, so for now use a calendar alert."}
+          </p>
+          <h2 className="h3 pt-4 border-t border-line">Weekly plan email</h2>
+          <label className="flex items-center gap-2 text-[15px]"><input type="checkbox" name="weeklyOn" defaultChecked={p.weeklyOn} className="h-4 w-4 accent-navy" /> Send me my week ahead</label>
+          <Field label="When">
+            <select name="weeklySlot" defaultValue={p.weeklySlot} className="input max-w-xs">
+              {Object.entries(WEEKLY_SLOTS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+            </select>
+          </Field>
+          <p className="text-xs text-ink-mute">
+            One email a week: where you are in your 30 days, your routines, who you&apos;re due to check in with, and your next coaching session.
+            It never includes your plan, reflections or scores.
           </p>
           <h2 className="h3 pt-4 border-t border-line">AI companion</h2>
           <label className="flex items-center gap-2 text-[15px]"><input type="checkbox" name="aiEnabled" defaultChecked={p.aiEnabled} className="h-4 w-4 accent-navy" /> Use the AI companion</label>

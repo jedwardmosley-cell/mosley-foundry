@@ -52,3 +52,65 @@ ${people ? `<p>${e(people)}</p>` : ""}
 </div>`;
   return { subject: o.day ? `Day ${o.day} of 30: time to check in` : "Time to check in", text, html };
 }
+
+// ---------- The weekly plan email ----------
+
+/** When the weekly email goes out, in the client's local time. */
+export const WEEKLY_SLOTS = {
+  SUN_PM: { label: "Sunday evening (6 pm)", dow: 0, minutes: 18 * 60, startsTomorrow: true },
+  MON_AM: { label: "Monday morning (7 am)", dow: 1, minutes: 7 * 60, startsTomorrow: false },
+} as const;
+export type WeeklySlot = keyof typeof WEEKLY_SLOTS;
+
+type WeeklyProfile = { weeklyOn: boolean; weeklySlot: string; timezone: string; lastWeeklyOn: string };
+
+/** Whether the weekly email is due now. Same rules as the daily one: once, on time, never hours late. */
+export function weeklyDue(p: WeeklyProfile, now = new Date()): { due: false } | { due: true; ymd: string } {
+  if (!p.weeklyOn || !validTimezone(p.timezone)) return { due: false };
+  const slot = WEEKLY_SLOTS[p.weeklySlot as WeeklySlot] ?? WEEKLY_SLOTS.SUN_PM;
+  const local = localNow(p.timezone, now);
+  if (p.lastWeeklyOn === local.ymd || local.dow !== slot.dow) return { due: false };
+  const late = local.minutes - slot.minutes;
+  if (late < 0 || late > REMINDER_WINDOW_MINUTES) return { due: false };
+  return { due: true, ymd: local.ymd };
+}
+
+export type WeeklyDigest = {
+  name: string;
+  /** e.g. "Week 2 of 30: Interrupt It" and that week's look-back question. */
+  cycle?: { heading: string; question?: string } | null;
+  routines: { title: string; when: string }[];
+  people: { name: string; when: string }[];
+  session?: string | null;
+  appUrl: string;
+};
+
+/** The weekly email. Routine titles and names are the client's own; it never includes the plan, reflections, scores or feedback. */
+export function weeklyEmail(d: WeeklyDigest) {
+  const first = d.name.split(" ")[0];
+  const e = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const blocks: { title: string; lines: string[] }[] = [];
+  if (d.cycle) blocks.push({ title: d.cycle.heading, lines: d.cycle.question ? [`This week's question: ${d.cycle.question}`] : [] });
+  if (d.routines.length) blocks.push({ title: "Your routines", lines: d.routines.map((r) => `${r.title}${r.when ? ` (${r.when})` : ""}`) });
+  if (d.people.length) blocks.push({ title: "Check-ins due", lines: d.people.map((p) => `${p.name}, ${p.when}`) });
+  if (d.session) blocks.push({ title: "Coaching", lines: [d.session] });
+  if (!blocks.length) blocks.push({ title: "A clear week", lines: ["Nothing is scheduled yet. Add a routine on My road, or start 30 days on one change."] });
+
+  const text = [
+    `Hi ${first},`,
+    "Here's what's on your road this week.",
+    ...blocks.map((b) => [b.title, ...b.lines.map((l) => `- ${l}`)].join("\n")),
+    `Look back and plan the week: ${d.appUrl}/reflect`,
+    `You get this once a week. Change the day or turn it off in Settings: ${d.appUrl}/settings`,
+  ].join("\n\n");
+
+  const html = `<div style="font-family:Georgia,serif;color:#131F35;max-width:560px;line-height:1.5">
+<p>Hi ${e(first)},</p>
+<p>Here's what's on your road this week.</p>
+${blocks.map((b) => `<h3 style="font-family:Arial,sans-serif;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#A35409;margin:24px 0 6px">${e(b.title)}</h3>
+${b.lines.length ? `<ul style="margin:0;padding-left:20px">${b.lines.map((l) => `<li>${e(l)}</li>`).join("")}</ul>` : ""}`).join("\n")}
+<p style="margin-top:28px"><a href="${d.appUrl}/reflect" style="display:inline-block;background:#1E2F4A;color:#FBF8F2;padding:10px 20px;border-radius:999px;text-decoration:none;font-family:Arial,sans-serif">Look back and plan the week</a></p>
+<p style="font-family:Arial,sans-serif;font-size:13px;color:#6E7480">You get this once a week. <a href="${d.appUrl}/settings" style="color:#6E7480">Change the day or turn it off in Settings.</a></p>
+</div>`;
+  return { subject: "Your week ahead", text, html };
+}

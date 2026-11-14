@@ -8,7 +8,8 @@ import assert from "node:assert/strict";
 import { PrismaClient } from "@prisma/client";
 import { parseDays, parseTime, scheduleOf, isScheduled, daysToText } from "../src/lib/schedule";
 import { buildCalendar, fold, esc, routineEvent } from "../src/lib/ics";
-import { reminderDue, reminderEmail, localNow } from "../src/lib/reminders";
+import { reminderDue, reminderEmail, localNow, weeklyDue, weeklyEmail } from "../src/lib/reminders";
+import { weeklyDigestFor } from "../src/lib/weekly";
 import { calendarFor } from "../src/lib/calendarFeed";
 
 test("schedule: reads days and times from older text entries", () => {
@@ -113,4 +114,41 @@ test("calendar link: routines, people and sessions; never the journal, plan, ref
   assert.ok(!/PRIVATE DEMO JOURNAL|Coach-private|pushes back|five times out of seven|Private note/i.test(ics.replace(/\r\n /g, "")));
   await db.profile.update({ where: { userId: danaId }, data: { reminderBy: "EMAIL" } });
   assert.ok(!/SUMMARY:Daily check-in/.test(await calendarFor(danaId, "https://app")), "email-only reminders stay off the calendar");
+});
+
+const w = { weeklyOn: true, weeklySlot: "SUN_PM", timezone: "America/New_York", lastWeeklyOn: "" };
+// Sunday 15 Nov 2026 in New York: 6:20 pm is 23:20 UTC.
+const sunday620 = new Date("2026-11-15T23:20:00Z");
+
+test("weekly email: Sunday evening or Monday morning, once, never hours late", () => {
+  assert.deepEqual(weeklyDue(w, sunday620), { due: true, ymd: "2026-11-15" });
+  assert.equal(weeklyDue({ ...w, lastWeeklyOn: "2026-11-15" }, sunday620).due, false, "never twice");
+  assert.equal(weeklyDue(w, new Date("2026-11-15T22:30:00Z")).due, false, "not before 6 pm");
+  assert.equal(weeklyDue(w, new Date("2026-11-16T03:30:00Z")).due, false, "not after the window");
+  assert.equal(weeklyDue({ ...w, weeklyOn: false }, sunday620).due, false);
+  assert.equal(weeklyDue({ ...w, timezone: "" }, sunday620).due, false);
+  assert.equal(weeklyDue({ ...w, weeklySlot: "MON_AM" }, sunday620).due, false);
+  // Monday 16 Nov, 7:10 am New York = 12:10 UTC.
+  assert.deepEqual(weeklyDue({ ...w, weeklySlot: "MON_AM" }, new Date("2026-11-16T12:10:00Z")), { due: true, ymd: "2026-11-16" });
+});
+
+test("weekly email: lists the week; an empty week gets a gentle line", () => {
+  const m = weeklyEmail({ name: "Dana Reyes", cycle: { heading: "Week 2 of your 30 days: Interrupt It", question: "Was that the real situation and the real feeling?" }, routines: [{ title: "Plan the week", when: "Sunday, 7:00 pm" }], people: [{ name: "Keisha Grant", when: "Wednesday" }], session: "Tuesday at 12:00 PM with Avery Lin", appUrl: "https://app" });
+  assert.equal(m.subject, "Your week ahead");
+  for (const bit of ["This week's question: Was that the real situation", "- Plan the week (Sunday, 7:00 pm)", "- Keisha Grant, Wednesday", "Tuesday at 12:00 PM with Avery Lin", "https://app/reflect", "https://app/settings"]) assert.ok(m.text.includes(bit), bit);
+  const empty = weeklyEmail({ name: "Sam", routines: [], people: [], appUrl: "https://app" });
+  assert.equal(empty.subject, "Your week ahead");
+  assert.match(empty.text, /Nothing is scheduled yet/);
+});
+
+test("weekly email: built from the client's own data, with nothing private", async () => {
+  const d = await weeklyDigestFor(danaId, "Dana Reyes", "America/New_York", "SUN_PM", "https://app", new Date());
+  assert.match(d.cycle?.heading ?? "", /^Week \d of your 30 days: /);
+  assert.ok(d.routines.some((r) => r.title === "Plan the week" && r.when === "Sunday, 7:00 pm"));
+  assert.ok(d.routines.some((r) => r.title.startsWith("Fifteen minutes") && r.when === "every day, 6:15 am"));
+  assert.ok(!d.routines.some((r) => /Quarterly|leadership book/.test(r.title)), "monthly and quarterly routines stay out of the weekly list");
+  assert.ok(d.people.some((p) => p.name === "Keisha Grant"));
+  assert.match(d.session ?? "", /with Avery Lin$/);
+  const m = weeklyEmail(d);
+  assert.ok(!/PRIVATE DEMO JOURNAL|Coach-private|pushes back|heat in my chest|five times out of seven/i.test(m.text + m.html));
 });
