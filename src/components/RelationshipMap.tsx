@@ -24,7 +24,7 @@ export function RelationshipMap({ name, rels }: { name: string; rels: Rel[] }) {
       {nodes.map((n) => (
         <line key={`l${n.id}`} x1={cx} y1={cy} x2={n.x} y2={n.y} stroke={n.overdue ? "rgb(var(--alert))" : "rgb(var(--ink-mute) / 0.5)"} strokeWidth={1.25} strokeDasharray={n.overdue ? "4 4" : undefined} />
       ))}
-      <circle cx={cx} cy={cy} r={30} fill="#15223A" />
+      <circle cx={cx} cy={cy} r={30} fill="rgb(var(--navy))" />
       <text x={cx} y={cy + 4} textAnchor="middle" fontSize="12" fill="#fff" fontFamily="Georgia, serif">{name.split(" ")[0]}</text>
       {nodes.map((n) => (
         <g key={n.id}>
