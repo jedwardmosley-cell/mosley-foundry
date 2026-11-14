@@ -11,12 +11,26 @@ import { FORGE_LINES, withPrefix, combineLines } from "@/content/forgeLines";
 export function StatementReveal({ label = "Save who I am", saved = {} }: { label?: string; saved?: Partial<Record<string, string>> }) {
   const ref = useRef<HTMLSpanElement>(null);
   const [text, setText] = useState<string | null>(null);
+  const [missing, setMissing] = useState<string | null>(null);
   const { pending } = useFormStatus();
 
   const form = () => ref.current?.closest("form") ?? null;
   const open = () => {
     const f = form();
     if (!f) return;
+    setMissing(null);
+    // Say what is missing instead of failing quietly: the seat, and how big a turn, are needed to save.
+    const kind = f.querySelector('input[name="level"]');
+    const role = f.querySelector<HTMLInputElement>('input[name="role"]');
+    const need = [
+      role && !role.value.trim() ? { msg: "Name the seat you're in (step 1).", el: role as Element } : null,
+      kind && !f.querySelector('input[name="level"]:checked') ? { msg: "Choose how big a turn this is (step 2).", el: kind.closest('[role="radiogroup"]') ?? kind } : null,
+    ].filter(Boolean) as { msg: string; el: Element }[];
+    if (need.length) {
+      setMissing(need.map((n) => n.msg).join(" "));
+      need[0].el.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
     const box = f.querySelector<HTMLTextAreaElement>('[name="statement"]');
     let s = box?.value.trim() ?? "";
     if (!s) {
@@ -44,6 +58,7 @@ export function StatementReveal({ label = "Save who I am", saved = {} }: { label
   return (
     <span ref={ref}>
       <button type="button" onClick={open} className="btn-primary">{label}</button>
+      {missing && <span role="alert" className="mt-2 block text-sm text-alert">{missing}</span>}
       {/* Rendered at the top of the page, so nothing on the screen behind it shows through. */}
       {text !== null && createPortal(
         <div role="dialog" aria-modal="true" aria-labelledby="reveal-line" className="reveal fixed inset-0 z-[60] flex flex-col overflow-y-auto bg-paper px-6 sm:px-10">

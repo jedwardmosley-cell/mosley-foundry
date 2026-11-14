@@ -8,10 +8,12 @@ type Props = {
   done: Record<string, boolean>;
   current: string | null;
   cycle: { day: number; week: number; phase: string; finished: boolean; seasonMonth?: number | null } | null;
+  /** What Who's behind the wheel still needs, so "still open" says why. */
+  identityMissing?: string[];
 };
 
 /** Five steps, shown at the top of every client screen: what is done, where you are, and what comes next. */
-export function JourneyBar({ steps, done, current, cycle }: Props) {
+export function JourneyBar({ steps, done, current, cycle, identityMissing = [] }: Props) {
   const path = usePathname();
   if (path.startsWith("/onboarding") || path.startsWith("/account") || path.startsWith("/start") || path.startsWith("/forge") || path.startsWith("/cycle/setup")) return null;
   const here = steps.find((s) => path === s.href || path.startsWith(s.href + "/"))?.key;
@@ -22,12 +24,12 @@ export function JourneyBar({ steps, done, current, cycle }: Props) {
   let line: React.ReactNode;
   // On Today the big card already shows the day, so the bar only nudges about a skipped step.
   if (cycle && (path === "/dashboard" || path === "/cycle")) {
-    line = open && !cycle.finished ? <span className="text-ink-mute">Still open: <Link href={open.href} className="btn-link">{open.label}</Link></span> : null;
+    line = open && !cycle.finished ? <span className="text-ink-mute">Still open: <Link href={open.href} className="btn-link">{open.label}</Link>{open.key === "identity" && identityMissing.length > 0 && <> ({identityMissing.join(", ")})</>}</span> : null;
   } else if (cycle) {
     line = cycle.finished
       ? <Link href="/cycle" className="btn-link">Your 30 days are up. Open your day 30 review</Link>
       : <Link href="/dashboard" className="hover:text-link">Day {cycle.day} of 30{cycle.seasonMonth ? ` · Month ${cycle.seasonMonth} of 3` : ""} · Week {cycle.week}{cycle.phase ? `, ${cycle.phase}` : ""} · <span className="btn-link">Check in today</span></Link>;
-    if (open && !cycle.finished) line = <>{line}<span className="hidden sm:inline text-ink-mute"> · </span><span className="block sm:inline mt-1 sm:mt-0 text-ink-mute">Still open: <Link href={open.href} className="btn-link">{open.label}</Link></span></>;
+    if (open && !cycle.finished) line = <>{line}<span className="hidden sm:inline text-ink-mute"> · </span><span className="block sm:inline mt-1 sm:mt-0 text-ink-mute">Still open: <Link href={open.href} className="btn-link">{open.label}</Link>{open.key === "identity" && identityMissing.length > 0 && <> ({identityMissing.join(", ")})</>}</span></>;
   } else if (next) {
     line = <>Step {n} of 4 · <Link href={`/start?step=${n}`} className="btn-link">{next.next}</Link></>;
   }

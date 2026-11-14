@@ -188,6 +188,8 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.waitForSelector(`text=${plan}`);
     await page.goto(`${BASE}/cycle`);
     await page.waitForSelector("text=Day 1 of 30");
+    await page.waitForSelector("text=My plan for 30 days");
+    await page.waitForSelector("text=Jamie checks on me.");
     // the journey bar follows: all four steps done, and the 30 days under way
     await page.goto(`${BASE}/blueprint`);
     const bar = page.locator('nav[aria-label="Your journey"]');
@@ -647,6 +649,21 @@ const submitAndWait = async (page: Page, selector: string) => {
     await login(dp, "marcus@demo.bothhands.app");
     await dp.goto(`${BASE}/dashboard`);
     assert.equal(await dp.locator("text=From your coach").count(), 0);
+    await dc.close();
+  });
+
+  await check("9c2. still open says why; saving without a seat says so; the 30 days page leads into week 1 setup", async () => {
+    const dc = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const dp: Page = await dc.newPage();
+    await login(dp, "dana@demo.bothhands.app");
+    await dp.goto(`${BASE}/identity`);
+    await dp.waitForSelector("text=Still open:");
+    assert.ok((await dp.locator('nav[aria-label="Your journey"]').innerText()).includes("your seat"), "the journey bar names what is missing");
+    await dp.click('button:has-text("Save who I am")');
+    await dp.waitForSelector("text=Name the seat you're in (step 1).");
+    assert.equal(await dp.locator('[role="dialog"]').count(), 0, "nothing saves until the seat is named");
+    await dp.goto(`${BASE}/cycle`);
+    await Promise.all([dp.waitForURL(/\/cycle\/setup\?step=1$/), dp.click('a:has-text("Start your week 1 setup")')]);
     await dc.close();
   });
 

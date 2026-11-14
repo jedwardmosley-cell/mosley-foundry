@@ -7,6 +7,7 @@ import { TONE_LABELS, type ToneSetting } from "@/lib/identityTone";
 import { LEVELS, FIRST_EXAMPLE, PICKS_STATUS, SITUATION_PICKS, type IdentityLevel } from "@/content/identity";
 import { ROLE_PICKS, WHO_I_AM_STATUS, WHO_TITLE, WHO_INTRO, WHO_HEADINGS, withArticle } from "@/content/whoIAm";
 import { getForgeSource } from "@/content/forgeSource";
+import { identityGaps } from "@/lib/journey";
 import { FiveSides, MyStatement } from "@/components/ForgeLinesFields";
 import { aiAvailable } from "@/lib/ai";
 import { getContent } from "@/content";
@@ -37,6 +38,7 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
   const ai = aiAvailable() && profile?.aiEnabled !== false;
   const { pack, entrepreneur } = await getContent();
   const forge = await getForgeSource();
+  const gaps = identityGaps(id, profile?.forgeStatement ?? "");
   const rules = Object.fromEntries(pack.pillars.map((p) => [p.key, p.short]));
   const hint = profile?.pathway === "ENTREPRENEURIAL" && entrepreneur ? entrepreneur.forgeStatementPrompt : pack.forgeStatementPrompt;
 
@@ -44,6 +46,16 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
     <>
       <PageHeader eyebrow="FORGE" title={WHO_TITLE}>{WHO_INTRO}</PageHeader>
 
+      {/* Say exactly what keeps this step open, with a link to each part. */}
+      {!saved && gaps.length > 0 && (id || profile?.forgeStatement || profile?.destination) && (
+        <p className="mb-4 rounded-2xl bg-gold-soft px-4 py-3 text-sm text-ink">
+          Still open:{" "}
+          {gaps.map((g, i) => (
+            <span key={g}>{i > 0 && ", "}<a href={g === "your seat" ? "#role" : g === "how big a turn" ? "#kind" : "#statement"} className="btn-link">{g}</a></span>
+          ))}
+          . This step is done when all three are saved.
+        </p>
+      )}
       {saved && <p role="status" className="mb-4 notice">Saved. Next, <Link href="/assessment" className="btn-link">see where you are today</Link>.</p>}
 
       <form action={saveWhoIAm} className="space-y-5">
@@ -62,7 +74,7 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
         </Card>
 
         <Card>
-          <p className="section-title"><span className="step-n">2</span>{WHO_HEADINGS.kind}</p>
+          <p id="kind" className="section-title scroll-mt-24"><span className="step-n">2</span>{WHO_HEADINGS.kind}</p>
           <IdentitySpectrum
             initial={id?.level as IdentityLevel | undefined}
             firstExample={FIRST_EXAMPLE[pathway]}
