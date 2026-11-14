@@ -41,6 +41,10 @@ export type ExamplePerson = {
 };
 
 export const EXAMPLE_PEOPLE: ExamplePerson[] = [
+  // Each person's five lines use that role's own word, and each line fits its letter as
+  // Chapter 9 defines it (forge-source.md): F where you're going, O what it looks like as you
+  // get closer, R why you're going (a reason with somebody else's name on it), G the gap and
+  // recalculating without ego, E the emotional state it takes. DRAFT FOR AUTHOR REVIEW.
   {
     key: "owner",
     role: "owner",
@@ -48,11 +52,11 @@ export const EXAMPLE_PEOPLE: ExamplePerson[] = [
     level: "REINVENT",
     claim: "I am the owner of this business. My job is to lead it.",
     lines: {
-      destination: "I am a builder of something that can run without me in the room.",
-      lineO: "I am an owner who sees the whole business.",
-      why: "I am a provider building something that outlasts a paycheck.",
-      lineG: "I am in charge without being the expert on everything.",
-      lineE: "I am calm when money is tight. Fear can ride along, but I keep the wheel.",
+      destination: "I am an owner building a business that can run without me in the room.",
+      lineO: "I am an owner who reads the early signs in my business straight, even when they're bad news.",
+      why: "I am an owner building something my family and my employees can count on.",
+      lineG: "I am an owner who can admit what I don't know and go learn it.",
+      lineE: "I am an owner who stays calm when money is tight. Fear can ride along, but I keep the wheel.",
     },
   },
   {
@@ -60,27 +64,27 @@ export const EXAMPLE_PEOPLE: ExamplePerson[] = [
     role: "manager",
     who: "Newly promoted manager",
     level: "ROLE",
-    claim: "I am a leader now. My results come through other people.",
+    claim: "I am a manager now. My results come through other people.",
     lines: {
       destination: "I am a manager measured by what my team can do.",
-      lineO: "I am a leader who puts people before tasks.",
-      why: "I am the boss I needed when I was coming up.",
-      lineG: "I am new at this and not ashamed of it. I can lead while I learn.",
-      lineE: "I am the same person on hard days. My team never has to guess who shows up.",
+      lineO: "I am a manager who notices what my team almost says.",
+      why: "I am the manager who makes hard days easier for my team.",
+      lineG: "I am a manager who can be corrected without getting defensive.",
+      lineE: "I am the same manager on hard days. My team never has to guess who shows up.",
     },
   },
   {
     key: "project",
     role: "project lead",
-    who: "Project manager, tough assignment",
+    who: "Project lead, tough assignment",
     level: "CORE",
-    claim: "I am the right person for this, and I belong in the seat.",
+    claim: "I am the right project lead for this, and I belong in the seat.",
     lines: {
-      destination: "I am a leader who brings order to hard things.",
-      lineO: "I am someone who wants the truth about the project, even when it's uncomfortable.",
-      why: "I am the one people trust with the hard thing.",
-      lineG: "I am not the smartest person here and don't need to be. I get smart people pulling the same way.",
-      lineE: "I am calm under a deadline. Pressure tells me what matters. It doesn't get to tell me who I am.",
+      destination: "I am a project lead who brings order to hard things.",
+      lineO: "I am a project lead who wants the truth about where the project stands, even when it's uncomfortable.",
+      why: "I am the project lead who gets my team to the finish without burning them out.",
+      lineG: "I am a project lead who changes the plan when the road changes, without taking it personally.",
+      lineE: "I am a project lead who stays calm on deadline. Pressure tells me what matters. It doesn't get to tell me who I am.",
     },
   },
   {
@@ -88,16 +92,15 @@ export const EXAMPLE_PEOPLE: ExamplePerson[] = [
     role: "pastor",
     who: "Pastor stepping into the lead role",
     level: "ROLE",
-    claim: "I am called to lead this church, and preaching is one part of that.",
+    claim: "I am called to lead this church as its pastor, and preaching is one part of that.",
     lines: {
-      destination: "I am a shepherd of the whole house, including the parts I didn't build.",
+      destination: "I am a pastor to the whole house, including the parts I didn't build.",
       lineO: "I am a pastor who watches the health of the people more than the size of the room.",
-      why: "I am here because I was called.",
-      lineG: "I am a leader who depends on God and the people He put around me.",
-      lineE: "I am secure in my calling when I'm criticized.",
+      why: "I am a pastor who leads for the people God put in my care.",
+      lineG: "I am a pastor who can hear correction and keep leading.",
+      lineE: "I am a pastor who is secure in my calling when I'm criticized.",
     },
   },
-  // Build-team drafts for the parent and coach roles, written to the author's four tests. DRAFT.
   {
     key: "parent",
     who: "Parent",
@@ -106,10 +109,10 @@ export const EXAMPLE_PEOPLE: ExamplePerson[] = [
     claim: "I am the parent my kids can count on.",
     lines: {
       destination: "I am a parent raising kids who can stand on their own.",
-      lineO: "I am a parent who sees my kids for who they are.",
-      why: "I am raising my family the way I want to be remembered.",
+      lineO: "I am a parent who notices the small signs of how my kids are really doing.",
+      why: "I am a parent who makes home the safe place for my kids.",
       lineG: "I am a parent who can say I got it wrong and start again.",
-      lineE: "I am the calm in my house when the day falls apart.",
+      lineE: "I am the calm parent in my house when the day falls apart.",
     },
   },
   {
@@ -121,9 +124,9 @@ export const EXAMPLE_PEOPLE: ExamplePerson[] = [
     lines: {
       destination: "I am a coach measured by what my clients can do without me.",
       lineO: "I am a coach who listens for what sits under the question.",
-      why: "I am here because someone believed in me before I believed in myself.",
-      lineG: "I am still learning this craft, and I let my clients see that.",
-      lineE: "I am settled when a client pushes back.",
+      why: "I am a coach who believes in people before they believe in themselves.",
+      lineG: "I am a coach who keeps learning the craft and changes course when a client shows me something new.",
+      lineE: "I am a coach who stays settled when a client pushes back.",
     },
   },
 ];

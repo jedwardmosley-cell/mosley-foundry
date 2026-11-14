@@ -81,3 +81,13 @@ test("the app is standalone: clients never see the workbook or worksheet named",
     });
   }
 });
+
+test("identity examples: each role's five lines use that role's own word", async () => {
+  const { EXAMPLE_PEOPLE } = await import("../src/content/identityExamples");
+  for (const p of EXAMPLE_PEOPLE) {
+    for (const [field, line] of Object.entries(p.lines)) {
+      assert.ok(line.toLowerCase().includes(p.role), `${p.key} ${field} says "${p.role}": ${line}`);
+      assert.ok(line.startsWith("I am "), `${p.key} ${field} starts with I am`);
+    }
+  }
+});

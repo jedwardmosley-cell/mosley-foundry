@@ -351,7 +351,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await g.locator('button:has-text("I am a manager measured by what my team can do.")').first().click();
     assert.equal(await g.inputValue('textarea[name="destination"]'), "a manager measured by what my team can do.");
     await g.locator('summary:has-text("More examples")').first().click();
-    await g.waitForSelector("text=Project manager, tough assignment · core alignment");
+    await g.waitForSelector("text=Project lead, tough assignment · core alignment");
     await Promise.all([g.waitForURL("**/start?step=1&part=3"), g.click('button:has-text("Save and continue")')]);
     // part 3: one statement
     assert.ok((await g.inputValue('textarea[name="statement"]')).startsWith("I am "), "the statement starts from the five lines");
