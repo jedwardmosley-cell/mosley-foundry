@@ -21,14 +21,23 @@ type Teach = Partial<Record<PillarKey, Partial<ForgeCard>>>;
  * the book's rule line and the part of identity it shapes. "What this means" opens the teaching
  * from forge-source.md. Then the question, the I am line and one example.
  */
-export function FiveSides({ profile, pathway, role, level, ai, teach = {}, rules = {} }: {
+export function FiveSides({ profile, pathway, role, level, ai, teach = {}, rules = {}, opening }: {
   profile: Saved; pathway: PathwayKey; role: string; level: string; ai: boolean; teach?: Teach; rules?: Partial<Record<PillarKey, string>>;
+  /** The author's Core idea and forge passage, from forge-source.md. */
+  opening?: { line: string; core: string; forge: string };
 }) {
   return (
     <div className="space-y-2">
       <div className="pb-4">
-        <p className="font-serif text-[22px] sm:text-[24px] leading-snug text-heading">{FORGE_OPENING.line}</p>
+        <p className="font-serif text-[22px] sm:text-[24px] leading-snug text-heading">{opening?.line || FORGE_OPENING.line}</p>
+        {opening?.core && <p className="mt-3 text-[16px] leading-relaxed text-ink">{opening.core}</p>}
         <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">{FORGE_OPENING.text}</p>
+        {opening?.forge && (
+          <details className="mt-3 text-sm">
+            <summary className="cursor-pointer text-link font-medium">Why it&apos;s called FORGE</summary>
+            <p className="mt-2 font-serif text-[17px] leading-[1.55] text-heading">{opening.forge}</p>
+          </details>
+        )}
         <details className="mt-3 text-sm">
           <summary className="cursor-pointer text-link font-medium">Is it an identity?</summary>
           <ol className="mt-2 list-decimal pl-5 space-y-1 text-ink-soft">{IDENTITY_TESTS.map((t) => <li key={t}>{t}</li>)}</ol>

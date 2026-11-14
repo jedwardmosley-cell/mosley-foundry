@@ -19,7 +19,16 @@ export default async function ContentReview() {
         })
       : [{ label: "Not installed", items: ["Upload forge-source.md at /setup to see the cards here."] }],
   };
-  const sets = [forgeSet, ...reviewSets()];
+  const bookSet: ReviewSet = {
+    key: "forgebook", title: "FORGE opening and the book's sources", where: "Who's behind the wheel, the five parts of one driver", file: "forge-source.md (uploaded at /setup)", draft: src?.draft ?? true,
+    groups: src ? [
+      { label: "Core idea", items: [src.intro.line, src.intro.core] },
+      { label: "The forge", items: [src.intro.forge] },
+      { label: "FORGE at a Glance", items: [src.intro.glance] },
+      ...src.bookSources.map((g) => ({ label: `Selected sources: ${g.group}`, items: g.items })),
+    ] : [{ label: "Not installed", items: ["Upload forge-source.md at /setup to see it here."] }],
+  };
+  const sets = [bookSet, forgeSet, ...reviewSets()];
   const drafts = sets.filter((s) => s.draft);
   return (
     <>
