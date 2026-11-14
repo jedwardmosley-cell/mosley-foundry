@@ -79,6 +79,7 @@ summary { -webkit-tap-highlight-color: transparent; }
     border: 1px solid rgb(var(--line) / 0.45);
     box-shadow: 0 1px 2px rgb(var(--shadow) / 0.04), 0 12px 32px -18px rgb(var(--shadow) / 0.16);
   }
+  .section-label { @apply text-[11px] uppercase tracking-[0.16em] font-semibold text-ink-mute; }
   .eyebrow { @apply text-[11px] uppercase tracking-[0.16em] text-ink-mute font-semibold; }
   .h1 { @apply font-serif text-[34px] sm:text-[44px] leading-[1.04] text-heading tracking-[-0.02em]; font-weight: 420; }
   .h2 { @apply font-serif text-[22px] sm:text-[26px] leading-snug text-heading tracking-[-0.01em]; }

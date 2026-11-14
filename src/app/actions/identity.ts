@@ -107,7 +107,7 @@ export async function saveIdentityControls(fd: FormData) {
 
 // ---------- Who I am: one activity ----------
 
-const NEXT_OK = ["/start?step=1&part=2", "/start?step=1&part=3", "/start?step=2", "/identity?saved=1"];
+const NEXT_OK = ["/start?step=1&part=2", "/start?step=1&part=3", "/start?step=2", "/identity?saved=1", "/forge/f?saved=1", "/forge/o", "/forge/r", "/forge/g", "/forge/e"];
 
 /**
  * Saves Who I am: the role, the kind of change, the five FORGE statements and My statement.

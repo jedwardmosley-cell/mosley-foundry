@@ -336,7 +336,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await g.waitForSelector("text=As a manager, who am I becoming?");
     await g.locator('summary:has-text("Examples")').first().click();
     await g.waitForSelector("text=Newly promoted manager · role transition");
-    await g.locator('button:has-text("a leader measured by what my team can do.")').first().click();
+    await g.locator('button:has-text("a manager measured by what my team can do.")').first().click();
     await Promise.all([g.waitForURL("**/start?step=1&part=3"), g.click('button:has-text("Save and continue")')]);
     // part 3: one statement
     assert.ok((await g.inputValue('textarea[name="statement"]')).startsWith("I am "), "the statement starts from the five lines");
@@ -355,7 +355,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await g.click('button:has-text("Add person")');
     await g.waitForSelector("text=✓ Pat Partner");
     await Promise.all([g.waitForURL("**/start?step=4"), g.click('a:has-text("Next: start your 30 days")')]);
-    await g.waitForSelector("text=I am a leader measured by what my team can do.");
+    await g.waitForSelector("text=I am a manager measured by what my team can do.");
     // 4. the 30 days, about the same role
     await Promise.all([g.waitForURL(/\/cycle\/new\?pillar=E/), g.click('a:has-text("start my 30 days")')]);
     assert.equal(await g.inputValue('input[name="role"]'), "manager");
