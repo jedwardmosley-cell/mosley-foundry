@@ -347,11 +347,12 @@ const submitAndWait = async (page: Page, selector: string) => {
     await Promise.all([g.waitForURL("**/start?step=1&part=2"), g.click('button:has-text("Save and continue")')]);
     // part 2: the five sides carry the role, and the examples match it (the newly promoted manager first)
     await g.waitForSelector("text=As a manager, who is the person I'm driving toward?");
-    // the closest example (the newly promoted manager) shows under the question; tapping it fills the box
-    await g.locator('button:has-text("I am a manager measured by what my team can do.")').first().click();
+    // examples stay folded under Examples, closest person first (the newly promoted manager); tapping one fills the box
+    assert.equal(await g.locator("text=For example").count(), 0, "no example line under the questions");
+    await g.locator('summary:has-text("Examples")').first().click();
+    await g.waitForSelector("text=Newly promoted manager · role transition");
+    await g.locator('button:has-text("a manager measured by what my team can do.")').first().click();
     assert.equal(await g.inputValue('textarea[name="destination"]'), "a manager measured by what my team can do.");
-    await g.locator('summary:has-text("More examples")').first().click();
-    await g.waitForSelector("text=Project lead, tough assignment · core alignment");
     await Promise.all([g.waitForURL("**/start?step=1&part=3"), g.click('button:has-text("Save and continue")')]);
     // part 3: one statement
     assert.ok((await g.inputValue('textarea[name="statement"]')).startsWith("I am "), "the statement starts from the five lines");
