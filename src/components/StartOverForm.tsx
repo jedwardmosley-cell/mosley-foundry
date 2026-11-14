@@ -8,7 +8,7 @@ export function StartOverForm() {
   return (
     <details className="rounded-2xl border border-alert/40 bg-card p-5">
       <summary className="cursor-pointer h3 !text-alert">Start over</summary>
-      <p className="mt-3 text-[15px]">This erases everything you have entered and takes you back to the beginning: your identity and FORGE statements, scores, blueprint, people, 30-day cycles, seasons, check-ins, reflections, journal and AI conversations.</p>
+      <p className="mt-3 text-[15px]">This erases everything you have entered and takes you back to the beginning: your identity and FORGE statements, scores, My road, people, 30-day cycles, seasons, check-ins, reflections, journal and AI conversations.</p>
       <p className="mt-2 text-sm text-ink-soft">Your login, settings and coach stay. What you chose to share stays switched on, but there will be nothing in it until you start again. This cannot be undone. To keep a copy first, open History and download your development summary.</p>
       <form action={action} className="mt-4 space-y-3">
         <label className="block">

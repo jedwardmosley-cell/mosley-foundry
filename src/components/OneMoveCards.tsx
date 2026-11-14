@@ -9,7 +9,7 @@ import { LEVELS, PILLAR_PROMPTS, type IdentityLevel } from "@/content/identity";
 
 type Goal = { pillar: string; whereNow: string; whereWant: string; oneMove: string };
 
-/** One move this week, per pillar. Behavior lives in Discipline by Design, so this sits in the blueprint. */
+/** One move this week, per pillar. Behavior lives in Discipline by Design, so this sits on My road. */
 export function OneMoveCards({ pack, goals, priority, level }: { pack: ContentPack; goals: Goal[]; priority?: string | null; level?: string | null }) {
   const roadTest = pack.chapters.find((c) => c.number === 9)?.roadTest ?? [];
   const rt = (k: string) => roadTest.find((l) => l.startsWith(`${k}:`))?.slice(3);

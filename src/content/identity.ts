@@ -85,7 +85,7 @@ export const PERSONA_FIELDS: { key: "personaName" | "personaQualities" | "person
 export const NO_RANK_NOTE = "These three levels describe how big a change you want to make. They say nothing about your worth, your health, or how far along you are. Level 3 does not rank above Level 1 or 2.";
 export const PERSONA_NOTE = "A performance identity is a practice tool you choose on purpose. It is a way to prepare for demanding situations. It is still you, and it makes no claim about changing your psychology.";
 
-// ---------- Part 2: how the level shapes FORGE, the blueprint and the daily check-in ----------
+// ---------- Part 2: how the level shapes FORGE, My road and the daily check-in ----------
 
 /**
  * One prompt per FORGE pillar per level. DRAFT FOR AUTHOR REVIEW.

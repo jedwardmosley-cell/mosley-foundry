@@ -33,7 +33,7 @@ export const PATHWAYS = {
 } as const;
 export type PathwayKey = keyof typeof PATHWAYS;
 
-/** The ten Blueprint areas from the brief, each tied to the Design Inventory label in Ch. 10 where one exists. */
+/** The ten My road areas from the brief, each tied to the Design Inventory label in Ch. 10 where one exists. */
 export const BLUEPRINT_AREAS = [
   { key: "ROUTINES", label: "Personal commitments and routines", inventory: "Daily", hint: "What happens before the world starts making demands?" },
   { key: "WEEKLY", label: "Weekly planning and reflection", inventory: "Weekly", hint: "One appointment to decide what matters, one to look back." },

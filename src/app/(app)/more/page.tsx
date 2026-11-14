@@ -8,7 +8,7 @@ const GROUPS: [string, [string, string, string][]][] = [
     ["/assessment", "2. Where I am today", "Score the five pillars and pick one to work on."],
   ]],
   ["Discipline by Design", [
-    ["/blueprint", "3. My road", "Discipline by Design: your routines, your people, your learning."],
+    ["/road", "3. My road", "Discipline by Design: your routines, your people, your learning."],
     ["/cycle", "4. 30 days", "Practice one behavior for 30 days, then decide what is next."],
     ["/season", "Season", "Three 30-day cycles, about 90 days, and the review at the end."],
     ["/reflect", "Weekly reflection", "Did I do what I said I was going to do?"],

@@ -43,7 +43,7 @@ export async function developmentSummary(userId: string, name: string) {
     for (const g of d.goals) L.push(`- **${pName(g.pillar)}${g.segmentKey ? ` (segment ${g.segmentKey})` : ""}**: now: ${g.whereNow || "-"}; want: ${g.whereWant || "-"}; one move: ${g.oneMove || "-"}`);
   }
   if (d.commitments.length) {
-    L.push("", "## Discipline by Design blueprint");
+    L.push("", "## My road (Discipline by Design)");
     for (const c of d.commitments) L.push(`- ${BLUEPRINT_AREAS.find((a) => a.key === c.area)?.label}: ${c.title}${c.when ? ` (${c.when})` : ""}`);
   }
   if (d.relationships.length) {

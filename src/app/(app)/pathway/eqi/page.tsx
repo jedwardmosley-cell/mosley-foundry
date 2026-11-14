@@ -77,9 +77,9 @@ export default async function EqiPage() {
                     <span className="text-sm text-ink-mute self-center">Choose a pillar to start a 30-day cycle.</span>
                   )}
                   {e.practice ? (
-                    <form action={addEqiToBlueprint}><input type="hidden" name="id" value={e.id} /><button className="btn-quiet">Add the practice to my blueprint</button></form>
+                    <form action={addEqiToBlueprint}><input type="hidden" name="id" value={e.id} /><button className="btn-quiet">Add the practice to My road</button></form>
                   ) : (
-                    <span className="text-sm text-ink-mute self-center">Add a practice to put it in your blueprint.</span>
+                    <span className="text-sm text-ink-mute self-center">Add a practice to put it on My road.</span>
                   )}
                   {coaches.length > 0 && !shared && (
                     <form action={shareEqi}><input type="hidden" name="id" value={e.id} /><button className="btn-quiet">Share with {coaches[0].coach.name.split(" (")[0]}</button></form>

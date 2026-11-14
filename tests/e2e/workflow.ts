@@ -103,7 +103,7 @@ const submitAndWait = async (page: Page, selector: string) => {
   });
 
   await check("3. identify a development priority", async () => {
-    await Promise.all([page.waitForURL(/\/blueprint(#one-move)?$/), page.click('button:has-text("my development priority")')]);
+    await Promise.all([page.waitForURL(/\/road(#one-move)?$/), page.click('button:has-text("my development priority")')]);
     // the old plan address now opens Who I am: one activity
     await Promise.all([page.waitForURL("**/identity"), page.goto(`${BASE}/plan`)]);
     const p = await db.profile.findFirst({ where: { user: { email } } });
@@ -143,8 +143,11 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.goto(`${BASE}/identity`);
   });
 
-  await check("4. create a Discipline by Design blueprint", async () => {
+  await check("4. create My road (Discipline by Design)", async () => {
+    // the old address still lands on My road
     await page.goto(`${BASE}/blueprint`);
+    await page.waitForURL("**/road");
+    await page.goto(`${BASE}/road`);
     const routines = page.locator("section", { hasText: "Personal commitments and routines" });
     await routines.locator("summary", { hasText: "Add to this area" }).click();
     await routines.locator('button:has-text("Journaling")').click(); // quick pick fills the field
@@ -155,7 +158,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await Promise.all([page.waitForLoadState("networkidle"), routines.locator('button[type="submit"]:has-text("Add")').click()]);
     await page.waitForSelector("text=Fifteen quiet minutes before email");
     await page.waitForSelector("text=Weekdays, 6:30 am");
-    await page.screenshot({ path: `${shots}/04-blueprint.png`, fullPage: false });
+    await page.screenshot({ path: `${shots}/04-my-road.png`, fullPage: false });
   });
 
   await check("5. name an accountability relationship", async () => {
@@ -192,7 +195,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.waitForSelector("text=My plan for 30 days");
     await page.waitForSelector("text=Jamie checks on me.");
     // the journey bar follows: all four steps done, and the 30 days under way
-    await page.goto(`${BASE}/blueprint`);
+    await page.goto(`${BASE}/road`);
     const bar = page.locator('nav[aria-label="Your journey"]');
     await bar.locator("text=Day 1 of 30").waitFor();
     assert.equal(await bar.locator("text=(done)").count(), 4, "Who I am, Where I am, My road and 30 days");
@@ -210,7 +213,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.screenshot({ path: `${shots}/06-dashboard.png`, fullPage: true });
   });
 
-  await check("7a. weekly reflection with blueprint checkboxes, no essay required", async () => {
+  await check("7a. weekly reflection with My road checkboxes, no essay required", async () => {
     await page.goto(`${BASE}/reflect`);
     await page.locator('input[name="didIt"][value="PARTIAL"]').check();
     await page.locator('input[name="held"]').first().check();
@@ -223,7 +226,7 @@ const submitAndWait = async (page: Page, selector: string) => {
   });
 
   await check("7b. Blueprint: one move this week, priority open, suggestion fills the field", async () => {
-    await page.goto(`${BASE}/blueprint`);
+    await page.goto(`${BASE}/road`);
     assert.equal(await (await page.request.get(`${BASE}/plan`)).text().then((t) => t.includes('name="oneMove"')), false, "one move is no longer on the FORGE plan");
     const pri = page.locator("details[open]", { hasText: "Emotionally Anchored" });
     await pri.locator('summary:has-text("Ideas")').click();
@@ -254,7 +257,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.waitForSelector("text=Start a 30-day cycle on Emotionally Anchored");
     assert.equal(await page.locator('button:has-text("Share with")').count(), 0, "no share button without a coach");
     await page.screenshot({ path: `${shots}/06c-eqi.png`, fullPage: true });
-    await Promise.all([page.waitForURL("**/blueprint"), page.click('button:has-text("Add the practice to my blueprint")')]);
+    await Promise.all([page.waitForURL("**/road"), page.click('button:has-text("Add the practice to My road")')]);
     await page.waitForSelector("text=One breath before I answer");
     await page.goto(`${BASE}/pathway/eqi`);
     await Promise.all([page.waitForURL(/\/cycle\/new\?pillar=E/), page.click('a:has-text("Start a 30-day cycle on Emotionally Anchored")')]);
@@ -279,7 +282,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.goto(`${BASE}/dashboard`);
     await page.waitForSelector(`main a:has-text("Who's behind the wheel") >> text=I am someone who follows through on what I say.`);
     // the behavior now opens My road
-    await page.goto(`${BASE}/blueprint`);
+    await page.goto(`${BASE}/road`);
     await page.fill('input[name="behavior"]', "I close every open commitment by Friday noon.");
     await submitAndWait(page, 'form:has(input[name="behavior"]) button[type="submit"]');
     assert.equal((await db.identityProfile.findUniqueOrThrow({ where: { userId: me.id } })).behavior, "I close every open commitment by Friday noon.");
@@ -303,18 +306,18 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal(priority.priorityPillar, "E", "choosing a kind of change never changes the FORGE priority");
   });
 
-  await check("7f. the level shapes the FORGE plan, blueprint, cycle and check-in, all optional", async () => {
+  await check("7f. the level shapes the FORGE plan, My road, cycle and check-in, all optional", async () => {
     const me = await db.user.findUniqueOrThrow({ where: { email } });
-    await page.goto(`${BASE}/blueprint`);
+    await page.goto(`${BASE}/road`);
     await page.waitForSelector("text=For identity reinvention:");
     await page.waitForSelector("text=Use your activation cue to prepare before a demanding situation.");
-    await page.goto(`${BASE}/blueprint`);
+    await page.goto(`${BASE}/road`);
     const card = page.locator("section", { hasText: "Identity practice" }).first();
     await card.waitFor();
     await card.locator("text=Write your activation cue first").waitFor(); // no cue written yet, so nothing is added for them
     const before = await db.commitment.count({ where: { userId: me.id } });
     await Promise.all([page.waitForLoadState("networkidle"), card.locator('button:has-text("Add a weekly review against my standards")').click()]);
-    await card.locator("text=In your blueprint").waitFor();
+    await card.locator("text=On My road").waitFor();
     assert.equal(await db.commitment.count({ where: { userId: me.id } }), before + 1, "only the one the person tapped is added");
     const added = await db.commitment.findFirstOrThrow({ where: { userId: me.id, detail: "Who I am" } });
     assert.equal(added.cadence, "WEEKLY");
@@ -586,7 +589,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await g.goto(`${BASE}/dashboard`);
     await g.waitForSelector("text=I am STATEMENT-B.");
     assert.ok(!(await g.locator("main").innerText()).includes("OLD-CLAIM-B"), "Today shows My statement");
-    await g.goto(`${BASE}/blueprint`);
+    await g.goto(`${BASE}/road`);
     assert.equal(await g.inputValue('input[name="behavior"]'), "BEHAVIOR-B", "the behavior opens My road");
     // the five and the statement with no identity yet: all there, and nothing is rewritten until the client saves
     await g.context().clearCookies();
@@ -822,7 +825,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     const dc = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const dp: Page = await dc.newPage();
     await login(dp, "dana@demo.bothhands.app");
-    for (const path of ["/dashboard", "/identity", "/assessment", "/blueprint", "/cycle", "/cycle/new", "/network", "/guide", "/pathway/segment/01"]) {
+    for (const path of ["/dashboard", "/identity", "/assessment", "/road", "/cycle", "/cycle/new", "/network", "/guide", "/pathway/segment/01"]) {
       await dp.goto(`${BASE}${path}`);
       for (const d of await dp.locator("details").all()) await d.evaluate((e) => ((e as HTMLDetailsElement).open = true));
       const text = await dp.locator("main").innerText();

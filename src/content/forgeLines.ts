@@ -37,7 +37,7 @@ export const FORGE_LINES: ForgeLine[] = [
     question: "Who is the person I'm driving toward?",
     shapes: "Where you're going.",
     prefix: "I am",
-    hint: "Describe the person you are choosing to be and where that person is headed. Plans and tasks go in your blueprint.",
+    hint: "Describe the person you are choosing to be and where that person is headed. Plans and tasks go on My road.",
   },
   {
     pillar: "O",
@@ -46,7 +46,7 @@ export const FORGE_LINES: ForgeLine[] = [
     question: "What does the person I'm becoming pay attention to?",
     shapes: "What it looks like as you get closer, and when you arrive.",
     prefix: "I am",
-    hint: "Describe the kind of attention this person brings. The signals you will track go in your blueprint.",
+    hint: "Describe the kind of attention this person brings. The signals you will track go on My road.",
   },
   {
     pillar: "R",
@@ -64,7 +64,7 @@ export const FORGE_LINES: ForgeLine[] = [
     question: "Who am I when I hit a limit?",
     shapes: "The gap between where you are and where you'll be.",
     prefix: "I am",
-    hint: "Describe who you are when you hit a limit. The skills you will practice go in your blueprint.",
+    hint: "Describe who you are when you hit a limit. The skills you will practice go on My road.",
   },
   {
     pillar: "E",
@@ -73,13 +73,13 @@ export const FORGE_LINES: ForgeLine[] = [
     question: "Who am I when the day gets ugly?",
     shapes: "The emotional state it takes to be that person and get there.",
     prefix: "I am",
-    hint: "Describe who you are when emotions run high. Techniques, like a pause or a breath, go in your blueprint.",
+    hint: "Describe who you are when emotions run high. Techniques, like a pause or a breath, go on My road.",
   },
 ];
 
 /**
  * Practices that REINFORCE a FORGE identity. These are habits and actions, so they live in
- * Discipline by Design (the blueprint and the guided session's "My road" step), never in FORGE.
+ * Discipline by Design (My road and the guided session's "My road" step), never in FORGE.
  * Build-team draft, for author review.
  */
 export const PRACTICE_STARTERS: Record<PillarKey, Record<PathwayKey, string[]>> = {
