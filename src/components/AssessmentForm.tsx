@@ -5,6 +5,7 @@ import type { PillarKey } from "@/content/types";
 import { PillarMark, Source } from "./ui";
 import { Submit } from "./Submit";
 import { DictationHint } from "./Picks";
+import { RuleAccordion } from "./RuleAccordion";
 
 type Content = Awaited<ReturnType<typeof getContent>>;
 
@@ -28,22 +29,27 @@ export function AssessmentForm({ pack, entrepreneur, useEntre, instrument, next,
   reviseId?: string;
 }) {
   return (
-    <form action={reviseId ? reviseAssessment : saveAssessment} className="space-y-6">
+    <form id="forge-rating" action={reviseId ? reviseAssessment : saveAssessment} className="space-y-3">
+      <RuleAccordion formId="forge-rating" />
       {reviseId ? <input type="hidden" name="id" value={reviseId} /> : <input type="hidden" name="instrument" value={instrument} />}
       {next && <input type="hidden" name="next" value={next} />}
-      {pack.pillars.map((p) => {
+      {pack.pillars.map((p, i) => {
         const e = useEntre ? entrepreneur!.pillars[p.key] : null;
         const mine = lines[p.key]?.trim();
         return (
-          <fieldset key={p.key} className="card">
+          // One rule at a time: the first is open, and picking a level opens the next (RuleAccordion).
+          <details key={p.key} data-rule={p.key} open={!defaults && i === 0} className="card group scroll-mt-20">
+          <summary className="flex cursor-pointer list-none items-center gap-3 [&::-webkit-details-marker]:hidden">
+            <PillarMark k={p.key} size="lg" />
+            <span className="min-w-0 flex-1">
+              <span className="block h2">{p.name}</span>
+              <span data-pick className="block text-sm text-ink-soft">{defaults ? `${defaults[p.key]} · ${p.anchors.find((a) => a.score === defaults[p.key])?.level ?? ""}` : "Not rated yet"}</span>
+            </span>
+            <span aria-hidden className="text-ink-mute transition group-open:rotate-90">›</span>
+          </summary>
+          <fieldset className="mt-4">
             <legend className="sr-only">{p.name}</legend>
-            <div className="flex items-start gap-3">
-              <PillarMark k={p.key} size="lg" />
-              <div>
-                <h2 className="h2">{p.name}</h2>
-                <p className="muted text-[15px]">{e?.tagline ?? p.definition}</p>
-              </div>
-            </div>
+            <p className="muted text-[15px]">{e?.tagline ?? p.definition}</p>
 
             <div className="mt-5 rounded-2xl bg-ink/[0.04] px-4 py-3">
               <p className="text-xs text-ink-mute">{role ? `What I wrote, as ${role}` : "What I wrote"}</p>
@@ -57,7 +63,7 @@ export function AssessmentForm({ pack, entrepreneur, useEntre, instrument, next,
               <div className="space-y-2">
                 {p.anchors.map((an) => (
                   <label key={an.score} className="block cursor-pointer">
-                    <input type="radio" name={p.key} value={an.score} required defaultChecked={defaults?.[p.key] === an.score} className="peer sr-only" />
+                    <input type="radio" name={p.key} value={an.score} data-level={an.level} required defaultChecked={defaults?.[p.key] === an.score} className="peer sr-only" />
                     <span className="flex gap-3 rounded-2xl border border-ink/10 bg-field p-3.5 transition hover:border-navy/40 peer-checked:border-navy peer-checked:bg-navy/[0.06] peer-checked:ring-2 peer-checked:ring-navy/30 peer-focus-visible:ring-4 peer-focus-visible:ring-navy/20">
                       <span className="w-6 shrink-0 font-serif text-xl text-heading">{an.score}</span>
                       <span>
@@ -81,9 +87,10 @@ export function AssessmentForm({ pack, entrepreneur, useEntre, instrument, next,
               </details>
             )}
           </fieldset>
+          </details>
         );
       })}
-      <div className="flex flex-wrap items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4 pt-3">
         <Submit className="btn-primary shrink-0">{reviseId ? "Save my ratings" : "See my profile"}</Submit>
         <p className="text-sm muted">Your answers are private. You decide later what, if anything, your coach sees.</p>
       </div>

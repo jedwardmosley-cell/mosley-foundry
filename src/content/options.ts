@@ -13,40 +13,6 @@ import type { PillarKey } from "./types";
  */
 export type OptionList = { status: "draft" | "approved"; basis?: "ch10" | "workbook"; options: string[] };
 
-/** One move this week, per pillar (FORGE plan and segment goals). */
-export const ONE_MOVE: Record<PillarKey, OptionList> = {
-  F: { status: "draft", basis: "workbook", options: [
-    "Write my destination in one sentence and read it every morning",
-    "Test one decision a day against my destination before I say yes",
-    "Set one rule in advance for what does not get my attention this week",
-    "Say no to one good thing that is outside my lane",
-  ] },
-  O: { status: "draft", basis: "workbook", options: [
-    "Name three early signals for my most important work",
-    "Check my three signals every Friday and write what I saw",
-    "Make one course correction this week based on an early signal",
-    "Share my signals with my team so they can read the road too",
-  ] },
-  R: { status: "draft", basis: "workbook", options: [
-    "Write my why in full and read it back after a hard day",
-    "Share my why with one person who will challenge it",
-    "Rewrite my why around the people it serves",
-    "Reread my why at the end of the week and note if it still feels true",
-  ] },
-  G: { status: "draft", basis: "workbook", options: [
-    "Treat one small setback this week as something to learn from",
-    "Go back to one piece of feedback I brushed off and act on it",
-    "Ask where I am the one who needs to recalculate",
-    "Show my team how I handle being wrong, out loud",
-  ] },
-  E: { status: "draft", basis: "workbook", options: [
-    "Name the exact situation that takes the wheel from me",
-    "Pause before I respond: one breath, one question",
-    "Look at the last three times I reacted and find what they share",
-    "Notice whether the people around me are calmer when I am present",
-  ] },
-};
-
 /** Starter behaviors for a 30-day cycle, per pillar. */
 export const CYCLE_FOCUS: Record<PillarKey, OptionList> = {
   F: { status: "draft", basis: "workbook", options: [
@@ -85,7 +51,7 @@ export const CHECKIN_TAGS: OptionList = { status: "draft", options: [
 export const BLUEPRINT_PICKS: Record<string, OptionList> = {
   ROUTINES: { status: "draft", basis: "ch10", options: ["Fifteen minutes before the day starts", "Reading", "Journaling", "Prayer or quiet reflection", "Moving my body", "Reading My statement"] },
   WEEKLY: { status: "draft", basis: "ch10", options: ["Plan the week ahead", "Look back: did I do what I said?", "Check my three signals"] },
-  ACCOUNTABILITY: { status: "draft", options: ["Share My statement with my partner", "Every-other-week check-in call", "Text my partner my one move each Monday"] },
+  ACCOUNTABILITY: { status: "draft", options: ["Share My statement with my partner", "Every-other-week check-in call", "Text my partner my focus each Monday"] },
   MENTORING: { status: "draft", basis: "ch10", options: ["Monthly call with my mentor", "Regular session with my coach", "Bring one crossroads decision to my mentor"] },
   MENTEES: { status: "draft", basis: "ch10", options: ["Weekly time with someone I am developing", "Teach one thing I am practicing", "Name the potential I see in someone, out loud"] },
   GROUPS: { status: "draft", basis: "ch10", options: ["Weekly peer group", "Mastermind", "A class or cohort", "Community of practice"] },
@@ -99,7 +65,7 @@ export const BLUEPRINT_PICKS: Record<string, OptionList> = {
 export const RELATIONSHIP_PURPOSE: Record<string, OptionList> = {
   MENTOR: { status: "draft", basis: "ch10", options: ["Perspective from further up the road", "Tells me the truth at a crossroads"] },
   COACH: { status: "draft", basis: "ch10", options: ["Watches my blind spots", "Checks that I do what I said I would do"] },
-  ACCOUNTABILITY_PARTNER: { status: "draft", options: ["Checks on My statement", "Checks on my one move each week", "Won't let me manage around my blind spots"] },
+  ACCOUNTABILITY_PARTNER: { status: "draft", options: ["Checks on My statement", "Checks on my focus each week", "Won't let me manage around my blind spots"] },
   MENTEE: { status: "draft", basis: "ch10", options: ["Someone I am pouring into", "Developing them for a bigger role"] },
   GROUP: { status: "draft", basis: "ch10", options: ["Peers pointed toward growth", "Study and accountability"] },
   DIRECT_REPORT: { status: "draft", options: ["Developing them into a leader", "Weekly one-on-one", "Clear expectations and follow-up"] },

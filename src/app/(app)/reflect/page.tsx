@@ -130,17 +130,27 @@ export default async function ReflectPage() {
       {past.length > 0 && (
         <div className="mt-6 space-y-3">
           <h2 className="h2">Earlier weeks</h2>
-          {past.map((w) => (
-            <Card key={w.id}>
+          {past.slice(0, 2).map((w) => <PastWeek key={w.id} w={w} />)}
+          {past.length > 2 && (
+            <details>
+              <summary className="cursor-pointer text-sm text-link">Show {past.length - 2} more {past.length - 2 === 1 ? "week" : "weeks"}</summary>
+              <div className="mt-3 space-y-3">{past.slice(2).map((w) => <PastWeek key={w.id} w={w} />)}</div>
+            </details>
+          )}
+        </div>
+      )}
+    </>
+  );
+}
+
+function PastWeek({ w }: { w: { weekOf: string; shared: boolean; built: string; avoided: string; nextWeek: string; held: string } }) {
+  return (
+            <Card>
               <div className="flex justify-between items-baseline"><p className="h3">Week of {fmt(w.weekOf)}</p><Privacy shared={w.shared} /></div>
               {w.built && <p className="mt-2 text-[15px]"><span className="text-ink-mute">Built: </span>{w.built}</p>}
               {w.avoided && <p className="mt-1 text-[15px]"><span className="text-ink-mute">Avoided: </span>{w.avoided}</p>}
               {w.nextWeek && <p className="mt-1 text-[15px]"><span className="text-ink-mute">Next: </span>{w.nextWeek}</p>}
               {JSON.parse(w.held || "[]").length > 0 && <p className="mt-1 text-sm muted">{JSON.parse(w.held).length} commitment{JSON.parse(w.held).length === 1 ? "" : "s"} kept</p>}
             </Card>
-          ))}
-        </div>
-      )}
-    </>
   );
 }

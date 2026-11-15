@@ -110,7 +110,7 @@ export async function setPriority(fd: FormData) {
 
 const planSchema = z.object({
   pillar: pillarKey,
-  whereNow: text(1500), whereWant: text(1500), oneMove: text(1000),
+  whereNow: text(1500), whereWant: text(1500),
   segmentKey: z.string().max(4).optional(),
 });
 

@@ -77,9 +77,8 @@ export const CLIENT_GUIDE: GuideSection[] = [
     id: "road",
     title: "My road and my people",
     time: "10 minutes to set up",
-    intro: "My road is where your FORGE identity turns into practice. It covers your one move this week, your routines, your weekly planning, your learning, and the people around you.",
+    intro: "My road is where your FORGE identity turns into practice. It covers your routines, your weekly planning, your learning, and the people around you.",
     steps: [
-      "Under One move this week, open your focus rule and pick one move. Tap a suggestion or write your own. Open the other rules when you are ready for them.",
       "On My road, open an area and tap Add to this area. Pick a suggestion or write your own, then choose the days and a time.",
       "In the My people card, tap Add next to a role. Start with an accountability partner.",
       "For each person, choose how often you will check in.",

@@ -116,7 +116,7 @@ export async function participantContext(userId: string) {
     const s = scoresFrom(assessment);
     lines.push(`Latest self-assessment (self-rated, ${assessment.completedAt.toDateString()}): F ${s.F}, O ${s.O}, R ${s.R}, G ${s.G}, E ${s.E}`);
   } else lines.push("No self-assessment completed yet.");
-  for (const g of goals) lines.push(`Goal ${g.pillar}${g.isPriority ? " (priority)" : ""}: now "${g.whereNow}" / want "${g.whereWant}" / one move "${g.oneMove}"`);
+  for (const g of goals) lines.push(`Goal ${g.pillar}${g.isPriority ? " (priority)" : ""}: now "${g.whereNow}" / want "${g.whereWant}"`);
   if (cycle) lines.push(`Active 30-day cycle started ${cycle.startDate.toDateString()} on rule ${cycle.pillar}${cycle.focus ? `, focus: ${cycle.focus}` : ""}`);
   if (checkIns.length) lines.push(`Recent check-ins: ${checkIns.map((c) => `${c.date} ${c.status}`).join(", ")}`);
   for (const s of sessions) if (s.commitments) lines.push(`Coaching commitments from ${s.scheduledAt.toDateString()}: ${s.commitments}`);
@@ -328,7 +328,7 @@ export async function coachIdentityLine(userId: string, field: LineField, writte
       "These five statements describe one identity from five sides. They are not five separate identities.",
       "FORGE is identity formation. It answers who is behind the wheel. Discipline by Design comes later and turns that identity into routines, relationships and accountability.",
       `The participant is writing their ${l.pillar}, ${l.label} identity statement. The question is: ${asRole(l.question, role)} The statement starts with "I am".`,
-      "Identity comes first and behavior follows it. People don't sustain a behavior that conflicts with who they believe they are. Behavior already has a home in this app: My road (one move this week) and 30 days (the practice). If the statement names a behavior, the person has claimed a task and those steps have nothing left to do.",
+      "Identity comes first and behavior follows it. People don't sustain a behavior that conflicts with who they believe they are. Behavior already has a home in this app: My focus (one or two things, each for 30 days) and My road (the routines). If the statement names a behavior, the person has claimed a task and those steps have nothing left to do.",
       `Your job is to help them tell apart four things and work at the identity level. A goal is ${FOUR_THINGS.goal}. A habit is ${FOUR_THINGS.habit}. A value is ${FOUR_THINGS.value}. An identity is ${FOUR_THINGS.identity}.`,
       `Apply these four tests to what they wrote and to anything you suggest: ${IDENTITY_TESTS.map((t, i) => `(${i + 1}) ${t}`).join(" ")}`,
       "- Too vague (\"a purposeful leader\") fails test 4: make it specific to the shift they are making. Too narrow (\"the leader who notices when someone goes quiet\") fails tests 1 and 3: that is one of fifty things a leader who puts people before tasks does. Move up to the identity that produces it.",

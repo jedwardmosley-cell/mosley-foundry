@@ -57,13 +57,16 @@ export default async function NetworkPage({ searchParams }: { searchParams: Prom
       </div>
 
       <h2 className="h2 mt-8 mb-3">People</h2>
-      <div className="space-y-4">
+      {rels.length > 0 && <p className="-mt-1 mb-3 text-sm text-ink-soft">Tap a person to add a check-in or see past ones.</p>}
+      <div className="space-y-3">
         {withState.map((r) => (
-          <Card key={r.id}>
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
+          // Each person is one line until opened, so a long list stays short on a phone.
+          <details key={r.id} className="card group !py-4" data-person={r.name}>
+            <summary className="flex cursor-pointer list-none flex-wrap items-baseline justify-between gap-2 [&::-webkit-details-marker]:hidden">
               <h3 className="h3">{r.name} <span className="muted font-normal">· {RELATIONSHIP_ROLES[r.role as keyof typeof RELATIONSHIP_ROLES]}</span></h3>
-              <span className={`text-sm ${r.overdue ? "text-alert" : "muted"}`}>Every {r.cadenceDays} days · {r.overdue ? "was due" : "next"} {fmt(r.nextCheckIn)}</span>
-            </div>
+              <span className={`text-sm ${r.overdue ? "text-alert" : "muted"}`}>{r.overdue ? "was due" : "next"} {fmt(r.nextCheckIn)} <span aria-hidden className="ml-1 inline-block transition group-open:rotate-90">›</span></span>
+            </summary>
+            <p className="mt-1 text-sm muted">Every {r.cadenceDays} days</p>
             {r.purpose && <p className="mt-1 text-[15px] text-ink-soft">{r.purpose}</p>}
             {r.checkIns.length > 0 && (
               <ul className="mt-3 space-y-2 text-sm">
@@ -102,13 +105,13 @@ export default async function NetworkPage({ searchParams }: { searchParams: Prom
               )}
               <form action={removeRelationship}><input type="hidden" name="id" value={r.id} /><button className="text-ink-mute hover:text-alert">Remove</button></form>
             </div>
-          </Card>
+          </details>
         ))}
       </div>
 
       <div id="add" className="scroll-mt-20" />
-      <Card className="mt-6">
-        <h2 className="h3">Add a person or group</h2>
+      <details className="card mt-6" open={rels.length === 0 || !!wantedRole}>
+        <summary className="cursor-pointer h3 text-link">Add a person or group</summary>
         <form action={addRelationship} className="mt-4 grid gap-4 sm:grid-cols-2">
           <Field label="Name"><input name="name" required maxLength={120} className="input" /></Field>
           <RelationshipFields initialRole={wantedRole && wantedRole in RELATIONSHIP_ROLES ? wantedRole : undefined} />
@@ -121,7 +124,7 @@ export default async function NetworkPage({ searchParams }: { searchParams: Prom
         </form>
         <p className="mt-4 text-xs text-ink-mute">Invited people can see that you named them. They never see your assessments, reflections, journal or plan.</p>
         {pack.namePeople.length > 0 && <Source>Both Hands on the Wheel, Ch. 10</Source>}
-      </Card>
+      </details>
     </>
   );
 }
