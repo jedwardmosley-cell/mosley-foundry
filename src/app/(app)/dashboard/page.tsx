@@ -57,7 +57,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   return (
     <div className="space-y-5">
       <TimezoneSync saved={d.profile.timezone} />
-      {setup === "done" && <p role="status" className="notice">Week 1 setup is done. Your plan is on its way to the person who finds out.</p>}
+      {setup === "done" && <p role="status" className="notice">Your focus is set up. Your plan is on its way to the person who finds out.</p>}
       {/* Mid-cycle and not set up yet: an invitation, never a gate. */}
       {notSetUp && !cyclePosition(notSetUp.startDate).finished && (
         <Link href={`/cycle/setup?step=${notSetUp.plan ? "share" : !notSetUp.situation ? 1 : !notSetUp.feeling ? 2 : !notSetUp.oldResponse ? 3 : !notSetUp.newResponse ? 4 : !notSetUp.gap ? 5 : "plan"}`} className="tile flex items-center gap-4 transition hover:-translate-y-0.5">

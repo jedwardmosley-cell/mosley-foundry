@@ -34,7 +34,7 @@ export const LEVELS: Record<IdentityLevel, {
   },
   REINVENT: {
     n: 3,
-    name: "Identity reinvention",
+    name: "Reinvention",
     line: "Become someone new.",
     forWhom: "For people pursuing a significant personal or professional transformation.",
     examples: [
@@ -132,19 +132,19 @@ export type PracticeAction =
 export const PRACTICE: Record<IdentityLevel, { text: string; action: PracticeAction }[]> = {
   CORE: [
     { text: "One repeatable daily behavior", action: { kind: "commit", area: "ROUTINES", cadence: "DAILY", from: "behavior", button: "Add my behavior as a daily routine" } },
-    { text: "Simple weekly reflection", action: { kind: "link", href: "/reflect", button: "Open the weekly reflection" } },
+    { text: "Simple weekly look back", action: { kind: "link", href: "/reflect", button: "Open the weekly look back" } },
     { text: "Optional accountability relationship", action: { kind: "link", href: "/network?role=ACCOUNTABILITY_PARTNER#add", button: "Add an accountability partner" } },
   ],
   ROLE: [
     { text: "Role-specific behavioral commitments", action: { kind: "commit", area: "LEADERSHIP", cadence: "WEEKLY", from: "behavior", button: "Add my behavior as a role commitment" } },
-    { text: "Real-world practice assignments", action: { kind: "link", href: "/cycle/new", button: "Start a 30-day cycle on it" } },
+    { text: "Real-world practice assignments", action: { kind: "link", href: "/cycle/new", button: "Practice it for 30 days" } },
     { text: "Scheduled feedback and accountability check-ins", action: { kind: "link", href: "/network?role=ACCOUNTABILITY_PARTNER#add", button: "Add someone who will give me feedback" } },
   ],
   REINVENT: [
     { text: "Defined performance standards", action: { kind: "commit", area: "ROUTINES", cadence: "DAILY", from: "standards", button: "Add reading my standards as a daily routine" } },
     { text: "Preparation or activation ritual", action: { kind: "commit", area: "ROUTINES", cadence: "DAILY", from: "cue", button: "Add my activation cue as a routine" } },
-    { text: "Deliberate practice assignments", action: { kind: "link", href: "/cycle/new", button: "Start a 30-day cycle on it" } },
-    { text: "Evidence-based performance review", action: { kind: "commit", area: "REVIEW", cadence: "WEEKLY", from: "review", button: "Add a weekly review against my standards" } },
+    { text: "Deliberate practice assignments", action: { kind: "link", href: "/cycle/new", button: "Practice it for 30 days" } },
+    { text: "Evidence-based performance review", action: { kind: "commit", area: "REVIEW", cadence: "WEEKLY", from: "review", button: "Add a weekly look back against my standards" } },
     { text: "Intentionally chosen accountability relationships", action: { kind: "link", href: "/network?role=ACCOUNTABILITY_PARTNER#add", button: "Choose who checks on me" } },
   ],
 };
@@ -162,7 +162,7 @@ export const CHECKIN_IDENTITY = {
  * coach can suggest identity work without choosing a level for the client.
  */
 export const IDENTITY_EXERCISES: { title: string; text: string }[] = [
-  { title: "Claim who you are", text: "Open Who's behind the wheel and write your statement as a present-tense claim that starts with I am. Read it out loud. Then choose the level that fits the size of change you want. It is your call, and you can change it later." },
+  { title: "Claim who you are", text: "Open Who's behind the wheel and write My statement as a present-tense claim that starts with I am. Read it out loud. Then choose the level that fits the size of change you want. It is your call, and you can change it later." },
   { title: "The behavior that shows it", text: "Write one behavior another person could see you do if you had already become this person. Then do it once this week and write what happened." },
   { title: "Evidence of the week", text: "Look back at your check-ins this week. Where did you show up as who you said you are? Write two moments, and one where you did not." },
   { title: "Prepare for a demanding situation", text: "Pick one demanding situation coming up. Read your I am statement, then write how you will prepare for it and the first thing you will do when it starts." },

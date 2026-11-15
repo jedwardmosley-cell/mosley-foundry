@@ -9,7 +9,7 @@ export function CycleFocusFields({ pillars, initial, initialFocus = "", identity
   return (
     <>
       <fieldset>
-        <legend className="label">Pillar</legend>
+        <legend className="label">Rule</legend>
         <div className="grid grid-cols-5 gap-2">
           {pillars.map((p) => (
             <label key={p.key} className="cursor-pointer">

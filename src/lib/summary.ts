@@ -18,13 +18,13 @@ export async function developmentSummary(userId: string, name: string) {
   L.push(`# Development summary: ${name}`, `Both Hands on the Wheel · generated ${fmt(new Date(), { month: "long", day: "numeric", year: "numeric" })}`, "");
   if (d.profile) {
     L.push(`**Pathway:** ${PATHWAYS[d.profile.pathway as keyof typeof PATHWAYS]?.name}`);
-    if (d.profile.priorityPillar) L.push(`**Development priority:** ${pName(d.profile.priorityPillar)}`);
+    if (d.profile.priorityPillar) L.push(`**First focus rule:** ${pName(d.profile.priorityPillar)}`);
     const lines = FORGE_LINES.filter((l) => d.profile?.[l.field]);
     if (lines.length) L.push("", "## My FORGE identity", ...lines.map((l) => `- **${l.pillar}, ${l.label}:** ${d.profile![l.field]}`));
     if (d.profile.forgeStatement) L.push("", "## My statement", d.profile.forgeStatement);
   }
   if (d.identity) {
-    const lv = { CORE: "Core alignment", ROLE: "Role transition", REINVENT: "Identity reinvention" }[d.identity.level as "CORE"];
+    const lv = { CORE: "Core alignment", ROLE: "Role transition", REINVENT: "Reinvention" }[d.identity.level as "CORE"];
     L.push("", "## Who's behind the wheel", ...(d.identity.role ? [`**Role:** ${d.identity.role}`] : []), `**Kind of change:** ${lv}`);
     if (!d.profile?.forgeStatement && d.identity.becoming) L.push("", d.identity.becoming);
     if (d.identity.behavior) L.push("", `**Behavior that shows it:** ${d.identity.behavior}`);
@@ -47,11 +47,11 @@ export async function developmentSummary(userId: string, name: string) {
     for (const c of d.commitments) L.push(`- ${BLUEPRINT_AREAS.find((a) => a.key === c.area)?.label}: ${c.title}${c.when ? ` (${c.when})` : ""}`);
   }
   if (d.relationships.length) {
-    L.push("", "## Accountability network");
+    L.push("", "## People");
     for (const r of d.relationships) L.push(`- ${r.name}, ${RELATIONSHIP_ROLES[r.role as keyof typeof RELATIONSHIP_ROLES]}, every ${r.cadenceDays} days; check-ins done: ${r.checkIns.filter((c) => c.happened).length}`);
   }
   if (cycles.length) {
-    L.push("", "## 30-day cycles");
+    L.push("", "## 30 days");
     for (const c of cycles) {
       const ci = await db.dailyCheckIn.findMany({ where: { cycleId: c.id } });
       const s = practiceSummary(ci);
@@ -60,7 +60,7 @@ export async function developmentSummary(userId: string, name: string) {
     }
   }
   if (d.weekly.length) {
-    L.push("", "## Recent weekly reflections");
+    L.push("", "## Recent weekly look backs");
     for (const w of d.weekly) L.push(`- Week of ${fmt(w.weekOf)}: built: ${w.built || "-"}; avoided: ${w.avoided || "-"}; next: ${w.nextWeek || "-"}`);
   }
   L.push("", "_Private journal entries and AI conversations are not included in this export._");

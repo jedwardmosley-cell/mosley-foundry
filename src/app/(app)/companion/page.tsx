@@ -6,7 +6,7 @@ import { startConversation } from "@/app/actions/ai";
 import { fmt } from "@/lib/dates";
 import { PageHeader, Card } from "@/components/ui";
 
-export const metadata = { title: "AI companion" };
+export const metadata = { title: "Help me with this" };
 
 const MODES = [
   { mode: "COACH", title: "Think it through", text: "Examine a decision, a pattern, or an obstacle. Design a small experiment for this week." },
@@ -24,7 +24,7 @@ export default async function CompanionHome() {
   const on = aiAvailable() && profile?.aiEnabled !== false;
   return (
     <>
-      <PageHeader eyebrow="Backs up your human coach" title="AI coaching companion">
+      <PageHeader eyebrow="Backs up your human coach" title="Help me with this">
         Grounded in Both Hands on the Wheel and your own recorded goals. It cites where its program content comes from, keeps what you recorded separate from its suggestions, and points you back to the people in your corner. It cannot see your private journal. It is not a therapist.
       </PageHeader>
       {!aiAvailable() && <Card className="mb-5"><p className="text-sm">The companion is not configured on this server. An administrator needs to set <code>ANTHROPIC_API_KEY</code>.</p></Card>}

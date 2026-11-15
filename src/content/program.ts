@@ -83,7 +83,7 @@ export const SEGMENTS: {
     title: "Knowing Yourself as a Leader",
     summary: "Use EQ-i 2.0 assessment insights to understand emotional reactions, behavior under pressure, and the impact on others.",
     pillars: ["E", "G"],
-    practice: { status: "draft", text: "Pick one development priority from your debrief. Name the situation where it shows up and one small practice you can use in that moment." },
+    practice: { status: "draft", text: "Pick one thing to work on from your debrief. Name the situation where it shows up and one small practice you can use in that moment." },
     commitmentArea: "ROUTINES",
   },
   {
@@ -163,10 +163,10 @@ export type CheckInStatus = keyof typeof CHECKIN_STATUS;
 export const DAY30_DECISIONS = {
   CONTINUE_ALONE: "Keep doing this work on my own",
   GO_FURTHER: "Go further, with coaching or a group",
-  NEW_CYCLE: "Start a new cycle on another pillar",
+  NEW_CYCLE: "Start new 30 days on another rule",
   // Inside a 90-day season (build-team wording, draft)
-  NEXT_SAME: "Next month: go deeper on the same pillar",
-  NEXT_OTHER: "Next month: work on another pillar",
+  NEXT_SAME: "Next month: go deeper on the same rule",
+  NEXT_OTHER: "Next month: work on another rule",
   END_SEASON: "End the season here and review it",
   SEASON_REVIEW: "Finish the season and review it",
 } as const;

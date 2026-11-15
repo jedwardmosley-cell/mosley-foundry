@@ -32,7 +32,7 @@ export default async function CyclePage({ searchParams }: { searchParams: Promis
     return (
       <>
         <PageHeader eyebrow="Discipline by Design · 30 days" title={season ? (month ? `Month ${month} of my season` : "My season is done") : "No active cycle"} />
-        {season && month && <Empty title={`Start month ${month}`} href="/cycle/new" cta="Start">Pick the pillar and the behavior for the next 30 days.</Empty>}
+        {season && month && <Empty title={`Start month ${month}`} href="/cycle/new" cta="Start">Pick the rule and the behavior for the next 30 days.</Empty>}
         {season && !month && <Empty title="Review your season" href="/season" cta="Open the review">Three months are done. Look back, then decide what comes next.</Empty>}
         {!season && <Empty title="Choose your focus" href="/focus" cta="Open My focus">One or two things to work on, each for 30 days. That's it.</Empty>}
         {past.length > 0 && <PastCycles past={past} />}
@@ -71,7 +71,7 @@ export default async function CyclePage({ searchParams }: { searchParams: Promis
           <p className="mt-2 font-serif text-[20px] leading-snug text-heading">{cycle.plan}</p>
           <p className="mt-3 text-sm text-ink-soft">
             {planPartner ? <>{planPartner.name.split(" ")[0]} checks on me. </> : null}
-            {pos.week >= 2 && !pos.finished ? <>This week&apos;s question is in your <Link href="/reflect" className="btn-link">weekly reflection</Link>. </> : null}
+            {pos.week >= 2 && !pos.finished ? <>This week&apos;s question is in your <Link href="/reflect" className="btn-link">weekly look back</Link>. </> : null}
             <Link href="/cycle/setup?step=1" className="btn-link">Change my answers</Link>
           </p>
         </Card>
@@ -158,7 +158,7 @@ export default async function CyclePage({ searchParams }: { searchParams: Promis
                     <textarea name="finalReview" aria-label="Final review" className="textarea min-h-[120px] mt-2" maxLength={6000} />
                   </details>
                   <div className="flex flex-wrap gap-3">
-                    <Submit>Complete the cycle</Submit>
+                    <Submit>Finish these 30 days</Submit>
                     <Link href="/assessment" className="btn-quiet">Re-take the assessment first</Link>
                   </div>
                 </form>

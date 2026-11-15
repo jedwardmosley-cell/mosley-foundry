@@ -17,10 +17,10 @@ export const FEEDBACK_COPY = {
   ownSummary: "This is my own summary or notes, not the full report.",
   fileHint: "PDF, Word or a photo of your own notes, up to 4 MB.",
   notFullReport: "Please upload or paste your own summary, your notes, or what you took from your debrief. Not the full report.",
-  pillarsQuestion: "Which part of FORGE does it speak to?",
+  pillarsQuestion: "Which FORGE rules does it speak to?",
   shareCoach: "Share this with my coach",
-  allowAi: "Let the AI companion use my summary",
-  aiNote: "The AI companion reads your summary only. It never opens the file.",
+  allowAi: "Let Help me with this use my summary",
+  aiNote: "Help me with this reads your summary only. It never opens the file.",
   notSameMeasure: "This is your own reading of your feedback. It isn't the same measure as your FORGE scores.",
   publisherNote: "CCL 360 assessments are published by the Center for Creative Leadership, and EQ-i 2.0 by MHS. This app doesn't read, score or interpret those reports. FORGE self-ratings and those assessments measure different things, so one can't stand in for the other.",
 };

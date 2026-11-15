@@ -48,7 +48,7 @@ export default async function FeedbackEntry({ params, searchParams }: { params: 
   const coachName = coaches[0]?.coach.name.split(" (")[0];
   const PillarSelect = ({ value }: { value?: string | null }) => (
     <select name="pillar" defaultValue={value ?? ""} className="input">
-      <option value="">Choose a pillar</option>
+      <option value="">Choose a rule</option>
       {pack.pillars.map((p) => <option key={p.key} value={p.key}>{p.name}: {p.short}</option>)}
     </select>
   );
@@ -99,7 +99,7 @@ export default async function FeedbackEntry({ params, searchParams }: { params: 
                 <div className="min-w-0 flex-1">
                   <h3 className="text-[16px] font-medium leading-snug text-heading">{e.label}</h3>
                   <p className="mt-0.5 text-sm text-ink-soft">
-                    {pillarName || "No pillar yet"} · {e.practice ? <>Practice: {e.practice}</> : "No practice yet"}
+                    {pillarName || "No rule yet"} · {e.practice ? <>Practice: {e.practice}</> : "No practice yet"}
                     {shared && <> · <span className="text-ink-mute">Shared with my coach</span></>}
                   </p>
                 </div>
@@ -127,10 +127,10 @@ export default async function FeedbackEntry({ params, searchParams }: { params: 
               )}
 
               <details className="mt-3 text-sm" open={!e.pillar || !e.practice}>
-                <summary className="cursor-pointer font-medium text-link">{!e.pillar || !e.practice ? "Add a pillar and a practice" : "Edit"}</summary>
+                <summary className="cursor-pointer font-medium text-link">{!e.pillar || !e.practice ? "Add a rule and a practice" : "Edit"}</summary>
                 <form action={updateEqi} className="mt-3 grid gap-3 sm:grid-cols-2">
                   <input type="hidden" name="id" value={e.id} />
-                  <Field label="FORGE pillar this connects to" hint="Your call. Pick the pillar where this shows up most."><PillarSelect value={e.pillar} /></Field>
+                  <Field label="FORGE rule this connects to" hint="Your call. Pick the rule where this shows up most."><PillarSelect value={e.pillar} /></Field>
                   <Field label="Practice I will try"><input name="practice" defaultValue={e.practice} maxLength={1500} className="input" placeholder="One small thing you could do" /></Field>
                   <div className="flex flex-wrap items-center gap-4 sm:col-span-2">
                     <Submit className="btn-quiet">Save</Submit>
@@ -147,7 +147,7 @@ export default async function FeedbackEntry({ params, searchParams }: { params: 
           <form action={addEqi} className="mt-4 space-y-3">
             <input type="hidden" name="feedbackId" value={f.id} />
             <Field label="What I'm working on" hint="Your own words. For example: Speaking up for what my team needs"><input name="label" required maxLength={200} className="input" /></Field>
-            <Field label="FORGE pillar this connects to"><PillarSelect /></Field>
+            <Field label="FORGE rule this connects to"><PillarSelect /></Field>
             <Field label="Practice I will try (optional)"><input name="practice" maxLength={1500} className="input" /></Field>
             <Submit>Add</Submit>
           </form>
@@ -156,8 +156,8 @@ export default async function FeedbackEntry({ params, searchParams }: { params: 
 
       <section className="mt-10">
         <h2 className="h2 mb-2">Who can see this</h2>
-        <Switch action={setFeedbackShare} id={f.id} on={f.shareCoach} label={FEEDBACK_COPY.shareCoach} disabled={!coaches.length && !f.shareCoach ? "You don't have a coach yet." : undefined} note={coachName ? `${coachName} sees the summary, the file and the pillars.` : undefined} />
-        <Switch action={setFeedbackAi} id={f.id} on={f.allowAi} label={FEEDBACK_COPY.allowAi} note={FEEDBACK_COPY.aiNote} disabled={profile?.aiEnabled === false ? "You turned the AI companion off in Settings." : undefined} />
+        <Switch action={setFeedbackShare} id={f.id} on={f.shareCoach} label={FEEDBACK_COPY.shareCoach} disabled={!coaches.length && !f.shareCoach ? "You don't have a coach yet." : undefined} note={coachName ? `${coachName} sees the summary, the file and the rules.` : undefined} />
+        <Switch action={setFeedbackAi} id={f.id} on={f.allowAi} label={FEEDBACK_COPY.allowAi} note={FEEDBACK_COPY.aiNote} disabled={profile?.aiEnabled === false ? "You turned Help me with this off in Settings." : undefined} />
       </section>
 
       <form action={deleteFeedback} className="mt-10"><input type="hidden" name="id" value={f.id} /><button className="text-sm text-ink-mute hover:text-alert">Delete this feedback and its file</button></form>

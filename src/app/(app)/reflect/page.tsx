@@ -9,7 +9,7 @@ import { mondayOf, fmt } from "@/lib/dates";
 import { PageHeader, Card, Field, Privacy, Source } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 
-export const metadata = { title: "Weekly reflection" };
+export const metadata = { title: "Weekly look back" };
 
 export default async function ReflectPage() {
   const u = await requireUser("PARTICIPANT");

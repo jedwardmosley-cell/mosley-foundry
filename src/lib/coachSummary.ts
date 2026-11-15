@@ -21,6 +21,6 @@ export function attentionFlags(v: View) {
     if (overdue.length) flags.push(`Overdue check-ins: ${overdue.map((r) => r.name).join(", ")}`);
     if (!v.relationships.some((r) => r.role === "ACCOUNTABILITY_PARTNER")) flags.push("No accountability partner named");
   }
-  if (s.has("GOALS") && v.profile && !v.profile.priorityPillar) flags.push("No development priority chosen");
+  if (s.has("GOALS") && v.profile && !v.profile.priorityPillar) flags.push("No focus rule chosen yet");
   return flags;
 }

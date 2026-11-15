@@ -35,7 +35,7 @@ export default async function NetworkPage({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      <PageHeader eyebrow="Accountability network" title="Name your people">
+      <PageHeader eyebrow="People" title="Name your people">
         {rels.length === 0 ? (pack.nobodyNote ?? "A life built around growth needs people built around growth.") : "The people around your growth, and how often you check in with each one."}
       </PageHeader>
 
@@ -44,7 +44,7 @@ export default async function NetworkPage({ searchParams }: { searchParams: Prom
           {rels.length ? <RelationshipMap name={u.name} rels={withState} /> : <p className="muted py-10 text-center">Your map is empty. Add one person to get started.</p>}
         </Card>
         <Card>
-          <p className="eyebrow">Structure health</p>
+          <p className="eyebrow">Your people</p>
           <ul className="mt-3 space-y-2.5">
             {health.map((h) => (
               <li key={h.label} className="flex items-start gap-2.5 text-[15px]">
@@ -57,7 +57,7 @@ export default async function NetworkPage({ searchParams }: { searchParams: Prom
         </Card>
       </div>
 
-      <h2 className="h2 mt-8 mb-3">Relationships</h2>
+      <h2 className="h2 mt-8 mb-3">People</h2>
       <div className="space-y-4">
         {withState.map((r) => (
           <Card key={r.id}>
@@ -78,7 +78,7 @@ export default async function NetworkPage({ searchParams }: { searchParams: Prom
               </ul>
             )}
             <details className="mt-3">
-              <summary className="cursor-pointer text-sm text-link">Log a check-in</summary>
+              <summary className="cursor-pointer text-sm text-link">Add a people check-in</summary>
               <form action={logRelationshipCheckIn} className="mt-3 grid gap-3 sm:grid-cols-2">
                 <input type="hidden" name="id" value={r.id} />
                 <Field label="Date"><input type="date" name="occurredOn" defaultValue={ymd()} className="input" /></Field>
@@ -90,7 +90,7 @@ export default async function NetworkPage({ searchParams }: { searchParams: Prom
                     <Field label="Agreed actions"><input name="agreedActions" className="input" maxLength={4000} /></Field>
                   </div>
                 </details>
-                <div className="sm:col-span-2"><Submit className="btn-quiet">Save check-in</Submit></div>
+                <div className="sm:col-span-2"><Submit className="btn-quiet">Save people check-in</Submit></div>
               </form>
             </details>
             <div className="mt-3 flex flex-wrap items-center gap-4 text-sm">
