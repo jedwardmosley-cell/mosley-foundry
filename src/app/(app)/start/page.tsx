@@ -7,27 +7,27 @@ import { getContent } from "@/content";
 import { aiAvailable } from "@/lib/ai";
 import { getJourney, JOURNEY_STEPS } from "@/lib/journey";
 import { saveWhoIAm } from "@/app/actions/identity";
-import { addCommitment, addRelationship } from "@/app/actions/participant";
+import { addCommitment } from "@/app/actions/participant";
 import { PageHeader, Card, PillarMark, Field } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 import { StatementReveal } from "@/components/StatementReveal";
 import { Picks } from "@/components/Picks";
 import { FiveSides, MyStatement } from "@/components/ForgeLinesFields";
-import { RelationshipFields } from "@/components/RelationshipFields";
 import { LEVELS, IDENTITY_LEVELS, type IdentityLevel } from "@/content/identity";
 import { ROLE_PICKS, WHO_I_AM_STATUS, KIND_NOTE, WHO_TITLE, WHO_HEADINGS, withArticle } from "@/content/whoIAm";
 import { BLUEPRINT_PICKS } from "@/content/options";
 import { getForgeSource } from "@/content/forgeSource";
 import { PRACTICE_STARTERS } from "@/content/forgeLines";
-import { RELATIONSHIP_ROLES, type PathwayKey } from "@/content/program";
+import type { PathwayKey } from "@/content/program";
+import type { PillarKey } from "@/content/types";
 
 export const metadata = { title: "My first session" };
 
 const STEP_COPY = [
   { title: WHO_TITLE, intro: "The FORGE framework, applied to you. Three short parts." },
-  { title: "See where you are today", intro: "Score the five pillars against the person you just described, then pick one to work on." },
-  { title: "Design your road", intro: "One routine that reinforces who you are, and one person who will know if you did it." },
-  { title: "Start your 30 days", intro: "Practice one behavior for 30 days, two minutes a day." },
+  { title: "See where you are today", intro: "Score the five pillars as the person you just described. The lowest one becomes your watch area: something to keep in view." },
+  { title: "Choose your focus", intro: "One or two things to work on, and that's it. Five short questions turn each one into a plan for 30 days, and one person finds out." },
+  { title: "What holds it in place", intro: "Discipline by Design: one routine with a day and a time. After that, a check-in each day and a look back each week." },
 ];
 
 /**
@@ -43,12 +43,12 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
   const asked = Number(sp.step);
   const step = asked >= 1 && asked <= 4 ? asked : firstOpen === -1 ? 0 : firstOpen + 1;
 
-  if (step === 0 || (journey.done.drive && !sp.step)) {
+  if (step === 0) {
     return (
       <>
         <PageHeader eyebrow="My first session" title="You are set up" />
         <Card>
-          <p className="text-[15px]">Your 30 days are under way. Each day, open Today and check in. It takes about two minutes.</p>
+          <p className="text-[15px]">Your focus is set and your road is in place. Each day, open Today and check in. On Saturday, look back on the week.</p>
           <Link href="/dashboard" className="btn-primary mt-4 inline-flex">Go to Today</Link>
         </Card>
         <ReadTheBook className="mt-5" />
@@ -56,12 +56,13 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
     );
   }
 
-  const [profile, identity, assessment, commitments, people, { pack, entrepreneur }, forge] = await Promise.all([
+  const [profile, identity, assessment, commitments, people, focuses, { pack, entrepreneur }, forge] = await Promise.all([
     db.profile.findUnique({ where: { userId: u.id } }),
     db.identityProfile.findUnique({ where: { userId: u.id }, select: { level: true, becoming: true, role: true } }),
     db.assessment.findFirst({ where: { userId: u.id, isSecondOpinion: false }, orderBy: { completedAt: "desc" }, select: { id: true } }),
     db.commitment.findMany({ where: { userId: u.id, active: true }, select: { id: true, title: true, when: true } }),
     db.relationship.findMany({ where: { ownerId: u.id, active: true }, select: { id: true, name: true, role: true } }),
+    db.developmentCycle.findMany({ where: { userId: u.id, status: "ACTIVE" }, orderBy: [{ slot: "asc" }, { startDate: "asc" }], select: { id: true, title: true, focus: true, plan: true, pillar: true, setupDoneAt: true } }),
     getContent(),
     getForgeSource(),
   ]);
@@ -73,7 +74,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
   const copy = STEP_COPY[step - 1];
   const next = `/start?step=${step + 1}`;
   const backHref = step === 1 ? (part > 1 ? `/start?step=1&part=${part - 1}` : null) : step === 2 ? "/start?step=1&part=3" : `/start?step=${step - 1}`;
-  const skipHref = step === 1 ? (part < 3 ? `/start?step=1&part=${part + 1}` : next) : step < 4 ? next : null;
+  const skipHref = step === 1 ? (part < 3 ? `/start?step=1&part=${part + 1}` : next) : step === 2 ? next : null;
   const nextLabel = step < 4 ? `Next: ${STEP_COPY[step].title.toLowerCase()}` : "";
 
   return (
@@ -153,12 +154,12 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
             </>
           ) : !priority ? (
             <>
-              <p className="text-[15px]">Your scores are in. Pick the one pillar you will work on first.</p>
-              <Link href={`/assessment/${assessment.id}?next=start`} className="btn-primary mt-4 inline-flex">See my results and pick a pillar</Link>
+              <p className="text-[15px]">Your scores are in. See your strengths and your watch area.</p>
+              <Link href={`/assessment/${assessment.id}?next=start`} className="btn-primary mt-4 inline-flex">See my results</Link>
             </>
           ) : (
             <>
-              <p className="eyebrow">My focus for the first 30 days</p>
+              <p className="eyebrow">My watch area</p>
               <p className="mt-3 flex items-center gap-2 h3"><PillarMark k={priority.key} /> {priority.name}</p>
               <p className="text-sm muted mt-2">To change it, open your <Link href={`/assessment/${assessment.id}?next=start`} className="btn-link">results</Link>.</p>
               <Link href={next} className="btn-primary mt-4 inline-flex">{nextLabel}</Link>
@@ -167,10 +168,10 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
         </Card>
       )}
 
-      {step === 3 && (
+      {step === 4 && (
         <div className="space-y-5">
           <Card>
-            <h2 className="h3">One routine</h2>
+            <h2 className="h3">One routine that holds your focus in place</h2>
             {commitments.length > 0 && <p className="mt-2 text-[15px]">✓ {commitments[commitments.length - 1].title}{commitments.length > 1 && <span className="text-ink-mute"> and {commitments.length - 1} more</span>}</p>}
             <form action={addCommitment} className="mt-4 space-y-3">
               <input type="hidden" name="next" value="/start" />
@@ -180,46 +181,65 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
                 <input name="title" required maxLength={200} className="input" />
               </Field>
               <Picks list={priority ? { status: "draft", options: [...PRACTICE_STARTERS[priority.key][pathway], ...BLUEPRINT_PICKS.ROUTINES.options] } : BLUEPRINT_PICKS.ROUTINES} target="title" folded="Ideas" />
-              <Field label="When">
-                <select name="whenDays" className="input" defaultValue="Every day">
-                  {["Every day", "Weekdays", "Weekends"].map((d) => <option key={d}>{d}</option>)}
-                </select>
-              </Field>
+              <div className="grid gap-3 grid-cols-2">
+                <Field label="Which days">
+                  <select name="whenDays" className="input" defaultValue="Every day">
+                    {["Every day", "Weekdays", "Weekends"].map((d) => <option key={d}>{d}</option>)}
+                  </select>
+                </Field>
+                <Field label="Time (optional)"><input type="time" name="whenTime" className="input" /></Field>
+              </div>
               <Submit className="btn-quiet">Add routine</Submit>
             </form>
           </Card>
-          <Card>
-            <h2 className="h3">One person</h2>
-            {people.length > 0 && <p className="mt-2 text-[15px]">✓ {people[people.length - 1].name} <span className="text-ink-mute">{people.length > 1 ? `and ${people.length - 1} more` : `· ${RELATIONSHIP_ROLES[people[0].role as keyof typeof RELATIONSHIP_ROLES]}`}</span></p>}
-            <form action={addRelationship} className="mt-4 grid gap-3 sm:grid-cols-2">
-              <input type="hidden" name="next" value="/start" />
-              <label className="block sm:col-span-2"><span className="label">{people.length ? "Add another (optional)" : "Name"}</span><input name="name" required maxLength={120} className="input" /></label>
-              <RelationshipFields purposeFolded />
-              <div className="sm:col-span-2"><Submit className="btn-quiet">Add person</Submit></div>
-            </form>
-            <p className="text-xs text-ink-mute mt-3">They don't see your records.</p>
-          </Card>
-          {commitments.length > 0 && people.length > 0 && <Link href={next} className="btn-primary inline-flex">{nextLabel}</Link>}
+          {people.length > 0 && (
+            <Card>
+              <h2 className="h3">Who checks on you</h2>
+              <p className="mt-2 text-[15px]">✓ {people.map((x) => x.name).join(", ")}</p>
+              <p className="mt-1 text-sm text-ink-soft">From &ldquo;Who finds out?&rdquo; in your focus. Add more people any time under People.</p>
+            </Card>
+          )}
+          {commitments.length > 0 && (
+            <Card>
+              <p className="text-[15px]">That&apos;s everything. Each day, open Today and check in. On Saturday, look back on the week.</p>
+              <div className="mt-4 flex flex-wrap items-center gap-4">
+                <Link href="/dashboard" className="btn-primary inline-flex">Finish and go to Today</Link>
+                <Link href="/settings" className="text-sm btn-link">Put it on my calendar</Link>
+              </div>
+            </Card>
+          )}
+
         </div>
       )}
 
-      {step === 4 && (
+      {step === 3 && (
         <Card>
-          <p className="eyebrow">My road</p>
-          <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-[15px] [&>div:first-child]:col-span-2 [&>div:nth-child(2)]:col-span-2">
-            {identity && <div><dt className="text-ink-mute text-sm">Who's behind the wheel</dt><dd className="font-serif text-lg">{identity.becoming}</dd></div>}
-            {!identity && profile?.destination && <div><dt className="text-ink-mute text-sm">Who's behind the wheel</dt><dd className="font-serif text-lg">{profile.destination}</dd></div>}
-            {priority && <div><dt className="text-ink-mute text-sm">My focus</dt><dd className="flex items-center gap-2"><PillarMark k={priority.key} /> {priority.name}</dd></div>}
-            {commitments[0] && <div><dt className="text-ink-mute text-sm">My routines</dt><dd>{commitments.length}</dd></div>}
-            {people[0] && <div><dt className="text-ink-mute text-sm">My people</dt><dd>{people.length}</dd></div>}
-          </dl>
-          {journey.done.drive ? (
-            <Link href="/dashboard" className="btn-primary mt-5 inline-flex">Your 30 days are under way. Go to Today</Link>
+          {focuses.length === 0 ? (
+            <>
+              <p className="text-[15px]">Name the one thing you&apos;ll work on first. If your watch area points somewhere, start there, but it doesn&apos;t have to.</p>
+              <Link href={`/cycle/new?next=start${priority ? `&pillar=${priority.key}` : ""}`} className="btn-primary mt-4 inline-flex">Choose my focus</Link>
+            </>
           ) : (
-            <Link href={`/cycle/new${priority ? `?pillar=${priority.key}` : ""}`} className="btn-primary mt-5 inline-flex">Choose my behavior and start my 30 days</Link>
-          )}
-          {!journey.done.drive && (
-            <ReadTheBook className="mt-4" />
+            <>
+              <p className="eyebrow">My focus</p>
+              <ul className="mt-3 space-y-3">
+                {focuses.map((f) => (
+                  <li key={f.id} className="flex items-start gap-3">
+                    <PillarMark k={f.pillar as PillarKey} size="sm" />
+                    <span className="flex-1">
+                      <span className="block text-[16px] font-medium text-heading">{f.title || f.focus}</span>
+                      {f.plan && <span className="block text-sm text-ink-soft">{f.plan}</span>}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              {focuses.some((f) => !f.setupDoneAt) ? (
+                <Link href="/cycle/setup?step=1" className="btn-primary mt-5 inline-flex">Finish setting it up</Link>
+              ) : (
+                <Link href={next} className="btn-primary mt-5 inline-flex">{nextLabel}</Link>
+              )}
+              {focuses.length === 1 && <p className="mt-3 text-sm text-ink-mute">One is plenty. You can add a second later, under My focus.</p>}
+            </>
           )}
         </Card>
       )}

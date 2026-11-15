@@ -72,7 +72,7 @@ export default async function AssessmentResult({ params, searchParams }: { param
       ))}
 
       <Card className="mt-5">
-        <p className="eyebrow">If your lowest score is here, do this</p>
+        <p className="eyebrow">Your watch area</p>
         <div className="mt-3 flex flex-wrap gap-2">
           {r.lowest.length > 1 && <span className="text-sm muted mr-1">Tied lowest:</span>}
           {(r.lowest.length > 1 ? r.lowest : PILLAR_KEYS).map((k) => (
@@ -87,8 +87,8 @@ export default async function AssessmentResult({ params, searchParams }: { param
         <form action={setPriority} className="mt-5 flex flex-wrap items-center gap-3">
           <input type="hidden" name="pillar" value={fp.key} />
           {next === "start" && <input type="hidden" name="next" value="/start" />}
-          <Submit>{profile?.priorityPillar === fp.key ? "This is my priority" : `Make ${fp.name} my development priority`}</Submit>
-          <span className="text-sm muted">One pillar with real attention produces more than five with divided attention.</span>
+          <Submit>{profile?.priorityPillar === fp.key ? "Choose my focus" : `Keep ${fp.name} in view and choose my focus`}</Submit>
+          <span className="text-sm muted">A watch area is something to keep in view. It is not a separate task. Next you&apos;ll choose one or two things to work on.</span>
         </form>
       </Card>
 

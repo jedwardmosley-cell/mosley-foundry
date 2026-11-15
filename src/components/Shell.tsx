@@ -8,10 +8,10 @@ import { signOut } from "@/app/actions/auth";
 // Client menu, in journey order. The phone tab bar keeps five tabs; everything else is under More.
 const PARTICIPANT_NAV: NavItem[] = [
   { href: "/dashboard", label: "Today", mobile: true },
-  { href: "/identity", label: "1. Who's behind the wheel", tab: "FORGE", mobile: true, group: "FORGE" },
+  { href: "/identity", label: "1. Who's behind the wheel", group: "FORGE" },
   { href: "/assessment", label: "2. Where I am", group: "FORGE" },
-  { href: "/road", label: "3. My road", group: "Discipline by Design" },
-  { href: "/cycle", label: "4. 30 days", group: "Discipline by Design" },
+  { href: "/focus", label: "3. My focus", tab: "Focus", mobile: true, group: "Discipline by Design" },
+  { href: "/road", label: "4. My road", group: "Discipline by Design" },
   { href: "/reflect", label: "Weekly reflection", group: "Discipline by Design" },
   { href: "/network", label: "People", mobile: true, group: "Support" },
   { href: "/coaching", label: "Coaching", tab: "Coach", mobile: true, group: "Support" },

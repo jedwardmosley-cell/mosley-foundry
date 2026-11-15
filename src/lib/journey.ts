@@ -5,20 +5,20 @@ import { getContent } from "@/content";
 
 /**
  * The client's path through the app, in one order:
- * FORGE: who I am, where I am today. Discipline by Design: my road, then the 30 days.
+ * FORGE: who I am, where I am today. Discipline by Design: my focus (one or two, each for 30 days), then my road.
  * Every step stays optional. The bar only shows what is done and what comes next.
  */
 export const JOURNEY_STEPS = [
   { key: "identity", label: "Who's behind the wheel", next: "Claim who you are", href: "/identity" },
-  { key: "today", label: "Where I am", next: "See where you are today and pick one pillar", href: "/assessment" },
-  { key: "road", label: "My road", next: "Design your road: one routine and one person", href: "/road" },
-  { key: "drive", label: "30 days", next: "Start your 30 days", href: "/cycle" },
+  { key: "today", label: "Where I am", next: "See where you are today and your watch area", href: "/assessment" },
+  { key: "drive", label: "My focus", next: "Choose one or two things to work on", href: "/focus" },
+  { key: "road", label: "My road", next: "One routine that holds your focus in place", href: "/road" },
 ] as const;
 export type JourneyKey = (typeof JOURNEY_STEPS)[number]["key"];
 
 export type Journey = {
   done: Record<JourneyKey, boolean>;
-  /** The first step not done, or null once the 30 days are under way. */
+  /** The first step not done, or null once all four are. */
   current: JourneyKey | null;
   cycle: { day: number; week: number; phase: string; finished: boolean; seasonMonth: number | null } | null;
   /** What Who's behind the wheel still needs, in the client's words: "your seat", "how big a turn", "your statement". */
@@ -41,14 +41,15 @@ export async function getJourney(userId: string): Promise<Journey> {
     db.assessment.findFirst({ where: { userId, isSecondOpinion: false }, select: { id: true } }),
     db.commitment.count({ where: { userId, active: true } }),
     db.relationship.count({ where: { ownerId: userId, active: true } }),
-    db.developmentCycle.findFirst({ where: { userId, status: "ACTIVE" }, orderBy: { startDate: "desc" }, select: { startDate: true, template: true, seasonMonth: true } }),
+    db.developmentCycle.findFirst({ where: { userId, status: "ACTIVE" }, orderBy: [{ slot: "asc" }, { startDate: "desc" }], select: { startDate: true, template: true, seasonMonth: true, setupDoneAt: true } }),
   ]);
   const done: Record<JourneyKey, boolean> = {
     // Who I am is done with a role, a kind of change and a statement. The five help build the statement.
     identity: identityGaps(identity, profile?.forgeStatement ?? "").length === 0,
     today: !!assessment && !!profile?.priorityPillar,
-    road: commitments > 0 && people > 0,
-    drive: !!cycle,
+    // My road holds the focus in place: one routine. The person comes from "Who finds out?" in the focus setup.
+    road: commitments > 0,
+    drive: !!cycle?.setupDoneAt,
   };
   let c: Journey["cycle"] = null;
   if (cycle) {
@@ -57,6 +58,7 @@ export async function getJourney(userId: string): Promise<Journey> {
     const phase = cycleWeeks(cycle.template, pack).weeks[pos.week - 1]?.phase ?? "";
     c = { ...pos, phase, seasonMonth: cycle.seasonMonth };
   }
-  const current = done.drive ? null : (JOURNEY_STEPS.find((s) => !done[s.key])?.key ?? null);
+  void people;
+  const current = JOURNEY_STEPS.find((s) => !done[s.key])?.key ?? null;
   return { done, current, cycle: c, identityMissing: identityGaps(identity, profile?.forgeStatement ?? "") };
 }

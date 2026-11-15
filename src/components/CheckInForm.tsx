@@ -13,12 +13,13 @@ const OPTIONS = [
 ];
 
 /** Two-minute daily check-in. Works without JavaScript. */
-export function CheckInForm({ existing, hasCoach, identityLevel, dark = false }: { existing: Existing; hasCoach: boolean; identityLevel?: string | null; dark?: boolean }) {
+export function CheckInForm({ existing, hasCoach, identityLevel, dark = false, slot = 1 }: { existing: Existing; hasCoach: boolean; identityLevel?: string | null; dark?: boolean; slot?: 1 | 2 }) {
   const pill = dark
     ? "border border-white/30 bg-surface/5 text-white peer-checked:bg-surface peer-checked:text-heading peer-checked:border-white"
     : "bg-ink/[0.05] text-ink-soft peer-checked:bg-navy peer-checked:text-white";
   return (
     <form action={logCheckIn} className="space-y-4">
+      <input type="hidden" name="slot" value={slot} />
       <fieldset>
         <legend className="sr-only">Did you practice today?</legend>
         <div className="seg grid-cols-3">
@@ -44,7 +45,7 @@ export function CheckInForm({ existing, hasCoach, identityLevel, dark = false }:
           ))}
         </fieldset>
       )}
-      <details className={`rounded-2xl ${dark ? "bg-surface/5" : ""} px-1 py-1`} open={!!(existing?.note || existing?.reflection || existing?.identityNote)}>
+      {slot === 1 && <details className={`rounded-2xl ${dark ? "bg-surface/5" : ""} px-1 py-1`} open={!!(existing?.note || existing?.reflection || existing?.identityNote)}>
         <summary className={`cursor-pointer text-sm ${dark ? "text-white/80" : "text-link"}`}>Add detail</summary>
         <div className={`mt-3 space-y-3 text-ink`}>
           <TagChoices name="tags" list={CHECKIN_TAGS} legend="Where?" selected={existing ? (JSON.parse(existing.tags || "[]") as string[]) : []} />
@@ -61,8 +62,8 @@ export function CheckInForm({ existing, hasCoach, identityLevel, dark = false }:
             </label>
           )}
         </div>
-      </details>
-      <Submit className={dark ? "btn w-full bg-surface text-heading" : "btn-primary w-full"}>{existing ? "Update today" : "Log today"}</Submit>
+      </details>}
+      <Submit className={dark ? "btn w-full bg-surface text-heading" : "btn-primary w-full"}>{existing?.status ? "Update today" : "Log today"}</Submit>
     </form>
   );
 }

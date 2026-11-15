@@ -12,6 +12,9 @@ import { bool, parse, pillarKey, score, text } from "@/lib/validation";
 import { addDays, ymd } from "@/lib/dates";
 import { PATHWAYS, BLUEPRINT_AREAS, RELATIONSHIP_ROLES, DAY30_DECISIONS, SEASON_DECISIONS, type Day30Decision } from "@/content/program";
 import { seasonForNewCycle } from "@/lib/season";
+import { activeFocuses } from "@/lib/focusData";
+import { freeSlot, watchAreas } from "@/lib/focus";
+import type { PillarKey } from "@/content/types";
 import { SHARE_SCOPES } from "@/lib/access";
 import { CHECKIN_TAGS } from "@/content/options";
 
@@ -96,7 +99,10 @@ export async function setPriority(fd: FormData) {
   const existing = await db.developmentGoal.findFirst({ where: { userId: u.id, pillar, status: "ACTIVE" } });
   if (existing) await db.developmentGoal.update({ where: { id: existing.id }, data: { isPriority: true } });
   else await db.developmentGoal.create({ data: { userId: u.id, pillar, isPriority: true } });
-  redirect(fromStart(fd) ? "/start?step=3" : "/road#one-move");
+  // The client's watch area. Next comes their focus: one or two things to work on.
+  if (fromStart(fd)) redirect("/start?step=3");
+  const working = await db.developmentCycle.count({ where: { userId: u.id, status: "ACTIVE" } });
+  redirect(working ? "/focus" : `/cycle/new?pillar=${pillar}`);
 }
 
 // ---------- FORGE plan (development goals) ----------
@@ -146,7 +152,7 @@ export async function addCommitment(fd: FormData) {
     data: { ...d, days, time: whenTime, userId: u.id, startsOn: d.startsOn ? new Date(d.startsOn + "T12:00:00") : null },
   });
   revalidatePath("/road");
-  if (fromStart(fd)) redirect("/start?step=3");
+  if (fromStart(fd)) redirect("/start?step=4");
 }
 
 /** Sets a routine's days and time, so it can go on the calendar. The rest of the routine is kept. */
@@ -188,7 +194,7 @@ export async function addRelationship(fd: FormData) {
     },
   });
   revalidatePath("/network");
-  if (fromStart(fd)) redirect("/start?step=3");
+  if (fromStart(fd)) redirect("/start?step=4");
 }
 
 export async function logRelationshipCheckIn(fd: FormData) {
@@ -235,14 +241,33 @@ export async function acceptInvite(fd: FormData) {
 
 // ---------- 30-day cycle ----------
 
-const startCycleSchema = z.object({ pillar: pillarKey, focus: text(500), template: z.enum(["WORKBOOK_30", "NIRS_30"]), startDate: z.string().optional(), season: z.enum(["new", "continue", ""]).default(""), role: text(80) });
+const startCycleSchema = z.object({ pillar: pillarKey, focus: text(500), template: z.enum(["WORKBOOK_30", "NIRS_30"]), startDate: z.string().optional(), season: z.enum(["new", "continue", ""]).default(""), role: text(80), title: text(160), source: z.enum(["WATCH", "FEEDBACK", "COACH", "OWN", ""]).default(""), replace: z.string().optional(), next: z.enum(["start", ""]).default("") });
 
 export async function startCycle(fd: FormData) {
   const u = await participant();
-  const { season, role, ...d } = parse(startCycleSchema, fd);
+  const { season: seasonChoice, role, title, source, replace, next, ...d } = parse(startCycleSchema, fd);
+  // One or two focuses, and that's it. A new focus takes the free slot; with two in progress it must replace one.
+  const active = await activeFocuses(u.id);
+  let slot = freeSlot(active);
+  if (!slot) {
+    const out = active.find((c) => c.id === replace);
+    if (!out) redirect(`/cycle/new?full=1`);
+    await db.developmentCycle.update({ where: { id: out.id }, data: { status: "STOPPED" } });
+    slot = out.slot as 1 | 2;
+  }
   // One role per 30 days. A new role here also becomes the role in Who I am.
   if (role) await db.identityProfile.updateMany({ where: { userId: u.id, NOT: { role } }, data: { role } });
-  await db.developmentCycle.updateMany({ where: { userId: u.id, status: "ACTIVE" }, data: { status: "STOPPED" } });
+  // Where the focus came from: the client's own pick, or their watch area when the pillar matches it.
+  let from = source;
+  if (!from) {
+    const [latest, prof] = await Promise.all([
+      db.assessment.findFirst({ where: { userId: u.id, isSecondOpinion: false }, orderBy: { completedAt: "desc" } }),
+      db.profile.findUnique({ where: { userId: u.id }, select: { priorityPillar: true } }),
+    ]);
+    from = watchAreas(latest, prof?.priorityPillar).includes(d.pillar as PillarKey) ? "WATCH" : "OWN";
+  }
+  // A season follows the first focus only.
+  const season = slot === 1 ? seasonChoice : "";
   const s = await seasonForNewCycle(u.id, season);
   // Month 2 or 3 of a season starts from last month's week 1 answers. The client reviews them in
   // week 1 setup and sends the plan again; last month's person is already picked.
@@ -257,9 +282,10 @@ export async function startCycle(fd: FormData) {
       }
     : { newResponse: d.focus };
   await db.developmentCycle.create({
-    data: { userId: u.id, role, seasonId: s.seasonId, seasonMonth: s.seasonMonth, pillar: d.pillar, focus: carried.newResponse || d.focus, template: d.template, startDate: d.startDate ? new Date(d.startDate + "T00:00:00") : new Date(new Date().toDateString()), ...carried },
+    data: { userId: u.id, role, slot, title: title || last?.title || "", source: from, seasonId: s.seasonId, seasonMonth: s.seasonMonth, pillar: d.pillar, focus: carried.newResponse || d.focus, template: d.template, startDate: d.startDate ? new Date(d.startDate + "T00:00:00") : new Date(new Date().toDateString()), ...carried },
   });
   // Week 1 setup comes next: the situation, the feeling, the old and new response, the gap, then who finds out.
+  void next;
   redirect("/cycle/setup?step=1");
 }
 
@@ -279,11 +305,25 @@ export async function logCheckIn(fd: FormData) {
   const allowed = new Set(CHECKIN_TAGS.options);
   const tags = JSON.stringify(fd.getAll("tags").map(String).filter((t) => allowed.has(t)));
   const date = d.date ?? ymd();
-  const cycle = await db.developmentCycle.findFirst({ where: { userId: u.id, status: "ACTIVE" } });
+  // With two focuses, the second one's status goes in status2 on the same day's row.
+  const slot = fd.get("slot") === "2" ? 2 : 1;
+  const cycle = await db.developmentCycle.findFirst({ where: { userId: u.id, status: "ACTIVE", slot }, orderBy: { startDate: "desc" } });
+  if (slot === 2) {
+    if (!cycle) throw new Error("No second focus in progress.");
+    await db.dailyCheckIn.upsert({
+      where: { userId_date: { userId: u.id, date } },
+      create: { userId: u.id, date, status: "", status2: d.status, cycle2Id: cycle.id },
+      update: { status2: d.status, cycle2Id: cycle.id },
+    });
+    revalidatePath("/dashboard");
+    revalidatePath("/cycle");
+    return;
+  }
   await db.dailyCheckIn.upsert({
     where: { userId_date: { userId: u.id, date } },
     create: { userId: u.id, date, status: d.status, note: d.note, reflection: d.reflection, shared: d.shared, tags, identityActed: d.identityActed, identityNote: d.identityNote, cycleId: cycle?.id },
-    update: { status: d.status, note: d.note, reflection: d.reflection, shared: d.shared, tags, identityActed: d.identityActed, identityNote: d.identityNote },
+    // The identity question moved to the weekly look back; answers saved before then are kept.
+    update: { status: d.status, note: d.note, reflection: d.reflection, shared: d.shared, tags, ...(fd.has("identityActed") ? { identityActed: d.identityActed, identityNote: d.identityNote } : {}) },
   });
   revalidatePath("/dashboard");
   revalidatePath("/cycle");
@@ -313,7 +353,7 @@ export async function completeCycle(fd: FormData) {
   });
   revalidatePath("/", "layout");
   const q = (x: Record<string, string>) => new URLSearchParams(x).toString();
-  if (d.decision === "NEXT_SAME") redirect(`/cycle/new?${q({ season: "continue", pillar: c.pillar, focus: c.focus })}`);
+  if (d.decision === "NEXT_SAME") redirect(`/cycle/new?${q({ season: "continue", pillar: c.pillar, focus: c.focus, title: c.title })}`);
   if (d.decision === "NEXT_OTHER") redirect(`/cycle/new?${q({ season: "continue" })}`);
   if (d.decision === "END_SEASON" || d.decision === "SEASON_REVIEW") redirect("/season");
   redirect(d.decision === "NEW_CYCLE" ? "/cycle/new" : "/history");
@@ -323,7 +363,7 @@ export async function completeCycle(fd: FormData) {
 
 export async function saveWeekly(fd: FormData) {
   const u = await participant();
-  const d = parse(z.object({ weekOf: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), built: text(), avoided: text(), nextWeek: text(), didIt: z.enum(["YES", "PARTIAL", "NOT_YET", ""]).default(""), shared: bool, held: z.string().optional() }), fd);
+  const d = parse(z.object({ weekOf: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), built: text(), avoided: text(), nextWeek: text(), didIt: z.enum(["YES", "PARTIAL", "NOT_YET", ""]).default(""), actedLike: z.enum(["YES", "MOSTLY", "NOT_YET", ""]).default(""), watchNote: text(1500), shared: bool, held: z.string().optional() }), fd);
   const mine = new Set((await db.commitment.findMany({ where: { userId: u.id, active: true }, select: { id: true } })).map((c) => c.id));
   const { held: _ignored, ...rest } = d;
   void _ignored;

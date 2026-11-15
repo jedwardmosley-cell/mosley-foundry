@@ -229,6 +229,10 @@ model DevelopmentCycle {
   shareGap     Boolean        @default(false)
   sharedLog    String         @default("[]") // JSON: [{ at, to, kind }] each time the client taps Send
   setupDoneAt  DateTime? // set when the client sends the plan to someone
+  // My focus: a client works on one or two focuses at a time. Each focus is one 30-day cycle in slot 1 or 2.
+  slot         Int            @default(1)
+  title        String         @default("") // the focus in a few words, e.g. "Stay curious when my decisions get challenged"
+  source       String         @default("") // where it came from: WATCH | FEEDBACK | COACH | OWN ("" for cycles made before focuses)
   checkIns     DailyCheckIn[]
 }
 
@@ -245,6 +249,9 @@ model DailyCheckIn {
   tags          String            @default("[]") // JSON array of quick tags (where the practice showed up)
   identityActed String            @default("") // enum: "" | YES | PARTLY | NOT_YET (optional identity question)
   identityNote  String            @default("") // optional one-line answer; private to the participant
+  // A second focus shares the day's row: its status and cycle sit here. The first focus uses status and cycleId.
+  status2       String            @default("") // "" | DONE | PARTIAL | NOT_YET
+  cycle2Id      String?
   shared        Boolean           @default(false) // reflection text visible to coach only when true AND reflections scope granted
   createdAt     DateTime          @default(now())
 
@@ -261,6 +268,8 @@ model WeeklyReflection {
   nextWeek  String   @default("") // What does next week need?
   didIt     String   @default("") // enum: YES | PARTIAL | NOT_YET (Did I do what I said I was going to do?)
   held      String   @default("[]") // JSON array of Blueprint commitment ids that held this week
+  actedLike String   @default("") // enum: "" | YES | MOSTLY | NOT_YET. Did I act like the person I described? (moved here from the daily check-in)
+  watchNote String   @default("") // Where did my watch area show up this week?
   shared    Boolean  @default(false)
   createdAt DateTime @default(now())
 

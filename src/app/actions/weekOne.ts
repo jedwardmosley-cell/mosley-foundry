@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
+import { setupCycle } from "@/lib/focusData";
 import { parse } from "@/lib/validation";
 import { addDays } from "@/lib/dates";
 import { SETUP_STEPS, FINDS_OUT_ROLES, type SetupField } from "@/content/weekOne";
@@ -12,7 +13,7 @@ const FIELDS = SETUP_STEPS.map((s) => s.field) as [SetupField, ...SetupField[]];
 const NEXT_OK = /^\/cycle\/setup\?step=(1|2|3|4|5|plan|share)$/;
 
 async function activeCycle(userId: string) {
-  const c = await db.developmentCycle.findFirst({ where: { userId, status: "ACTIVE" }, orderBy: { startDate: "desc" } });
+  const c = await setupCycle(userId);
   if (!c) redirect("/cycle/new");
   return c;
 }
@@ -64,7 +65,10 @@ export async function markShared(input: z.input<typeof shareSchema>): Promise<{ 
   const u = await requireUser("PARTICIPANT");
   const d = shareSchema.safeParse(input);
   if (!d.success) return { error: "Something was missing." };
-  const c = await db.developmentCycle.findFirst({ where: { userId: u.id, status: { in: ["ACTIVE", "COMPLETED"] } }, orderBy: { startDate: "desc" } });
+  // Sending a plan finishes the focus being set up; later messages go with the newest 30 days.
+  const c = d.data.kind === "plan"
+    ? await setupCycle(u.id)
+    : await db.developmentCycle.findFirst({ where: { userId: u.id, status: { in: ["ACTIVE", "COMPLETED"] } }, orderBy: { startDate: "desc" } });
   if (!c) return { error: "No 30 days in progress." };
   const person = await db.relationship.findFirst({ where: { id: d.data.to, ownerId: u.id, active: true } });
   if (!person) return { error: "That person is not in My people." };

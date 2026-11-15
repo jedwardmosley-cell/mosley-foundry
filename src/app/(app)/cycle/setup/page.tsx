@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { CSSProperties } from "react";
 import { requireUser } from "@/lib/auth";
+import { setupCycle } from "@/lib/focusData";
 import { db } from "@/lib/db";
 import { aiAvailable } from "@/lib/ai";
 import { FORGE_LINES } from "@/content/forgeLines";
@@ -24,8 +25,10 @@ const TOTAL = SETUP_STEPS.length + 2; // five questions, the plan, and who finds
 export default async function WeekOneSetup({ searchParams }: { searchParams: Promise<{ step?: string }> }) {
   const u = await requireUser("PARTICIPANT");
   const { step = "1" } = await searchParams;
-  const cycle = await db.developmentCycle.findFirst({ where: { userId: u.id, status: "ACTIVE" }, orderBy: { startDate: "desc" } });
+  const cycle = await setupCycle(u.id);
   if (!cycle) redirect("/cycle/new");
+  // In the first session, finishing week 1 setup leads to the last step: what holds the focus in place.
+  const doneHref = (await db.commitment.count({ where: { userId: u.id, active: true } })) ? "/dashboard?setup=done" : "/start?step=4";
   const [profile, people] = await Promise.all([
     db.profile.findUnique({ where: { userId: u.id } }),
     db.relationship.findMany({ where: { ownerId: u.id, active: true }, orderBy: { createdAt: "asc" }, select: { id: true, name: true, role: true, email: true } }),
@@ -123,7 +126,7 @@ export default async function WeekOneSetup({ searchParams }: { searchParams: Pro
         <>
           <p className="mt-2 mb-5 text-[15px] text-ink-soft">{WHO_FINDS_OUT.hint}</p>
           <SetupShare people={findsOut} mentees={mentees} plan={cycle.plan} answers={cycle}
-            initial={{ to: cycle.partnerId, feeling: cycle.shareFeeling, old: cycle.shareOld, gap: cycle.shareGap }} />
+            initial={{ to: cycle.partnerId, feeling: cycle.shareFeeling, old: cycle.shareOld, gap: cycle.shareGap }} doneHref={doneHref} />
         </>
       ) : (
         <>

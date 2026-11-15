@@ -8,9 +8,11 @@ type Person = { id: string; name: string; role: string; email: string | null };
 type Answers = { situation: string; feeling: string; oldResponse: string; newResponse: string; gap: string };
 
 /** "Who finds out?": pick one person, read the message, choose what else to share, then send. */
-export function SetupShare({ people, mentees, answers, plan, initial }: {
+export function SetupShare({ people, mentees, answers, plan, initial, doneHref = "/dashboard?setup=done" }: {
   people: Person[]; mentees: Person[]; answers: Answers; plan: string;
   initial: { to: string | null; feeling: boolean; old: boolean; gap: boolean };
+  /** Where the client goes once the plan is sent. */
+  doneHref?: string;
 }) {
   const [to, setTo] = useState(initial.to ?? people[0]?.id ?? "");
   const [t, setT] = useState({ feeling: initial.feeling, old: initial.old, gap: initial.gap });
@@ -51,7 +53,7 @@ export function SetupShare({ people, mentees, answers, plan, initial }: {
       </div>
 
       <div className="mt-6">
-        <ShareSend message={message} to={to} email={person?.email} kind="plan" toggles={t} doneHref="/dashboard?setup=done" disabled={!to} />
+        <ShareSend message={message} to={to} email={person?.email} kind="plan" toggles={t} doneHref={doneHref} disabled={!to} />
       </div>
 
       {mentees.length > 0 && plan && (
