@@ -48,7 +48,7 @@ export function reviewSets(): ReviewSet[] {
       ],
     },
     {
-      key: "picks", title: "Identity quick picks", where: "Who's behind the wheel and My road", file: "src/content/identity.ts", draft: PICKS_STATUS === "draft",
+      key: "picks", title: "Identity quick picks", where: "Who's behind the wheel and My Design", file: "src/content/identity.ts", draft: PICKS_STATUS === "draft",
       groups: [
         ...Object.entries(SITUATION_PICKS).map(([k, v]) => ({ label: `Situation, ${PATHWAY_NAME[k]}`, items: v })),
         ...Object.entries(BEHAVIOR_PICKS).map(([k, v]) => ({ label: `Behavior, ${PATHWAY_NAME[k]}`, items: v })),
@@ -60,10 +60,10 @@ export function reviewSets(): ReviewSet[] {
     },
     { key: "focus", title: "30-day focus ideas", where: "30 days, start a cycle", file: "src/content/options.ts", draft: anyDraft(CYCLE_FOCUS), groups: lists(CYCLE_FOCUS, (k) => PILLAR_NAME[k]) },
     {
-      key: "starters", title: "Practice starters", where: "My road, routines", file: "src/content/forgeLines.ts", draft: true,
+      key: "starters", title: "Practice starters", where: "My Design, routines", file: "src/content/forgeLines.ts", draft: true,
       groups: Object.entries(PRACTICE_STARTERS).flatMap(([k, v]) => Object.entries(v).map(([p, items]) => ({ label: `${PILLAR_NAME[k]}, ${PATHWAY_NAME[p]}`, items }))),
     },
-    { key: "blueprint", title: "My road picks", where: "My road, add to an area", file: "src/content/options.ts", draft: anyDraft(BLUEPRINT_PICKS), groups: lists(BLUEPRINT_PICKS) },
+    { key: "blueprint", title: "My Design picks", where: "My Design, add to an area", file: "src/content/options.ts", draft: anyDraft(BLUEPRINT_PICKS), groups: lists(BLUEPRINT_PICKS) },
     { key: "people", title: "Relationship purposes", where: "People", file: "src/content/options.ts", draft: anyDraft(RELATIONSHIP_PURPOSE), groups: lists(RELATIONSHIP_PURPOSE) },
     { key: "tags", title: "Check-in tags", where: "Today, add detail", file: "src/content/options.ts", draft: CHECKIN_TAGS.status === "draft", groups: [{ label: "Where?", items: CHECKIN_TAGS.options }] },
     {

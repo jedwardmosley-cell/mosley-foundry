@@ -11,7 +11,7 @@ const PARTICIPANT_NAV: NavItem[] = [
   { href: "/identity", label: "1. Who's behind the wheel", group: "FORGE" },
   { href: "/assessment", label: "2. Where I am", group: "FORGE" },
   { href: "/focus", label: "3. My focus", tab: "Focus", mobile: true, group: "Discipline by Design" },
-  { href: "/road", label: "4. My road", group: "Discipline by Design" },
+  { href: "/road", label: "4. My Design", group: "Discipline by Design" },
   { href: "/reflect", label: "Weekly look back", group: "Discipline by Design" },
   { href: "/network", label: "People", mobile: true, group: "Support" },
   { href: "/coaching", label: "Coaching", tab: "Coach", mobile: true, group: "Support" },

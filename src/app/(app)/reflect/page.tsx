@@ -87,7 +87,7 @@ export default async function ReflectPage() {
                 <>
                   {cycle.plan && <p className="font-serif text-[18px] leading-snug text-heading">{cycle.plan}</p>}
                   <textarea name="look_keep" aria-label="What keeps this going" placeholder="A routine, a person, a reminder, a place..." defaultValue={String(thisWeek?.keep ?? "")} className="textarea !min-h-[80px]" maxLength={1500} />
-                  <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="look_routine" className="h-4 w-4 accent-navy" /> Put it on My road as a weekly routine</label>
+                  <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="look_routine" className="h-4 w-4 accent-navy" /> Put it in My Design as a weekly routine</label>
                 </>
               )}
             </section>

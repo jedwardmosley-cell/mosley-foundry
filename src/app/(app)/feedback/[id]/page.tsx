@@ -109,7 +109,7 @@ export default async function FeedbackEntry({ params, searchParams }: { params: 
               {/* The three ways to put it to work, on one row. */}
               <div className="mt-4 flex flex-wrap gap-2">
                 {e.pillar && <Link href={`/cycle/new?pillar=${e.pillar}&source=FEEDBACK&title=${encodeURIComponent(e.label)}&focus=${encodeURIComponent(e.practice || e.label)}`} className="btn-quiet !px-4 !py-2 text-sm">Make this a focus</Link>}
-                {e.practice && <form action={addEqiToBlueprint}><input type="hidden" name="id" value={e.id} /><button className="btn-quiet !px-4 !py-2 text-sm">Add to My road</button></form>}
+                {e.practice && <form action={addEqiToBlueprint}><input type="hidden" name="id" value={e.id} /><button className="btn-quiet !px-4 !py-2 text-sm">Add to My Design</button></form>}
                 {coaches.length > 0 && !shared && <form action={shareEqi}><input type="hidden" name="id" value={e.id} /><button className="btn-quiet !px-4 !py-2 text-sm">Share with {coachName}</button></form>}
               </div>
 

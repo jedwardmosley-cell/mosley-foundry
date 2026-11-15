@@ -67,7 +67,7 @@ export async function removeIdentity() {
 }
 
 /**
- * Adds one identity practice to My road from the participant's own words.
+ * Adds one identity practice to My Design from the participant's own words.
  * The participant can change or remove it like any other commitment.
  */
 export async function addIdentityPractice(fd: FormData) {
@@ -168,7 +168,7 @@ export async function saveWhoIAm(fd: FormData) {
   redirect(NEXT_OK.includes(nxt) ? nxt : "/identity?saved=1");
 }
 
-/** The behavior that would show it. It lives at the top of My road, since behavior is Discipline by Design. */
+/** The behavior that would show it. It lives at the top of My Design, since behavior is Discipline by Design. */
 export async function saveBehavior(fd: FormData) {
   const u = await requireUser("PARTICIPANT");
   const behavior = String(fd.get("behavior") ?? "").trim().slice(0, 1500);

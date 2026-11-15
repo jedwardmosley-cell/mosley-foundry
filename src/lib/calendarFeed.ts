@@ -7,7 +7,7 @@ import { RELATIONSHIP_ROLES } from "@/content/program";
 export const CALENDAR_NAME = "Both Hands on the Wheel";
 
 /**
- * The client's private calendar: their routines from My road, check-ins with their people,
+ * The client's private calendar: their routines from My Design, check-ins with their people,
  * coaching sessions, and the daily check-in when they asked for it there.
  * Titles only, plus a link back. Never the journal, the plan, reflections, scores, feedback or coach notes.
  */

@@ -70,7 +70,7 @@ export default async function SettingsPage() {
       <Card className="mt-6">
         <h2 className="h3">My calendar</h2>
         <p className="mt-2 text-[15px] text-ink-soft">
-          Put your routines from My road, check-ins with your people and coaching sessions on the calendar you already use.
+          Put your routines from My Design, check-ins with your people and coaching sessions on the calendar you already use.
           Change something in the app and your calendar follows.
         </p>
         {feed ? (
@@ -83,7 +83,7 @@ export default async function SettingsPage() {
             </div>
             <p className="mt-3 text-xs text-ink-mute">
               This link is private. Anyone who has it can see these items, so don&apos;t share it. Calendar apps check for changes on their own schedule,
-              anywhere from a few minutes to about a day. Routines with no day or time stay off the calendar until you add one on My road.
+              anywhere from a few minutes to about a day. Routines with no day or time stay off the calendar until you add one in My Design.
             </p>
             <div className="mt-4 flex flex-wrap gap-4 text-sm">
               <form action={setCalendarLink}><input type="hidden" name="mode" value="RESET" /><button className="btn-link">Get a new link (the old one stops working)</button></form>

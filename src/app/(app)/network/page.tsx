@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { headers } from "next/headers";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -7,7 +8,6 @@ import { addRelationship, logRelationshipCheckIn, removeRelationship, createInvi
 import { fmt, daysBetween, ymd } from "@/lib/dates";
 import { PageHeader, Card, Field, Source } from "@/components/ui";
 import { Submit } from "@/components/Submit";
-import { RelationshipMap } from "@/components/RelationshipMap";
 import { RelationshipFields } from "@/components/RelationshipFields";
 
 export const metadata = { title: "People" };
@@ -35,14 +35,16 @@ export default async function NetworkPage({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      <PageHeader eyebrow="People" title="Name your people">
+      <PageHeader eyebrow="My Design" title="My people">
         {rels.length === 0 ? (pack.nobodyNote ?? "A life built around growth needs people built around growth.") : "The people around your growth, and how often you check in with each one."}
       </PageHeader>
 
-      <div className="grid gap-5 md:grid-cols-[1.2fr_1fr]">
-        <Card>
-          {rels.length ? <RelationshipMap name={u.name} rels={withState} /> : <p className="muted py-10 text-center">Your map is empty. Add one person to get started.</p>}
-        </Card>
+      <div className="grid gap-5 md:grid-cols-[1fr_1fr]">
+        <Link href="/road" className="card flex flex-col justify-center hover:border-navy/40">
+          <p className="eyebrow">My Design</p>
+          <p className="mt-1 text-[15px]">Your people are one part of your design, with your routines, groups and programs. See the whole map.</p>
+          <span className="mt-2 text-sm btn-link">Open My Design</span>
+        </Link>
         <Card>
           <p className="eyebrow">Your people</p>
           <ul className="mt-3 space-y-2.5">

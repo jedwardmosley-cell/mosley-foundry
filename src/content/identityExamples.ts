@@ -8,7 +8,7 @@ import type { LineField } from "./forgeLines";
  *
  * Four people, so users can see themselves. Each set has the I am claim and one statement per
  * FORGE letter. Every example must pass the four tests below. Behavior has its own home in
- * My focus (the 30 days of practice) and My road (the routines).
+ * My focus (the 30 days of practice) and My Design (the routines).
  *
  * Banned words and the "X, not Y" pattern are checked by tests/style.test.ts.
  */

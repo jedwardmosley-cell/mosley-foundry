@@ -213,6 +213,8 @@ const submitAndWait = async (page: Page, selector: string) => {
     await weekly.locator('select[name="whenDays"]').selectOption("Sunday");
     await Promise.all([page.waitForLoadState("networkidle"), weekly.locator('button[type="submit"]:has-text("Add")').click()]);
     await page.waitForSelector("text=Plan the week ahead");
+    // the map: the client in the middle, one spoke per area, filled as the design grows
+    await page.waitForSelector('svg[aria-label^="My Design: 2 of 10 areas in place"]');
     await page.screenshot({ path: `${shots}/04-my-road.png`, fullPage: false });
   });
 
@@ -288,7 +290,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.waitForSelector("text=Stay curious when my decisions get challenged");
     await page.waitForSelector("text=Add a second focus");
     await page.goto(`${BASE}/road`);
-    await page.waitForSelector("text=This road holds my focus");
+    await page.waitForSelector("text=What this design builds");
     assert.equal(await page.locator("text=One move this week").count(), 0, "one move is folded into My focus");
     // a second focus fills slot 2; a third has to replace one
     await page.goto(`${BASE}/cycle/new`);
@@ -343,7 +345,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await Promise.all([page.waitForLoadState("networkidle"), add.locator('button:has-text("Add")').click()]);
     await page.waitForSelector("text=Make this a focus");
     assert.equal(await page.locator('button:has-text("Share with")').count(), 0, "no share button without a coach");
-    await Promise.all([page.waitForURL("**/road"), page.click('button:has-text("Add to My road")')]);
+    await Promise.all([page.waitForURL("**/road"), page.click('button:has-text("Add to My Design")')]);
     await page.waitForSelector("text=One breath before I answer");
     // the AI switch turns on for this entry only
     await page.goto(`${BASE}/feedback/${fb.id}`);
@@ -382,7 +384,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.waitForSelector(`main a:has-text("Who's behind the wheel") >> text=I am someone who follows through on what I say.`);
     // My road starts from the statement and holds the focus: no separate behavior to track
     await page.goto(`${BASE}/road`);
-    await page.waitForSelector("text=This road holds my focus");
+    await page.waitForSelector("text=What this design builds");
     assert.equal(await page.locator('input[name="behavior"]').count(), 0);
     // identity reinvention, with the folded performance identity
     await page.goto(`${BASE}/identity`);

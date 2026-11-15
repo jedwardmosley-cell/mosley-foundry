@@ -14,17 +14,19 @@ import { BLUEPRINT_PICKS } from "@/content/options";
 import { withArticle } from "@/content/whoIAm";
 import { Picks } from "@/components/Picks";
 import { Icon, IconBadge, type IconName } from "@/components/Icon";
+import { SystemMap, type MapArea } from "@/components/SystemMap";
 import { FORGE_LINES, PRACTICE_STARTERS } from "@/content/forgeLines";
 import type { PathwayKey } from "@/content/program";
 import type { PillarKey } from "@/content/types";
 
-export const metadata = { title: "My road" };
+export const metadata = { title: "My Design" };
 
 const CADENCES = { DAILY: "Daily", WEEKLY: "Weekly", MONTHLY: "Monthly", QUARTERLY: "Quarterly", ONCE: "One time" };
 const AREA_ICON: Record<string, IconName> = { ROUTINES: "sun", WEEKLY: "calendar", RELATIONSHIPS: "people", LEARNING: "book", LEADERSHIP: "flag", REVIEW: "repeat" };
 const DAY_CHOICES = DAY_LABELS.map((d) => d.label);
 
-export default async function MyRoadPage() {
+export default async function MyRoadPage({ searchParams }: { searchParams: Promise<{ add?: string }> }) {
+  const { add } = await searchParams;
   const u = await requireUser("PARTICIPANT");
   const { pack } = await getContent();
   const [items, rels] = await Promise.all([
@@ -55,10 +57,25 @@ export default async function MyRoadPage() {
     { label: "Group", roles: ["GROUP"], add: "GROUP", line: first("Your groups") },
   ];
   const peopleNamed = peopleRows.filter((r) => rels.some((x) => r.roles.includes(x.role))).length;
+  // The map: one spoke per area. People areas count the people named; the others count what's on the list.
+  const SHORT: Record<string, string> = { ROUTINES: "Routines", WEEKLY: "Weekly planning", ACCOUNTABILITY: "Accountability", MENTORING: "Mentors", MENTEES: "Mentees", GROUPS: "Groups", RELATIONSHIPS: "Relationships", LEARNING: "Learning", LEADERSHIP: "Leadership", REVIEW: "Review" };
+  const PEOPLE_ROLES: Record<string, { roles: string[]; add: string }> = {
+    ACCOUNTABILITY: { roles: ["ACCOUNTABILITY_PARTNER"], add: "ACCOUNTABILITY_PARTNER" },
+    MENTORING: { roles: ["MENTOR", "COACH"], add: "MENTOR" },
+    MENTEES: { roles: ["MENTEE", "DIRECT_REPORT"], add: "MENTEE" },
+    GROUPS: { roles: ["GROUP"], add: "GROUP" },
+  };
+  const mapAreas: MapArea[] = BLUEPRINT_AREAS.map((a) => {
+    const pr = PEOPLE_ROLES[a.key];
+    const count = items.filter((i) => i.area === a.key).length + (pr ? rels.filter((r) => pr.roles.includes(r.role)).length : 0);
+    const href = pr ? (count ? "/network" : `/network?role=${pr.add}#add`) : count ? `#area-${a.key}` : `/road?add=${a.key}#area-${a.key}`;
+    return { key: a.key, label: SHORT[a.key] ?? a.label, count, href };
+  });
 
   return (
     <>
-      <PageHeader eyebrow="Discipline by Design" title="My road" />
+      <PageHeader eyebrow="Discipline by Design" title="My Design">The system that makes it hard to fail: your routines, your people, your groups and programs, the people you develop. It stays, and it grows.</PageHeader>
+      <div className="card mb-8 !px-3 !py-5 sm:!p-6"><SystemMap name={u.name} areas={mapAreas} /></div>
       <FromBook label="From the book, Chapter 10">
         {d.intro[0] ? <><p>{d.intro.find((t) => t.startsWith("It's the deliberate construction"))}</p><p className="mt-2">{d.intro.find((t) => t.startsWith("The question isn't"))}</p></> : "The deliberate construction of the routines, relationships, environments, and accountability structures that support sustained development."}
       </FromBook>
@@ -67,12 +84,12 @@ export default async function MyRoadPage() {
       <section className="mb-10 overflow-hidden rounded-[24px] shadow-[0_24px_48px_-28px_rgb(var(--navy-deep)/0.8)]">
         {(identity?.becoming || profile?.forgeStatement) && (
           <Link href="/identity" className="block bg-[linear-gradient(150deg,rgb(var(--navy)),rgb(var(--navy-deep)))] px-5 py-6 sm:px-7 text-white transition hover:brightness-110">
-            <p className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.16em] text-[#F8CC78]">This road reinforces{identity?.role ? ` · as ${withArticle(identity.role)}` : ""}<Icon name="arrow" className="h-4 w-4 text-white/50" /></p>
+            <p className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.16em] text-[#F8CC78]">This design reinforces{identity?.role ? ` · as ${withArticle(identity.role)}` : ""}<Icon name="arrow" className="h-4 w-4 text-white/50" /></p>
             <p className="mt-3 font-serif text-[20px] sm:text-[22px] leading-[1.3] tracking-[-0.01em] line-clamp-4"><span aria-hidden className="mr-1 text-[#F8CC78]">&ldquo;</span>{profile?.forgeStatement || identity?.becoming}</p>
           </Link>
         )}
         <div className="bg-card px-5 py-5 sm:px-7 sm:py-6">
-          <p className="label">This road holds my focus</p>
+          <p className="label">What this design builds</p>
           {focuses.length ? (
             <ul className="mt-2 space-y-2">
               {focuses.map((f) => (
@@ -92,7 +109,7 @@ export default async function MyRoadPage() {
         </figure>
       )}
 
-      <SectionHead title="My system" sub="The routines and reviews that keep you on the road." />
+      <SectionHead title="Routines and reviews" sub="What you do on a schedule, so you don't have to decide each time." />
       <p className="-mt-2 mb-4 text-sm text-ink-soft">Want these on your phone? <Link href="/settings" className="btn-link">Put them on your calendar</Link>.</p>
       <div className="card !p-0 divide-y divide-line/60">
         {BLUEPRINT_AREAS.map((area) => {
@@ -101,7 +118,7 @@ export default async function MyRoadPage() {
           const people: typeof rels = [];
           const text = inv(area.inventory);
           return (
-            <section key={area.key} className="px-5 py-5 sm:px-7">
+            <section key={area.key} id={`area-${area.key}`} className="scroll-mt-24 px-5 py-5 sm:px-7">
               <div className="flex items-center gap-3">
                 <IconBadge name={AREA_ICON[area.key] ?? "target"} />
                 <h3 className="h3 flex-1 leading-snug">{area.label}</h3>
@@ -125,7 +142,7 @@ export default async function MyRoadPage() {
                   ))}
                 </ul>
               )}
-                <details className="mt-3">
+                <details className="mt-3" open={add === area.key}>
                   <summary className="cursor-pointer text-sm text-link">Add to this area</summary>
                   <p className="mt-2 text-sm text-ink-soft">{text ?? area.hint}</p>
                   <form action={addCommitment} className="mt-3 space-y-3">
