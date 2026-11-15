@@ -25,11 +25,11 @@ import { PRACTICE_STARTERS } from "@/content/forgeLines";
 import { PATHWAYS, type PathwayKey } from "@/content/program";
 import type { PillarKey } from "@/content/types";
 
-export const metadata = { title: "My first session" };
+export const metadata = { title: "Kickoff" };
 
 const STEP_COPY = [
   { title: WHO_TITLE, intro: "The FORGE framework, applied to you. Three short parts." },
-  { title: "See where you are today", intro: "Score the five pillars as the person you just described. It takes about five minutes." },
+  { title: "Where I am", intro: "Score the five rules as the person you just described. It takes about five minutes." },
   { title: "Choose your focus", intro: "One or two things to work on, and that's it. Five short questions turn each one into a plan for 30 days, and one person finds out." },
   { title: "What holds it in place", intro: "Discipline by Design: one routine with a day and a time. After that, a check-in each day and a look back each week." },
 ];
@@ -50,7 +50,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
   if (step === 0) {
     return (
       <>
-        <PageHeader eyebrow="My first session" title="You are set up" />
+        <PageHeader eyebrow="Kickoff" title="You are set up" />
         <Card>
           <p className="text-[15px]">Your focus is set and your road is in place. Each day, open Today and check in. On Saturday, look back on the week.</p>
           <Link href="/dashboard" className="btn-primary mt-4 inline-flex">Go to Today</Link>
@@ -99,7 +99,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
           </li>
         ))}
       </ol>
-      <PageHeader eyebrow={`My first session · Step ${step} of 4${step === 1 ? `, part ${part} of 3` : ""} · ${step <= 2 ? "FORGE" : "Discipline by Design"}`} title={copy.title}>{copy.intro}</PageHeader>
+      <PageHeader eyebrow={`Kickoff · Step ${step} of 4${step === 1 ? `, part ${part} of 3` : ""} · ${step <= 2 ? "FORGE" : "Discipline by Design"}`} title={copy.title}>{copy.intro}</PageHeader>
 
       {step === 1 && part === 1 && (
         <Card>
@@ -159,7 +159,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
         <Card>
           {!assessment ? (
             <>
-              <p className="mb-5 text-[15px]">Tap a score from 1 to 5 for each pillar. Score what you did this past month. A 3 is a fine place to start.</p>
+              <p className="mb-5 text-[15px]">Tap a score from 1 to 5 for each rule. Score what you did this past month. A 3 is a fine place to start.</p>
               <AssessmentForm pack={pack} entrepreneur={entrepreneur} useEntre={useEntre} instrument={instrument} next="/start" />
             </>
           ) : (
@@ -214,7 +214,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
           </Card>
           {people.length > 0 && (
             <Card>
-              <h2 className="h3">Who checks on you</h2>
+              <h2 className="h3">Who finds out</h2>
               <p className="mt-2 text-[15px]">✓ {people.map((x) => x.name).join(", ")}</p>
               <p className="mt-1 text-sm text-ink-soft">From &ldquo;Who finds out?&rdquo; in your focus. Add more people any time under People.</p>
             </Card>

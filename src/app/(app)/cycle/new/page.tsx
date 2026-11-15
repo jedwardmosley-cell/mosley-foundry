@@ -72,12 +72,12 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
             <div className="mt-2"><Picks list={CYCLE_FOCUS[startPillar]} target="title" folded={`Ideas for ${pName(startPillar)}`} /></div>
           </div>
           <div>
-            <label htmlFor="role" className="label">{identity?.role ? "Still about me as..." : "The role this 30 days is about"}</label>
+            <label htmlFor="role" className="label">{identity?.role ? "Still about me as..." : "The seat these 30 days are about"}</label>
             <div className="flex items-center inputbox">
               <span className="pl-3.5 pr-1.5 py-2.5 text-[15px] text-ink-soft whitespace-nowrap">This is about me as</span>
               <input id="role" name="role" defaultValue={identity?.role ?? ""} maxLength={80} placeholder="manager" className="flex-1 min-w-0 bg-transparent py-2.5 pr-3 text-[15px] focus:outline-none" />
             </div>
-            <p className="mt-1 text-xs text-ink-mute">One role for each 30 days. Change it here if this month is about a different one.</p>
+            <p className="mt-1 text-xs text-ink-mute">One seat for each 30 days. Change it here if this month is about a different one.</p>
           </div>
           <CycleFocusFields pillars={pack.pillars.map((p) => ({ key: p.key, name: p.name }))} initial={startPillar} initialFocus={(sp.focus ?? "").slice(0, 500)} identityBehavior={identity?.behavior.split("\n")[0].slice(0, 300) ?? ""} />
           {/* A season follows the first focus only. */}
@@ -116,7 +116,7 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
             </fieldset>
             <Field label="Start date"><input type="date" name="startDate" defaultValue={ymd()} className="input max-w-[200px]" /></Field>
           </details>
-          <Submit>{full ? "Replace and start" : "Start the cycle"}</Submit>
+          <Submit>{full ? "Replace and start" : "Start my 30 days"}</Submit>
         </form>
       </Card>
     </>

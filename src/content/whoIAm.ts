@@ -9,14 +9,14 @@ export const WHO_I_AM_STATUS: "draft" | "approved" = "draft";
 
 /** The page's name, from the book. The menu, the journey bar and Today all use it. */
 export const WHO_TITLE = "Who's behind the wheel";
-export const WHO_INTRO = "This is the FORGE framework, applied to you. Name the seat you're in and how big a turn this is, then work through the five parts of one driver. Together they become one statement, and everything after this page is built on it.";
-export const WHO_HEADINGS = { role: "Which seat are you in?", kind: "How big a turn is this?", forge: "The five parts of one driver", statement: "My statement" };
+export const WHO_INTRO = "This is the FORGE framework, applied to you. Name the seat you're in and how big a turn this is, then work through the five rules of one driver. Together they become My statement, and everything after this page is built on it.";
+export const WHO_HEADINGS = { role: "Which seat are you in?", kind: "How big a turn is this?", forge: "The five rules of one driver", statement: "My statement" };
 
 /** The FORGE opening above the five letters. The first line is the author's; the rest is build-team draft. */
 export const FORGE_OPENING = {
   line: "You only ever rise to the level of who you believe you are.",
   /** Shown under the author's core idea from forge-source.md. Build-team draft. */
-  text: "Who you are isn't a goal you check off. It's what your mind runs underneath every decision, and FORGE breaks it into five parts: where you're going, what it looks like as you get closer, why you're going, the gap between where you are and where you'll be, and the emotional state it takes to be that person when you get there. Research on identity-based motivation, led by psychologist Daphna Oyserman, finds that people stick with actions that feel like \"me\" and drop the ones that don't.",
+  text: "Who you are isn't a goal you check off. It's what your mind runs underneath every decision, and FORGE breaks it into five rules: where you're going, what it looks like as you get closer, why you're going, the gap between where you are and where you'll be, and the emotional state it takes to be that person when you get there. Research on identity-based motivation, led by psychologist Daphna Oyserman, finds that people stick with actions that feel like \"me\" and drop the ones that don't.",
 };
 
 /** "This is about me as a ___." Ordered so the likeliest role for the pathway comes first. */
@@ -51,6 +51,6 @@ export function asRole(question: string, role: string) {
 export const KIND_GUIDANCE: Record<IdentityLevel, string> = {
   CORE: "Core alignment: the person already is this. Help them name what is true and where their actions have drifted from it. Do not push for a new identity.",
   ROLE: "Role transition: the person is stepping into something new while the old role still pulls. Help them name what they are leaving, what made them good before that will not carry over, and who they are now.",
-  REINVENT: "Identity reinvention: the person is becoming someone substantially different. Go slower. Ask more before offering a statement. Expect it to feel untrue at first, and never push a claim they do not believe. Suggest smaller first moves and bringing it to their coach.",
+  REINVENT: "Reinvention: the person is becoming someone substantially different. Go slower. Ask more before offering a statement. Expect it to feel untrue at first, and never push a claim they do not believe. Suggest smaller first moves and bringing it to their coach.",
 };
 export const KIND_RULE = "Never tell the person they chose the wrong kind of change. If what they write sounds like a different kind, you may ask one question about it. The person decides.";

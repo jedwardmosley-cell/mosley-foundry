@@ -15,7 +15,7 @@ import { Submit } from "@/components/Submit";
 import { SetupWords } from "@/components/SetupWords";
 import { SetupShare } from "@/components/SetupShare";
 
-export const metadata = { title: "Week 1 setup" };
+export const metadata = { title: "Focus setup" };
 
 const TOTAL = SETUP_STEPS.length + 2; // five questions, the plan, and who finds out
 
@@ -53,7 +53,7 @@ export default async function WeekOneSetup({ searchParams }: { searchParams: Pro
   ) : (
     <>
       <div className="flex items-center justify-between text-sm text-ink-mute">
-        <span>Week 1 setup{n <= 5 ? ` · ${n} of 5` : ""}</span>
+        <span>Focus setup{n <= 5 ? ` · question ${n} of 5` : ""}</span>
         <Link href="/dashboard" className="hover:text-ink">Finish later</Link>
       </div>
       <div className="mt-2 mb-8 flex gap-1" aria-hidden>{Array.from({ length: TOTAL }, (_, i) => <span key={i} className={`h-1 flex-1 rounded-full ${i < n ? "bg-navy" : "bg-ink/[0.08]"}`} />)}</div>

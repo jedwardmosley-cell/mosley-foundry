@@ -12,10 +12,10 @@ const PARTICIPANT_NAV: NavItem[] = [
   { href: "/assessment", label: "2. Where I am", group: "FORGE" },
   { href: "/focus", label: "3. My focus", tab: "Focus", mobile: true, group: "Discipline by Design" },
   { href: "/road", label: "4. My road", group: "Discipline by Design" },
-  { href: "/reflect", label: "Weekly reflection", group: "Discipline by Design" },
+  { href: "/reflect", label: "Weekly look back", group: "Discipline by Design" },
   { href: "/network", label: "People", mobile: true, group: "Support" },
   { href: "/coaching", label: "Coaching", tab: "Coach", mobile: true, group: "Support" },
-  { href: "/companion", label: "AI companion", group: "Support" },
+  { href: "/companion", label: "Help me with this", group: "Support" },
   { href: "/more", label: "More", mobile: true, desktop: false },
   { href: "/more", label: "More", group: "Support" },
 ];
@@ -71,7 +71,7 @@ export function Shell({ user, children, journey }: { user: CurrentUser; children
           ))}
         </nav>
         {user.role === "PARTICIPANT" && (
-          <Link href="/companion" aria-label="AI companion" className="h-[54px] w-[54px] shrink-0 grid place-items-center rounded-full text-white shadow-[0_16px_36px_-12px_rgb(var(--navy-deep)/0.8)] bg-[linear-gradient(160deg,rgb(var(--navy)),rgb(var(--navy-deep)))]">
+          <Link href="/companion" aria-label="Help me with this" className="h-[54px] w-[54px] shrink-0 grid place-items-center rounded-full text-white shadow-[0_16px_36px_-12px_rgb(var(--navy-deep)/0.8)] bg-[linear-gradient(160deg,rgb(var(--navy)),rgb(var(--navy-deep)))]">
             <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden><path d="M12 5v14M5 12h14" /><path d="M18.5 2.5l.7 1.6 1.6.7-1.6.7-.7 1.6-.7-1.6-1.6-.7 1.6-.7z" fill="currentColor" stroke="none" /></svg>
           </Link>
         )}
@@ -85,7 +85,7 @@ function Brand({ compact = false }: { compact?: boolean }) {
     <Link href="/" className="flex items-center gap-2.5">
       <BrandMark size={compact ? 26 : 30} className="text-heading shrink-0" />
       <span>
-        <span className="block font-serif text-heading text-[19px] leading-none tracking-[-0.01em]">{compact ? "Both Hands" : "Both Hands on the Wheel"}</span>
+        <span className="block font-serif text-heading text-[19px] leading-none tracking-[-0.01em]">Both Hands on the Wheel</span>
         {!compact && <span className="block mt-1.5 text-[11px] tracking-[0.14em] uppercase text-ink-mute">Mosley Foundry</span>}
       </span>
     </Link>

@@ -78,7 +78,7 @@ export const publicPack: ContentPack = {
     { role: "mentee", prompt: "Someone you are developing" },
   ],
   forgeStatementPrompt: "One paragraph: the leader you are becoming, the destination you are driving toward, and the discipline you are committing to build.",
-  actionPlanIntro: "For each pillar, note where you are now, where you want to be, and one move this week.",
+  actionPlanIntro: "For each rule, note where you are now, where you want to be, and one move this week.",
   chapters: [],
   discipline: { intro: [], whatDisciplineIs: [], inventory: [], whosChecking: [], leadingOthers: [] },
 };

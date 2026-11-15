@@ -57,7 +57,7 @@ export default async function HistoryPage() {
 
       {cycles.length > 0 && (
         <Card className="mt-5">
-          <p className="eyebrow">30-day cycles</p>
+          <p className="eyebrow">Past 30 days</p>
           <ul className="mt-3 space-y-3">
             {cycles.map((c) => {
               const s = practiceSummary(c.checkIns);

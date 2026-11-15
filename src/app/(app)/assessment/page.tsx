@@ -23,9 +23,9 @@ export default async function AssessmentPage({ searchParams }: { searchParams: P
 
   return (
     <>
-      <PageHeader eyebrow={useEntre ? "FORGE self-assessment · Step 2 · for entrepreneurs" : "FORGE self-assessment · Step 2"} title="Where I am">
+      <PageHeader eyebrow={useEntre ? "self-assessment · Step 2 · for entrepreneurs" : "self-assessment · Step 2"} title="Where I am">
         {useEntre ? entrepreneur!.intro.filter((t) => !/measures five behaviors/i.test(t)).slice(0, 3).map((t) => <p key={t} className="mb-2">{t}</p>) : (
-          <p>Tap a score from 1 to 5 for each pillar. Score what you did this past month. The short lines under each score show what it looks like.</p>
+          <p>Tap a score from 1 to 5 for each rule. Score what you did this past month. The short lines under each score show what it looks like.</p>
         )}
       </PageHeader>
 
@@ -34,7 +34,7 @@ export default async function AssessmentPage({ searchParams }: { searchParams: P
         <Link href="/identity" className="glow mb-6 block rounded-[22px] p-5 sm:p-6">
           <p className="section-label">{identity?.role ? `Rate yourself as ${withArticle(identity.role)}` : "Rate yourself against who you claimed"}</p>
           {statement && <p className="mt-2 font-serif text-[18px] leading-snug text-heading line-clamp-3">{statement}</p>}
-          <p className="mt-3 text-sm text-ink-soft">Score each pillar as the person you described. The lowest one is where your focus goes next.</p>
+          <p className="mt-3 text-sm text-ink-soft">Score each rule as the person you described. The lowest one is where your focus goes next.</p>
         </Link>
       )}
 

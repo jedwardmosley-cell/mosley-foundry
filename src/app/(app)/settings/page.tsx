@@ -56,8 +56,8 @@ export default async function SettingsPage() {
             One email a week: where you are in your 30 days, your routines, who you&apos;re due to check in with, and your next coaching session.
             It never includes your plan, reflections or scores.
           </p>
-          <h2 className="h3 pt-4 border-t border-line">AI companion</h2>
-          <label className="flex items-center gap-2 text-[15px]"><input type="checkbox" name="aiEnabled" defaultChecked={p.aiEnabled} className="h-4 w-4 accent-navy" /> Use the AI companion</label>
+          <h2 className="h3 pt-4 border-t border-line">Help me with this</h2>
+          <label className="flex items-center gap-2 text-[15px]"><input type="checkbox" name="aiEnabled" defaultChecked={p.aiEnabled} className="h-4 w-4 accent-navy" /> Use Help me with this</label>
           <Field label="Keep conversations for (days)" hint="Conversations older than this are deleted automatically.">
             <input type="number" name="aiRetentionDays" min={1} max={365} defaultValue={p.aiRetentionDays} className="input max-w-[160px]" />
           </Field>

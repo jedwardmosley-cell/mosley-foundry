@@ -21,10 +21,17 @@ export function cleanText(s: string): string {
   return RULES.reduce((t, [re, to]) => t.replace(re, to), s).replace(/\s{2,}/g, " ").trim();
 }
 
-function walk<T>(v: T): T {
-  if (typeof v === "string") return cleanText(v) as T;
-  if (Array.isArray(v)) return v.map(walk) as T;
-  if (v && typeof v === "object") return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, walk(x)])) as T;
+/** The app calls F, O, R, G and E the five rules. The workbook says "pillar"; the book's own chapter text is left as written. */
+export function ruleWords(s: string): string {
+  return s.replace(/\b[Yy]our FORGE statement\b/g, "My statement").replace(/\bFORGE statement\b/g, "My statement").replace(/\bpillars\b/g, "rules").replace(/\bPillars\b/g, "Rules").replace(/\bpillar\b/g, "rule").replace(/\bPillar\b/g, "Rule");
+}
+
+const BOOK_TEXT = new Set(["rule", "chapters"]);
+
+function walk<T>(v: T, book = false): T {
+  if (typeof v === "string") return (book ? cleanText(v) : ruleWords(cleanText(v))) as T;
+  if (Array.isArray(v)) return v.map((x) => walk(x, book)) as T;
+  if (v && typeof v === "object") return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, walk(x, book || BOOK_TEXT.has(k))])) as T;
   return v;
 }
 

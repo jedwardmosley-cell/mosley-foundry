@@ -83,23 +83,23 @@ export const CHECKIN_TAGS: OptionList = { status: "draft", options: [
 
 /** Quick picks for each My road area. */
 export const BLUEPRINT_PICKS: Record<string, OptionList> = {
-  ROUTINES: { status: "draft", basis: "ch10", options: ["Fifteen minutes before the day starts", "Reading", "Journaling", "Prayer or quiet reflection", "Moving my body", "Reading my FORGE statement"] },
+  ROUTINES: { status: "draft", basis: "ch10", options: ["Fifteen minutes before the day starts", "Reading", "Journaling", "Prayer or quiet reflection", "Moving my body", "Reading My statement"] },
   WEEKLY: { status: "draft", basis: "ch10", options: ["Plan the week ahead", "Look back: did I do what I said?", "Check my three signals"] },
-  ACCOUNTABILITY: { status: "draft", options: ["Share my FORGE statement with my partner", "Every-other-week check-in call", "Text my partner my one move each Monday"] },
+  ACCOUNTABILITY: { status: "draft", options: ["Share My statement with my partner", "Every-other-week check-in call", "Text my partner my one move each Monday"] },
   MENTORING: { status: "draft", basis: "ch10", options: ["Monthly call with my mentor", "Regular session with my coach", "Bring one crossroads decision to my mentor"] },
   MENTEES: { status: "draft", basis: "ch10", options: ["Weekly time with someone I am developing", "Teach one thing I am practicing", "Name the potential I see in someone, out loud"] },
   GROUPS: { status: "draft", basis: "ch10", options: ["Weekly peer group", "Mastermind", "A class or cohort", "Community of practice"] },
   RELATIONSHIPS: { status: "draft", options: ["Reach out to one person in my circle each week", "Coffee conversation, nothing to ask for", "Thank-you note to someone who helped me"] },
   LEARNING: { status: "draft", basis: "ch10", options: ["A book I am working through right now", "A course or certification", "A podcast worth becoming like", "Audit my feed"] },
   LEADERSHIP: { status: "draft", options: ["Every commitment gets an owner, a date, and a follow-up", "Follow up on what my team said they would do", "Delegate one task I am still doing myself"] },
-  REVIEW: { status: "draft", options: ["Quarterly destination check", "Monthly look at My road", "Re-take the FORGE assessment every 90 days"] },
+  REVIEW: { status: "draft", options: ["Quarterly destination check", "Monthly look at My road", "Re-take the self-assessment every 90 days"] },
 };
 
 /** Purpose quick picks per relationship role. */
 export const RELATIONSHIP_PURPOSE: Record<string, OptionList> = {
   MENTOR: { status: "draft", basis: "ch10", options: ["Perspective from further up the road", "Tells me the truth at a crossroads"] },
   COACH: { status: "draft", basis: "ch10", options: ["Watches my blind spots", "Checks that I do what I said I would do"] },
-  ACCOUNTABILITY_PARTNER: { status: "draft", options: ["Checks on my FORGE statement", "Checks on my one move each week", "Won't let me manage around my blind spots"] },
+  ACCOUNTABILITY_PARTNER: { status: "draft", options: ["Checks on My statement", "Checks on my one move each week", "Won't let me manage around my blind spots"] },
   MENTEE: { status: "draft", basis: "ch10", options: ["Someone I am pouring into", "Developing them for a bigger role"] },
   GROUP: { status: "draft", basis: "ch10", options: ["Peers pointed toward growth", "Study and accountability"] },
   DIRECT_REPORT: { status: "draft", options: ["Developing them into a leader", "Weekly one-on-one", "Clear expectations and follow-up"] },

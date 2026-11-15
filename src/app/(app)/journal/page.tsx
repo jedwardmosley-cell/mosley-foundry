@@ -13,7 +13,7 @@ export default async function JournalPage() {
   return (
     <>
       <PageHeader eyebrow="Private to you" title="Private journal">
-        Nothing here can be shared. Coaches, administrators and the AI companion have no access to it.
+        Nothing here can be shared. Coaches, administrators and Help me with this have no access to it.
       </PageHeader>
       <Card>
         <form action={addJournal} className="space-y-3">

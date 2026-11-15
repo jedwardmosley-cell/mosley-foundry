@@ -37,7 +37,7 @@ export function reviewSets(): ReviewSet[] {
       ],
     },
     {
-      key: "lines", title: "The five FORGE questions", where: "Who's behind the wheel, the five parts", file: "src/content/forgeLines.ts", draft: FORGE_LINES_STATUS === "draft",
+      key: "lines", title: "The five FORGE questions", where: "Who's behind the wheel, the five rules", file: "src/content/forgeLines.ts", draft: FORGE_LINES_STATUS === "draft",
       groups: FORGE_LINES.map((l) => ({ label: `${l.pillar} · ${l.label}`, items: [l.question, `What it is about: ${l.shapes}`, `Hint: ${l.hint}`] })),
     },
     {
@@ -59,7 +59,7 @@ export function reviewSets(): ReviewSet[] {
       ],
     },
     {
-      key: "prompts", title: "Pillar prompts by kind of change", where: "My road, one move this week", file: "src/content/identity.ts", draft: PILLAR_PROMPTS_STATUS === "draft",
+      key: "prompts", title: "Rule prompts by kind of change", where: "My road, one move this week", file: "src/content/identity.ts", draft: PILLAR_PROMPTS_STATUS === "draft",
       groups: Object.entries(PILLAR_PROMPTS).map(([k, v]) => ({ label: PILLAR_NAME[k], items: IDENTITY_LEVELS.map((l) => `${LEVELS[l].name}: ${v[l]}`) })),
     },
     { key: "onemove", title: "One move ideas", where: "My road, one move this week", file: "src/content/options.ts", draft: anyDraft(ONE_MOVE), groups: lists(ONE_MOVE, (k) => PILLAR_NAME[k]) },

@@ -4,19 +4,19 @@ import { PageHeader } from "@/components/ui";
 
 const GROUPS: [string, [string, string, string][]][] = [
   ["FORGE", [
-    ["/identity", "1. Who's behind the wheel", "The FORGE framework, applied to you: your seat, how big a turn, the five parts of one driver, and one statement."],
-    ["/assessment", "2. Where I am today", "Score the five pillars. The goal is a 5 on every one."],
+    ["/identity", "1. Who's behind the wheel", "The FORGE framework, applied to you: your seat, how big a turn, the five rules of one driver, and My statement."],
+    ["/assessment", "2. Where I am", "Score the five rules. The goal is a 5 on every one."],
   ]],
   ["Discipline by Design", [
     ["/focus", "3. My focus", "One or two things to work on, each with a plan for 30 days. That's it."],
     ["/road", "4. My road", "Discipline by Design: the routines and people that hold your focus in place."],
-    ["/season", "Season", "Three 30-day cycles, about 90 days, and the review at the end."],
-    ["/reflect", "Weekly reflection", "Did I do what I said I was going to do?"],
+    ["/season", "Season", "Three rounds of 30 days, about 90 days, and the review at the end."],
+    ["/reflect", "Weekly look back", "Did I do what I said I was going to do?"],
   ]],
   ["Support", [
     ["/coaching", "Coaching", "Sessions and exercises from your coach."],
     ["/network", "People", "Log check-ins with the people on your road."],
-    ["/companion", "AI companion", "Think it through, practice a hard conversation, prepare for coaching."],
+    ["/companion", "Help me with this", "Think it through, practice a hard conversation, prepare for coaching."],
     ["/pathway", "My pathway", "Program segments and work for your pathway."],
     ["/feedback", "My feedback", "Your own summary of a 360 or an EQ-i debrief, connected to FORGE. Private unless you share it."],
     ["/library", "Library", "The FORGE Framework: the five rules for the road, and how to put each one into practice."],

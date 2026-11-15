@@ -211,9 +211,9 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.ok(await page.locator('input[name="pillar"][value="E"]').isChecked(), "ideas start from the lowest score");
     assert.equal(await page.locator("text=watch area").count(), 0, "no watch area");
     await page.fill('input[name="title"]', "Stay curious when my decisions get challenged");
-    await page.click('button:has-text("Start the cycle")');
+    await page.click('button:has-text("Start my 30 days")');
     const plan = await doSetup(page, "Jamie Cole");
-    await page.waitForSelector("text=Week 1 setup is done");
+    await page.waitForSelector("text=Your focus is set up");
     const c = await db.developmentCycle.findFirstOrThrow({ where: { user: { email }, status: "ACTIVE" } });
     assert.equal(c.plan, plan);
     assert.equal(c.focus, "Pause and ask one question before I answer", "the coach's Practice view sees the new response, never the feeling");
@@ -240,7 +240,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.ok(await page.locator('input[name="tags"][value="In a meeting"]').isChecked());
     await page.fill('input[name="note"]', "Paused in the 10 am review");
     await page.fill('textarea[name="reflection"]', "E2E-REFLECTION-TEXT: the pause gave me room.");
-    await submitAndWait(page, 'button:has-text("Log today")');
+    await submitAndWait(page, 'button:has-text("Save my daily check-in")');
     await page.screenshot({ path: `${shots}/06-dashboard.png`, fullPage: true });
   });
 
@@ -266,7 +266,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     // a second focus fills slot 2; a third has to replace one
     await page.goto(`${BASE}/cycle/new`);
     await page.fill('input[name="title"]', "Give my team the full picture, early");
-    await Promise.all([page.waitForURL(/\/cycle\/setup\?step=1$/), page.click('button:has-text("Start the cycle")')]);
+    await Promise.all([page.waitForURL(/\/cycle\/setup\?step=1$/), page.click('button:has-text("Start my 30 days")')]);
     const two = await db.developmentCycle.findMany({ where: { user: { email }, status: "ACTIVE" }, orderBy: { slot: "asc" } });
     assert.deepEqual(two.map((c) => c.slot), [1, 2]);
     await page.goto(`${BASE}/cycle/new`);
@@ -276,7 +276,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.goto(`${BASE}/dashboard`);
     const second = page.locator('section[aria-label="Focus 2"]');
     await second.locator('label:has(input[value="PARTIAL"])').click();
-    await Promise.all([page.waitForLoadState("networkidle"), second.locator('button:has-text("Log today")').click()]);
+    await Promise.all([page.waitForLoadState("networkidle"), second.locator('button:has-text("Save my daily check-in")').click()]);
     let row = await db.dailyCheckIn.findFirst({ where: { user: { email }, cycle2Id: two[1].id } });
     for (let i = 0; i < 25 && !row; i++) { await page.waitForTimeout(200); row = await db.dailyCheckIn.findFirst({ where: { user: { email }, cycle2Id: two[1].id } }); }
     assert.equal(row?.status2, "PARTIAL");
@@ -316,15 +316,15 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.waitForSelector("text=One breath before I answer");
     // the AI switch turns on for this entry only
     await page.goto(`${BASE}/feedback/${fb.id}`);
-    await Promise.all([page.waitForLoadState("networkidle"), page.click('button[aria-label="Let the AI companion use my summary"]')]);
-    await page.waitForSelector('button[aria-label="Let the AI companion use my summary"][aria-checked="true"]');
+    await Promise.all([page.waitForLoadState("networkidle"), page.click('button[aria-label="Let Help me with this use my summary"]')]);
+    await page.waitForSelector('button[aria-label="Let Help me with this use my summary"][aria-checked="true"]');
     // practicing it for 30 days warns that the current 30 days would end
     await Promise.all([page.waitForURL(/\/cycle\/new\?pillar=E/), page.click('a:has-text("Make this a focus")')]);
     assert.equal(await page.inputValue('input[name="focus"]'), "One breath before I answer");
     assert.ok(await page.locator('input[name="pillar"][value="E"]').isChecked());
     assert.equal(await page.inputValue('input[name="source"]'), "FEEDBACK");
     // one focus is in progress, so this one can be a second focus: nothing ends
-    await page.waitForSelector('button:has-text("Start the cycle")');
+    await page.waitForSelector('button:has-text("Start my 30 days")');
     assert.equal(await page.locator('input[name="replace"]').count(), 0);
     // the results page says where the feedback points, and that it is a different measure
     const a = await db.assessment.findFirstOrThrow({ where: { user: { email } }, orderBy: { completedAt: "desc" } });
@@ -339,7 +339,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.waitForSelector(`main a:has-text("Who's behind the wheel · as a manager") >> text=I am a leader my team trusts with bad news.`);
     await page.goto(`${BASE}/identity`);
     assert.ok(!(await page.content()).includes("Identity shift"), "one activity, one name");
-    for (const name of ["Core alignment", "Role transition", "Identity reinvention"]) await page.locator("label", { hasText: name }).click();
+    for (const name of ["Core alignment", "Role transition", "Reinvention"]) await page.locator("label", { hasText: name }).click();
     await page.locator("label", { hasText: "Core alignment" }).click();
     assert.ok(!(await page.locator('input[name="personaName"]').isVisible()), "the performance identity folds under identity reinvention only");
     await page.fill('textarea[name="statement"]', "someone who follows through on what I say.");
@@ -355,7 +355,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal(await page.locator('input[name="behavior"]').count(), 0);
     // identity reinvention, with the folded performance identity
     await page.goto(`${BASE}/identity`);
-    await page.locator("label", { hasText: "Identity reinvention" }).click();
+    await page.locator("label", { hasText: "Reinvention" }).click();
     await page.locator("summary", { hasText: "Create a performance identity" }).click();
     await page.fill('input[name="personaName"]', "The Closer");
     await page.fill('textarea[name="personaStandards"]', "I finish what I start.");
@@ -378,7 +378,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.goto(`${BASE}/dashboard`);
     await page.waitForSelector("text=Showed up as who I am?");
     await page.locator('label:has(input[name="identityActed"][value="PARTLY"])').click();
-    await submitAndWait(page, 'button:has-text("Update today")');
+    await submitAndWait(page, 'button:has-text("Update my daily check-in")');
     let ci = await db.dailyCheckIn.findFirst({ where: { userId: me.id, identityActed: "PARTLY" } });
     for (let i = 0; i < 25 && !ci; i++) { await page.waitForTimeout(200); ci = await db.dailyCheckIn.findFirst({ where: { userId: me.id, identityActed: "PARTLY" } }); }
     assert.ok(ci, "the daily answer is saved");
@@ -391,7 +391,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await logout(page);
     await login(page, email, "e2e-password-123");
     await page.goto(`${BASE}/dashboard`);
-    await page.waitForSelector('button:has-text("Update today")');
+    await page.waitForSelector('button:has-text("Update my daily check-in")');
     await page.goto(`${BASE}/history`);
     await page.waitForSelector("text=E2E-REFLECTION-TEXT");
   });
@@ -447,7 +447,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await saveThroughReveal(g, "**/start?step=2", "Save and continue");
     // 2. where I am: the self-assessment is inside the kickoff; the client never leaves it
     for (const [k, v] of Object.entries({ F: 4, O: 3, R: 4, G: 3, E: 2 })) await g.locator(`input[name="${k}"][value="${v}"]`).check({ force: true });
-    await Promise.all([g.waitForURL("**/start?step=2"), g.click('button:has-text("See my profile")')]);
+    await Promise.all([g.waitForURL("**/start?step=2&scored=1"), g.click('button:has-text("See my profile")')]);
     await g.waitForSelector("text=The goal is a 5 on every one");
     assert.equal(await g.locator("text=/ 25").count(), 0, "no total");
     await Promise.all([g.waitForURL("**/start?step=3"), g.click('a:has-text("Next: choose your focus")')]);
@@ -509,10 +509,10 @@ const submitAndWait = async (page: Page, selector: string) => {
     // month 1, day 30: only the season choices are offered
     assert.equal(await g.locator('input[name="decision"][value="CONTINUE_ALONE"]').count(), 0);
     await g.locator('input[name="decision"][value="NEXT_SAME"]').check();
-    await Promise.all([g.waitForURL(/\/cycle\/new\?season=continue/), g.click('button:has-text("Complete the cycle")')]);
+    await Promise.all([g.waitForURL(/\/cycle\/new\?season=continue/), g.click('button:has-text("Finish these 30 days")')]);
     await g.waitForSelector("text=Month 2 of 3 in my season");
     assert.equal(await g.inputValue('input[name="focus"]'), "Pause before I answer", "same pillar carries the behavior over");
-    await Promise.all([g.waitForURL(/\/cycle\/setup\?step=1$/), g.click('button:has-text("Start the cycle")')]);
+    await Promise.all([g.waitForURL(/\/cycle\/setup\?step=1$/), g.click('button:has-text("Start my 30 days")')]);
     // month 2 starts from month 1's week 1 answers, to review and send again
     assert.equal(await g.inputValue('textarea[name="value"]'), "When someone pushes back on my decision in a meeting");
     await g.waitForSelector("text=From last month. Change it if it's different now.");
@@ -526,14 +526,14 @@ const submitAndWait = async (page: Page, selector: string) => {
     // the review: month rows, then close the season
     await g.goto(`${BASE}/season`);
     await g.waitForSelector("text=Month 2 · Emotionally Anchored");
-    await g.waitForSelector("text=Take the FORGE assessment");
+    await g.waitForSelector("text=Take the self-assessment");
     await g.waitForSelector("text=The review opens when month 2 ends.");
     assert.equal(await g.locator('input[name="decision"][value="KEEP_GOING"]').count(), 0, "no closing the season mid-month");
     // jump month 2 to its day 30, then end the season there
     await db.developmentCycle.update({ where: { id: cycles[1].id }, data: { startDate: new Date(Date.now() - 29 * 86400000) } });
     await g.goto(`${BASE}/cycle`);
     await g.locator('input[name="decision"][value="END_SEASON"]').check();
-    await Promise.all([g.waitForURL("**/season"), g.click('button:has-text("Complete the cycle")')]);
+    await Promise.all([g.waitForURL("**/season"), g.click('button:has-text("Finish these 30 days")')]);
     await g.locator('input[name="decision"][value="KEEP_GOING"]').check();
     await Promise.all([g.waitForURL("**/dashboard"), g.click('button:has-text("Close the season")')]);
     const season = await db.season.findFirstOrThrow({ where: { userId: guided.id } });
@@ -719,11 +719,16 @@ const submitAndWait = async (page: Page, selector: string) => {
     const dp: Page = await dc.newPage();
     await login(dp, "dana@demo.bothhands.app");
     await dp.goto(`${BASE}/identity`);
-    await dp.waitForSelector("text=Still open:");
+    await dp.waitForSelector("text=Step 1 of 4");
     assert.ok((await dp.locator('nav[aria-label="Your journey"]').innerText()).includes("your seat"), "the journey bar names what is missing");
     await dp.click('button:has-text("Save who I am")');
     await dp.waitForSelector("text=Name the seat you're in (step 1).");
     assert.equal(await dp.locator('[role="dialog"]').count(), 0, "nothing saves until the seat is named");
+    // the daily check-in waits for the whole kickoff
+    await dp.goto(`${BASE}/dashboard`);
+    await dp.waitForSelector("text=Finish your kickoff");
+    assert.equal(await dp.locator('button:has-text("Save my daily check-in")').count(), 0, "no check-in before the kickoff is done");
+    assert.equal(await dp.locator("text=Check in today").count(), 0);
     await dp.goto(`${BASE}/cycle`);
     await Promise.all([dp.waitForURL(/\/cycle\/setup\?step=1$/), dp.click('a:has-text("Start your week 1 setup")')]);
     await dc.close();
@@ -735,7 +740,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await login(dp, "dana@demo.bothhands.app");
     await dp.goto(`${BASE}/identity`);
     await dp.fill('input[name="role"]', "E2E-ROLE");
-    await dp.locator("label", { hasText: "Identity reinvention" }).click();
+    await dp.locator("label", { hasText: "Reinvention" }).click();
     await dp.locator("summary", { hasText: "Create a performance identity" }).click();
     await dp.fill('input[name="personaName"]', "E2E-PERSONA");
     await saveThroughReveal(dp, "**/identity?saved=1");
@@ -748,7 +753,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.waitForSelector("text=E2E-ROLE");
     assert.ok(!(await page.content()).includes("E2E-PERSONA"), "persona needs its own tick");
     await dp.goto(`${BASE}/identity`);
-    await dp.locator("summary", { hasText: "AI companion and sharing" }).click();
+    await dp.locator("summary", { hasText: "Help me with this and sharing" }).click();
     await dp.locator('input[name="sharePersona"]').check();
     await dp.locator('input[value="SUPPORTIVE"]').check();
     await Promise.all([dp.waitForLoadState("networkidle"), dp.click('button:has-text("Save these settings")')]);

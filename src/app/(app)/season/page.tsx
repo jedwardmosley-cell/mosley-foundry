@@ -28,7 +28,7 @@ export default async function SeasonPage() {
     return (
       <>
         <PageHeader eyebrow="Discipline by Design" title="Seasons" />
-        <Empty title="No season yet" href="/cycle/new?season=new" cta="Start a season">A season is three 30-day cycles back to back, about 90 days, with a review at the end.</Empty>
+        <Empty title="No season yet" href="/cycle/new?season=new" cta="Start a season">A season is three rounds of 30 days back to back, about 90 days, with a review at the end.</Empty>
       </>
     );
   }
@@ -86,8 +86,8 @@ export default async function SeasonPage() {
           </ul>
         ) : (
           <div className="mt-2">
-            <p className="text-[15px]">{before ? "See how far you've come. Score the five pillars again, then come back here." : "Score the five pillars to see where you are now."}</p>
-            <Link href="/assessment?next=season" className="btn-quiet mt-3 inline-flex">Take the FORGE assessment</Link>
+            <p className="text-[15px]">{before ? "See how far you've come. Score the five rules again, then come back here." : "Score the five rules to see where you are now."}</p>
+            <Link href="/assessment?next=season" className="btn-quiet mt-3 inline-flex">Take the self-assessment</Link>
           </div>
         )}
       </Card>

@@ -56,7 +56,7 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
           . This step is done when all three are saved.
         </p>
       )}
-      {saved && <p role="status" className="mb-4 notice">Saved. Next, <Link href="/assessment" className="btn-link">see where you are today</Link>.</p>}
+      {saved && <p role="status" className="mb-4 notice">Saved. Next, <Link href="/assessment" className="btn-link">see where you are</Link>.</p>}
 
       <form action={saveWhoIAm} className="space-y-5">
         <Card>
@@ -96,10 +96,10 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
 
       {id && (
         <details className="card mt-6">
-          <summary className="cursor-pointer h3">AI companion and sharing</summary>
+          <summary className="cursor-pointer h3">Help me with this and sharing</summary>
           <form action={saveIdentityControls} className="mt-4 space-y-5">
             <fieldset>
-              <legend className="label">Coaching tone in the AI companion</legend>
+              <legend className="label">Coaching tone in Help me with this</legend>
                             <div className="space-y-1.5">
                 {(Object.entries(TONE_LABELS) as [ToneSetting, string][]).map(([v, label]) => (
                   <label key={v} className="flex items-start gap-2 text-[15px]">
@@ -110,7 +110,7 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
               </div>
             </fieldset>
             <fieldset className="space-y-2">
-              <legend className="label">What the AI companion can use</legend>
+              <legend className="label">What Help me with this can use</legend>
               <label className="flex items-start gap-2 text-[15px]">
                 <input type="checkbox" name="aiUse" defaultChecked={id.aiUse} className="mt-1 h-4 w-4 accent-navy" />
                 <span>Use my level, my statement and my behavior. <span className="text-ink-mute text-sm">They are sent to Anthropic, the AI provider, when you chat.</span></span>

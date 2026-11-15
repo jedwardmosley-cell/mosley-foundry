@@ -55,7 +55,7 @@ test("the tone reaches the system prompt", async () => {
 test("the AI gets the statement by default, the persona only when ticked, nothing when turned off", async () => {
   let ctx = await participantContext(dana.id);
   assert.ok(ctx.includes("ID-ROLE") && ctx.includes("ID-BEHAVIOR"), "role and behavior");
-  assert.match(ctx, /kind of change[^\n]*identity reinvention/);
+  assert.match(ctx, /kind of change[^\n]*reinvention/);
   assert.match(ctx, /Go slower/, "coaching guidance for the kind of change");
   assert.ok(!ctx.includes("ID-BECOMING"), "with a statement on the profile, the AI reads that one statement");
   assert.ok(!ctx.includes("ID-PERSONA") && !ctx.includes("ID-CUE"), "persona held back by default");

@@ -63,7 +63,7 @@ export function CheckInForm({ existing, hasCoach, identityLevel, dark = false, s
           )}
         </div>
       </details>}
-      <Submit className={dark ? "btn w-full bg-surface text-heading" : "btn-primary w-full"}>{existing?.status ? "Update today" : "Log today"}</Submit>
+      <Submit className={dark ? "btn w-full bg-surface text-heading" : "btn-primary w-full"}>{existing?.status ? "Update my daily check-in" : "Save my daily check-in"}</Submit>
     </form>
   );
 }

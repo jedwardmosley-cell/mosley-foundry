@@ -114,10 +114,10 @@ export async function participantContext(userId: string) {
   }
   if (assessment) {
     const s = scoresFrom(assessment);
-    lines.push(`Latest FORGE self-assessment (self-rated, ${assessment.completedAt.toDateString()}): F ${s.F}, O ${s.O}, R ${s.R}, G ${s.G}, E ${s.E}`);
-  } else lines.push("No FORGE self-assessment completed yet.");
+    lines.push(`Latest self-assessment (self-rated, ${assessment.completedAt.toDateString()}): F ${s.F}, O ${s.O}, R ${s.R}, G ${s.G}, E ${s.E}`);
+  } else lines.push("No self-assessment completed yet.");
   for (const g of goals) lines.push(`Goal ${g.pillar}${g.isPriority ? " (priority)" : ""}: now "${g.whereNow}" / want "${g.whereWant}" / one move "${g.oneMove}"`);
-  if (cycle) lines.push(`Active 30-day cycle started ${cycle.startDate.toDateString()} on pillar ${cycle.pillar}${cycle.focus ? `, focus: ${cycle.focus}` : ""}`);
+  if (cycle) lines.push(`Active 30-day cycle started ${cycle.startDate.toDateString()} on rule ${cycle.pillar}${cycle.focus ? `, focus: ${cycle.focus}` : ""}`);
   if (checkIns.length) lines.push(`Recent check-ins: ${checkIns.map((c) => `${c.date} ${c.status}`).join(", ")}`);
   for (const s of sessions) if (s.commitments) lines.push(`Coaching commitments from ${s.scheduledAt.toDateString()}: ${s.commitments}`);
   for (const e of eqi) lines.push(`EQ-i development priority (participant's own words, no scores): ${e.label}${e.pillar ? `; linked by the participant to FORGE ${e.pillar}` : ""}${e.practice ? `; practice: ${e.practice}` : ""}`);
@@ -127,7 +127,7 @@ export async function participantContext(userId: string) {
   // The performance identity is sent only if they also ticked that box.
   const id = await db.identityProfile.findUnique({ where: { userId } });
   if (id && id.aiUse) {
-    const kind = { CORE: "core alignment", ROLE: "role transition", REINVENT: "identity reinvention" }[id.level as "CORE"] ?? id.level;
+    const kind = { CORE: "core alignment", ROLE: "role transition", REINVENT: "reinvention" }[id.level as "CORE"] ?? id.level;
     if (id.role) lines.push(`The role this is about: ${id.role}`);
     lines.push(`The kind of change (the participant's own choice, not a ranking): ${kind}`);
     if (KIND_GUIDANCE[id.level as IdentityLevel]) lines.push(`How to coach this kind of change: ${KIND_GUIDANCE[id.level as IdentityLevel]}`);
@@ -188,7 +188,7 @@ export function systemPrompt(mode: AiMode, context: string, sources: Chunk[], to
     "- You are not a therapist and do not diagnose. If the participant describes a mental health crisis, self-harm, abuse or danger, respond with care, encourage them to contact a qualified professional or local emergency services (in the US, call or text 988), and suggest they tell their coach.",
     "- Push toward real-world action and human accountability: a specific behavior, a date, and a person who will know.",
     "- When you draw on a passage from the book and it would help, you can suggest reading that chapter of Both Hands on the Wheel. At most once in a conversation, and never as a sales pitch. Never mention a workbook or worksheet, or section numbers. The app is standalone.",
-    "- FORGE is identity formation, and it comes first. Discipline by Design comes after: it turns the identity into routines, relationships and accountability. Keep them apart. A FORGE statement describes who the person is and how they understand themselves. A habit, task or technique belongs on their road (the My road page).",
+    "- FORGE is identity formation, and it comes first. Discipline by Design comes after: it turns the identity into routines, relationships and accountability. Keep them apart. A My statement describes who the person is and how they understand themselves. A habit, task or technique belongs on their road (the My road page).",
     `- ${KIND_RULE} When the records name a role and a kind of change, coach to them: use the role in your questions and follow the guidance for that kind.`,
     "- Identity statements are claimed in the present tense, in the person's own words: \"I am a leader who operates with integrity.\" Never pressure someone to claim something they do not believe. If they are not there yet, \"I am becoming a courageous leader who speaks up when something matters\" is honest and fine.",
     "",
@@ -249,7 +249,7 @@ const LINE_QUERY: Record<LineField, string> = {
 function draftAsk(kind: DraftKind): { query: string; ask: string } {
   if (kind === "forgeStatement") {
     return {
-      query: "FORGE statement one paragraph leader destination discipline committing",
+      query: "My statement one paragraph leader destination discipline committing",
       ask: "Draft the participant's statement (My statement): one short paragraph that pulls their five FORGE identity statements together into one description of who they are, in the role their records name. It starts with \"I am\", stays in the present tense, and keeps their own words where it can. It describes the person. It does not list habits, schedules or tasks. If they wrote \"I am becoming\" somewhere, keep that honesty. If some statements are missing, use their identity statement and what else they have recorded.",
     };
   }
@@ -324,7 +324,7 @@ export async function coachIdentityLine(userId: string, field: LineField, writte
     fallbacks: "default",
     system: [
       "You are an identity coach inside Both Hands on the Wheel, a personal leadership app by Jason Mosley.",
-      ...(level ? [`They chose ${({ CORE: "core alignment", ROLE: "role transition", REINVENT: "identity reinvention" } as Record<string, string>)[level]}. ${KIND_GUIDANCE[level as IdentityLevel]}`, KIND_RULE] : []),
+      ...(level ? [`They chose ${({ CORE: "core alignment", ROLE: "role transition", REINVENT: "reinvention" } as Record<string, string>)[level]}. ${KIND_GUIDANCE[level as IdentityLevel]}`, KIND_RULE] : []),
       "These five statements describe one identity from five sides. They are not five separate identities.",
       "FORGE is identity formation. It answers who is behind the wheel. Discipline by Design comes later and turns that identity into routines, relationships and accountability.",
       `The participant is writing their ${l.pillar}, ${l.label} identity statement. The question is: ${asRole(l.question, role)} The statement starts with "I am".`,
@@ -382,7 +382,7 @@ const SETUP_ASK: Record<SetupHelpField, string> = {
   feeling:
     "The question is: what do you feel in that moment? Offer 4 to 6 single words or short phrases a person might use for a feeling or a body sensation, as options to choose from. You never state what they feel, never label, interpret or diagnose it, and never use clinical, medical or mental-health terms. Plain everyday words only.",
   oldResponse: "The question is: what do you usually do in that moment? Offer 3 to 4 short, plain, non-judging ways to describe the usual response, built only from what they wrote.",
-  newResponse: "The question is: what does the person you're becoming do instead? Offer 3 to 4 short responses that fit their FORGE statements: one small thing they could do in that moment. Each starts with a verb.",
+  newResponse: "The question is: what does the person you're becoming do instead? Offer 3 to 4 short responses that fit their five I am lines: one small thing they could do in that moment. Each starts with a verb.",
   gap: "The question is: what makes the new response hard, and what do you need to learn or let go of? Offer 3 to 4 short, honest ways to put it, built only from what they wrote.",
 };
 

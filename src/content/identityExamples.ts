@@ -152,7 +152,7 @@ export function peopleFor(pathway: PathwayKey, role = "", level = ""): ExamplePe
 export const afterIAm = (s: string) => s.replace(/^I am\s+/, "");
 
 /** Example groups for one statement (or for the I am claim when field is "claim"). */
-const KIND_NAME: Record<string, string> = { CORE: "core alignment", ROLE: "role transition", REINVENT: "identity reinvention" };
+const KIND_NAME: Record<string, string> = { CORE: "core alignment", ROLE: "role transition", REINVENT: "reinvention" };
 
 export function exampleGroups(field: LineField | "claim", pathway: PathwayKey, role = "", level = "") {
   return peopleFor(pathway, role, level).map((p) => ({ label: `${p.who} · ${KIND_NAME[p.level]}`, options: [afterIAm(field === "claim" ? p.claim : p.lines[field])] }));

@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "@fontsource-variable/fraunces/full.css";
 import "@fontsource-variable/inter/index.css";
 import "./globals.css";
+import { Suspense } from "react";
+import { ScrollTop } from "@/components/ScrollTop";
 
 export const metadata: Metadata = {
   title: { default: "Both Hands on the Wheel", template: "%s | Both Hands on the Wheel" },
@@ -12,7 +14,7 @@ export const viewport: Viewport = { width: "device-width", initialScale: 1, them
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body><Suspense fallback={null}><ScrollTop /></Suspense>{children}</body>
     </html>
   );
 }

@@ -89,13 +89,13 @@ export default async function PathwayPage() {
 
       {profile.pathway === "PERSONAL" && (
         <Card>
-          <p className="text-[15px]">Your pathway runs on the core: the FORGE assessment, your FORGE plan, My road (Discipline by Design), your people, and 30-day cycles. The <Link href="/library" className="btn-link">Library</Link> has the FORGE guide and exercises.</p>
+          <p className="text-[15px]">Your pathway runs on the core: the self-assessment, your FORGE plan, My road (Discipline by Design), your people, and 30-day cycles. The <Link href="/library" className="btn-link">Library</Link> has the FORGE guide and exercises.</p>
         </Card>
       )}
 
       <Link href="/feedback" className="card block mt-5 hover:border-navy/40">
         <h2 className="h3">My feedback</h2>
-        <p className="text-sm muted mt-1">Had a 360 or an EQ-i debrief? Add your own summary and connect it to a FORGE pillar, a practice and your 30 days.</p>
+        <p className="text-sm muted mt-1">Had a 360 or an EQ-i debrief? Add your own summary and connect it to a FORGE rule, a practice and your 30 days.</p>
       </Link>
 
       <Card className="mt-8">
