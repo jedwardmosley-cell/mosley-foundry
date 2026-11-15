@@ -6,6 +6,7 @@ import { getContent } from "@/content";
 import { cycleWeeks, cyclePosition, practiceSummary } from "@/lib/cycle";
 import { fmt, daysBetween, ymd, addDays } from "@/lib/dates";
 import { todayHeadline } from "@/lib/todayHeadline";
+import { getJourney, JOURNEY_STEPS } from "@/lib/journey";
 import { withArticle } from "@/content/whoIAm";
 import type { PillarKey } from "@/content/types";
 import { PillarMark, PILLAR_FILL } from "@/components/ui";
@@ -19,8 +20,11 @@ export const metadata = { title: "Today" };
 export default async function Dashboard({ searchParams }: { searchParams: Promise<{ setup?: string }> }) {
   const { setup } = await searchParams;
   const u = await requireUser("PARTICIPANT");
-  const d = await loadParticipant(u.id);
+  const [d, journey] = await Promise.all([loadParticipant(u.id), getJourney(u.id)]);
   if (!d.profile?.onboardedAt) redirect("/onboarding");
+  // The daily check-in opens once the whole kickoff is done: who, where, the focus and what holds it in place.
+  const kickoffStep = journey.current ? JOURNEY_STEPS.findIndex((s) => s.key === journey.current) + 1 : 0;
+  const kickoff = kickoffStep ? JOURNEY_STEPS[kickoffStep - 1] : null;
   const { pack } = await getContent();
   const pillarKey = (d.profile.priorityPillar ?? d.cycle?.pillar) as PillarKey | undefined;
   const p = pillarKey ? pack.pillars.find((x) => x.key === pillarKey) : null;
@@ -51,6 +55,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   const since = w ? ymd(addDays(new Date(), -(w - 1))) : "";
   const recent = w ? d.checkIns.filter((c) => c.date >= since && (c.status === "DONE" || c.status === "PARTIAL")).length : 0;
   const head = todayHeadline({ cycle: !!(d.cycle && pos), finished: !!pos?.finished, day: pos?.day ?? 0, practiced: recent, window: w });
+  if (kickoffStep) Object.assign(head, { mood: "start", label: `Kickoff · step ${kickoffStep} of 4`, title: "Finish your kickoff", line: "Your daily check-in opens once all four steps are done." });
   const moodTone = { strong: "text-link", building: "text-ink-soft", care: "text-alert", start: "text-ink-mute", ready: "text-ink-mute", decide: "text-ink-soft" }[head.mood];
   const overdue = d.relationships.filter((r) => r.nextCheckIn && daysBetween(new Date(), r.nextCheckIn) < 0).length;
 
@@ -58,8 +63,8 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
     <div className="space-y-5">
       <TimezoneSync saved={d.profile.timezone} />
       {setup === "done" && <p role="status" className="notice">Your focus is set up. Your plan is on its way to the person who finds out.</p>}
-      {/* Mid-cycle and not set up yet: an invitation, never a gate. */}
-      {notSetUp && !cyclePosition(notSetUp.startDate).finished && (
+      {/* Mid-cycle and not set up yet: an invitation. During the kickoff the card below says it instead. */}
+      {!kickoff && notSetUp && !cyclePosition(notSetUp.startDate).finished && (
         <Link href={`/cycle/setup?step=${notSetUp.plan ? "share" : !notSetUp.situation ? 1 : !notSetUp.feeling ? 2 : !notSetUp.oldResponse ? 3 : !notSetUp.newResponse ? 4 : !notSetUp.gap ? 5 : "plan"}`} className="tile flex items-center gap-4 transition hover:-translate-y-0.5">
           <span className="flex-1">
             <span className="block text-[15px] font-medium text-heading">Finish setting up {d.focuses.length > 1 ? `"${focusTitle(notSetUp)}"` : "your focus"}</span>
@@ -78,7 +83,19 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         <h1 className="mt-2 font-serif text-[32px] sm:text-[40px] leading-[1.05] tracking-[-0.02em] text-heading">{head.title}</h1>
         <p className="mt-1.5 text-[15px] text-ink-soft max-w-md">{head.line}</p>
 
-        {d.cycle && week && pos ? (
+        {kickoff ? (
+          <>
+            <ol className="mt-5 space-y-2">
+              {JOURNEY_STEPS.map((s, i) => (
+                <li key={s.key} className={`flex items-center gap-3 text-[15px] ${journey.done[s.key] ? "text-ink-mute" : s.key === kickoff.key ? "font-medium text-heading" : "text-ink-soft"}`}>
+                  <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-xs ${journey.done[s.key] ? "bg-navy text-white" : "border border-ink/20"}`}>{journey.done[s.key] ? <Icon name="check" className="h-3.5 w-3.5" /> : i + 1}</span>
+                  {s.label}{journey.done[s.key] && <span className="sr-only"> (done)</span>}
+                </li>
+              ))}
+            </ol>
+            <Link href={`/start?step=${kickoffStep}`} className="mt-5 btn-primary w-full">Next: {kickoff.next}</Link>
+          </>
+        ) : d.cycle && week && pos ? (
           <>
             <DayArc day={pos.day} pillar={d.cycle.pillar as PillarKey} />
             <p className="text-center text-[11px] uppercase tracking-[0.14em] text-ink-mute">{d.focuses.length > 1 ? "Focus 1 · " : "My focus · "}Week {pos.week} · {week.phase}{d.cycle.seasonMonth ? ` · Month ${d.cycle.seasonMonth} of 3` : ""}</p>
@@ -101,7 +118,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
           </div>
           <p className="mt-2 text-[17px] font-medium leading-snug text-heading">{focusTitle(second)}</p>
           {second.title && second.plan && <p className="mt-1 text-sm text-ink-soft">{second.plan}</p>}
-          {secondPos.finished
+          {kickoff ? null : secondPos.finished
             ? <Link href={`/cycle?id=${second.id}`} className="mt-4 btn-primary w-full">Open my day 30 review</Link>
             : <div className="mt-4"><CheckInForm existing={d.todayCheckIn ? { ...d.todayCheckIn, status: d.todayCheckIn.status2 } : null} hasCoach={false} slot={2} /></div>}
         </section>

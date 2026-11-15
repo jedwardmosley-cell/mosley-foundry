@@ -447,7 +447,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await saveThroughReveal(g, "**/start?step=2", "Save and continue");
     // 2. where I am: the self-assessment is inside the kickoff; the client never leaves it
     for (const [k, v] of Object.entries({ F: 4, O: 3, R: 4, G: 3, E: 2 })) await g.locator(`input[name="${k}"][value="${v}"]`).check({ force: true });
-    await Promise.all([g.waitForURL("**/start?step=2"), g.click('button:has-text("See my profile")')]);
+    await Promise.all([g.waitForURL("**/start?step=2&scored=1"), g.click('button:has-text("See my profile")')]);
     await g.waitForSelector("text=The goal is a 5 on every one");
     assert.equal(await g.locator("text=/ 25").count(), 0, "no total");
     await Promise.all([g.waitForURL("**/start?step=3"), g.click('a:has-text("Next: choose your focus")')]);
@@ -719,11 +719,16 @@ const submitAndWait = async (page: Page, selector: string) => {
     const dp: Page = await dc.newPage();
     await login(dp, "dana@demo.bothhands.app");
     await dp.goto(`${BASE}/identity`);
-    await dp.waitForSelector("text=Still open:");
+    await dp.waitForSelector("text=Step 1 of 4");
     assert.ok((await dp.locator('nav[aria-label="Your journey"]').innerText()).includes("your seat"), "the journey bar names what is missing");
     await dp.click('button:has-text("Save who I am")');
     await dp.waitForSelector("text=Name the seat you're in (step 1).");
     assert.equal(await dp.locator('[role="dialog"]').count(), 0, "nothing saves until the seat is named");
+    // the daily check-in waits for the whole kickoff
+    await dp.goto(`${BASE}/dashboard`);
+    await dp.waitForSelector("text=Finish your kickoff");
+    assert.equal(await dp.locator('button:has-text("Save my daily check-in")').count(), 0, "no check-in before the kickoff is done");
+    assert.equal(await dp.locator("text=Check in today").count(), 0);
     await dp.goto(`${BASE}/cycle`);
     await Promise.all([dp.waitForURL(/\/cycle\/setup\?step=1$/), dp.click('a:has-text("Start your week 1 setup")')]);
     await dc.close();

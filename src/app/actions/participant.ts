@@ -67,8 +67,8 @@ export async function saveAssessment(fd: FormData) {
     },
   });
   if (fd.get("next") === "/season") redirect("/season");
-  // In the kickoff, the short result shows on the kickoff itself.
-  if (fromStart(fd)) redirect("/start?step=2");
+  // In the kickoff, the short result shows on the kickoff itself. "scored" gives it its own address, so it opens at the top.
+  if (fromStart(fd)) redirect("/start?step=2&scored=1");
   redirect(`/assessment/${a.id}`);
 }
 

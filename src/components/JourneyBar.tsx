@@ -19,11 +19,16 @@ export function JourneyBar({ steps, done, current, cycle, identityMissing = [] }
   const here = steps.find((s) => path === s.href || path.startsWith(s.href + "/"))?.key;
   const next = steps.find((s) => s.key === current);
   const n = next ? steps.indexOf(next) + 1 : 0;
+  // During the kickoff, Today's own card lists the four steps.
+  if (next && path === "/dashboard") return null;
 
   const open = steps.find((s) => !done[s.key] && s.key !== "drive");
   let line: React.ReactNode;
   // On Today the big card already shows the day, so the bar only nudges about a skipped step.
-  if (cycle && (path === "/dashboard" || path === "/cycle")) {
+  if (next && (!cycle || !cycle.finished)) {
+    // The kickoff comes first: no "Check in today" until all four steps are done.
+    line = <>Step {n} of 4 · <Link href={`/start?step=${n}`} className="btn-link">{next.next}</Link>{next.key === "identity" && identityMissing.length > 0 && <span className="text-ink-mute"> (still needs {identityMissing.join(", ")})</span>}</>;
+  } else if (cycle && (path === "/dashboard" || path === "/cycle")) {
     line = open && !cycle.finished ? <span className="text-ink-mute">Still open: <Link href={open.href} className="btn-link">{open.label}</Link>{open.key === "identity" && identityMissing.length > 0 && <> ({identityMissing.join(", ")})</>}</span> : null;
   } else if (cycle) {
     line = cycle.finished
@@ -35,7 +40,7 @@ export function JourneyBar({ steps, done, current, cycle, identityMissing = [] }
   }
 
   // On Today during the 30 days, the bar is one thin strip; the big card says the rest.
-  if (cycle && path === "/dashboard") {
+  if (cycle && path === "/dashboard" && !next) {
     return (
       <nav aria-label="Your journey" className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1">
         <ol className="grid flex-1 min-w-[150px] grid-cols-4 gap-1">
