@@ -6,13 +6,13 @@ import { getContent } from "@/content";
 /**
  * The client's path through the app, in one order:
  * FORGE: who I am, where I am today. Discipline by Design: my focus (one or two, each for 30 days), then my road.
- * Every step stays optional. The bar only shows what is done and what comes next.
+ * The daily check-in opens once all four are done. The bar shows what is done and what comes next.
  */
 export const JOURNEY_STEPS = [
   { key: "identity", label: "Who's behind the wheel", next: "Claim who you are", href: "/identity" },
   { key: "today", label: "Where I am", next: "Rate yourself on the five rules", href: "/assessment" },
   { key: "drive", label: "My focus", next: "Choose one or two things to work on", href: "/focus" },
-  { key: "road", label: "My road", next: "One routine that holds your focus in place", href: "/road" },
+  { key: "road", label: "My road", next: "One routine that builds your focus into your week", href: "/road" },
 ] as const;
 export type JourneyKey = (typeof JOURNEY_STEPS)[number]["key"];
 
@@ -47,7 +47,7 @@ export async function getJourney(userId: string): Promise<Journey> {
     // Who I am is done with a role, a kind of change and a statement. The five help build the statement.
     identity: identityGaps(identity, profile?.forgeStatement ?? "").length === 0,
     today: !!assessment,
-    // My road holds the focus in place: one routine. The person comes from "Who finds out?" in the focus setup.
+    // My road builds the focus into the week: one routine. The person comes from "Who finds out?" in the focus setup.
     road: commitments > 0,
     drive: !!cycle?.setupDoneAt,
   };

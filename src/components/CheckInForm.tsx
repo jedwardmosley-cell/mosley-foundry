@@ -12,7 +12,7 @@ const OPTIONS = [
   { v: "NOT_YET", label: "Not yet" },
 ];
 
-/** Two-minute daily check-in. Works without JavaScript. */
+/** The daily check-in: a few taps. Works without JavaScript. */
 export function CheckInForm({ existing, hasCoach, identityLevel, dark = false, slot = 1 }: { existing: Existing; hasCoach: boolean; identityLevel?: string | null; dark?: boolean; slot?: 1 | 2 }) {
   const pill = dark
     ? "border border-white/30 bg-surface/5 text-white peer-checked:bg-surface peer-checked:text-heading peer-checked:border-white"

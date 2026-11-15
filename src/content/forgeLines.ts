@@ -142,3 +142,10 @@ export function combineLines(lines: Partial<Record<LineField, string>>) {
 export function fiveLines(p: Partial<Record<LineField, string | null>> | null | undefined): Partial<Record<LineField, string>> {
   return Object.fromEntries(FORGE_LINES.map((l) => [l.field, p?.[l.field] ?? ""]));
 }
+
+/** The client's own line for each rule, from the profile, for the self-assessment and the readout. */
+export function linesOf(profile: Partial<Record<LineField, string | null>> | null | undefined): Partial<Record<PillarKey, string>> {
+  const out: Partial<Record<PillarKey, string>> = {};
+  for (const l of FORGE_LINES) out[l.pillar] = profile?.[l.field] ?? "";
+  return out;
+}

@@ -3,10 +3,12 @@ import { withArticle } from "@/content/whoIAm";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getContent } from "@/content";
-import { scoresFrom, total } from "@/lib/forge";
+import { scoresFrom } from "@/lib/forge";
+import { PILLAR_KEYS } from "@/content/types";
 import { fmt } from "@/lib/dates";
 import { PageHeader, PillarMark, Draft, Source } from "@/components/ui";
 import { AssessmentForm } from "@/components/AssessmentForm";
+import { linesOf } from "@/content/forgeLines";
 
 export const metadata = { title: "Where I am" };
 
@@ -25,7 +27,7 @@ export default async function AssessmentPage({ searchParams }: { searchParams: P
     <>
       <PageHeader eyebrow={useEntre ? "self-assessment · Step 2 · for entrepreneurs" : "self-assessment · Step 2"} title="Where I am">
         {useEntre ? entrepreneur!.intro.filter((t) => !/measures five behaviors/i.test(t)).slice(0, 3).map((t) => <p key={t} className="mb-2">{t}</p>) : (
-          <p>Tap a score from 1 to 5 for each rule. Score what you did this past month. The short lines under each score show what it looks like.</p>
+          <p>This is the deep work of FORGE. For each rule, read what you wrote and all five levels, then choose the one that is true of you this past month. Take your time with it.</p>
         )}
       </PageHeader>
 
@@ -60,7 +62,7 @@ export default async function AssessmentPage({ searchParams }: { searchParams: P
             {past.map((a) => (
               <li key={a.id} className="py-2 flex justify-between">
                 <Link href={`/assessment/${a.id}`} className="btn-link">{fmt(a.completedAt, { month: "short", day: "numeric", year: "numeric" })}</Link>
-                <span className="muted text-sm">{total(scoresFrom(a))} / 25</span>
+                <span className="muted text-sm">{(() => { const sc = scoresFrom(a); return PILLAR_KEYS.map((k) => `${k} ${sc[k]}`).join(" · "); })()}</span>
               </li>
             ))}
           </ul>
@@ -69,7 +71,7 @@ export default async function AssessmentPage({ searchParams }: { searchParams: P
 
       {pack.threeNote && !useEntre && <p className="quote mb-6">{pack.threeNote}</p>}
 
-      <AssessmentForm pack={pack} entrepreneur={entrepreneur} useEntre={useEntre} instrument={instrument} next={next === "season" ? "/season" : undefined} />
+      <AssessmentForm pack={pack} entrepreneur={entrepreneur} useEntre={useEntre} instrument={instrument} next={next === "season" ? "/season" : undefined} lines={linesOf(profile)} role={identity?.role} />
     </>
   );
 }

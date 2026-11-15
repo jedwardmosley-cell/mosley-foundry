@@ -53,7 +53,6 @@ export default async function NetworkPage({ searchParams }: { searchParams: Prom
               </li>
             ))}
           </ul>
-          {pack.discipline.whosChecking[2] && <p className="mt-4 text-sm text-ink-soft">{pack.discipline.whosChecking[2]}</p>}
         </Card>
       </div>
 

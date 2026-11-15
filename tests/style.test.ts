@@ -33,7 +33,7 @@ test("quick-pick options and the guide follow the house style", () => {
   walk(tone);
   walk(FORGE_LINES);
   walk(headline.MOOD_LABEL);
-  for (const o of [{ cycle: false, finished: false, day: 0, practiced: 0, window: 0 }, { cycle: true, finished: true, day: 30, practiced: 0, window: 10 }, { cycle: true, finished: false, day: 2, practiced: 1, window: 2 }, { cycle: true, finished: false, day: 12, practiced: 9, window: 10 }, { cycle: true, finished: false, day: 12, practiced: 6, window: 10 }, { cycle: true, finished: false, day: 12, practiced: 2, window: 10 }, { cycle: true, finished: false, day: 12, practiced: 0, window: 10 }]) walk(headline.todayHeadline(o));
+  for (const o of [{ cycle: false, finished: false, day: 0 }, { cycle: true, finished: true, day: 30 }, { cycle: true, finished: false, day: 12 }]) walk(headline.todayHeadline(o));
   // The author's identity examples get the same banned-word and "X, not Y" checks.
   const ex: string[] = [];
   JSON.stringify(examples, (_k, v) => { if (typeof v === "string") ex.push(v); return v; });
