@@ -125,7 +125,7 @@ export async function saveGoal(fd: FormData) {
   revalidatePath("/pathway");
 }
 
-// ---------- Discipline by Design: My road ----------
+// ---------- Discipline by Design: My Design ----------
 
 const commitmentSchema = z.object({
   area: z.enum(BLUEPRINT_AREAS.map((a) => a.key) as [string, ...string[]]),
@@ -396,7 +396,7 @@ const lookSchema = z.object({
 
 /**
  * Weeks 2 to 4 of the 30 days come back to the week 1 answers. Week 2 can change the situation or
- * the feeling; the first guess is kept. Week 4 can put what keeps it going onto My road.
+ * the feeling; the first guess is kept. Week 4 can put what keeps it going onto My Design.
  */
 async function saveLookAgain(userId: string, fd: FormData) {
   if (!fd.get("look_week")) return;
@@ -549,7 +549,7 @@ export async function updateEqi(fd: FormData) {
   revalidatePath("/dashboard");
 }
 
-/** Puts the practice for an EQ-i priority onto My road as a daily routine. */
+/** Puts the practice for an EQ-i priority onto My Design as a daily routine. */
 export async function addEqiToBlueprint(fd: FormData) {
   const u = await participant();
   const { id } = parse(z.object({ id: z.string() }), fd);

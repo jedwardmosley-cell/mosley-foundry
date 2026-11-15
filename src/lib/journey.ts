@@ -12,7 +12,7 @@ export const JOURNEY_STEPS = [
   { key: "identity", label: "Who's behind the wheel", next: "Claim who you are", href: "/identity" },
   { key: "today", label: "Where I am", next: "Rate yourself on the five rules", href: "/assessment" },
   { key: "drive", label: "My focus", next: "Choose one or two things to work on", href: "/focus" },
-  { key: "road", label: "My road", next: "Build your system", href: "/road" },
+  { key: "road", label: "My Design", next: "Build your system", href: "/road" },
 ] as const;
 export type JourneyKey = (typeof JOURNEY_STEPS)[number]["key"];
 
@@ -23,11 +23,11 @@ export type Journey = {
   cycle: { day: number; week: number; phase: string; finished: boolean; seasonMonth: number | null } | null;
   /** What Who's behind the wheel still needs, in the client's words: "your seat", "how big a turn", "your statement". */
   identityMissing: string[];
-  /** What the system (My road) still needs: "a daily routine", "a weekly planning time", "an accountability partner". */
+  /** What the system (My Design) still needs: "a daily routine", "a weekly planning time", "an accountability partner". */
   roadMissing: string[];
 };
 
-/** The core of Discipline by Design, built before the first check-in. The other areas of My road come after. */
+/** The core of Discipline by Design, built before the first check-in. The other areas of My Design come after. */
 export const SYSTEM_PIECES = [
   { key: "daily", label: "A daily routine", missing: "a daily routine" },
   { key: "weekly", label: "A weekly planning time", missing: "a weekly planning time" },
@@ -66,7 +66,7 @@ export async function getJourney(userId: string): Promise<Journey> {
     // Who I am is done with a role, a kind of change and a statement. The five help build the statement.
     identity: identityGaps(identity, profile?.forgeStatement ?? "").length === 0,
     today: !!assessment,
-    // My road is the system: a daily routine, a weekly planning time and an accountability partner.
+    // My Design is the system: a daily routine, a weekly planning time and an accountability partner.
     road: system.daily && system.weekly && system.partner,
     drive: !!cycle?.setupDoneAt,
   };

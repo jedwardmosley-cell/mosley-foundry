@@ -295,7 +295,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
 
           {part === 4 && (
             <Card>
-              <p className="text-[15px]">Your system is in place. Each day, open Today and check in. On Saturday, look back on the week. The rest of My road (mentors, learning, groups and more) is there when you&apos;re ready.</p>
+              <p className="text-[15px]">Your system is in place. Each day, open Today and check in. On Saturday, look back on the week. The rest of My Design (mentors, learning, groups and more) is there when you&apos;re ready.</p>
               <div className="mt-4 flex flex-wrap items-center gap-4">
                 <Link href="/dashboard" className="btn-primary inline-flex">Finish and go to Today</Link>
                 <Link href="/settings" className="text-sm btn-link">Put it on my calendar</Link>

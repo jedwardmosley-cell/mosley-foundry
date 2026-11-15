@@ -110,7 +110,7 @@ export function routineEvent(c: Routine, appUrl: string): CalEvent | null {
   return {
     uid: `routine-${c.id}@bothhands`,
     title: c.title,
-    description: [c.detail, "From My road in Both Hands on the Wheel."].filter(Boolean).join("\n\n"),
+    description: [c.detail, "From My Design in Both Hands on the Wheel."].filter(Boolean).join("\n\n"),
     url: `${appUrl}/road`,
     start: time ? { local: `${date}T${time.replace(":", "")}00` } : { date },
     minutes: 30,
