@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { loadParticipant } from "@/lib/participant";
 import { getContent } from "@/content";
-import { cycleWeeks, cyclePosition, practiceSummary } from "@/lib/cycle";
+import { cycleWeeks, cyclePosition } from "@/lib/cycle";
 import { fmt, daysBetween } from "@/lib/dates";
 import { todayHeadline } from "@/lib/todayHeadline";
 import { getJourney, JOURNEY_STEPS } from "@/lib/journey";
@@ -33,7 +33,6 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   const notSetUp = d.focuses.find((f) => !f.setupDoneAt) ?? null;
   const pos = d.cycle ? cyclePosition(d.cycle.startDate) : null;
   const week = d.cycle && pos ? cycleWeeks(d.cycle.template, pack).weeks[pos.week - 1] : null;
-  const practice = practiceSummary(d.checkIns);
 
   // Items the coach has put in front of this person. They live on the Coaching page; this makes them hard to miss.
   const now = new Date();
@@ -121,10 +120,8 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
       )}
 
       <div className="grid grid-cols-2 gap-3">
-        <Tile href="/history" icon="calendar" label="Practiced" value={String(practice.practiced)} word={practice.practiced ? "in the last 30 days" : "none yet"}>
-          <PracticeStrip checkIns={d.checkIns} pillar={(d.cycle?.pillar ?? pillarKey ?? "F") as PillarKey} />
-        </Tile>
-        <Tile href="/network" icon="people" label="People" value={String(dueSoon.length)} word={overdue ? `${overdue} overdue` : dueSoon.length ? "due soon" : d.relationships.length ? "all caught up" : "add someone"} tone={overdue ? "text-alert" : "text-ink-mute"} />
+        {/* No practice count on Today: calm, not gamified. The day-by-day record is on the 30 days page. */}
+        <Tile className="col-span-2" href="/network" icon="people" label="People" value={String(dueSoon.length)} word={overdue ? `${overdue} overdue` : dueSoon.length ? "due soon" : d.relationships.length ? "all caught up" : "add someone"} tone={overdue ? "text-alert" : "text-ink-mute"} />
 
         {/* Who I am: the anchor of the day, set like a page from the book. */}
         <Link href="/identity" className="glow col-span-2 block rounded-[22px] p-5 sm:p-6 transition hover:-translate-y-0.5">
@@ -171,9 +168,9 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
 }
 
 /** A soft tile: an icon, a label, one big number and a word. Tapping opens the detail. */
-function Tile({ href, icon, label, value, word, tone = "text-ink-mute", children }: { href: string; icon: IconName; label: string; value?: string; word?: string; tone?: string; children?: React.ReactNode }) {
+function Tile({ href, icon, label, value, word, tone = "text-ink-mute", children, className = "" }: { className?: string; href: string; icon: IconName; label: string; value?: string; word?: string; tone?: string; children?: React.ReactNode }) {
   return (
-    <Link href={href} className="tile block transition hover:-translate-y-0.5">
+    <Link href={href} className={`tile block transition hover:-translate-y-0.5 ${className}`}>
       <p className="flex items-center gap-2.5 text-[13px] text-ink-soft"><IconBadge name={icon} className="!h-7 !w-7 [&>svg]:!h-4 [&>svg]:!w-4" />{label}<Icon name="arrow" className="ml-auto h-4 w-4 text-ink-mute" /></p>
       {value !== undefined && <p className="mt-4 font-serif text-[44px] leading-none tracking-[-0.02em] text-heading">{value}</p>}
       {word && <p className={`mt-1.5 text-[13px] ${tone}`}>{word}</p>}
@@ -211,20 +208,3 @@ function DayArc({ day, pillar }: { day: number; pillar: PillarKey }) {
   );
 }
 
-function PracticeStrip({ checkIns, pillar }: { checkIns: { date: string; status: string }[]; pillar: PillarKey }) {
-  const map = new Map(checkIns.map((c) => [c.date, c.status]));
-  const days = Array.from({ length: 14 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - (13 - i));
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-    return { key, s: map.get(key) };
-  });
-  const tone = (s?: string) => (s === "DONE" ? PILLAR_FILL[pillar].full : s === "PARTIAL" ? PILLAR_FILL[pillar].part : s === "NOT_YET" ? "bg-ink/[0.14]" : "bg-ink/[0.06]");
-  return (
-    <div className="mt-3">
-      <div className="flex gap-1" role="img" aria-label="Last 14 days of practice">
-        {days.map((d) => <span key={d.key} title={`${d.key}: ${d.s ?? "no entry"}`} className={`h-3.5 flex-1 rounded-[4px] ${tone(d.s)}`} />)}
-      </div>
-    </div>
-  );
-}
