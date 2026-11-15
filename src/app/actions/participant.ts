@@ -153,7 +153,8 @@ export async function addCommitment(fd: FormData) {
     data: { ...d, days, time: whenTime, userId: u.id, startsOn: d.startsOn ? new Date(d.startsOn + "T12:00:00") : null },
   });
   revalidatePath("/road");
-  if (fromStart(fd)) redirect("/start?step=4");
+  // Each save gets its own address, so the next screen of the kickoff opens at the top.
+  if (fromStart(fd)) redirect(`/start?step=4&saved=${d.area.toLowerCase()}`);
 }
 
 /** Sets a routine's days and time, so it can go on the calendar. The rest of the routine is kept. */
@@ -175,6 +176,16 @@ export async function removeCommitment(fd: FormData) {
 
 // ---------- Accountability network ----------
 
+/** Makes someone already on the list the client's accountability partner (kickoff, step 4). Nothing else about them changes. */
+export async function makeAccountabilityPartner(fd: FormData) {
+  const u = await participant();
+  const { id } = parse(z.object({ id: z.string() }), fd);
+  await db.relationship.updateMany({ where: { id, ownerId: u.id, active: true }, data: { role: "ACCOUNTABILITY_PARTNER" } });
+  revalidatePath("/network");
+  revalidatePath("/road");
+  if (fromStart(fd)) redirect("/start?step=4&saved=partner");
+}
+
 const relSchema = z.object({
   name: z.string().trim().min(1).max(120),
   role: z.enum(Object.keys(RELATIONSHIP_ROLES) as [string, ...string[]]),
@@ -195,7 +206,7 @@ export async function addRelationship(fd: FormData) {
     },
   });
   revalidatePath("/network");
-  if (fromStart(fd)) redirect("/start?step=4");
+  if (fromStart(fd)) redirect("/start?step=4&saved=partner");
 }
 
 export async function logRelationshipCheckIn(fd: FormData) {

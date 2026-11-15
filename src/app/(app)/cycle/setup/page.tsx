@@ -1,3 +1,4 @@
+import { systemPieces } from "@/lib/journey";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { CSSProperties } from "react";
@@ -29,7 +30,9 @@ export default async function WeekOneSetup({ searchParams }: { searchParams: Pro
   const cycle = await setupCycle(u.id);
   if (!cycle) redirect("/cycle/new");
   // In the first session, finishing week 1 setup leads to the last step: a routine that builds the focus into the week.
-  const doneHref = (await db.commitment.count({ where: { userId: u.id, active: true } })) ? "/dashboard?setup=done" : "/start?step=4";
+  // After the focus is set up, the kickoff goes on to build the system, unless it is already built.
+  const sys = await systemPieces(u.id);
+  const doneHref = sys.daily && sys.weekly && sys.partner ? "/dashboard?setup=done" : "/start?step=4";
   const [profile, people] = await Promise.all([
     db.profile.findUnique({ where: { userId: u.id } }),
     db.relationship.findMany({ where: { ownerId: u.id, active: true }, orderBy: { createdAt: "asc" }, select: { id: true, name: true, role: true, email: true } }),

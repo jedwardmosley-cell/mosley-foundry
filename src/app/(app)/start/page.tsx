@@ -7,7 +7,7 @@ import { getContent } from "@/content";
 import { aiAvailable } from "@/lib/ai";
 import { getJourney, JOURNEY_STEPS } from "@/lib/journey";
 import { saveWhoIAm } from "@/app/actions/identity";
-import { addCommitment, startCycle } from "@/app/actions/participant";
+import { addCommitment, addRelationship, makeAccountabilityPartner, startCycle } from "@/app/actions/participant";
 import { AssessmentForm } from "@/components/AssessmentForm";
 import { ForgeReadout } from "@/components/ForgeReadout";
 import { linesOf } from "@/content/forgeLines";
@@ -23,7 +23,7 @@ import { ROLE_PICKS, WHO_I_AM_STATUS, KIND_NOTE, WHO_TITLE, WHO_HEADINGS, withAr
 import { BLUEPRINT_PICKS } from "@/content/options";
 import { getForgeSource } from "@/content/forgeSource";
 import { PRACTICE_STARTERS } from "@/content/forgeLines";
-import { PATHWAYS, type PathwayKey } from "@/content/program";
+import { PATHWAYS, BLUEPRINT_AREAS, RELATIONSHIP_ROLES, type PathwayKey } from "@/content/program";
 import type { PillarKey } from "@/content/types";
 
 export const metadata = { title: "Kickoff" };
@@ -32,7 +32,7 @@ const STEP_COPY = [
   { title: WHO_TITLE, intro: "The FORGE framework, applied to you. Three short parts." },
   { title: "Where I am", intro: "Rate yourself on the five rules as the person you just described. This is the work to sit with." },
   { title: "Choose your focus", intro: "One or two things to work on, and that's it. Five short questions turn each one into a plan for 30 days, and one person finds out." },
-  { title: "Build it into your week", intro: "Discipline by Design: one routine with a day and a time. After that, a check-in each day and a look back each week." },
+  { title: "Build your system", intro: "Discipline by Design is the structure around your focus. Three pieces, one screen each: a daily routine, a weekly planning time and an accountability partner. Your daily check-in opens once they're in place." },
 ];
 
 /**
@@ -65,14 +65,21 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
     db.profile.findUnique({ where: { userId: u.id } }),
     db.identityProfile.findUnique({ where: { userId: u.id }, select: { level: true, becoming: true, role: true } }),
     db.assessment.findFirst({ where: { userId: u.id, isSecondOpinion: false }, orderBy: { completedAt: "desc" } }),
-    db.commitment.findMany({ where: { userId: u.id, active: true }, select: { id: true, title: true, when: true } }),
+    db.commitment.findMany({ where: { userId: u.id, active: true }, select: { id: true, title: true, when: true, area: true } }),
     db.relationship.findMany({ where: { ownerId: u.id, active: true }, select: { id: true, name: true, role: true } }),
     db.developmentCycle.findMany({ where: { userId: u.id, status: "ACTIVE" }, orderBy: [{ slot: "asc" }, { startDate: "asc" }], select: { id: true, title: true, focus: true, plan: true, pillar: true, setupDoneAt: true } }),
     getContent(),
     getForgeSource(),
   ]);
   const pathway = (profile?.pathway ?? "PERSONAL") as PathwayKey;
-  const part = [1, 2, 3].includes(Number(sp.part)) ? Number(sp.part) : 1;
+  // Step 4 builds the system: 1 a daily routine, 2 a weekly planning time, 3 an accountability partner, then done (4).
+  const daily = commitments.filter((c) => c.area === "ROUTINES");
+  const weekly = commitments.filter((c) => c.area === "WEEKLY");
+  const partners = people.filter((x) => x.role === "ACCOUNTABILITY_PARTNER");
+  const firstMissing = !daily.length ? 1 : !weekly.length ? 2 : !partners.length ? 3 : 4;
+  const part = step === 4
+    ? ([1, 2, 3].includes(Number(sp.part)) ? Number(sp.part) : firstMissing)
+    : [1, 2, 3].includes(Number(sp.part)) ? Number(sp.part) : 1;
   const role = identity?.role ?? "";
   const ai = aiAvailable() && profile?.aiEnabled !== false;
   const priority = pack.pillars.find((p) => p.key === profile?.priorityPillar);
@@ -84,7 +91,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
   const template = pack.thirtyDayPlan.length ? PATHWAYS[pathway].cycleTemplate : "NIRS_30";
   const copy = STEP_COPY[step - 1];
   const next = `/start?step=${step + 1}`;
-  const backHref = step === 1 ? (part > 1 ? `/start?step=1&part=${part - 1}` : null) : step === 2 ? "/start?step=1&part=3" : `/start?step=${step - 1}`;
+  const backHref = step === 1 ? (part > 1 ? `/start?step=1&part=${part - 1}` : null) : step === 2 ? "/start?step=1&part=3" : step === 4 && part > 1 ? `/start?step=4&part=${part - 1}` : `/start?step=${step - 1}`;
   const skipHref = step === 1 ? (part < 3 ? `/start?step=1&part=${part + 1}` : next) : step === 2 ? next : null;
   const nextLabel = step < 4 ? `Next: ${STEP_COPY[step].title.toLowerCase()}` : "";
 
@@ -100,7 +107,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
           </li>
         ))}
       </ol>
-      <PageHeader eyebrow={`Kickoff · Step ${step} of 4${step === 1 ? `, part ${part} of 3` : ""} · ${step <= 2 ? "FORGE" : "Discipline by Design"}`} title={copy.title}>{copy.intro}</PageHeader>
+      <PageHeader eyebrow={`Kickoff · Step ${step} of 4${step === 1 || (step === 4 && part < 4) ? `, part ${part} of 3` : ""} · ${step <= 2 ? "FORGE" : "Discipline by Design"}`} title={copy.title}>{step === 4 && part === 4 ? "Your system is set up." : step === 4 && (daily.length || weekly.length) ? "Three pieces, one screen each. Your daily check-in opens once they're in place." : copy.intro}</PageHeader>
 
       {step === 1 && part === 1 && (
         <Card>
@@ -179,45 +186,122 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
 
       {step === 4 && (
         <div className="space-y-5">
-          <Card>
-            <h2 className="h3">One routine that builds your focus into your week</h2>
-            {commitments.length > 0 && <p className="mt-2 text-[15px]">✓ {commitments[commitments.length - 1].title}{commitments.length > 1 && <span className="text-ink-mute"> and {commitments.length - 1} more</span>}</p>}
-            <form action={addCommitment} className="mt-4 space-y-3">
-              <input type="hidden" name="next" value="/start" />
-              <input type="hidden" name="area" value="ROUTINES" />
-              <input type="hidden" name="cadence" value="DAILY" />
-              <Field label={commitments.length ? "Add another (optional)" : "What will you do?"}>
-                <input name="title" required maxLength={200} className="input" />
-              </Field>
-              <Picks list={priority ? { status: "draft", options: [...PRACTICE_STARTERS[priority.key][pathway], ...BLUEPRINT_PICKS.ROUTINES.options] } : BLUEPRINT_PICKS.ROUTINES} target="title" folded="Ideas" />
-              <div className="grid gap-3 grid-cols-2">
-                <Field label="Which days">
-                  <select name="whenDays" className="input" defaultValue="Every day">
-                    {["Every day", "Weekdays", "Weekends"].map((d) => <option key={d}>{d}</option>)}
-                  </select>
-                </Field>
-                <Field label="Time (optional)"><input type="time" name="whenTime" className="input" /></Field>
-              </div>
-              <Submit className="btn-quiet">Add routine</Submit>
-            </form>
-          </Card>
-          {people.length > 0 && (
+          <ol className="space-y-1.5" aria-label="Your system">
+            {[["A daily routine", daily], ["A weekly planning time", weekly], ["An accountability partner", partners]].map(([label, list], i) => {
+              const have = (list as { id: string }[]).length > 0;
+              return (
+                <li key={i}>
+                  <Link href={`/start?step=4&part=${i + 1}`} className={`flex items-center gap-3 text-[15px] ${part === i + 1 ? "font-medium text-heading" : have ? "text-ink-mute" : "text-ink-soft"}`}>
+                    <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-xs ${have ? "bg-navy text-white" : "border border-ink/20"}`}>{have ? "✓" : i + 1}</span>
+                    {label as string}{have && <span className="sr-only"> (done)</span>}
+                  </Link>
+                </li>
+              );
+            })}
+          </ol>
+
+          {part === 1 && (
             <Card>
-              <h2 className="h3">Who finds out</h2>
-              <p className="mt-2 text-[15px]">✓ {people.map((x) => x.name).join(", ")}</p>
-              <p className="mt-1 text-sm text-ink-soft">From &ldquo;Who finds out?&rdquo; in your focus. Add more people any time under People.</p>
+              <h2 className="h3">A daily routine</h2>
+              <p className="mt-1 text-sm text-ink-soft">{BLUEPRINT_AREAS.find((x) => x.key === "ROUTINES")!.hint} Something small you do every day that builds your focus into your week.</p>
+              {daily.length > 0 && <p className="mt-3 text-[15px]">✓ {daily.map((c) => c.title).join(", ")}</p>}
+              <form action={addCommitment} className="mt-4 space-y-3">
+                <input type="hidden" name="next" value="/start" />
+                <input type="hidden" name="area" value="ROUTINES" />
+                <input type="hidden" name="cadence" value="DAILY" />
+                <Field label={daily.length ? "Add another (optional)" : "What will you do?"}>
+                  <input name="title" required maxLength={200} className="input" />
+                </Field>
+                <Picks list={priority ? { status: "draft", options: [...PRACTICE_STARTERS[priority.key][pathway], ...BLUEPRINT_PICKS.ROUTINES.options] } : BLUEPRINT_PICKS.ROUTINES} target="title" folded="Ideas" />
+                <div className="grid gap-3 grid-cols-2">
+                  <Field label="Which days">
+                    <select name="whenDays" className="input" defaultValue="Every day">
+                      {["Every day", "Weekdays", "Weekends"].map((d) => <option key={d}>{d}</option>)}
+                    </select>
+                  </Field>
+                  <Field label="Time (optional)"><input type="time" name="whenTime" className="input" /></Field>
+                </div>
+                <Submit className={daily.length ? "btn-quiet" : "btn-primary"}>Add daily routine</Submit>
+              </form>
+              {daily.length > 0 && <Link href="/start?step=4&part=2" className="btn-primary mt-4 inline-flex">Next: a weekly planning time</Link>}
             </Card>
           )}
-          {commitments.length > 0 && (
+
+          {part === 2 && (
             <Card>
-              <p className="text-[15px]">That&apos;s everything. Each day, open Today and check in. On Saturday, look back on the week.</p>
+              <h2 className="h3">A weekly planning time</h2>
+              <p className="mt-1 text-sm text-ink-soft">{BLUEPRINT_AREAS.find((x) => x.key === "WEEKLY")!.hint}</p>
+              {weekly.length > 0 && <p className="mt-3 text-[15px]">✓ {weekly.map((c) => [c.title, c.when].filter(Boolean).join(", ")).join("; ")}</p>}
+              <form action={addCommitment} className="mt-4 space-y-3">
+                <input type="hidden" name="next" value="/start" />
+                <input type="hidden" name="area" value="WEEKLY" />
+                <input type="hidden" name="cadence" value="WEEKLY" />
+                <Field label={weekly.length ? "Add another (optional)" : "What will you do?"}>
+                  <input name="title" required maxLength={200} defaultValue={weekly.length ? "" : "Plan the week ahead"} className="input" />
+                </Field>
+                <Picks list={BLUEPRINT_PICKS.WEEKLY} target="title" folded="Ideas" />
+                <div className="grid gap-3 grid-cols-2">
+                  <Field label="Which day">
+                    <select name="whenDays" className="input" defaultValue="Sunday">
+                      {["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].map((d) => <option key={d}>{d}</option>)}
+                    </select>
+                  </Field>
+                  <Field label="Time (optional)"><input type="time" name="whenTime" className="input" /></Field>
+                </div>
+                <Submit className={weekly.length ? "btn-quiet" : "btn-primary"}>Add weekly planning time</Submit>
+              </form>
+              {weekly.length > 0 && <Link href="/start?step=4&part=3" className="btn-primary mt-4 inline-flex">Next: an accountability partner</Link>}
+            </Card>
+          )}
+
+          {part === 3 && (
+            <Card>
+              <h2 className="h3">An accountability partner</h2>
+              <p className="mt-1 text-sm text-ink-soft">{BLUEPRINT_AREAS.find((x) => x.key === "ACCOUNTABILITY")!.hint} Someone who checks in with you on a schedule.</p>
+              {partners.length > 0 && <p className="mt-3 text-[15px]">✓ {partners.map((x) => x.name).join(", ")}</p>}
+              {partners.length === 0 && people.length > 0 && (
+                <div className="mt-4 space-y-2">
+                  <p className="text-sm text-ink-soft">Someone already on your list?</p>
+                  {people.map((x) => (
+                    <form key={x.id} action={makeAccountabilityPartner} className="flex items-center justify-between gap-3 rounded-2xl bg-ink/[0.04] px-4 py-2.5">
+                      <input type="hidden" name="id" value={x.id} />
+                      <input type="hidden" name="next" value="/start" />
+                      <span className="text-[15px]">{x.name} <span className="text-sm text-ink-mute">· {RELATIONSHIP_ROLES[x.role as keyof typeof RELATIONSHIP_ROLES] ?? x.role}</span></span>
+                      <Submit className="btn-quiet !py-1.5 text-sm">Make {x.name.split(" ")[0]} my partner</Submit>
+                    </form>
+                  ))}
+                  <p className="pt-2 text-sm text-ink-soft">Or add someone new:</p>
+                </div>
+              )}
+              <form action={addRelationship} className="mt-4 space-y-3">
+                <input type="hidden" name="next" value="/start" />
+                <input type="hidden" name="role" value="ACCOUNTABILITY_PARTNER" />
+                <Field label={partners.length ? "Add another (optional)" : "Name"}>
+                  <input name="name" required maxLength={120} className="input" />
+                </Field>
+                <Field label="How often you'll check in">
+                  <select name="cadenceDays" className="input" defaultValue="7">
+                    <option value="7">Every week</option>
+                    <option value="14">Every two weeks</option>
+                    <option value="30">Every month</option>
+                  </select>
+                </Field>
+                <input type="hidden" name="purpose" value="Checks on my focus" />
+                <Submit className={partners.length ? "btn-quiet" : "btn-primary"}>Add accountability partner</Submit>
+              </form>
+              {partners.length > 0 && firstMissing === 4 && <Link href="/start?step=4" className="btn-primary mt-4 inline-flex">Next: finish</Link>}
+            </Card>
+          )}
+
+          {part === 4 && (
+            <Card>
+              <p className="text-[15px]">Your system is in place. Each day, open Today and check in. On Saturday, look back on the week. The rest of My road (mentors, learning, groups and more) is there when you&apos;re ready.</p>
               <div className="mt-4 flex flex-wrap items-center gap-4">
                 <Link href="/dashboard" className="btn-primary inline-flex">Finish and go to Today</Link>
                 <Link href="/settings" className="text-sm btn-link">Put it on my calendar</Link>
               </div>
             </Card>
           )}
-
         </div>
       )}
 

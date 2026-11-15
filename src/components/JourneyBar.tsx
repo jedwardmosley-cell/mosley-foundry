@@ -10,10 +10,12 @@ type Props = {
   cycle: { day: number; week: number; phase: string; finished: boolean; seasonMonth?: number | null } | null;
   /** What Who's behind the wheel still needs, so "still open" says why. */
   identityMissing?: string[];
+  /** What the system still needs. */
+  roadMissing?: string[];
 };
 
 /** Five steps, shown at the top of every client screen: what is done, where you are, and what comes next. */
-export function JourneyBar({ steps, done, current, cycle, identityMissing = [] }: Props) {
+export function JourneyBar({ steps, done, current, cycle, identityMissing = [], roadMissing = [] }: Props) {
   const path = usePathname();
   if (path.startsWith("/onboarding") || path.startsWith("/account") || path.startsWith("/start") || path.startsWith("/forge") || path.startsWith("/cycle/setup")) return null;
   const here = steps.find((s) => path === s.href || path.startsWith(s.href + "/"))?.key;
@@ -27,7 +29,10 @@ export function JourneyBar({ steps, done, current, cycle, identityMissing = [] }
   // On Today the big card already shows the day, so the bar only nudges about a skipped step.
   if (next && (!cycle || !cycle.finished)) {
     // The kickoff comes first: no "Check in today" until all four steps are done.
-    line = <>Step {n} of 4 · <Link href={`/start?step=${n}`} className="btn-link">{next.next}</Link>{next.key === "identity" && identityMissing.length > 0 && <span className="text-ink-mute"> (still needs {identityMissing.join(", ")})</span>}</>;
+    const needs = next.key === "identity" ? identityMissing : next.key === "road" ? roadMissing : [];
+    line = next.key === "road"
+      ? <><span className="font-medium text-heading">Build your system first</span> · <Link href={`/start?step=${n}`} className="btn-link">Still needed: {needs.join(", ")}</Link></>
+      : <><span className="font-medium text-heading">Build your system first</span> · Step {n} of 4 · <Link href={`/start?step=${n}`} className="btn-link">{next.next}</Link>{needs.length > 0 && <span className="text-ink-mute"> (still needs {needs.join(", ")})</span>}</>;
   } else if (cycle && (path === "/dashboard" || path === "/cycle")) {
     line = open && !cycle.finished ? <span className="text-ink-mute">Still open: <Link href={open.href} className="btn-link">{open.label}</Link>{open.key === "identity" && identityMissing.length > 0 && <> ({identityMissing.join(", ")})</>}</span> : null;
   } else if (cycle) {

@@ -6,13 +6,13 @@ import { getContent } from "@/content";
 /**
  * The client's path through the app, in one order:
  * FORGE: who I am, where I am today. Discipline by Design: my focus (one or two, each for 30 days), then my road.
- * The daily check-in opens once all four are done. The bar shows what is done and what comes next.
+ * The daily check-in opens once all four are done, so the system is built before the first check-in. The bar shows what is done and what comes next.
  */
 export const JOURNEY_STEPS = [
   { key: "identity", label: "Who's behind the wheel", next: "Claim who you are", href: "/identity" },
   { key: "today", label: "Where I am", next: "Rate yourself on the five rules", href: "/assessment" },
   { key: "drive", label: "My focus", next: "Choose one or two things to work on", href: "/focus" },
-  { key: "road", label: "My road", next: "One routine that builds your focus into your week", href: "/road" },
+  { key: "road", label: "My road", next: "Build your system", href: "/road" },
 ] as const;
 export type JourneyKey = (typeof JOURNEY_STEPS)[number]["key"];
 
@@ -23,7 +23,27 @@ export type Journey = {
   cycle: { day: number; week: number; phase: string; finished: boolean; seasonMonth: number | null } | null;
   /** What Who's behind the wheel still needs, in the client's words: "your seat", "how big a turn", "your statement". */
   identityMissing: string[];
+  /** What the system (My road) still needs: "a daily routine", "a weekly planning time", "an accountability partner". */
+  roadMissing: string[];
 };
+
+/** The core of Discipline by Design, built before the first check-in. The other areas of My road come after. */
+export const SYSTEM_PIECES = [
+  { key: "daily", label: "A daily routine", missing: "a daily routine" },
+  { key: "weekly", label: "A weekly planning time", missing: "a weekly planning time" },
+  { key: "partner", label: "An accountability partner", missing: "an accountability partner" },
+] as const;
+export type SystemPiece = (typeof SYSTEM_PIECES)[number]["key"];
+
+/** Which pieces of the system are in place. */
+export async function systemPieces(userId: string): Promise<Record<SystemPiece, boolean>> {
+  const [daily, weekly, partner] = await Promise.all([
+    db.commitment.count({ where: { userId, active: true, area: "ROUTINES" } }),
+    db.commitment.count({ where: { userId, active: true, area: "WEEKLY" } }),
+    db.relationship.count({ where: { ownerId: userId, active: true, role: "ACCOUNTABILITY_PARTNER" } }),
+  ]);
+  return { daily: daily > 0, weekly: weekly > 0, partner: partner > 0 };
+}
 
 /** The three things Who's behind the wheel needs to count as done. */
 export function identityGaps(identity: { role: string; level: string; becoming: string } | null, statement: string) {
@@ -35,20 +55,19 @@ export function identityGaps(identity: { role: string; level: string; becoming: 
 }
 
 export async function getJourney(userId: string): Promise<Journey> {
-  const [identity, profile, assessment, commitments, people, cycle] = await Promise.all([
+  const [identity, profile, assessment, system, cycle] = await Promise.all([
     db.identityProfile.findUnique({ where: { userId }, select: { role: true, level: true, becoming: true } }),
     db.profile.findUnique({ where: { userId }, select: { forgeStatement: true, priorityPillar: true } }),
     db.assessment.findFirst({ where: { userId, isSecondOpinion: false }, select: { id: true } }),
-    db.commitment.count({ where: { userId, active: true } }),
-    db.relationship.count({ where: { ownerId: userId, active: true } }),
+    systemPieces(userId),
     db.developmentCycle.findFirst({ where: { userId, status: "ACTIVE" }, orderBy: [{ slot: "asc" }, { startDate: "desc" }], select: { startDate: true, template: true, seasonMonth: true, setupDoneAt: true } }),
   ]);
   const done: Record<JourneyKey, boolean> = {
     // Who I am is done with a role, a kind of change and a statement. The five help build the statement.
     identity: identityGaps(identity, profile?.forgeStatement ?? "").length === 0,
     today: !!assessment,
-    // My road builds the focus into the week: one routine. The person comes from "Who finds out?" in the focus setup.
-    road: commitments > 0,
+    // My road is the system: a daily routine, a weekly planning time and an accountability partner.
+    road: system.daily && system.weekly && system.partner,
     drive: !!cycle?.setupDoneAt,
   };
   let c: Journey["cycle"] = null;
@@ -58,7 +77,7 @@ export async function getJourney(userId: string): Promise<Journey> {
     const phase = cycleWeeks(cycle.template, pack).weeks[pos.week - 1]?.phase ?? "";
     c = { ...pos, phase, seasonMonth: cycle.seasonMonth };
   }
-  void people;
   const current = JOURNEY_STEPS.find((s) => !done[s.key])?.key ?? null;
-  return { done, current, cycle: c, identityMissing: identityGaps(identity, profile?.forgeStatement ?? "") };
+  const roadMissing = SYSTEM_PIECES.filter((p) => !system[p.key]).map((p) => p.missing);
+  return { done, current, cycle: c, identityMissing: identityGaps(identity, profile?.forgeStatement ?? ""), roadMissing };
 }
