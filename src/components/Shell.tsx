@@ -51,7 +51,7 @@ export function Shell({ user, children, journey }: { user: CurrentUser; children
       </aside>
 
       <div className="flex-1 min-w-0">
-        <header className="md:hidden flex items-center justify-between px-4 py-2.5 sticky top-0 z-20 bg-paper/75 backdrop-blur-xl">
+        <header className="md:hidden flex items-center justify-between px-4 py-2.5 sticky top-0 z-20 bg-paper border-b border-line/50">
           <Brand compact />
           <AccountMenu user={user} />
         </header>
@@ -63,9 +63,9 @@ export function Shell({ user, children, journey }: { user: CurrentUser; children
         <main className="mx-auto w-full max-w-3xl px-4 sm:px-8 py-5 sm:py-10 pb-28 md:pb-14">{journey}<div className="rise">{children}</div></main>
       </div>
 
-      {/* Phone: a floating, frosted menu bar. Clients also get a round button for the AI companion. */}
+      {/* Phone: a floating, solid menu bar. Clients also get a round button for Help me with this. */}
       <div className="md:hidden fixed bottom-3 inset-x-3 z-30 flex items-end gap-2">
-        <nav aria-label="Primary" className="flex-1 grid rounded-full border border-line/50 bg-card/85 backdrop-blur-xl shadow-[0_16px_40px_-14px_rgb(0_0_0/0.35)]" style={{ gridTemplateColumns: `repeat(${nav.filter((n) => n.mobile).length}, minmax(0, 1fr))` }}>
+        <nav aria-label="Primary" className="flex-1 grid rounded-full border border-line/50 bg-card shadow-[0_16px_40px_-14px_rgb(0_0_0/0.35)]" style={{ gridTemplateColumns: `repeat(${nav.filter((n) => n.mobile).length}, minmax(0, 1fr))` }}>
           {(nav as NavItem[]).filter((n) => n.mobile).map((n) => (
             <NavLink key={n.href} href={n.href} variant="tab">{n.tab ?? n.label}</NavLink>
           ))}

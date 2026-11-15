@@ -32,8 +32,12 @@ export function FiveSides({ profile, pathway, role, level, ai, teach = {}, rules
     <div className="space-y-2">
       <div className="pb-4">
         <p className="font-serif text-[22px] sm:text-[24px] leading-snug text-heading">{opening?.line || FORGE_OPENING.line}</p>
-        {opening?.core && <p className="mt-3 text-[16px] leading-relaxed text-ink">{opening.core}</p>}
-        <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">{FORGE_OPENING.text}</p>
+        {/* The reading sits behind one link, so the five questions come first on a phone. */}
+        <details className="mt-3 text-sm">
+          <summary className="cursor-pointer text-link font-medium">Read more about FORGE</summary>
+          {opening?.core && <p className="mt-2 text-[16px] leading-relaxed text-ink">{opening.core}</p>}
+          <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">{FORGE_OPENING.text}</p>
+        </details>
         {opening?.forge && (
           <details className="mt-3 text-sm">
             <summary className="cursor-pointer text-link font-medium">Why it&apos;s called FORGE</summary>
