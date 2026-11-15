@@ -13,6 +13,7 @@ test("focus ideas start from the lowest score; nothing is labeled a weakness", (
   assert.equal(lowestRule(a(4, 2, 4, 3, 2)), "O", "a tie takes the first in FORGE order");
   assert.equal(lowestRule(a(4, 3, 4, 3, 2, { revisedE: 5 })), "O", "revised scores count");
   assert.equal(lowestRule(null), null);
+  assert.equal(lowestRule(a(4, 3, 4, 3, 2), ["E"]), "O", "a second focus starts from the lowest rule not already in use");
 });
 
 test("one or two focuses, and that's it", () => {

@@ -1,8 +1,11 @@
+import { systemPieces } from "@/lib/journey";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { CSSProperties } from "react";
 import { requireUser } from "@/lib/auth";
 import { setupCycle } from "@/lib/focusData";
+import { focusTitle } from "@/lib/focus";
+import type { PillarKey } from "@/content/types";
 import { getJourney, JOURNEY_STEPS } from "@/lib/journey";
 import { db } from "@/lib/db";
 import { aiAvailable } from "@/lib/ai";
@@ -29,7 +32,9 @@ export default async function WeekOneSetup({ searchParams }: { searchParams: Pro
   const cycle = await setupCycle(u.id);
   if (!cycle) redirect("/cycle/new");
   // In the first session, finishing week 1 setup leads to the last step: a routine that builds the focus into the week.
-  const doneHref = (await db.commitment.count({ where: { userId: u.id, active: true } })) ? "/dashboard?setup=done" : "/start?step=4";
+  // After the focus is set up, the kickoff goes on to build the system, unless it is already built.
+  const sys = await systemPieces(u.id);
+  const doneHref = sys.daily && sys.weekly && sys.partner ? "/dashboard?setup=done" : "/start?step=4";
   const [profile, people] = await Promise.all([
     db.profile.findUnique({ where: { userId: u.id } }),
     db.relationship.findMany({ where: { ownerId: u.id, active: true }, orderBy: { createdAt: "asc" }, select: { id: true, name: true, role: true, email: true } }),
@@ -73,6 +78,16 @@ export default async function WeekOneSetup({ searchParams }: { searchParams: Pro
         <form action={saveSetupStep}>
           <input type="hidden" name="field" value={s.field} />
           <input type="hidden" name="next" value={next} />
+          {/* Start from what the client said: their focus, in their words. */}
+          {n === 1 ? (
+            <div className="mb-8 rounded-2xl bg-ink/[0.04] px-4 py-4">
+              <p className="text-sm text-ink-mute">You said you want to work on</p>
+              <p className="mt-1.5 flex items-start gap-2.5 font-serif text-[20px] leading-snug text-heading"><PillarMark k={cycle.pillar as PillarKey} size="sm" />&ldquo;{focusTitle(cycle)}&rdquo;</p>
+              <p className="mt-3 text-[15px] text-ink-soft">Five short questions turn that into a plan. Start with the moment it matters.</p>
+            </div>
+          ) : (
+            <p className="mb-6 flex items-center gap-2 text-sm text-ink-mute"><PillarMark k={cycle.pillar as PillarKey} size="sm" /><span className="line-clamp-1">You said: &ldquo;{focusTitle(cycle)}&rdquo;</span></p>
+          )}
           <p className="section-label" style={tone ? { color: "rgb(var(--pc))" } : undefined}>{s.label}</p>
           <label htmlFor="value" className="mt-2 block font-serif text-[30px] leading-[1.15] tracking-[-0.01em] text-heading">{s.question}</label>
           <p className="mt-2 text-[15px] text-ink-soft">{s.hint}</p>

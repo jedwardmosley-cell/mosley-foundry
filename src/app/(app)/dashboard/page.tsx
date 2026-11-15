@@ -50,7 +50,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   ].filter(Boolean) as { key: string; href: string; icon: IconName; text: string; side: string }[];
 
   const head = todayHeadline({ cycle: !!(d.cycle && pos), finished: !!pos?.finished, day: pos?.day ?? 0 });
-  if (kickoffStep) Object.assign(head, { mood: "start", label: `Kickoff · step ${kickoffStep} of 4`, title: "Finish your kickoff", line: "Your daily check-in opens once all four steps are done." });
+  if (kickoffStep) Object.assign(head, { mood: "start", label: `Kickoff · step ${kickoffStep} of 4`, title: "Build your system first", line: kickoff?.key === "road" && journey.roadMissing.length ? `Still needed: ${journey.roadMissing.join(", ")}. Your daily check-in opens once your system is set up.` : "Your daily check-in opens once your system is set up." });
   const moodTone = { start: "text-ink-mute", ready: "text-ink-mute", decide: "text-ink-soft" }[head.mood];
   const overdue = d.relationships.filter((r) => r.nextCheckIn && daysBetween(new Date(), r.nextCheckIn) < 0).length;
 

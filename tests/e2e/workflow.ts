@@ -207,6 +207,12 @@ const submitAndWait = async (page: Page, selector: string) => {
     await Promise.all([page.waitForLoadState("networkidle"), routines.locator('button[type="submit"]:has-text("Add")').click()]);
     await page.waitForSelector("text=Fifteen quiet minutes before email");
     await page.waitForSelector("text=Weekdays, 6:30 am");
+    const weekly = page.locator("section", { hasText: "Weekly planning and reflection" });
+    await weekly.locator("summary", { hasText: "Add to this area" }).click();
+    await weekly.locator('input[name="title"]').fill("Plan the week ahead");
+    await weekly.locator('select[name="whenDays"]').selectOption("Sunday");
+    await Promise.all([page.waitForLoadState("networkidle"), weekly.locator('button[type="submit"]:has-text("Add")').click()]);
+    await page.waitForSelector("text=Plan the week ahead");
     await page.screenshot({ path: `${shots}/04-my-road.png`, fullPage: false });
   });
 
@@ -286,6 +292,10 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal(await page.locator("text=One move this week").count(), 0, "one move is folded into My focus");
     // a second focus fills slot 2; a third has to replace one
     await page.goto(`${BASE}/cycle/new`);
+    assert.ok(await page.locator('input[name="pillar"][value="O"]').isChecked(), "a second focus starts from the lowest rule not already in use");
+    await page.locator('label:has(input[name="pillar"][value="G"])').click();
+    await page.waitForSelector("text=Ideas for Growth Oriented");
+    assert.equal(await page.locator("text=Ideas for Outcome Aware").count(), 0, "the ideas follow the rule picked");
     await page.fill('input[name="title"]', "Give my team the full picture, early");
     await Promise.all([page.waitForURL(/\/cycle\/setup\?step=1$/), page.click('button:has-text("Start my 30 days")')]);
     const two = await db.developmentCycle.findMany({ where: { user: { email }, status: "ACTIVE" }, orderBy: { slot: "asc" } });
@@ -482,13 +492,22 @@ const submitAndWait = async (page: Page, selector: string) => {
     await Promise.all([g.waitForURL(/\/cycle\/setup\?step=1$/), g.click('button:has-text("Next: five short questions")')]);
     await g.waitForSelector("text=Step 3 of 4 · question 1 of 5");
     await doSetup(g, "Pat Partner", "Pause before I answer", "**/start?step=4");
-    // 4. my road: one routine holds the focus in place; the person came from "Who finds out?"
-    await g.waitForSelector("text=✓ Pat Partner");
+    // 4. build the system, one screen each: a daily routine, a weekly planning time, an accountability partner
+    await g.waitForSelector("text=Kickoff · Step 4 of 4, part 1 of 3");
+    await g.goto(`${BASE}/dashboard`);
+    await g.waitForSelector("text=Build your system first");
+    assert.equal(await g.locator('button:has-text("Save my daily check-in")').count(), 0, "no check-in until the system is built");
+    await g.goto(`${BASE}/start?step=4`);
     await g.locator('summary:has-text("Ideas")').click();
     await g.locator('button:has-text("Journaling")').click();
-    await Promise.all([g.waitForURL("**/start?step=4"), g.click('button:has-text("Add routine")')]);
-    await g.waitForSelector("text=✓ Journaling");
+    await Promise.all([g.waitForURL(/\/start\?step=4&saved=routines$/), g.click('button:has-text("Add daily routine")')]);
+    await g.waitForSelector("text=Kickoff · Step 4 of 4, part 2 of 3");
+    await Promise.all([g.waitForURL(/\/start\?step=4&saved=weekly$/), g.click('button:has-text("Add weekly planning time")')]);
+    // Pat came in as the accountability partner who finds out, so the third piece is already in place
+    await g.waitForSelector("text=Your system is set up.");
+    await g.waitForSelector('a:has-text("An accountability partner")');
     await g.click('a:has-text("Finish and go to Today")');
+    await g.waitForSelector('button:has-text("Save my daily check-in")');
     // for the season checks below: make this month 1 of a season, started 29 days ago, so today is day 30
     {
       const gu = await db.user.findFirstOrThrow({ where: { name: "Guided Driver (E2E)" }, orderBy: { createdAt: "desc" } });
@@ -748,7 +767,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal(await dp.locator('[role="dialog"]').count(), 0, "nothing saves until the seat is named");
     // the daily check-in waits for the whole kickoff
     await dp.goto(`${BASE}/dashboard`);
-    await dp.waitForSelector("text=Finish your kickoff");
+    await dp.waitForSelector("text=Build your system first");
     assert.equal(await dp.locator('button:has-text("Save my daily check-in")').count(), 0, "no check-in before the kickoff is done");
     assert.equal(await dp.locator("text=Check in today").count(), 0);
     await dp.goto(`${BASE}/cycle`);

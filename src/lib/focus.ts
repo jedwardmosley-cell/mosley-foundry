@@ -21,10 +21,13 @@ export function pillarScores(a: Scores): Record<PillarKey, number> {
 }
 
 /** The lowest-scored rule, used only to order focus ideas. The goal is a 5 on every rule; nothing is labeled a weakness. */
-export function lowestRule(a: Scores | null | undefined): PillarKey | null {
+export function lowestRule(a: Scores | null | undefined, skip: string[] = []): PillarKey | null {
   if (!a) return null;
   const s = pillarScores(a);
-  return KEYS.reduce((low, k) => (s[k] < s[low] ? k : low), KEYS[0]);
+  // A second focus starts from the lowest rule not already being worked on.
+  const keys = KEYS.filter((k) => !skip.includes(k));
+  const from = keys.length ? keys : KEYS;
+  return from.reduce((low, k) => (s[k] < s[low] ? k : low), from[0]);
 }
 
 /** The free slot for a new focus, or null when the client already has two. */
