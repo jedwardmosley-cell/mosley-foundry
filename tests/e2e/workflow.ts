@@ -34,6 +34,13 @@ const login = async (page: Page, email: string, password = "demo-password-1") =>
   await page.fill('input[name="password"]', password);
   await Promise.all([page.waitForURL((u: URL) => !u.pathname.startsWith("/login")), page.click('button:has-text("Sign in")')]);
 };
+/** Rate the five rules on the one-page self-assessment: each rule is a section that opens to its five levels. */
+const rate = async (page: Page, scores: Record<string, number>) => {
+  for (const [k, v] of Object.entries(scores)) {
+    await page.locator(`details[data-rule="${k}"]`).evaluate((d) => { (d as HTMLDetailsElement).open = true; });
+    await page.locator(`input[name="${k}"][value="${v}"]`).check({ force: true });
+  }
+};
 const logout = async (page: Page) => {
   await page.context().clearCookies();
 };
@@ -121,7 +128,9 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal(await page.locator('input[type="radio"][name="E"]').count(), 5, "all five levels show up front");
     assert.equal(await page.locator("text=What I wrote").count(), 5, "each rule shows what the client wrote");
     const scores: Record<string, number> = { F: 4, O: 3, R: 4, G: 3, E: 2 };
-    for (const [k, v] of Object.entries(scores)) await page.locator(`input[name="${k}"][value="${v}"]`).check({ force: true });
+    await rate(page, scores);
+    await page.waitForTimeout(500); // picking a level closes the rule; tap it again to add a reflection
+    await page.locator('details[data-rule="E"] > summary').click();
     await page.locator("fieldset", { hasText: "Emotionally Anchored" }).locator("summary", { hasText: "Add a reflection" }).click();
     await page.fill('textarea[name="reflE"]', "When my numbers get questioned in front of my boss, I get sharp.");
     await page.screenshot({ path: `${shots}/02-assessment.png`, fullPage: false });
@@ -458,7 +467,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.ok((await g.inputValue('textarea[name="statement"]')).startsWith("I am "), "the statement starts from the five lines");
     await saveThroughReveal(g, "**/start?step=2", "Save and continue");
     // 2. where I am: the self-assessment is inside the kickoff; the client never leaves it
-    for (const [k, v] of Object.entries({ F: 4, O: 3, R: 4, G: 3, E: 2 })) await g.locator(`input[name="${k}"][value="${v}"]`).check({ force: true });
+    await rate(g, { F: 4, O: 3, R: 4, G: 3, E: 2 });
     await Promise.all([g.waitForURL("**/start?step=2&scored=1"), g.click('button:has-text("See my profile")')]);
     await g.waitForSelector("text=The goal is a 5 on every one");
     assert.equal(await g.locator("text=/ 25").count(), 0, "no total");

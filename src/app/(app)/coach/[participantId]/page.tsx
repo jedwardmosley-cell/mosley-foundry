@@ -73,7 +73,6 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
                   ))}
                 </ul>
               )}
-              {v.goals.filter((g) => g.oneMove).map((g) => <p key={g.id} className="mt-2 text-sm"><span className="text-ink-mute">{g.pillar}{g.segmentKey ? ` (seg. ${g.segmentKey})` : ""} one move: </span>{g.oneMove}</p>)}
             </>
           ) : <div className="mt-3"><NotShared scope="GOALS" /></div>}
         </Card>

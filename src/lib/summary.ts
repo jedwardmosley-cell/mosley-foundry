@@ -40,7 +40,7 @@ export async function developmentSummary(userId: string, name: string) {
   }
   if (d.goals.length) {
     L.push("", "## FORGE plan");
-    for (const g of d.goals) L.push(`- **${pName(g.pillar)}${g.segmentKey ? ` (segment ${g.segmentKey})` : ""}**: now: ${g.whereNow || "-"}; want: ${g.whereWant || "-"}; one move: ${g.oneMove || "-"}`);
+    for (const g of d.goals) L.push(`- **${pName(g.pillar)}${g.segmentKey ? ` (segment ${g.segmentKey})` : ""}**: now: ${g.whereNow || "-"}; want: ${g.whereWant || "-"}`);
   }
   if (d.commitments.length) {
     L.push("", "## My road (Discipline by Design)");

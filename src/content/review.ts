@@ -6,8 +6,8 @@
 import { IDENTITY_EXAMPLES_STATUS, EXAMPLE_PEOPLE, IDENTITY_TESTS } from "./identityExamples";
 import { WHO_I_AM_STATUS, ROLE_PICKS, KIND_NOTE, WHO_TITLE, WHO_INTRO, WHO_HEADINGS, FORGE_OPENING } from "./whoIAm";
 import { FORGE_LINES_STATUS, FORGE_LINES, PRACTICE_STARTERS } from "./forgeLines";
-import { LEVELS, IDENTITY_LEVELS, PILLAR_PROMPTS_STATUS, PILLAR_PROMPTS, PICKS_STATUS, SITUATION_PICKS, BEHAVIOR_PICKS, QUALITY_PICKS, PERSONA_SITUATION_PICKS, CUE_PICKS, STANDARD_PICKS } from "./identity";
-import { ONE_MOVE, CYCLE_FOCUS, CHECKIN_TAGS, BLUEPRINT_PICKS, RELATIONSHIP_PURPOSE, type OptionList } from "./options";
+import { LEVELS, IDENTITY_LEVELS, PICKS_STATUS, SITUATION_PICKS, BEHAVIOR_PICKS, QUALITY_PICKS, PERSONA_SITUATION_PICKS, CUE_PICKS, STANDARD_PICKS } from "./identity";
+import { CYCLE_FOCUS, CHECKIN_TAGS, BLUEPRINT_PICKS, RELATIONSHIP_PURPOSE, type OptionList } from "./options";
 import { GUIDE_STATUS, CLIENT_GUIDE } from "./guide";
 import { SEGMENTS, NIRS_WEEKS, DAY30_DECISIONS, SEASON_DECISIONS } from "./program";
 import { todayHeadline } from "@/lib/todayHeadline";
@@ -58,11 +58,6 @@ export function reviewSets(): ReviewSet[] {
         { label: "Performance identity: standards", items: STANDARD_PICKS },
       ],
     },
-    {
-      key: "prompts", title: "Rule prompts by kind of change", where: "My road, one move this week", file: "src/content/identity.ts", draft: PILLAR_PROMPTS_STATUS === "draft",
-      groups: Object.entries(PILLAR_PROMPTS).map(([k, v]) => ({ label: PILLAR_NAME[k], items: IDENTITY_LEVELS.map((l) => `${LEVELS[l].name}: ${v[l]}`) })),
-    },
-    { key: "onemove", title: "One move ideas", where: "My road, one move this week", file: "src/content/options.ts", draft: anyDraft(ONE_MOVE), groups: lists(ONE_MOVE, (k) => PILLAR_NAME[k]) },
     { key: "focus", title: "30-day focus ideas", where: "30 days, start a cycle", file: "src/content/options.ts", draft: anyDraft(CYCLE_FOCUS), groups: lists(CYCLE_FOCUS, (k) => PILLAR_NAME[k]) },
     {
       key: "starters", title: "Practice starters", where: "My road, routines", file: "src/content/forgeLines.ts", draft: true,
