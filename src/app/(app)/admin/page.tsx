@@ -12,12 +12,18 @@ export const metadata = { title: "Programs" };
 export default async function AdminHome() {
   const a = await requireUser("ADMIN");
   const org = a.orgId ? await db.organization.findUnique({ where: { id: a.orgId } }) : null;
+  const waiting = await db.user.count({ where: { status: "PENDING", isDemo: false, OR: [{ orgId: null }, { orgId: a.orgId ?? "__none__" }] } });
   const cohorts = await db.cohort.findMany({ where: { orgId: a.orgId ?? "__none__" }, orderBy: { startDate: "desc" }, include: { _count: { select: { members: true } } } });
   return (
     <>
       <PageHeader eyebrow={org?.name ?? "Organization"} title="Programs and cohorts">
         Sponsors and administrators manage enrollment, schedules and attendance and see group reporting. Individual journals, EQ-i results, reflections and coaching conversations are not available here.
       </PageHeader>
+      {waiting > 0 && (
+        <Link href="/admin/people" className="mb-5 block rounded-2xl bg-gold-soft px-4 py-3 text-[15px] text-ink hover:brightness-[0.98]">
+          {waiting === 1 ? "1 sign-up is" : `${waiting} sign-ups are`} waiting for your approval. <span className="btn-link">Review</span>
+        </Link>
+      )}
       <div className="space-y-3">
         {cohorts.map((c) => (
           <Link key={c.id} href={`/admin/cohorts/${c.id}`} className="card block hover:border-navy/40">

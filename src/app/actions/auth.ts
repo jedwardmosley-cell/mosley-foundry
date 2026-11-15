@@ -19,16 +19,39 @@ const signUpSchema = z.object({
 });
 
 export async function signUp(_: AuthState, fd: FormData): Promise<AuthState> {
-  if (process.env.ALLOW_SIGNUP === "false") return { error: "Sign-up is by invitation. Ask your program administrator to enroll you." };
   const r = signUpSchema.safeParse(Object.fromEntries(fd));
   if (!r.success) return { error: r.error.issues[0].message };
   const { name, email, password, invite } = r.data;
   if (await db.user.findUnique({ where: { email } })) return { error: "An account with that email already exists. Sign in instead." };
+  // A partner invited by a client comes straight in. Everyone else waits for an administrator.
+  const invited = invite ? await db.relationship.findFirst({ where: { inviteToken: invite, inviteStatus: "PENDING" }, select: { id: true } }) : null;
+  // ALLOW_SIGNUP=false closes sign-up completely, except for a partner a client invited.
+  if (!invited && process.env.ALLOW_SIGNUP === "false") return { error: "Sign-up is by invitation. Ask your program administrator to enroll you." };
   const user = await db.user.create({
-    data: { name, email, passwordHash: hashPassword(password), role: "PARTICIPANT", profile: { create: {} } },
+    data: { name, email, passwordHash: hashPassword(password), role: "PARTICIPANT", status: invited ? "ACTIVE" : "PENDING", profile: { create: {} } },
   });
+  if (!invited) {
+    await tellAdmins(name, email);
+    redirect("/login?requested=1");
+  }
   await createSession(user.id);
-  redirect(invite ? `/invite/${encodeURIComponent(invite)}` : "/onboarding");
+  redirect(`/invite/${encodeURIComponent(invite!)}`);
+}
+
+/** Emails each administrator that a sign-up is waiting. The People page lists it either way. */
+async function tellAdmins(name: string, email: string) {
+  if (!emailAvailable()) return;
+  const admins = await db.user.findMany({ where: { role: "ADMIN", isDemo: false, status: "ACTIVE" }, select: { email: true } });
+  const link = `${appUrl()}/admin/people`;
+  const esc = (x: string) => x.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  for (const a of admins) {
+    await sendEmail({
+      to: a.email,
+      subject: "A sign-up is waiting for your approval",
+      text: `${name} (${email}) asked for an account on Both Hands on the Wheel.\n\nApprove or decline: ${link}`,
+      html: `<p>${esc(name)} (${esc(email)}) asked for an account on Both Hands on the Wheel.</p><p><a href="${link}">Approve or decline</a></p>`,
+    }).catch(() => false);
+  }
 }
 
 const signInSchema = z.object({ email: z.string().trim().toLowerCase(), password: z.string(), next: z.string().optional() });
@@ -38,6 +61,8 @@ export async function signIn(_: AuthState, fd: FormData): Promise<AuthState> {
   const user = await db.user.findUnique({ where: { email } });
   // Same message for unknown email and wrong password.
   if (!user || !verifyPassword(password, user.passwordHash)) return { error: "That email and password don't match." };
+  if (user.status === "PENDING") return { error: "Your account is waiting for approval. You'll get an email when it's ready." };
+  if (user.status !== "ACTIVE") return { error: "This account isn't active. Contact your program administrator." };
   await createSession(user.id);
   const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : "/";
   redirect(safeNext);

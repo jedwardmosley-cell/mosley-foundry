@@ -41,6 +41,8 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   const s = await db.session.findUnique({ where: { tokenHash: sha256(token) }, include: { user: true } });
   if (!s || s.expiresAt < new Date()) return null;
   const u = s.user;
+  // Only an active account is signed in. Pending, declined or turned-off accounts get nothing.
+  if (u.status !== "ACTIVE") return null;
   return { id: u.id, email: u.email, name: u.name, role: u.role as Role, orgId: u.orgId, isDemo: u.isDemo, alsoCoach: u.alsoCoach, mustChangePassword: u.mustChangePassword };
 }
 

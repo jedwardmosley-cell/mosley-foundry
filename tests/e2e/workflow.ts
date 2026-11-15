@@ -84,7 +84,29 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.fill('input[name="name"]', "Test Driver (E2E)");
     await page.fill('input[name="email"]', email);
     await page.fill('input[name="password"]', "e2e-password-123");
-    await Promise.all([page.waitForURL("**/onboarding"), page.click('button:has-text("Create account")')]);
+    // sign-up is a request: the person waits until an administrator approves
+    await Promise.all([page.waitForURL("**/login?requested=1"), page.click('button:has-text("Create account")')]);
+    await page.waitForSelector("text=Your account is waiting for approval");
+    await page.fill('input[name="email"]', email);
+    await page.fill('input[name="password"]', "e2e-password-123");
+    await page.click('button:has-text("Sign in")');
+    await page.waitForSelector("text=waiting for approval. You'll get an email");
+    // the administrator approves on the People page
+    const ac = await browser.newContext();
+    const ap: Page = await ac.newPage();
+    await login(ap, "admin@demo.bothhands.app", "demo-password-1");
+    await ap.goto(`${BASE}/admin`);
+    await ap.waitForSelector("text=waiting for your approval");
+    await ap.goto(`${BASE}/admin/people`);
+    const row = ap.locator("li", { hasText: email });
+    await Promise.all([ap.waitForLoadState("networkidle"), row.locator('button:has-text("Approve")').click()]);
+    let approved = await db.user.findUniqueOrThrow({ where: { email } });
+    for (let i = 0; i < 25 && approved.status !== "ACTIVE"; i++) { await ap.waitForTimeout(200); approved = await db.user.findUniqueOrThrow({ where: { email } }); }
+    assert.equal(approved.status, "ACTIVE");
+    assert.ok(approved.orgId, "approval adds them to the organization");
+    await ac.close();
+    await login(page, email, "e2e-password-123");
+    await page.goto(`${BASE}/onboarding`);
     await page.screenshot({ path: `${shots}/01-onboarding.png`, fullPage: true });
     // a new client goes straight into the guided first session; this run takes the full pages instead
     await Promise.all([page.waitForURL("**/start"), page.locator('form:has(input[value="PERSONAL"]) button').click()]);
@@ -402,7 +424,11 @@ const submitAndWait = async (page: Page, selector: string) => {
     await g.fill('input[name="name"]', "Guided Driver (E2E)");
     await g.fill('input[name="email"]', `e2e-guided-${Date.now()}@example.test`);
     await g.fill('input[name="password"]', "e2e-password-123");
-    await Promise.all([g.waitForURL("**/onboarding"), g.click('button:has-text("Create account")')]);
+    const gEmail = await g.inputValue('input[name="email"]');
+    await Promise.all([g.waitForURL("**/login?requested=1"), g.click('button:has-text("Create account")')]);
+    await db.user.update({ where: { email: gEmail }, data: { status: "ACTIVE" } }); // approved (the approval itself is tested in step 1)
+    await login(g, gEmail, "e2e-password-123");
+    await g.goto(`${BASE}/onboarding`);
     await Promise.all([g.waitForURL("**/start"), g.locator('form:has(input[value="LEADING_OTHERS"]) button').click()]);
     // 1. who I am, part 1: the role and the kind of change
     await g.locator('button:has-text("manager")').first().click();
@@ -898,6 +924,36 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal(denied?.status(), 404, "admin-coach cannot open someone they do not coach");
     const j = await page.goto(`${BASE}/journal`);
     assert.ok(!j?.url().endsWith("/journal"));
+  });
+
+  await check("11b. admin turns an account off and back on; nothing is removed", async () => {
+    const ac = await browser.newContext();
+    const ap: Page = await ac.newPage();
+    await login(ap, "admin@demo.bothhands.app", "demo-password-1");
+    await ap.goto(`${BASE}/admin/people`);
+    const target = "tess@demo.bothhands.app";
+    const before = await db.dailyCheckIn.count({ where: { user: { email: target } } });
+    const row = ap.locator("div.px-5", { hasText: target });
+    await Promise.all([ap.waitForLoadState("networkidle"), row.locator('button:has-text("Turn off")').click()]);
+    let t = await db.user.findUniqueOrThrow({ where: { email: target } });
+    for (let i = 0; i < 25 && t.status !== "DISABLED"; i++) { await ap.waitForTimeout(200); t = await db.user.findUniqueOrThrow({ where: { email: target } }); }
+    assert.equal(t.status, "DISABLED");
+    const tc = await browser.newContext();
+    const tp: Page = await tc.newPage();
+    await tp.goto(`${BASE}/login`);
+    await tp.fill('input[name="email"]', target);
+    await tp.fill('input[name="password"]', "demo-password-1");
+    await tp.click('button:has-text("Sign in")');
+    await tp.waitForSelector("text=This account isn't active");
+    assert.equal(await db.dailyCheckIn.count({ where: { user: { email: target } } }), before, "nothing they saved is removed");
+    await ap.goto(`${BASE}/admin/people`);
+    await Promise.all([ap.waitForLoadState("networkidle"), ap.locator("div.px-5", { hasText: target }).locator('button:has-text("Turn back on")').click()]);
+    t = await db.user.findUniqueOrThrow({ where: { email: target } });
+    for (let i = 0; i < 25 && t.status !== "ACTIVE"; i++) { await ap.waitForTimeout(200); t = await db.user.findUniqueOrThrow({ where: { email: target } }); }
+    assert.equal(t.status, "ACTIVE");
+    await login(tp, target, "demo-password-1");
+    await tc.close();
+    await ac.close();
   });
 
   await check("desktop layout renders", async () => {
