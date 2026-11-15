@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ReadTheBook } from "@/components/ReadTheBook";
 import { requireUser } from "@/lib/auth";
+import { checkInsFor } from "@/lib/focusData";
 import { db } from "@/lib/db";
 import { getContent } from "@/content";
 import { cycleWeeks, cyclePosition, practiceSummary, CYCLE_TEMPLATES } from "@/lib/cycle";
@@ -16,10 +17,14 @@ import { Submit } from "@/components/Submit";
 
 export const metadata = { title: "30-Day Cycle" };
 
-export default async function CyclePage() {
+export default async function CyclePage({ searchParams }: { searchParams: Promise<{ id?: string }> }) {
   const u = await requireUser("PARTICIPANT");
+  const { id } = await searchParams;
   const { pack } = await getContent();
-  const cycle = await db.developmentCycle.findFirst({ where: { userId: u.id, status: "ACTIVE" }, orderBy: { startDate: "desc" } });
+  // One focus at a time: the one asked for, else the first focus in progress.
+  const cycle =
+    (id ? await db.developmentCycle.findFirst({ where: { id, userId: u.id, status: "ACTIVE" } }) : null) ??
+    (await db.developmentCycle.findFirst({ where: { userId: u.id, status: "ACTIVE" }, orderBy: [{ slot: "asc" }, { startDate: "desc" }] }));
   const past = await db.developmentCycle.findMany({ where: { userId: u.id, status: { not: "ACTIVE" } }, orderBy: { startDate: "desc" }, take: 5 });
   if (!cycle) {
     const season = await activeSeason(u.id);
@@ -29,7 +34,7 @@ export default async function CyclePage() {
         <PageHeader eyebrow="Discipline by Design · 30 days" title={season ? (month ? `Month ${month} of my season` : "My season is done") : "No active cycle"} />
         {season && month && <Empty title={`Start month ${month}`} href="/cycle/new" cta="Start">Pick the pillar and the behavior for the next 30 days.</Empty>}
         {season && !month && <Empty title="Review your season" href="/season" cta="Open the review">Three months are done. Look back, then decide what comes next.</Empty>}
-        {!season && <Empty title="Start a 30-day cycle" href="/cycle/new" cta="Start">Pick one pillar and one behavior, then work on it for four weeks.</Empty>}
+        {!season && <Empty title="Choose your focus" href="/focus" cta="Open My focus">One or two things to work on, each for 30 days. That's it.</Empty>}
         {past.length > 0 && <PastCycles past={past} />}
       </>
     );
@@ -37,7 +42,8 @@ export default async function CyclePage() {
   const { weeks, decide } = cycleWeeks(cycle.template, pack);
   const pos = cyclePosition(cycle.startDate);
   const p = pack.pillars.find((x) => x.key === (cycle.pillar as PillarKey))!;
-  const checkIns = await db.dailyCheckIn.findMany({ where: { userId: u.id, cycleId: cycle.id }, orderBy: { date: "asc" } });
+  const checkIns = await checkInsFor(cycle);
+  const others = await db.developmentCycle.count({ where: { userId: u.id, status: "ACTIVE", NOT: { id: cycle.id } } });
   const byDate = new Map(checkIns.map((c) => [c.date, c]));
   const notes = JSON.parse(cycle.weekNotes) as Record<string, string>;
   const wstat = JSON.parse(cycle.weekStatus) as Record<string, string>;
@@ -53,7 +59,8 @@ export default async function CyclePage() {
   return (
     <>
       <PageHeader eyebrow={cycle.seasonMonth ? `Discipline by Design · Season, month ${cycle.seasonMonth} of ${SEASON_LENGTH}` : "Discipline by Design · 30 days"} title={`Day ${pos.day} of 30`}>
-        <span className="inline-flex items-center gap-2"><PillarMark k={p.key} size="sm" /> {cycle.focus || p.name}</span>
+        <span className="inline-flex items-center gap-2"><PillarMark k={p.key} size="sm" /> {cycle.title || cycle.focus || p.name}</span>
+        {others > 0 && <Link href="/focus" className="ml-3 text-sm btn-link">Both focuses</Link>}
         {cycle.seasonMonth && <Link href="/season" className="ml-3 text-sm btn-link">See the season</Link>}
       </PageHeader>
 

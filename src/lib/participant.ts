@@ -10,7 +10,7 @@ export async function loadParticipant(userId: string) {
     db.assessment.findFirst({ where: { userId, isSecondOpinion: false }, orderBy: { completedAt: "desc" } }),
     db.assessment.findMany({ where: { userId, isSecondOpinion: false }, orderBy: { completedAt: "asc" } }),
     db.developmentGoal.findMany({ where: { userId, status: "ACTIVE" }, orderBy: { updatedAt: "desc" } }),
-    db.developmentCycle.findFirst({ where: { userId, status: "ACTIVE" }, orderBy: { startDate: "desc" } }),
+    db.developmentCycle.findFirst({ where: { userId, status: "ACTIVE" }, orderBy: [{ slot: "asc" }, { startDate: "desc" }] }),
     db.dailyCheckIn.findMany({ where: { userId, date: { gte: since } }, orderBy: { date: "desc" } }),
     db.dailyCheckIn.findUnique({ where: { userId_date: { userId, date: ymd() } } }),
     db.relationship.findMany({ where: { ownerId: userId, active: true }, orderBy: { nextCheckIn: "asc" }, include: { checkIns: { orderBy: { occurredOn: "desc" }, take: 3 } } }),
@@ -22,5 +22,7 @@ export async function loadParticipant(userId: string) {
     db.eqiPriority.findMany({ where: { userId }, orderBy: { createdAt: "asc" }, select: { id: true, label: true, pillar: true } }),
     db.identityProfile.findUnique({ where: { userId } }),
   ]);
-  return { profile, assessment, assessments, goals, cycle, checkIns, todayCheckIn, relationships, commitments, weekly, coaches, exercises, sessions, eqi, identity };
+  // My focus: one or two 30-day cycles. The first is also `cycle`, as before.
+  const focuses = await db.developmentCycle.findMany({ where: { userId, status: "ACTIVE" }, orderBy: [{ slot: "asc" }, { startDate: "asc" }] });
+  return { focuses, profile, assessment, assessments, goals, cycle, checkIns, todayCheckIn, relationships, commitments, weekly, coaches, exercises, sessions, eqi, identity };
 }

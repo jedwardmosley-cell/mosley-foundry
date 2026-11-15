@@ -1,4 +1,8 @@
 import { cyclePosition } from "@/lib/cycle";
+import { activeFocuses } from "@/lib/focusData";
+import { watchAreas, focusTitle, MAX_FOCUSES } from "@/lib/focus";
+import { CYCLE_FOCUS } from "@/content/options";
+import { Picks } from "@/components/Picks";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getContent } from "@/content";
@@ -14,9 +18,9 @@ import { activeSeason, nextMonth } from "@/lib/season";
 import { SEASON_LENGTH } from "@/content/program";
 import type { PillarKey } from "@/content/types";
 
-export const metadata = { title: "Start a 30-day cycle" };
+export const metadata = { title: "My focus" };
 
-export default async function NewCycle({ searchParams }: { searchParams: Promise<{ pillar?: string; focus?: string; season?: string }> }) {
+export default async function NewCycle({ searchParams }: { searchParams: Promise<{ pillar?: string; focus?: string; season?: string; title?: string; source?: string; next?: string; full?: string }> }) {
   const sp = await searchParams;
   const fromLink = ["F", "O", "R", "G", "E"].includes(sp.pillar ?? "") ? (sp.pillar as PillarKey) : null;
   const u = await requireUser("PARTICIPANT");
@@ -28,21 +32,51 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
   const [open, coaches] = await Promise.all([activeSeason(u.id), db.coachAssignment.count({ where: { participantId: u.id, active: true } })]);
   const month = open ? nextMonth(open.cycles.length) : null;
   const continuing = !!(open && month && sp.season !== "none");
-  // Starting a new 30 days ends one that is running. Say so before the client starts.
-  const running = await db.developmentCycle.findFirst({ where: { userId: u.id, status: "ACTIVE" }, orderBy: { startDate: "desc" }, select: { startDate: true } });
-  const runningPos = running ? cyclePosition(running.startDate) : null;
+  // One or two focuses, and that's it. With two in progress, a new one has to replace one.
+  const [active, assessment] = await Promise.all([
+    activeFocuses(u.id),
+    db.assessment.findFirst({ where: { userId: u.id, isSecondOpinion: false }, orderBy: { completedAt: "desc" } }),
+  ]);
+  const full = active.length >= MAX_FOCUSES;
+  const watch = watchAreas(assessment, profile?.priorityPillar);
+  const startPillar = fromLink ?? watch[0] ?? ((profile?.priorityPillar ?? "F") as PillarKey);
+  const source = ["FEEDBACK", "COACH"].includes(sp.source ?? "") ? sp.source! : "";
+  const pName = (k: string) => pack.pillars.find((x) => x.key === k)?.name ?? k;
   return (
     <>
-      <PageHeader eyebrow="Discipline by Design" title="Start your 30 days">Pick one pillar. Then name the moment you want to change and what you'll do instead. Checking in takes two minutes a day.</PageHeader>
-      {runningPos && !runningPos.finished && (
-        <p role="note" className="mb-5 rounded-2xl bg-gold-soft px-4 py-3 text-[15px] text-ink">
-          You&apos;re on day {runningPos.day} of your current 30 days. Starting a new one ends it. Your check-ins are kept.{" "}
-          <Link href="/cycle" className="btn-link">Keep my current 30 days</Link>
-          {sp.focus ? <> or <Link href="/feedback" className="btn-link">add it to My road for now</Link></> : null}.
+      <PageHeader eyebrow="Discipline by Design · My focus" title={active.length ? "Add a focus" : "Choose your focus"}>
+        One or two things to work on, and that&apos;s it. Name it in a few words, then five short questions turn it into a plan for 30 days.
+      </PageHeader>
+      {watch.length > 0 && (
+        <p role="note" className="mb-5 rounded-2xl bg-ink/[0.04] px-4 py-3 text-[15px] text-ink">
+          Your watch area is {watch.map(pName).join(" and ")}. Keep it in view as you choose. A focus that runs through it is a good place to start, but it doesn&apos;t have to.
         </p>
       )}
       <Card>
         <form action={startCycle} className="space-y-5">
+          {full && (
+            <fieldset className="rounded-2xl bg-gold-soft px-4 py-4">
+              <legend className="sr-only">Which focus does this replace?</legend>
+              <p className="text-[15px] font-medium text-heading">You already have two focuses. That&apos;s the most.</p>
+              <p className="mt-1 text-sm text-ink-soft">This one can only come in by replacing one. The one you replace moves to Finished, with its check-ins kept.</p>
+              <div className="mt-3 space-y-2">
+                {active.map((c) => (
+                  <label key={c.id} className="option !flex items-start gap-3 !py-3 cursor-pointer">
+                    <input type="radio" name="replace" value={c.id} required className="mt-1 accent-navy" />
+                    <span><span className="font-medium">Replace &ldquo;{focusTitle(c)}&rdquo;</span><span className="block text-sm text-ink-soft">Day {cyclePosition(c.startDate).day} of 30</span></span>
+                  </label>
+                ))}
+              </div>
+              <Link href={source === "FEEDBACK" ? "/feedback" : "/focus"} className="mt-3 inline-block text-sm btn-link">Not now. Keep my two.</Link>
+            </fieldset>
+          )}
+          <input type="hidden" name="source" value={source} />
+          <input type="hidden" name="next" value={sp.next === "start" ? "start" : ""} />
+          <div>
+            <label htmlFor="title" className="label">My focus, in a few words</label>
+            <input id="title" name="title" required maxLength={160} defaultValue={(sp.title ?? sp.focus ?? "").slice(0, 160)} placeholder="Stay curious when my decisions get challenged" className="input" />
+            <div className="mt-2"><Picks list={CYCLE_FOCUS[startPillar]} target="title" folded={`Ideas for ${pName(startPillar)}`} /></div>
+          </div>
           <div>
             <label htmlFor="role" className="label">{identity?.role ? "Still about me as..." : "The role this 30 days is about"}</label>
             <div className="flex items-center inputbox">
@@ -51,8 +85,9 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
             </div>
             <p className="mt-1 text-xs text-ink-mute">One role for each 30 days. Change it here if this month is about a different one.</p>
           </div>
-          <CycleFocusFields pillars={pack.pillars.map((p) => ({ key: p.key, name: p.name }))} initial={fromLink ?? ((profile?.priorityPillar ?? "F") as PillarKey)} initialFocus={(sp.focus ?? "").slice(0, 500)} identityBehavior={identity?.behavior.split("\n")[0].slice(0, 300) ?? ""} />
-          {continuing ? (
+          <CycleFocusFields pillars={pack.pillars.map((p) => ({ key: p.key, name: p.name }))} initial={startPillar} initialFocus={(sp.focus ?? "").slice(0, 500)} identityBehavior={identity?.behavior.split("\n")[0].slice(0, 300) ?? ""} />
+          {/* A season follows the first focus only. */}
+          {active.some((c) => c.slot === 1) && !full ? null : continuing ? (
             <div className="rounded-xl border border-line bg-paper px-4 py-3">
               <input type="hidden" name="season" value="continue" />
               <p className="font-medium">Month {month} of {SEASON_LENGTH} in my season</p>
@@ -87,7 +122,7 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
             </fieldset>
             <Field label="Start date"><input type="date" name="startDate" defaultValue={ymd()} className="input max-w-[200px]" /></Field>
           </details>
-          <Submit>{runningPos && !runningPos.finished ? "Start anyway" : "Start the cycle"}</Submit>
+          <Submit>{full ? "Replace and start" : "Start the cycle"}</Submit>
         </form>
       </Card>
     </>

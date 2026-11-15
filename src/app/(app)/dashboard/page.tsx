@@ -11,6 +11,7 @@ import type { PillarKey } from "@/content/types";
 import { PillarMark, PILLAR_FILL } from "@/components/ui";
 import { CheckInForm } from "@/components/CheckInForm";
 import { TimezoneSync } from "@/components/Timezone";
+import { watchAreas, focusTitle, MAX_FOCUSES } from "@/lib/focus";
 import { Icon, IconBadge, type IconName } from "@/components/Icon";
 
 export const metadata = { title: "Today" };
@@ -23,7 +24,10 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   const { pack } = await getContent();
   const pillarKey = (d.profile.priorityPillar ?? d.cycle?.pillar) as PillarKey | undefined;
   const p = pillarKey ? pack.pillars.find((x) => x.key === pillarKey) : null;
-  const goal = d.goals.find((g) => g.isPriority) ?? d.goals[0];
+  const watch = watchAreas(d.assessment, d.profile.priorityPillar);
+  const second = d.focuses.find((f) => f.slot === 2) ?? null;
+  const secondPos = second ? cyclePosition(second.startDate) : null;
+  const notSetUp = d.focuses.find((f) => !f.setupDoneAt) ?? null;
   const pos = d.cycle ? cyclePosition(d.cycle.startDate) : null;
   const week = d.cycle && pos ? cycleWeeks(d.cycle.template, pack).weeks[pos.week - 1] : null;
   const practice = practiceSummary(d.checkIns);
@@ -56,10 +60,10 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
       <TimezoneSync saved={d.profile.timezone} />
       {setup === "done" && <p role="status" className="notice">Week 1 setup is done. Your plan is on its way to the person who finds out.</p>}
       {/* Mid-cycle and not set up yet: an invitation, never a gate. */}
-      {d.cycle && pos && !pos.finished && !d.cycle.setupDoneAt && (
-        <Link href={`/cycle/setup?step=${d.cycle.plan ? "share" : !d.cycle.situation ? 1 : !d.cycle.feeling ? 2 : !d.cycle.oldResponse ? 3 : !d.cycle.newResponse ? 4 : !d.cycle.gap ? 5 : "plan"}`} className="tile flex items-center gap-4 transition hover:-translate-y-0.5">
+      {notSetUp && !cyclePosition(notSetUp.startDate).finished && (
+        <Link href={`/cycle/setup?step=${notSetUp.plan ? "share" : !notSetUp.situation ? 1 : !notSetUp.feeling ? 2 : !notSetUp.oldResponse ? 3 : !notSetUp.newResponse ? 4 : !notSetUp.gap ? 5 : "plan"}`} className="tile flex items-center gap-4 transition hover:-translate-y-0.5">
           <span className="flex-1">
-            <span className="block text-[15px] font-medium text-heading">Finish your week 1 setup</span>
+            <span className="block text-[15px] font-medium text-heading">Finish setting up {d.focuses.length > 1 ? `"${focusTitle(notSetUp)}"` : "your focus"}</span>
             <span className="block text-sm text-ink-soft">Five short questions, your plan, and who finds out.</span>
           </span>
           <Icon name="arrow" className="h-4 w-4 shrink-0 text-ink-mute" />
@@ -78,16 +82,33 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         {d.cycle && week && pos ? (
           <>
             <DayArc day={pos.day} pillar={d.cycle.pillar as PillarKey} />
-            <p className="text-center text-[11px] uppercase tracking-[0.14em] text-ink-mute">Week {pos.week} · {week.phase}{d.cycle.seasonMonth ? ` · Month ${d.cycle.seasonMonth} of 3` : ""}</p>
-            <Link href="/cycle" className="mt-1 block text-center text-[17px] font-medium leading-snug text-ink">{d.cycle.plan || d.cycle.focus || week.work}</Link>
+            <p className="text-center text-[11px] uppercase tracking-[0.14em] text-ink-mute">{d.focuses.length > 1 ? "Focus 1 · " : "My focus · "}Week {pos.week} · {week.phase}{d.cycle.seasonMonth ? ` · Month ${d.cycle.seasonMonth} of 3` : ""}</p>
+            <Link href={`/cycle?id=${d.cycle.id}`} className="mt-1 block text-center text-[17px] font-medium leading-snug text-ink">{d.cycle.title || d.cycle.plan || d.cycle.focus || week.work}</Link>
+            {d.cycle.title && d.cycle.plan && <p className="mt-1 text-center text-sm text-ink-soft">{d.cycle.plan}</p>}
+            {watch.includes(d.cycle.pillar as PillarKey) && <p className="mt-2 text-center text-xs text-ink-mute">Runs through your watch area: {pack.pillars.find((x) => x.key === d.cycle!.pillar)?.name}</p>}
             {pos.finished
-              ? <Link href="/cycle" className="mt-5 btn-primary w-full">Open my day 30 review</Link>
-              : <div className="mt-4"><CheckInForm existing={d.todayCheckIn} hasCoach={d.coaches.length > 0} identityLevel={d.identity?.level} /></div>}
+              ? <Link href={`/cycle?id=${d.cycle.id}`} className="mt-5 btn-primary w-full">Open my day 30 review</Link>
+              : <div className="mt-4"><CheckInForm existing={d.todayCheckIn} hasCoach={d.coaches.length > 0} /></div>}
           </>
         ) : (
           <Link href="/start" className="mt-6 btn-primary w-full">Pick up where I left off</Link>
         )}
       </section>
+
+      {second && secondPos && (
+        <section className="tile !p-5 sm:!p-6" aria-label="Focus 2">
+          <div className="flex items-baseline justify-between gap-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-mute">Focus 2 · day {secondPos.day} of 30</p>
+            <Link href={`/cycle?id=${second.id}`} className="text-sm btn-link">Open</Link>
+          </div>
+          <p className="mt-2 text-[17px] font-medium leading-snug text-heading">{focusTitle(second)}</p>
+          {second.title && second.plan && <p className="mt-1 text-sm text-ink-soft">{second.plan}</p>}
+          {watch.includes(second.pillar as PillarKey) && <p className="mt-2 text-xs text-ink-mute">Runs through your watch area: {pack.pillars.find((x) => x.key === second.pillar)?.name}</p>}
+          {secondPos.finished
+            ? <Link href={`/cycle?id=${second.id}`} className="mt-4 btn-primary w-full">Open my day 30 review</Link>
+            : <div className="mt-4"><CheckInForm existing={d.todayCheckIn ? { ...d.todayCheckIn, status: d.todayCheckIn.status2 } : null} hasCoach={false} slot={2} /></div>}
+        </section>
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         <Tile href="/history" icon="calendar" label="Practiced" value={String(practice.practiced)} word={practice.practiced ? "in the last 30 days" : "none yet"}>
@@ -104,11 +125,13 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
           {d.identity?.level === "REINVENT" && d.identity.personaName && <p className="mt-3 text-xs text-ink-mute">Performance identity: <span className="text-ink">{d.identity.personaName}</span></p>}
         </Link>
 
-        <Link href={goal?.oneMove ? "/road#one-move" : "/road"} className="tile col-span-2 flex items-center gap-4 transition hover:-translate-y-0.5">
+        <Link href="/focus" className="tile col-span-2 flex items-center gap-4 transition hover:-translate-y-0.5">
           {p ? <PillarMark k={p.key} /> : <IconBadge name="step" />}
           <div className="flex-1 min-w-0">
-            <p className="text-[13px] text-ink-mute">My move this week{p ? ` · ${p.name}` : ""}</p>
-            <p className="mt-0.5 text-[15px] font-medium leading-snug text-ink line-clamp-2">{goal?.oneMove || "Pick one move"}</p>
+            <p className="text-[13px] text-ink-mute">My focus</p>
+            <p className="mt-0.5 text-[15px] font-medium leading-snug text-ink line-clamp-2">
+              {d.focuses.length === 0 ? "Choose one or two things to work on" : d.focuses.length < MAX_FOCUSES ? "One focus in progress. There's room for one more, if you want it." : "Two focuses in progress. That's the most."}
+            </p>
           </div>
           <Icon name="arrow" className="h-4 w-4 shrink-0 text-ink-mute" />
         </Link>

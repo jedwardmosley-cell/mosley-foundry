@@ -45,7 +45,7 @@ const saveThroughReveal = async (page: Page, url: string, button = "Save who I a
   await Promise.all([page.waitForURL(url), dialog.locator('button:has-text("Save")').click()]);
 };
 /** Week 1 setup: five answers, the plan, then one person who finds out. Returns the plan text. */
-const doSetup = async (page: Page, who: string, newResponse = "Pause and ask one question before I answer") => {
+const doSetup = async (page: Page, who: string, newResponse = "Pause and ask one question before I answer", landing = "**/dashboard?setup=done") => {
   await page.waitForURL(/\/cycle\/setup\?step=1$/);
   const answers = ["When someone pushes back on my decision in a meeting", "Heat in my chest", "I defend the decision right away", newResponse, "Letting go of needing to look like I have the answer"];
   for (let i = 0; i < 5; i++) {
@@ -56,10 +56,15 @@ const doSetup = async (page: Page, who: string, newResponse = "Pause and ask one
   const plan = await page.inputValue('textarea[name="plan"]');
   assert.equal(plan, `When someone pushes back on my decision in a meeting and I feel heat in my chest, I will ${newResponse[0].toLowerCase()}${newResponse.slice(1)}.`);
   await Promise.all([page.waitForURL(/step=share$/), page.click('button:has-text("Looks right")')]);
+  // No one in My people yet (the first session no longer asks earlier): add them right here.
+  if (await page.locator('button:has-text("Add and continue")').count()) {
+    await page.fill('input[name="name"]', who);
+    await Promise.all([page.waitForLoadState("networkidle"), page.click('button:has-text("Add and continue")')]);
+  }
   await page.locator("label", { hasText: who }).first().click();
   const msg = await page.inputValue("textarea");
   assert.ok(msg.endsWith("Check on me.") && !/heat|defend|letting go/i.test(msg), "only the situation and the new response by default");
-  await Promise.all([page.waitForURL("**/dashboard?setup=done"), page.click('button:has-text("Send by text or email")')]);
+  await Promise.all([page.waitForURL(landing), page.click('button:has-text("Send by text or email")')]);
   return plan;
 };
 const submitAndWait = async (page: Page, selector: string) => {
@@ -103,7 +108,8 @@ const submitAndWait = async (page: Page, selector: string) => {
   });
 
   await check("3. identify a development priority", async () => {
-    await Promise.all([page.waitForURL(/\/road(#one-move)?$/), page.click('button:has-text("my development priority")')]);
+    // The lowest score is the watch area; choosing it leads to My focus.
+    await Promise.all([page.waitForURL(/\/cycle\/new\?pillar=E$/), page.click('button:has-text("choose my focus")')]);
     // the old plan address now opens Who I am: one activity
     await Promise.all([page.waitForURL("**/identity"), page.goto(`${BASE}/plan`)]);
     const p = await db.profile.findFirst({ where: { user: { email } } });
@@ -180,6 +186,8 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.addInitScript(() => { (navigator as unknown as { share: (d: { text: string }) => Promise<void> }).share = async () => {}; });
     await page.goto(`${BASE}/cycle/new`);
     assert.equal(await page.locator('input[name="focus"][type="text"]').count(), 0, "the behavior box is gone: week 1 setup names it");
+    await page.waitForSelector("text=Your watch area is Emotionally Anchored");
+    await page.fill('input[name="title"]', "Stay curious when my decisions get challenged");
     await page.click('button:has-text("Start the cycle")');
     const plan = await doSetup(page, "Jamie Cole");
     await page.waitForSelector("text=Week 1 setup is done");
@@ -225,23 +233,35 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.deepEqual(JSON.parse(c.tags), ["In a meeting"]);
   });
 
-  await check("7b. Blueprint: one move this week, priority open, suggestion fills the field", async () => {
+  await check("7b. My focus: one or two, and that's it; My road holds it", async () => {
+    await page.goto(`${BASE}/focus`);
+    await page.waitForSelector("text=Stay curious when my decisions get challenged");
+    await page.waitForSelector("text=Watch area");
+    await page.waitForSelector("text=Add a second focus");
     await page.goto(`${BASE}/road`);
-    assert.equal(await (await page.request.get(`${BASE}/plan`)).text().then((t) => t.includes('name="oneMove"')), false, "one move is no longer on the FORGE plan");
-    const pri = page.locator("details[open]", { hasText: "Emotionally Anchored" });
-    await pri.locator('summary:has-text("Ideas")').click();
-    await pri.locator('button:has-text("one breath, one question")').click();
-    assert.match(await pri.locator('input[name="oneMove"]').inputValue(), /one breath/);
-    await Promise.all([page.waitForLoadState("networkidle"), pri.locator('button:has-text("Save my move")').click()]);
-    // Wait for the save to land: networkidle can resolve before the server action finishes.
-    let g = await db.developmentGoal.findFirstOrThrow({ where: { user: { email }, pillar: "E", segmentKey: null } });
-    for (let i = 0; i < 25 && !/one breath/.test(g.oneMove); i++) {
-      await page.waitForTimeout(200);
-      g = await db.developmentGoal.findFirstOrThrow({ where: { user: { email }, pillar: "E", segmentKey: null } });
-    }
-    assert.match(g.oneMove, /one breath/);
-    assert.equal(await page.locator("details[open]", { hasText: "Future Focused" }).count(), 0, "non-priority pillars start folded");
-    await page.screenshot({ path: `${shots}/06b-plan.png`, fullPage: false });
+    await page.waitForSelector("text=This road holds my focus");
+    assert.equal(await page.locator("text=One move this week").count(), 0, "one move is folded into My focus");
+    // a second focus fills slot 2; a third has to replace one
+    await page.goto(`${BASE}/cycle/new`);
+    await page.fill('input[name="title"]', "Give my team the full picture, early");
+    await Promise.all([page.waitForURL(/\/cycle\/setup\?step=1$/), page.click('button:has-text("Start the cycle")')]);
+    const two = await db.developmentCycle.findMany({ where: { user: { email }, status: "ACTIVE" }, orderBy: { slot: "asc" } });
+    assert.deepEqual(two.map((c) => c.slot), [1, 2]);
+    await page.goto(`${BASE}/cycle/new`);
+    await page.waitForSelector("text=You already have two focuses");
+    assert.equal(await page.locator('input[name="replace"]').count(), 2);
+    // check in on each focus: the second one's status shares the day's row
+    await page.goto(`${BASE}/dashboard`);
+    const second = page.locator('section[aria-label="Focus 2"]');
+    await second.locator('label:has(input[value="PARTIAL"])').click();
+    await Promise.all([page.waitForLoadState("networkidle"), second.locator('button:has-text("Log today")').click()]);
+    let row = await db.dailyCheckIn.findFirst({ where: { user: { email }, cycle2Id: two[1].id } });
+    for (let i = 0; i < 25 && !row; i++) { await page.waitForTimeout(200); row = await db.dailyCheckIn.findFirst({ where: { user: { email }, cycle2Id: two[1].id } }); }
+    assert.equal(row?.status2, "PARTIAL");
+    assert.equal(row?.status, "DONE", "focus 1's check-in from earlier today is untouched");
+    await page.screenshot({ path: `${shots}/06b-focus.png`, fullPage: true });
+    // leave one focus, as later steps expect
+    await db.developmentCycle.update({ where: { id: two[1].id }, data: { status: "STOPPED" } });
   });
 
   await check("7c. My feedback: own summary and file, private, tagged to a pillar, put to work", async () => {
@@ -268,7 +288,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await add.locator('select[name="pillar"]').selectOption("E");
     await add.locator('input[name="practice"]').fill("One breath before I answer");
     await Promise.all([page.waitForLoadState("networkidle"), add.locator('button:has-text("Add")').click()]);
-    await page.waitForSelector("text=Practice this for 30 days");
+    await page.waitForSelector("text=Make this a focus");
     assert.equal(await page.locator('button:has-text("Share with")').count(), 0, "no share button without a coach");
     await Promise.all([page.waitForURL("**/road"), page.click('button:has-text("Add to My road")')]);
     await page.waitForSelector("text=One breath before I answer");
@@ -277,11 +297,13 @@ const submitAndWait = async (page: Page, selector: string) => {
     await Promise.all([page.waitForLoadState("networkidle"), page.click('button[aria-label="Let the AI companion use my summary"]')]);
     await page.waitForSelector('button[aria-label="Let the AI companion use my summary"][aria-checked="true"]');
     // practicing it for 30 days warns that the current 30 days would end
-    await Promise.all([page.waitForURL(/\/cycle\/new\?pillar=E/), page.click('a:has-text("Practice this for 30 days")')]);
+    await Promise.all([page.waitForURL(/\/cycle\/new\?pillar=E/), page.click('a:has-text("Make this a focus")')]);
     assert.equal(await page.inputValue('input[name="focus"]'), "One breath before I answer");
     assert.ok(await page.locator('input[name="pillar"][value="E"]').isChecked());
-    await page.waitForSelector("text=Starting a new one ends it.");
-    await page.waitForSelector('button:has-text("Start anyway")');
+    assert.equal(await page.inputValue('input[name="source"]'), "FEEDBACK");
+    // one focus is in progress, so this one can be a second focus: nothing ends
+    await page.waitForSelector('button:has-text("Start the cycle")');
+    assert.equal(await page.locator('input[name="replace"]').count(), 0);
     // the results page says where the feedback points, and that it is a different measure
     const a = await db.assessment.findFirstOrThrow({ where: { user: { email } }, orderBy: { completedAt: "desc" } });
     await page.goto(`${BASE}/assessment/${a.id}`);
@@ -305,11 +327,10 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal((await db.profile.findUniqueOrThrow({ where: { userId: me.id } })).forgeStatement, id.becoming);
     await page.goto(`${BASE}/dashboard`);
     await page.waitForSelector(`main a:has-text("Who's behind the wheel") >> text=I am someone who follows through on what I say.`);
-    // the behavior now opens My road
+    // My road starts from the statement and holds the focus: no separate behavior to track
     await page.goto(`${BASE}/road`);
-    await page.fill('input[name="behavior"]', "I close every open commitment by Friday noon.");
-    await submitAndWait(page, 'form:has(input[name="behavior"]) button[type="submit"]');
-    assert.equal((await db.identityProfile.findUniqueOrThrow({ where: { userId: me.id } })).behavior, "I close every open commitment by Friday noon.");
+    await page.waitForSelector("text=This road holds my focus");
+    assert.equal(await page.locator('input[name="behavior"]').count(), 0);
     // identity reinvention, with the folded performance identity
     await page.goto(`${BASE}/identity`);
     await page.locator("label", { hasText: "Identity reinvention" }).click();
@@ -322,7 +343,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal(hist.length, 2);
     assert.ok(hist.every((h) => h.level === "CORE" && h.role === "manager"));
     assert.equal(await db.assessment.count({ where: { userId: me.id } }), 1, "FORGE records untouched");
-    assert.equal(await db.developmentCycle.count({ where: { userId: me.id } }), 1);
+    assert.equal(await db.developmentCycle.count({ where: { userId: me.id, status: "ACTIVE" } }), 1, "the focus in progress is untouched");
     await page.goto(`${BASE}/dashboard`);
     await page.waitForSelector("text=The Closer");
     await page.screenshot({ path: `${shots}/06e-identity-card.png` });
@@ -330,35 +351,19 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal(priority.priorityPillar, "E", "choosing a kind of change never changes the FORGE priority");
   });
 
-  await check("7f. the level shapes the FORGE plan, My road, cycle and check-in, all optional", async () => {
+  await check("7f. who I am is asked weekly, with the watch area, not every day", async () => {
     const me = await db.user.findUniqueOrThrow({ where: { email } });
-    await page.goto(`${BASE}/road`);
-    await page.waitForSelector("text=For identity reinvention:");
-    await page.waitForSelector("text=Use your activation cue to prepare before a demanding situation.");
-    await page.goto(`${BASE}/road`);
-    const card = page.locator("section", { hasText: "Identity practice" }).first();
-    await card.waitFor();
-    await card.locator("text=Write your activation cue first").waitFor(); // no cue written yet, so nothing is added for them
-    const before = await db.commitment.count({ where: { userId: me.id } });
-    await Promise.all([page.waitForLoadState("networkidle"), card.locator('button:has-text("Add a weekly review against my standards")').click()]);
-    await card.locator("text=On My road").waitFor();
-    assert.equal(await db.commitment.count({ where: { userId: me.id } }), before + 1, "only the one the person tapped is added");
-    const added = await db.commitment.findFirstOrThrow({ where: { userId: me.id, detail: "Who I am" } });
-    assert.equal(added.cadence, "WEEKLY");
-    await page.goto(`${BASE}/cycle/new`);
-    assert.equal(await page.inputValue('input[name="focus"]'), "I close every open commitment by Friday noon.", "the behavior from My road starts the new response");
-    await page.waitForSelector("text=You'll start from: I close every open commitment by Friday noon.");
     await page.goto(`${BASE}/dashboard`);
-    await page.waitForSelector("text=Showed up as who I am?");
-    await page.waitForSelector('input[placeholder="Where did you meet your standard today, and where did you fall short?"]', { state: "attached" });
-    // the question is optional: saving without it still works
-    await submitAndWait(page, 'button:has-text("Update today")');
-    assert.equal((await db.dailyCheckIn.findFirstOrThrow({ where: { userId: me.id } })).identityActed, "");
-    await page.locator('label:has(input[name="identityActed"][value="PARTLY"])').click();
-    await submitAndWait(page, 'button:has-text("Update today")');
-    const ci = await db.dailyCheckIn.findFirstOrThrow({ where: { userId: me.id } });
-    assert.equal(ci.identityActed, "PARTLY");
-    assert.equal(ci.status, "DONE", "Done / Partial / Not yet is unchanged");
+    assert.equal(await page.locator("text=Showed up as who I am?").count(), 0, "moved to the weekly look back");
+    await page.goto(`${BASE}/reflect`);
+    await page.waitForSelector("text=Where did my watch area show up this week?");
+    await page.locator('label:has(input[name="actedLike"][value="MOSTLY"])').click();
+    await page.fill('input[name="watchNote"]', "Thursday's budget review");
+    await submitAndWait(page, 'button:has-text("Save this week")');
+    let w = await db.weeklyReflection.findFirst({ where: { userId: me.id } });
+    for (let i = 0; i < 25 && !w?.watchNote; i++) { await page.waitForTimeout(200); w = await db.weeklyReflection.findFirst({ where: { userId: me.id } }); }
+    assert.equal(w?.actedLike, "MOSTLY");
+    assert.equal(w?.watchNote, "Thursday's budget review");
   });
 
   await check("1b/7d. sign out, sign back in, saved progress and reflection retrieved", async () => {
@@ -419,30 +424,28 @@ const submitAndWait = async (page: Page, selector: string) => {
     await Promise.all([g.waitForURL("**/assessment?next=start"), g.click('a:has-text("Take the FORGE assessment")')]);
     for (const [k, v] of Object.entries({ F: 4, O: 3, R: 4, G: 3, E: 2 })) await g.locator(`input[name="${k}"][value="${v}"]`).check({ force: true });
     await Promise.all([g.waitForURL(/\/assessment\/[a-z0-9]+\?next=start$/), g.click('button:has-text("See my profile")')]);
-    await Promise.all([g.waitForURL("**/start?step=3"), g.click('button:has-text("my development priority")')]);
-    // 3. my road: one routine and one person
-    await g.locator('summary:has-text("Ideas")').click();
-    await g.locator('button:has-text("Journaling")').click();
-    await Promise.all([g.waitForURL("**/start?step=3"), g.click('button:has-text("Add routine")')]);
-    await g.waitForSelector("text=✓ Journaling");
-    await g.fill('input[name="name"]', "Pat Partner");
-    await g.click('button:has-text("Add person")');
-    await g.waitForSelector("text=✓ Pat Partner");
-    await Promise.all([g.waitForURL("**/start?step=4"), g.click('a:has-text("Next: start your 30 days")')]);
-    await g.waitForSelector("text=I am a manager measured by what my team can do.");
-    // 4. the 30 days, about the same role
-    await Promise.all([g.waitForURL(/\/cycle\/new\?pillar=E/), g.click('a:has-text("start my 30 days")')]);
+    await Promise.all([g.waitForURL("**/start?step=3"), g.click('button:has-text("choose my focus")')]);
+    // 3. my focus: one thing to work on, set up once (five questions, the plan, who finds out)
+    await Promise.all([g.waitForURL(/\/cycle\/new\?next=start&pillar=E/), g.click('a:has-text("Choose my focus")')]);
     // the phone's share sheet, stubbed, and loaded with a full page load so it is in place for week 1 setup
     await g.addInitScript(() => { (navigator as unknown as { share: () => Promise<void> }).share = async () => {}; });
     await g.reload();
     assert.equal(await g.inputValue('input[name="role"]'), "manager");
+    await g.fill('input[name="title"]', "Stay curious when my decisions get challenged");
     // month 1 of a season, started 29 days ago, so today is day 30 and the review is open
     await g.locator('input[name="season"][value="new"]').check();
     await g.locator('summary:has-text("Structure and start date")').click();
     const ago = new Date(Date.now() - 29 * 86400000);
     await g.fill('input[name="startDate"]', `${ago.getFullYear()}-${String(ago.getMonth() + 1).padStart(2, "0")}-${String(ago.getDate()).padStart(2, "0")}`);
     await g.click('button:has-text("Start the cycle")');
-    await doSetup(g, "Pat Partner", "Pause before I answer");
+    await doSetup(g, "Pat Partner", "Pause before I answer", "**/start?step=4");
+    // 4. my road: one routine holds the focus in place; the person came from "Who finds out?"
+    await g.waitForSelector("text=✓ Pat Partner");
+    await g.locator('summary:has-text("Ideas")').click();
+    await g.locator('button:has-text("Journaling")').click();
+    await Promise.all([g.waitForURL("**/start?step=4"), g.click('button:has-text("Add routine")')]);
+    await g.waitForSelector("text=✓ Journaling");
+    await g.click('a:has-text("Finish and go to Today")');
     await g.goto(`${BASE}/cycle`);
     await g.waitForSelector("text=Season, month 1 of 3");
     // day 30 of a set-up cycle: week 4 asks what keeps it going, and can put it on My road
@@ -614,7 +617,8 @@ const submitAndWait = async (page: Page, selector: string) => {
     await g.waitForSelector("text=I am STATEMENT-B.");
     assert.ok(!(await g.locator("main").innerText()).includes("OLD-CLAIM-B"), "Today shows My statement");
     await g.goto(`${BASE}/road`);
-    assert.equal(await g.inputValue('input[name="behavior"]'), "BEHAVIOR-B", "the behavior opens My road");
+    // the behavior is kept in the record; My road now shows the focus instead
+    assert.equal((await db.identityProfile.findUniqueOrThrow({ where: { userId: both.id } })).behavior, "BEHAVIOR-B", "a saved behavior is kept");
     // the five and the statement with no identity yet: all there, and nothing is rewritten until the client saves
     await g.context().clearCookies();
     await login(g, linesOnly.email, "carry-password-1");

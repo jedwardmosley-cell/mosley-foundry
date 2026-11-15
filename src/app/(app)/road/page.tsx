@@ -1,19 +1,18 @@
 import { DAY_CHOICES as DAY_LABELS, isScheduled, scheduleOf, daysToText } from "@/lib/schedule";
 import { requireUser } from "@/lib/auth";
+import { activeFocuses } from "@/lib/focusData";
+import { focusTitle } from "@/lib/focus";
 import { ReadTheBook } from "@/components/ReadTheBook";
 import { db } from "@/lib/db";
 import { getContent } from "@/content";
 import { BLUEPRINT_AREAS } from "@/content/program";
 import { addCommitment, removeCommitment, updateCommitmentSchedule } from "@/app/actions/participant";
-import { PageHeader, Card, Source, Field } from "@/components/ui";
+import { PageHeader, Card, Source, Field, PillarMark } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 import Link from "next/link";
 import { BLUEPRINT_PICKS } from "@/content/options";
-import { LEVELS, PRACTICE, PICKS_STATUS, BEHAVIOR_PICKS, type IdentityLevel } from "@/content/identity";
-import { addIdentityPractice, saveBehavior } from "@/app/actions/identity";
 import { withArticle } from "@/content/whoIAm";
 import { Picks } from "@/components/Picks";
-import { OneMoveCards } from "@/components/OneMoveCards";
 import { Icon, IconBadge, type IconName } from "@/components/Icon";
 import { FORGE_LINES, PRACTICE_STARTERS } from "@/content/forgeLines";
 import type { PathwayKey } from "@/content/program";
@@ -34,10 +33,9 @@ export default async function MyRoadPage() {
   ]);
   const identity = await db.identityProfile.findUnique({ where: { userId: u.id } });
   const profile = await db.profile.findUnique({ where: { userId: u.id } });
-  const goals = await db.developmentGoal.findMany({ where: { userId: u.id, status: "ACTIVE", segmentKey: null } });
+  const focuses = await activeFocuses(u.id);
   const pathway = (profile?.pathway ?? "PERSONAL") as PathwayKey;
   const focus = profile?.priorityPillar as PillarKey | null | undefined;
-  const statements = FORGE_LINES.filter((l) => profile?.[l.field]);
   // Practices for the focus pillar come first in the routine picks: this is where the identity turns into habits.
   const picksFor = (area: string) => {
     const base = BLUEPRINT_PICKS[area];
@@ -74,25 +72,17 @@ export default async function MyRoadPage() {
           </Link>
         )}
         <div className="bg-card px-5 py-5 sm:px-7 sm:py-6">
-          {identity ? (
-            <form action={saveBehavior} className="space-y-2">
-              <label htmlFor="behavior" className="label">What behavior would show I&apos;ve become this person?</label>
-              <input id="behavior" name="behavior" defaultValue={identity.behavior} maxLength={1500} className="input" placeholder="Something another person could see me do" />
-              <div className="flex items-start justify-between gap-3">
-                <Picks list={{ status: PICKS_STATUS, options: BEHAVIOR_PICKS[pathway] }} target="behavior" folded="Examples" />
-                <Submit className="btn-quiet !py-2 mt-1.5 shrink-0">Save</Submit>
-              </div>
-            </form>
+          <p className="label">This road holds my focus</p>
+          {focuses.length ? (
+            <ul className="mt-2 space-y-2">
+              {focuses.map((f) => (
+                <li key={f.id}><Link href={`/cycle?id=${f.id}`} className="flex items-start gap-2.5 text-[15px] text-heading hover:text-link"><PillarMark k={f.pillar as PillarKey} size="sm" />{focusTitle(f)}</Link></li>
+              ))}
+            </ul>
           ) : (
-            <p className="text-[15px]">Start with <Link href="/identity" className="btn-link">Who's behind the wheel</Link>. Then name the behavior that would show it.</p>
+            <p className="mt-1 text-[15px]"><Link href="/focus" className="btn-link">Choose your focus</Link> first: one or two things to work on. The routines below hold it in place.</p>
           )}
         </div>
-      </section>
-
-      <section id="one-move" className="mb-10 scroll-mt-20">
-        <SectionHead title="One move this week" />
-        {!focus && <p className="mb-3 text-sm muted">Pick a focus pillar from your assessment results first.</p>}
-        <OneMoveCards pack={pack} goals={goals} priority={focus} level={identity?.level} />
       </section>
 
       {d.whosChecking.length > 0 && (
@@ -100,36 +90,6 @@ export default async function MyRoadPage() {
           <blockquote className="font-serif text-[21px] sm:text-[24px] leading-[1.3] tracking-[-0.01em] text-heading">{d.whosChecking[0]}</blockquote>
           <FromBook label="So who's checking?" className="mt-3 !mb-0">{d.whosChecking[2]}</FromBook>
         </figure>
-      )}
-
-      {identity && (
-        <section className="mb-10">
-          <SectionHead title="Identity practice" meta={<Link href="/identity" className="chip whitespace-nowrap">{LEVELS[identity.level as IdentityLevel].name}</Link>} />
-          <Card className="!py-2">
-          <ul className="divide-y divide-line/60">
-            {PRACTICE[identity.level as IdentityLevel].map((item, i) => {
-              const a = item.action;
-              const source = a.kind === "commit" ? (a.from === "behavior" ? identity.behavior : a.from === "cue" ? identity.personaCue : a.from === "standards" ? identity.personaStandards : "ok") : "ok";
-              const title = a.kind === "commit" ? (a.from === "behavior" ? identity.behavior.split("\n")[0].trim().slice(0, 200) : a.from === "cue" ? identity.personaCue.split("\n")[0].trim().slice(0, 200) : a.from === "standards" ? "Read my standards" : "Review my week against my standards") : "";
-              const added = a.kind === "commit" && items.some((c) => c.title === title && ["Who I am", "Identity shift", "Identity Shift"].includes(c.detail));
-              return (
-                <li key={item.text} className="py-3.5 flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5">
-                  <span className="text-[15px]">{item.text}</span>
-                  {a.kind === "link" ? (
-                    <Link href={a.href} className="text-sm btn-link">{a.button}</Link>
-                  ) : added ? (
-                    <span className="chip !text-link">On My road</span>
-                  ) : source ? (
-                    <form action={addIdentityPractice}><input type="hidden" name="index" value={i} /><button className="text-sm btn-link text-left">{a.button}</button></form>
-                  ) : (
-                    <Link href="/identity" className="text-sm btn-link">{a.from === "behavior" ? "Write your behavior first" : a.from === "cue" ? "Write your activation cue first" : "Write your standards first"}</Link>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-          </Card>
-        </section>
       )}
 
       <SectionHead title="My system" sub="The routines and reviews that keep you on the road." />
