@@ -1,46 +1,57 @@
 /**
- * My Design as one picture: the client in the center and one spoke for each area of Discipline by Design.
- * A filled circle shows how many things are in that area. An open circle is a slot still to fill: tap it to add.
- * The map grows as the system does.
+ * My Design as one picture: the client in the middle and everything they have built around them,
+ * routines, people, groups and programs, the people they develop. Only what is really there shows,
+ * so the map starts with just their name and fills in as the design grows.
  */
-export type MapArea = { key: string; label: string; count: number; href: string; firstItem?: string };
+export type MapKind = "routine" | "guide" | "partner" | "group" | "develop" | "learning";
+export type MapNode = { id: string; label: string; kind: MapKind; href: string; overdue?: boolean };
 
-export function SystemMap({ name, areas }: { name: string; areas: MapArea[] }) {
-  const W = 440, H = 340, cx = W / 2, cy = H / 2, R = 100, LR = 124;
-  const n = areas.length;
-  const filled = areas.filter((a) => a.count > 0).length;
+export const KIND: Record<MapKind, { name: string; color: string }> = {
+  routine: { name: "Routines and habits", color: "rgb(var(--navy))" },
+  partner: { name: "Accountability", color: "rgb(var(--clay))" },
+  guide: { name: "Mentors and coaches", color: "rgb(var(--sage))" },
+  group: { name: "Groups and programs", color: "rgb(var(--gold))" },
+  learning: { name: "Learning", color: "rgb(var(--violet))" },
+  develop: { name: "People I develop", color: "rgb(var(--brass))" },
+};
+const ORDER: MapKind[] = ["routine", "partner", "guide", "group", "learning", "develop"];
+
+export function SystemMap({ name, nodes }: { name: string; nodes: MapNode[] }) {
+  const W = 440, H = 360, cx = W / 2, cy = H / 2;
+  const sorted = [...nodes].sort((a, b) => ORDER.indexOf(a.kind) - ORDER.indexOf(b.kind));
+  const n = sorted.length;
+  // One ring; a second, closer ring takes every other item once there are many.
+  const placed = sorted.map((node, i) => {
+    const ang = (-90 + (360 / Math.max(n, 1)) * i) * (Math.PI / 180);
+    const r = n > 12 && i % 2 ? 92 : 128;
+    return { ...node, ang, x: cx + r * Math.cos(ang), y: cy + r * Math.sin(ang) };
+  });
+  const kinds = ORDER.filter((k) => sorted.some((x) => x.kind === k));
   return (
     <figure>
-      <svg viewBox={`0 0 ${W} ${H}`} className="mx-auto w-full max-w-[420px] h-auto" role="img" aria-label={`My Design: ${filled} of ${n} areas in place`}>
-        <circle cx={cx} cy={cy} r={R} fill="none" stroke="rgb(var(--line))" strokeDasharray="3 5" />
-        {areas.map((a, i) => {
-          const ang = (-90 + (360 / n) * i) * (Math.PI / 180);
-          const x = cx + R * Math.cos(ang), y = cy + R * Math.sin(ang);
-          const lx = cx + LR * Math.cos(ang), ly = cy + LR * Math.sin(ang);
-          const anchor = Math.abs(Math.cos(ang)) < 0.2 ? "middle" : Math.cos(ang) > 0 ? "start" : "end";
-          const on = a.count > 0;
+      <svg viewBox={`0 0 ${W} ${H}`} className="mx-auto w-full max-w-[440px] h-auto" role="img" aria-label={`My Design: ${n} ${n === 1 ? "thing" : "things"} around you`}>
+        <circle cx={cx} cy={cy} r={128} fill="none" stroke="rgb(var(--line))" strokeDasharray="3 5" />
+        {placed.map((p) => (
+          <line key={`l${p.id}`} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke={p.overdue ? "rgb(var(--alert))" : "rgb(var(--ink-mute) / 0.45)"} strokeWidth={1.25} strokeDasharray={p.overdue ? "4 4" : undefined} />
+        ))}
+        <circle cx={cx} cy={cy} r={34} fill="rgb(var(--navy))" />
+        <text x={cx} y={cy + 5} textAnchor="middle" fontSize="14" fill="#fff" fontFamily="Georgia, serif">{name.split(" ")[0].slice(0, 12)}</text>
+        {placed.map((p) => {
+          const below = Math.sin(p.ang) > -0.3;
           return (
-            <a key={a.key} href={a.href} aria-label={`${a.label}: ${on ? `${a.count} in place` : "open, tap to add"}`}>
-              <line x1={cx} y1={cy} x2={x} y2={y} stroke={on ? "rgb(var(--navy) / 0.55)" : "rgb(var(--ink-mute) / 0.3)"} strokeWidth={on ? 1.5 : 1} strokeDasharray={on ? undefined : "3 4"} />
-              {on ? (
-                <>
-                  <circle cx={x} cy={y} r={15} fill="rgb(var(--navy))" />
-                  <text x={x} y={y + 4.5} textAnchor="middle" fontSize="13" fontWeight="600" fill="#fff">{a.count}</text>
-                </>
-              ) : (
-                <>
-                  <circle cx={x} cy={y} r={15} fill="rgb(var(--card))" stroke="rgb(var(--ink-mute) / 0.6)" strokeDasharray="3 3" />
-                  <text x={x} y={y + 5} textAnchor="middle" fontSize="16" fill="rgb(var(--ink-mute))">+</text>
-                </>
-              )}
-              <text x={lx} y={ly + (Math.sin(ang) > 0.5 ? 10 : Math.sin(ang) < -0.5 ? -2 : 4)} textAnchor={anchor} fontSize="11.5" fill={on ? "rgb(var(--heading))" : "rgb(var(--ink-mute))"} fontWeight={on ? 600 : 400}>{a.label}</text>
+            <a key={p.id} href={p.href} aria-label={`${p.label}, ${KIND[p.kind].name}`}>
+              <circle cx={p.x} cy={p.y} r={8} fill={KIND[p.kind].color} />
+              <text x={p.x} y={below ? p.y + 22 : p.y - 14} textAnchor="middle" fontSize="11" fill="rgb(var(--ink))">{p.label.length > 18 ? p.label.slice(0, 17) + "…" : p.label}</text>
             </a>
           );
         })}
-        <circle cx={cx} cy={cy} r={36} fill="rgb(var(--navy))" />
-        <text x={cx} y={cy + 5} textAnchor="middle" fontSize="14" fill="#fff" fontFamily="Georgia, serif">{name.split(" ")[0].slice(0, 12)}</text>
+        {n === 0 && <text x={cx} y={cy + 70} textAnchor="middle" fontSize="12" fill="rgb(var(--ink-mute))">Add a routine or a person and it shows up here.</text>}
       </svg>
-      <figcaption className="mt-2 text-center text-sm text-ink-soft">{filled} of {n} areas in place.{filled < n && " Tap an open circle to add to it."}</figcaption>
+      {kinds.length > 0 && (
+        <figcaption className="mt-3 flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-xs text-ink-soft">
+          {kinds.map((k) => <span key={k} className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full" style={{ background: KIND[k].color }} />{KIND[k].name}</span>)}
+        </figcaption>
+      )}
     </figure>
   );
 }

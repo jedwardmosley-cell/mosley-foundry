@@ -213,8 +213,10 @@ const submitAndWait = async (page: Page, selector: string) => {
     await weekly.locator('select[name="whenDays"]').selectOption("Sunday");
     await Promise.all([page.waitForLoadState("networkidle"), weekly.locator('button[type="submit"]:has-text("Add")').click()]);
     await page.waitForSelector("text=Plan the week ahead");
-    // the map: the client in the middle, one spoke per area, filled as the design grows
-    await page.waitForSelector('svg[aria-label^="My Design: 2 of 10 areas in place"]');
+    // the map: the client in the middle, and only what they have added around them
+    await page.waitForSelector('svg[aria-label="My Design: 2 things around you"]');
+    assert.equal(await page.locator('svg[aria-label^="My Design"] a').count(), 2, "no empty category slots");
+    assert.equal(await page.locator("text=Chapter 10").count(), 0, "no chapter numbers");
     await page.screenshot({ path: `${shots}/04-my-road.png`, fullPage: false });
   });
 

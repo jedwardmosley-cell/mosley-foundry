@@ -41,7 +41,7 @@ export default async function ForgeGuide({ params }: { params: Promise<{ letter:
         </section>
       ) : chapter && (
         <section className="mt-10">
-          <h2 className="section-label">From Chapter 9, The Rules of the Road</h2>
+          <h2 className="section-label">From the book: The Rules of the Road</h2>
           <div className="mt-3 space-y-4 font-serif text-[18px] leading-[1.6] text-heading">
             {chapter.paragraphs.map((p, i) => <p key={i}>{p}</p>)}
           </div>
