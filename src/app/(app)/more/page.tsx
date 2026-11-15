@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/ui";
 const GROUPS: [string, [string, string, string][]][] = [
   ["FORGE", [
     ["/identity", "1. Who's behind the wheel", "The FORGE framework, applied to you: your seat, how big a turn, the five parts of one driver, and one statement."],
-    ["/assessment", "2. Where I am today", "Score the five pillars. See your strengths and your watch area."],
+    ["/assessment", "2. Where I am today", "Score the five pillars. The goal is a 5 on every one."],
   ]],
   ["Discipline by Design", [
     ["/focus", "3. My focus", "One or two things to work on, each with a plan for 30 days. That's it."],

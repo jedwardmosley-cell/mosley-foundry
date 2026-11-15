@@ -9,6 +9,8 @@ import { parse, text } from "@/lib/validation";
 import { defaultSchedule } from "@/content/program";
 import { randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
+import { audit } from "@/lib/access";
+import { emailAvailable, sendEmail, appUrl } from "@/lib/email";
 
 const admin = () => requireUser("ADMIN");
 
@@ -58,6 +60,9 @@ export async function enroll(fd: FormData): Promise<void> {
     });
   } else if (user.orgId && user.orgId !== a.orgId) {
     throw new Error("That person belongs to another organization.");
+  } else if (user.status === "PENDING") {
+    // Enrolling someone who signed up is approving them.
+    user = await db.user.update({ where: { id: user.id }, data: { status: "ACTIVE", orgId: a.orgId, approvedAt: new Date(), approvedBy: a.name } });
   }
   await db.cohortMember.upsert({
     where: { cohortId_userId: { cohortId: d.cohortId, userId: user.id } },
@@ -112,4 +117,64 @@ export async function setAlsoCoach(fd: FormData) {
   const { on } = parse(z.object({ on: z.enum(["true", "false"]) }), fd);
   await db.user.update({ where: { id: a.id }, data: { alsoCoach: on === "true" } });
   revalidatePath("/", "layout");
+}
+
+// ---------- People: sign-up approval and turning accounts off ----------
+
+/**
+ * An account the administrator may act on: someone in their organization, or a sign-up that has
+ * no organization yet. Never another administrator, and never themselves.
+ */
+async function manageable(a: { id: string; orgId: string | null }, userId: string) {
+  const u = await db.user.findUnique({ where: { id: userId } });
+  if (!u || u.id === a.id || u.role === "ADMIN") throw new Error("Not found");
+  if (u.orgId && u.orgId !== a.orgId) throw new Error("Not found");
+  return u;
+}
+
+const idOnly = z.object({ userId: z.string().min(1) });
+
+/** Approves a sign-up: it joins this organization, can sign in, and gets an email saying so. */
+export async function approveUser(fd: FormData) {
+  const a = await admin();
+  const { userId } = parse(idOnly, fd);
+  const u = await manageable(a, userId);
+  if (u.status !== "PENDING" && u.status !== "DECLINED") throw new Error("Not waiting for approval.");
+  await db.user.update({ where: { id: u.id }, data: { status: "ACTIVE", orgId: u.orgId ?? a.orgId, approvedAt: new Date(), approvedBy: a.name } });
+  await audit(a, "admin.approve_signup", u.id);
+  if (emailAvailable()) {
+    const link = `${appUrl()}/login`;
+    await sendEmail({
+      to: u.email,
+      subject: "Your account is ready",
+      text: `Hi ${u.name.split(" ")[0]},\n\nYour account on Both Hands on the Wheel is approved. Sign in here: ${link}`,
+      html: `<p>Hi ${u.name.split(" ")[0].replace(/</g, "&lt;")},</p><p>Your account on Both Hands on the Wheel is approved.</p><p><a href="${link}">Sign in</a></p>`,
+    }).catch(() => false);
+  }
+  revalidatePath("/admin/people");
+}
+
+/** Declines a sign-up. The person can't sign in; nothing is emailed. It can be approved later. */
+export async function declineUser(fd: FormData) {
+  const a = await admin();
+  const { userId } = parse(idOnly, fd);
+  const u = await manageable(a, userId);
+  if (u.status !== "PENDING") throw new Error("Not waiting for approval.");
+  await db.user.update({ where: { id: u.id }, data: { status: "DECLINED", approvedAt: new Date(), approvedBy: a.name } });
+  await audit(a, "admin.decline_signup", u.id);
+  revalidatePath("/admin/people");
+}
+
+/** Turns an account off (no sign-in, everywhere at once) or back on. Nothing they saved is removed. */
+export async function setUserActive(fd: FormData) {
+  const a = await admin();
+  const { userId, on } = parse(z.object({ userId: z.string().min(1), on: z.enum(["true", "false"]) }), fd);
+  const u = await manageable(a, userId);
+  const active = on === "true";
+  if (active && u.status !== "DISABLED") throw new Error("Only a turned-off account can be turned back on.");
+  if (!active && u.status !== "ACTIVE") throw new Error("Only an active account can be turned off.");
+  await db.user.update({ where: { id: u.id }, data: { status: active ? "ACTIVE" : "DISABLED", approvedBy: a.name } });
+  if (!active) await db.session.deleteMany({ where: { userId: u.id } });
+  await audit(a, active ? "admin.turn_on_account" : "admin.turn_off_account", u.id);
+  revalidatePath("/admin/people");
 }

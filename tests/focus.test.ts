@@ -1,27 +1,18 @@
 /**
  * My focus: one or two development opportunities, and that's it.
- * The watch area is awareness, never a task. Two focuses share one check-in row a day.
+ * The goal is a 5 on every rule. Two focuses share one check-in row a day.
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { watchAreas, strengths, freeSlot, statusFor, focusTitle, MAX_FOCUSES } from "../src/lib/focus";
+import { lowestRule, freeSlot, statusFor, focusTitle, MAX_FOCUSES } from "../src/lib/focus";
 
 const a = (f: number, o: number, r: number, g: number, e: number, rev: Partial<Record<"revisedF" | "revisedO" | "revisedR" | "revisedG" | "revisedE", number>> = {}) => ({ f, o, r, g, e, ...rev });
 
-test("watch area: the lowest pillar, or the two lowest when they tie", () => {
-  assert.deepEqual(watchAreas(a(4, 3, 4, 3, 2)), ["E"]);
-  assert.deepEqual(watchAreas(a(4, 2, 4, 3, 2)), ["O", "E"]);
-  assert.deepEqual(watchAreas(a(2, 2, 4, 3, 2)), [], "three tied lowest: nothing stands out");
-  assert.deepEqual(watchAreas(a(3, 3, 3, 3, 3)), [], "all the same: none");
-  assert.deepEqual(watchAreas(a(3, 3, 3, 3, 3), "G"), ["G"], "the client's pick from a tie becomes the watch area");
-  assert.deepEqual(watchAreas(a(4, 3, 4, 3, 2), "G"), ["E"], "a clear lowest wins over an old pick");
-  assert.deepEqual(watchAreas(a(4, 3, 4, 3, 2, { revisedE: 4 })), ["O", "G"], "revised scores count");
-  assert.deepEqual(watchAreas(null), []);
-});
-
-test("strengths: the highest pillars, when they stand above the rest", () => {
-  assert.deepEqual(strengths(a(4, 3, 4, 3, 2)), ["F", "R"]);
-  assert.deepEqual(strengths(a(3, 3, 3, 3, 3)), []);
+test("focus ideas start from the lowest score; nothing is labeled a weakness", () => {
+  assert.equal(lowestRule(a(4, 3, 4, 3, 2)), "E");
+  assert.equal(lowestRule(a(4, 2, 4, 3, 2)), "O", "a tie takes the first in FORGE order");
+  assert.equal(lowestRule(a(4, 3, 4, 3, 2, { revisedE: 5 })), "O", "revised scores count");
+  assert.equal(lowestRule(null), null);
 });
 
 test("one or two focuses, and that's it", () => {

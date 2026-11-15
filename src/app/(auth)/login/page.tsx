@@ -3,12 +3,13 @@ import { db } from "@/lib/db";
 
 export const metadata = { title: "Sign in" };
 
-export default async function Login({ searchParams }: { searchParams: Promise<{ next?: string; reset?: string }> }) {
-  const { next, reset } = await searchParams;
+export default async function Login({ searchParams }: { searchParams: Promise<{ next?: string; reset?: string; requested?: string }> }) {
+  const { next, reset, requested } = await searchParams;
   const demo = (await db.user.count({ where: { isDemo: true } }).catch(() => 0)) > 0;
   return (
     <>
       {reset && <p role="status" className="mb-5 notice text-link">Your password is changed. Sign in with the new one.</p>}
+      {requested && <p role="status" className="mb-5 notice">Thanks. Your account is waiting for approval. You&apos;ll get an email when it&apos;s ready, and then you can sign in here.</p>}
       <AuthForm mode="login" next={next} />
       {demo && <div className="mt-10 rounded-xl border border-line bg-card p-4 text-[13px] text-ink-soft">
         <p className="font-medium text-ink">Demo accounts (fictional people)</p>

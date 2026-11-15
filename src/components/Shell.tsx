@@ -28,8 +28,9 @@ const COACH_NAV = [
 ];
 const ADMIN_NAV = [
   { href: "/admin", label: "Programs", mobile: true },
+  { href: "/admin/people", label: "People", mobile: true },
   { href: "/admin/reports", label: "Reports", mobile: true },
-  { href: "/admin/content", label: "Content review", tab: "Review", mobile: true },
+  { href: "/admin/content", label: "Content review", tab: "Review" },
 ];
 
 export function Shell({ user, children, journey }: { user: CurrentUser; children: ReactNode; journey?: ReactNode }) {

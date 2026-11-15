@@ -1,6 +1,6 @@
 import { cyclePosition } from "@/lib/cycle";
 import { activeFocuses } from "@/lib/focusData";
-import { watchAreas, focusTitle, MAX_FOCUSES } from "@/lib/focus";
+import { lowestRule, focusTitle, MAX_FOCUSES } from "@/lib/focus";
 import { CYCLE_FOCUS } from "@/content/options";
 import { Picks } from "@/components/Picks";
 import { requireUser } from "@/lib/auth";
@@ -29,7 +29,7 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
   const identity = await db.identityProfile.findUnique({ where: { userId: u.id }, select: { behavior: true, role: true } });
   const pathway = PATHWAYS[(profile?.pathway ?? "PERSONAL") as keyof typeof PATHWAYS];
   const defaultTemplate = pack.thirtyDayPlan.length ? pathway.cycleTemplate : "NIRS_30";
-  const [open, coaches] = await Promise.all([activeSeason(u.id), db.coachAssignment.count({ where: { participantId: u.id, active: true } })]);
+  const open = await activeSeason(u.id);
   const month = open ? nextMonth(open.cycles.length) : null;
   const continuing = !!(open && month && sp.season !== "none");
   // One or two focuses, and that's it. With two in progress, a new one has to replace one.
@@ -38,8 +38,7 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
     db.assessment.findFirst({ where: { userId: u.id, isSecondOpinion: false }, orderBy: { completedAt: "desc" } }),
   ]);
   const full = active.length >= MAX_FOCUSES;
-  const watch = watchAreas(assessment, profile?.priorityPillar);
-  const startPillar = fromLink ?? watch[0] ?? ((profile?.priorityPillar ?? "F") as PillarKey);
+  const startPillar = fromLink ?? lowestRule(assessment) ?? ((profile?.priorityPillar ?? "F") as PillarKey);
   const source = ["FEEDBACK", "COACH"].includes(sp.source ?? "") ? sp.source! : "";
   const pName = (k: string) => pack.pillars.find((x) => x.key === k)?.name ?? k;
   return (
@@ -47,11 +46,6 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
       <PageHeader eyebrow="Discipline by Design · My focus" title={active.length ? "Add a focus" : "Choose your focus"}>
         One or two things to work on, and that&apos;s it. Name it in a few words, then five short questions turn it into a plan for 30 days.
       </PageHeader>
-      {watch.length > 0 && (
-        <p role="note" className="mb-5 rounded-2xl bg-ink/[0.04] px-4 py-3 text-[15px] text-ink">
-          Your watch area is {watch.map(pName).join(" and ")}. Keep it in view as you choose. A focus that runs through it is a good place to start, but it doesn&apos;t have to.
-        </p>
-      )}
       <Card>
         <form action={startCycle} className="space-y-5">
           {full && (
@@ -96,7 +90,7 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
             </div>
           ) : (
             <label className="option !flex items-start gap-3 !py-3 cursor-pointer">
-              <input type="checkbox" name="season" value="new" defaultChecked={sp.season === "new" || (coaches > 0 && sp.season !== "none")} className="mt-1 h-4 w-4 accent-navy" />
+              <input type="checkbox" name="season" value="new" defaultChecked={sp.season === "new"} className="mt-1 h-4 w-4 accent-navy" />
               <span><span className="font-medium">Make this month 1 of a 90-day season</span><span className="block text-sm text-ink-soft">Three 30-day cycles back to back, with a review at the end.</span></span>
             </label>
           )}

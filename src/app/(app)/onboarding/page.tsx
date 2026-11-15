@@ -10,8 +10,8 @@ export default async function Onboarding() {
   const u = await requireUser("PARTICIPANT");
   return (
     <>
-      <PageHeader eyebrow="Getting started" title={`Where are you driving, ${u.name.split(" ")[0]}?`}>
-        Every pathway rests on the same foundation: personal leadership begins with leading yourself. Pick the one that fits the road you are on now. You can change it later.
+      <PageHeader eyebrow="Getting started" title={`Which program are you in, ${u.name.split(" ")[0]}?`}>
+        This sets which program materials you see. Next, you&apos;ll name the seat you&apos;re in. You can change the program later.
       </PageHeader>
       <div className="grid gap-4">
         {Object.values(PATHWAYS).map((p) => (

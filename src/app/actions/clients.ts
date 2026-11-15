@@ -32,6 +32,9 @@ export async function addClient(_: ClientState, fd: FormData): Promise<ClientSta
   if (user) {
     if (user.role !== "PARTICIPANT") return { error: "That email belongs to a coach or administrator account.", values };
     if (user.orgId && user.orgId !== coach.orgId) return { error: "That person belongs to another organization.", values };
+    if (user.status === "DISABLED" || user.status === "DECLINED") return { error: "That account isn't active. Ask your program administrator.", values };
+    // A coach adding someone who signed up is the invitation: they come straight in.
+    if (user.status === "PENDING") user = await db.user.update({ where: { id: user.id }, data: { status: "ACTIVE", orgId: user.orgId ?? coach.orgId, approvedAt: new Date(), approvedBy: coach.name } });
   } else {
     const password = randomBytes(9).toString("base64url");
     user = await db.user.create({

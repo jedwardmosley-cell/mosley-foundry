@@ -36,6 +36,11 @@ model User {
   orgId              String?
   org                Organization? @relation(fields: [orgId], references: [id])
   isDemo             Boolean       @default(false)
+  // Sign-up needs an administrator's approval. Accounts a coach adds, an admin enrolls, or a partner
+  // creates from a client's invitation are ACTIVE straight away. Only ACTIVE accounts can sign in.
+  status             String        @default("ACTIVE") // enum: ACTIVE | PENDING | DECLINED | DISABLED
+  approvedAt         DateTime?
+  approvedBy         String? // name of the administrator who approved, declined, turned off or turned on the account
   createdAt          DateTime      @default(now())
 
   sessions                      Session[]

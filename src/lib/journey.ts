@@ -10,7 +10,7 @@ import { getContent } from "@/content";
  */
 export const JOURNEY_STEPS = [
   { key: "identity", label: "Who's behind the wheel", next: "Claim who you are", href: "/identity" },
-  { key: "today", label: "Where I am", next: "See where you are today and your watch area", href: "/assessment" },
+  { key: "today", label: "Where I am", next: "See where you are today", href: "/assessment" },
   { key: "drive", label: "My focus", next: "Choose one or two things to work on", href: "/focus" },
   { key: "road", label: "My road", next: "One routine that holds your focus in place", href: "/road" },
 ] as const;
@@ -46,7 +46,7 @@ export async function getJourney(userId: string): Promise<Journey> {
   const done: Record<JourneyKey, boolean> = {
     // Who I am is done with a role, a kind of change and a statement. The five help build the statement.
     identity: identityGaps(identity, profile?.forgeStatement ?? "").length === 0,
-    today: !!assessment && !!profile?.priorityPillar,
+    today: !!assessment,
     // My road holds the focus in place: one routine. The person comes from "Who finds out?" in the focus setup.
     road: commitments > 0,
     drive: !!cycle?.setupDoneAt,
