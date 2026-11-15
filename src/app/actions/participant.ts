@@ -67,7 +67,9 @@ export async function saveAssessment(fd: FormData) {
     },
   });
   if (fd.get("next") === "/season") redirect("/season");
-  redirect(`/assessment/${a.id}${fromStart(fd) ? "?next=start" : ""}`);
+  // In the kickoff, the short result shows on the kickoff itself.
+  if (fromStart(fd)) redirect("/start?step=2");
+  redirect(`/assessment/${a.id}`);
 }
 
 const reviseSchema = z.object({

@@ -46,7 +46,7 @@ export async function getJourney(userId: string): Promise<Journey> {
   const done: Record<JourneyKey, boolean> = {
     // Who I am is done with a role, a kind of change and a statement. The five help build the statement.
     identity: identityGaps(identity, profile?.forgeStatement ?? "").length === 0,
-    today: !!assessment && !!profile?.priorityPillar,
+    today: !!assessment,
     // My road holds the focus in place: one routine. The person comes from "Who finds out?" in the focus setup.
     road: commitments > 0,
     drive: !!cycle?.setupDoneAt,

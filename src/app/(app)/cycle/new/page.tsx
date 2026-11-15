@@ -29,7 +29,7 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
   const identity = await db.identityProfile.findUnique({ where: { userId: u.id }, select: { behavior: true, role: true } });
   const pathway = PATHWAYS[(profile?.pathway ?? "PERSONAL") as keyof typeof PATHWAYS];
   const defaultTemplate = pack.thirtyDayPlan.length ? pathway.cycleTemplate : "NIRS_30";
-  const [open, coaches] = await Promise.all([activeSeason(u.id), db.coachAssignment.count({ where: { participantId: u.id, active: true } })]);
+  const open = await activeSeason(u.id);
   const month = open ? nextMonth(open.cycles.length) : null;
   const continuing = !!(open && month && sp.season !== "none");
   // One or two focuses, and that's it. With two in progress, a new one has to replace one.
@@ -96,7 +96,7 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
             </div>
           ) : (
             <label className="option !flex items-start gap-3 !py-3 cursor-pointer">
-              <input type="checkbox" name="season" value="new" defaultChecked={sp.season === "new" || (coaches > 0 && sp.season !== "none")} className="mt-1 h-4 w-4 accent-navy" />
+              <input type="checkbox" name="season" value="new" defaultChecked={sp.season === "new"} className="mt-1 h-4 w-4 accent-navy" />
               <span><span className="font-medium">Make this month 1 of a 90-day season</span><span className="block text-sm text-ink-soft">Three 30-day cycles back to back, with a review at the end.</span></span>
             </label>
           )}

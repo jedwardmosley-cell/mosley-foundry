@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import type { CSSProperties } from "react";
 import { requireUser } from "@/lib/auth";
 import { setupCycle } from "@/lib/focusData";
+import { getJourney, JOURNEY_STEPS } from "@/lib/journey";
 import { db } from "@/lib/db";
 import { aiAvailable } from "@/lib/ai";
 import { FORGE_LINES } from "@/content/forgeLines";
@@ -35,7 +36,21 @@ export default async function WeekOneSetup({ searchParams }: { searchParams: Pro
   ]);
   const ai = aiAvailable() && profile?.aiEnabled !== false;
   const n = step === "plan" ? 6 : step === "share" ? 7 : Math.min(Math.max(Number(step) || 1, 1), 5);
-  const bar = (
+  // In the kickoff, setup is step 3 of 4 and shows the kickoff's own bar, so there is one progress bar, not two.
+  const journey = await getJourney(u.id);
+  const kickoff = journey.current !== null;
+  const where = n <= 5 ? `question ${n} of 5` : n === 6 ? "your plan" : "who finds out";
+  const bar = kickoff ? (
+    <>
+      <ol className="mb-3 grid grid-cols-4 gap-1.5" aria-label="Kickoff steps">
+        {JOURNEY_STEPS.map((s, i) => <li key={s.key}><span className={`block h-1.5 rounded-full ${i === 2 ? "bg-heading" : journey.done[s.key] ? "bg-navy" : "bg-line"}`} /><span className="sr-only">Step {i + 1}: {s.label}</span></li>)}
+      </ol>
+      <div className="mb-8 flex items-center justify-between gap-4 text-sm text-ink-mute">
+        <span>Step 3 of 4 · {where}</span>
+        <Link href="/start?step=3" className="shrink-0 hover:text-ink">Finish later</Link>
+      </div>
+    </>
+  ) : (
     <>
       <div className="flex items-center justify-between text-sm text-ink-mute">
         <span>Week 1 setup{n <= 5 ? ` · ${n} of 5` : ""}</span>

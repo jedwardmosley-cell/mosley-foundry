@@ -7,7 +7,11 @@ import { getContent } from "@/content";
 import { aiAvailable } from "@/lib/ai";
 import { getJourney, JOURNEY_STEPS } from "@/lib/journey";
 import { saveWhoIAm } from "@/app/actions/identity";
-import { addCommitment } from "@/app/actions/participant";
+import { addCommitment, startCycle } from "@/app/actions/participant";
+import { AssessmentForm } from "@/components/AssessmentForm";
+import { CycleFocusFields } from "@/components/CycleFocusFields";
+import { pillarScores } from "@/lib/focus";
+import { CYCLE_FOCUS } from "@/content/options";
 import { PageHeader, Card, PillarMark, Field } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 import { StatementReveal } from "@/components/StatementReveal";
@@ -18,14 +22,14 @@ import { ROLE_PICKS, WHO_I_AM_STATUS, KIND_NOTE, WHO_TITLE, WHO_HEADINGS, withAr
 import { BLUEPRINT_PICKS } from "@/content/options";
 import { getForgeSource } from "@/content/forgeSource";
 import { PRACTICE_STARTERS } from "@/content/forgeLines";
-import type { PathwayKey } from "@/content/program";
+import { PATHWAYS, type PathwayKey } from "@/content/program";
 import type { PillarKey } from "@/content/types";
 
 export const metadata = { title: "My first session" };
 
 const STEP_COPY = [
   { title: WHO_TITLE, intro: "The FORGE framework, applied to you. Three short parts." },
-  { title: "See where you are today", intro: "Score the five pillars as the person you just described. The lowest one becomes your watch area: something to keep in view." },
+  { title: "See where you are today", intro: "Score the five pillars as the person you just described. It takes about five minutes." },
   { title: "Choose your focus", intro: "One or two things to work on, and that's it. Five short questions turn each one into a plan for 30 days, and one person finds out." },
   { title: "What holds it in place", intro: "Discipline by Design: one routine with a day and a time. After that, a check-in each day and a look back each week." },
 ];
@@ -59,7 +63,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
   const [profile, identity, assessment, commitments, people, focuses, { pack, entrepreneur }, forge] = await Promise.all([
     db.profile.findUnique({ where: { userId: u.id } }),
     db.identityProfile.findUnique({ where: { userId: u.id }, select: { level: true, becoming: true, role: true } }),
-    db.assessment.findFirst({ where: { userId: u.id, isSecondOpinion: false }, orderBy: { completedAt: "desc" }, select: { id: true } }),
+    db.assessment.findFirst({ where: { userId: u.id, isSecondOpinion: false }, orderBy: { completedAt: "desc" } }),
     db.commitment.findMany({ where: { userId: u.id, active: true }, select: { id: true, title: true, when: true } }),
     db.relationship.findMany({ where: { ownerId: u.id, active: true }, select: { id: true, name: true, role: true } }),
     db.developmentCycle.findMany({ where: { userId: u.id, status: "ACTIVE" }, orderBy: [{ slot: "asc" }, { startDate: "asc" }], select: { id: true, title: true, focus: true, plan: true, pillar: true, setupDoneAt: true } }),
@@ -71,6 +75,12 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
   const role = identity?.role ?? "";
   const ai = aiAvailable() && profile?.aiEnabled !== false;
   const priority = pack.pillars.find((p) => p.key === profile?.priorityPillar);
+  const useEntre = profile?.pathway === "ENTREPRENEURIAL" && !!entrepreneur;
+  const instrument = pack.assessmentStatus === "draft" ? "FORGE_DRAFT" : useEntre ? "FORGE_ENTREPRENEUR" : "FORGE_PERSONAL";
+  const scores = assessment ? pillarScores(assessment) : ({ F: 0, O: 0, R: 0, G: 0, E: 0 } as Record<PillarKey, number>);
+  // Focus ideas start from the lowest score. Nothing is labeled a weakness.
+  const lowest = (assessment ? (["F", "O", "R", "G", "E"] as PillarKey[]).reduce((a, k) => (scores[k] < scores[a] ? k : a), "F" as PillarKey) : (priority?.key as PillarKey | undefined)) ?? "F";
+  const template = pack.thirtyDayPlan.length ? PATHWAYS[pathway].cycleTemplate : "NIRS_30";
   const copy = STEP_COPY[step - 1];
   const next = `/start?step=${step + 1}`;
   const backHref = step === 1 ? (part > 1 ? `/start?step=1&part=${part - 1}` : null) : step === 2 ? "/start?step=1&part=3" : `/start?step=${step - 1}`;
@@ -149,20 +159,30 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
         <Card>
           {!assessment ? (
             <>
-              <p className="text-[15px]">Tap a score from 1 to 5 for each pillar. It takes about five minutes. Score what you do today. A 3 is a fine place to start.</p>
-              <Link href="/assessment?next=start" className="btn-primary mt-4 inline-flex">Take the FORGE assessment</Link>
-            </>
-          ) : !priority ? (
-            <>
-              <p className="text-[15px]">Your scores are in. See your strengths and your watch area.</p>
-              <Link href={`/assessment/${assessment.id}?next=start`} className="btn-primary mt-4 inline-flex">See my results</Link>
+              <p className="mb-5 text-[15px]">Tap a score from 1 to 5 for each pillar. Score what you did this past month. A 3 is a fine place to start.</p>
+              <AssessmentForm pack={pack} entrepreneur={entrepreneur} useEntre={useEntre} instrument={instrument} next="/start" />
             </>
           ) : (
             <>
-              <p className="eyebrow">My watch area</p>
-              <p className="mt-3 flex items-center gap-2 h3"><PillarMark k={priority.key} /> {priority.name}</p>
-              <p className="text-sm muted mt-2">To change it, open your <Link href={`/assessment/${assessment.id}?next=start`} className="btn-link">results</Link>.</p>
-              <Link href={next} className="btn-primary mt-4 inline-flex">{nextLabel}</Link>
+              <p className="eyebrow">My scores</p>
+              <ul className="mt-4 space-y-3">
+                {pack.pillars.map((p) => {
+                  const v = scores[p.key as PillarKey];
+                  return (
+                    <li key={p.key} className="flex items-center gap-3">
+                      <PillarMark k={p.key} size="sm" />
+                      <span className="w-40 shrink-0 text-[15px]">{p.name}</span>
+                      <span className="flex flex-1 gap-1" aria-hidden>{[1, 2, 3, 4, 5].map((n) => <span key={n} className={`h-1.5 flex-1 rounded-full ${n <= v ? "bg-navy" : "bg-ink/[0.08]"}`} />)}</span>
+                      <span className="w-14 text-right text-sm text-ink-soft">{v} of 5</span>
+                    </li>
+                  );
+                })}
+              </ul>
+              <p className="mt-4 text-sm text-ink-soft">The goal is a 5 on every one. It&apos;s a pursuit that doesn&apos;t end.</p>
+              <div className="mt-5 flex flex-wrap items-center gap-4">
+                <Link href={next} className="btn-primary inline-flex">{nextLabel}</Link>
+                <Link href={`/assessment/${assessment.id}`} className="text-sm btn-link">See my full results</Link>
+              </div>
             </>
           )}
         </Card>
@@ -215,10 +235,19 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
       {step === 3 && (
         <Card>
           {focuses.length === 0 ? (
-            <>
-              <p className="text-[15px]">Name the one thing you&apos;ll work on first. If your watch area points somewhere, start there, but it doesn&apos;t have to.</p>
-              <Link href={`/cycle/new?next=start${priority ? `&pillar=${priority.key}` : ""}`} className="btn-primary mt-4 inline-flex">Choose my focus</Link>
-            </>
+            <form action={startCycle} className="space-y-5">
+              <input type="hidden" name="next" value="start" />
+              <input type="hidden" name="role" value={role} />
+              <input type="hidden" name="template" value={template} />
+              <input type="hidden" name="season" value="" />
+              <div>
+                <label htmlFor="title" className="label">My focus, in a few words</label>
+                <input id="title" name="title" required maxLength={160} placeholder="Stay curious when my decisions get challenged" className="input" />
+                <div className="mt-2"><Picks list={CYCLE_FOCUS[lowest]} target="title" folded="Ideas" /></div>
+              </div>
+              <CycleFocusFields pillars={pack.pillars.map((p) => ({ key: p.key, name: p.name }))} initial={lowest} />
+              <Submit>Next: five short questions</Submit>
+            </form>
           ) : (
             <>
               <p className="eyebrow">My focus</p>

@@ -446,24 +446,21 @@ const submitAndWait = async (page: Page, selector: string) => {
     // part 3: one statement
     assert.ok((await g.inputValue('textarea[name="statement"]')).startsWith("I am "), "the statement starts from the five lines");
     await saveThroughReveal(g, "**/start?step=2", "Save and continue");
-    // 2. where I am: the assessment and the priority bring the client back
-    await Promise.all([g.waitForURL("**/assessment?next=start"), g.click('a:has-text("Take the FORGE assessment")')]);
+    // 2. where I am: the self-assessment is inside the kickoff; the client never leaves it
     for (const [k, v] of Object.entries({ F: 4, O: 3, R: 4, G: 3, E: 2 })) await g.locator(`input[name="${k}"][value="${v}"]`).check({ force: true });
-    await Promise.all([g.waitForURL(/\/assessment\/[a-z0-9]+\?next=start$/), g.click('button:has-text("See my profile")')]);
-    await Promise.all([g.waitForURL("**/start?step=3"), g.click('button:has-text("choose my focus")')]);
-    // 3. my focus: one thing to work on, set up once (five questions, the plan, who finds out)
-    await Promise.all([g.waitForURL(/\/cycle\/new\?next=start&pillar=E/), g.click('a:has-text("Choose my focus")')]);
+    await Promise.all([g.waitForURL("**/start?step=2"), g.click('button:has-text("See my profile")')]);
+    await g.waitForSelector("text=The goal is a 5 on every one");
+    assert.equal(await g.locator("text=/ 25").count(), 0, "no total");
+    await Promise.all([g.waitForURL("**/start?step=3"), g.click('a:has-text("Next: choose your focus")')]);
+    // 3. my focus: named right here (no seat, season or start date), then five questions, the plan, who finds out
+    assert.equal(await g.locator('input[name="season"][type="checkbox"]').count(), 0, "no season in the kickoff");
     // the phone's share sheet, stubbed, and loaded with a full page load so it is in place for week 1 setup
     await g.addInitScript(() => { (navigator as unknown as { share: () => Promise<void> }).share = async () => {}; });
     await g.reload();
-    assert.equal(await g.inputValue('input[name="role"]'), "manager");
     await g.fill('input[name="title"]', "Stay curious when my decisions get challenged");
-    // month 1 of a season, started 29 days ago, so today is day 30 and the review is open
-    await g.locator('input[name="season"][value="new"]').check();
-    await g.locator('summary:has-text("Structure and start date")').click();
-    const ago = new Date(Date.now() - 29 * 86400000);
-    await g.fill('input[name="startDate"]', `${ago.getFullYear()}-${String(ago.getMonth() + 1).padStart(2, "0")}-${String(ago.getDate()).padStart(2, "0")}`);
-    await g.click('button:has-text("Start the cycle")');
+    assert.ok(await g.locator('input[name="pillar"][value="E"]').isChecked(), "starts from the lowest score");
+    await Promise.all([g.waitForURL(/\/cycle\/setup\?step=1$/), g.click('button:has-text("Next: five short questions")')]);
+    await g.waitForSelector("text=Step 3 of 4 · question 1 of 5");
     await doSetup(g, "Pat Partner", "Pause before I answer", "**/start?step=4");
     // 4. my road: one routine holds the focus in place; the person came from "Who finds out?"
     await g.waitForSelector("text=✓ Pat Partner");
@@ -472,6 +469,14 @@ const submitAndWait = async (page: Page, selector: string) => {
     await Promise.all([g.waitForURL("**/start?step=4"), g.click('button:has-text("Add routine")')]);
     await g.waitForSelector("text=✓ Journaling");
     await g.click('a:has-text("Finish and go to Today")');
+    // for the season checks below: make this month 1 of a season, started 29 days ago, so today is day 30
+    {
+      const gu = await db.user.findFirstOrThrow({ where: { name: "Guided Driver (E2E)" }, orderBy: { createdAt: "desc" } });
+      const season = await db.season.create({ data: { userId: gu.id, startStatement: "I am a manager measured by what my team can do." } });
+      const c = await db.developmentCycle.findFirstOrThrow({ where: { userId: gu.id, status: "ACTIVE" } });
+      const ago = new Date(Date.now() - 29 * 86400000); ago.setHours(0, 0, 0, 0);
+      await db.developmentCycle.update({ where: { id: c.id }, data: { seasonId: season.id, seasonMonth: 1, startDate: ago } });
+    }
     await g.goto(`${BASE}/cycle`);
     await g.waitForSelector("text=Season, month 1 of 3");
     // day 30 of a set-up cycle: week 4 asks what keeps it going, and can put it on My road
