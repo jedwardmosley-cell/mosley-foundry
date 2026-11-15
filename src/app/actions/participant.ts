@@ -75,22 +75,21 @@ export async function saveAssessment(fd: FormData) {
 const reviseSchema = z.object({
   id: z.string(),
   F: score, O: score, R: score, G: score, E: score,
-  wF: text(40), wO: text(40), wR: text(40), wG: text(40), wE: text(40),
 });
 
-/** The workbook's "Revised" column: participants re-score after reading the full anchor tables. */
+/** "Update my ratings" from the profile: the new scores are kept beside the first ones. */
 export async function reviseAssessment(fd: FormData) {
   const u = await participant();
   const d = parse(reviseSchema, fd);
   const n = await db.assessment.updateMany({
     where: { id: d.id, userId: u.id },
-    data: {
-      revisedF: d.F, revisedO: d.O, revisedR: d.R, revisedG: d.G, revisedE: d.E,
-      oneWords: JSON.stringify({ F: d.wF, O: d.wO, R: d.wR, G: d.wG, E: d.wE }),
-    },
+    data: { revisedF: d.F, revisedO: d.O, revisedR: d.R, revisedG: d.G, revisedE: d.E },
   });
   if (!n.count) throw new Error("Not found");
   revalidatePath(`/assessment/${d.id}`);
+  revalidatePath("/dashboard");
+  if (fromStart(fd)) redirect("/start?step=2&scored=1");
+  redirect(`/assessment/${d.id}?updated=1`);
 }
 
 export async function setPriority(fd: FormData) {

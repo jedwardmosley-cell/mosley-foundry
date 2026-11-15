@@ -5,18 +5,21 @@ import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getContent } from "@/content";
 import { scoresFrom, interpret, entrepreneurPatterns } from "@/lib/forge";
-import { reviseAssessment, setPriority } from "@/app/actions/participant";
+import { setPriority } from "@/app/actions/participant";
 import { fmt } from "@/lib/dates";
 import { PILLAR_KEYS, type PillarKey } from "@/content/types";
-import { PageHeader, Card, PillarMark, Gauge, Source, Draft } from "@/components/ui";
+import { PageHeader, Card, PillarMark, Draft } from "@/components/ui";
+import { AssessmentForm } from "@/components/AssessmentForm";
+import { ForgeReadout } from "@/components/ForgeReadout";
+import { linesOf } from "@/content/forgeLines";
 import { Submit } from "@/components/Submit";
 
 export const metadata = { title: "My FORGE profile" };
 
-export default async function AssessmentResult({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ focus?: string; next?: string }> }) {
+export default async function AssessmentResult({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ focus?: string; next?: string; edit?: string; updated?: string }> }) {
   const u = await requireUser("PARTICIPANT");
   const { id } = await params;
-  const { focus, next } = await searchParams;
+  const { focus, next, edit, updated } = await searchParams;
   const a = await db.assessment.findFirst({ where: { id, userId: u.id } });
   if (!a) notFound();
   const profile = await db.profile.findUnique({ where: { userId: u.id } });
@@ -26,41 +29,40 @@ export default async function AssessmentResult({ params, searchParams }: { param
   const r = interpret(pack, s, focusKey ?? (profile?.priorityPillar as PillarKey | undefined));
   const fp = pack.pillars.find((p) => p.key === r.focus)!;
   const patterns = a.instrument === "FORGE_ENTREPRENEUR" ? entrepreneurPatterns(entrepreneur, s) : [];
-  const words = JSON.parse(a.oneWords || "{}") as Record<string, string>;
   const revised = a.revisedF != null;
+  const lines = linesOf(profile);
+  const identity = await db.identityProfile.findUnique({ where: { userId: u.id }, select: { role: true } });
+  const useEntre = a.instrument === "FORGE_ENTREPRENEUR" && !!entrepreneur;
   // My feedback, if the client tagged it to pillars: their own reading, shown beside the scores, never as a score.
   const fb = await db.feedback.findFirst({ where: { userId: u.id, NOT: { pillars: "[]" } }, orderBy: [{ takenOn: "desc" }, { createdAt: "desc" }], select: { id: true, title: true, takenOn: true, pillars: true } });
   const fbPillars = fb ? (JSON.parse(fb.pillars) as PillarKey[]) : [];
 
   return (
     <>
-      <PageHeader eyebrow={`FORGE · ${fmt(a.completedAt, { month: "long", day: "numeric", year: "numeric" })}`} title="My score profile">
-        Your five scores are not five separate grades. They are a pattern.
+      <PageHeader eyebrow={`FORGE · ${fmt(a.completedAt, { month: "long", day: "numeric", year: "numeric" })}`} title={edit ? "Update my ratings" : "My FORGE profile"}>
+        {edit ? "Read each level again and choose the one that is true of you now." : "Your five scores are not five separate grades. They are a pattern."}
         {a.instrument === "FORGE_DRAFT" && <span className="ml-2"><Draft>Draft instrument</Draft></span>}
       </PageHeader>
 
-      <div className="grid gap-5 md:grid-cols-[1fr_1.2fr]">
-        <Card>
-          <p className="eyebrow">{revised ? "Revised scores" : "Your scores"}</p>
-          <ul className="mt-4 space-y-3">
-            {pack.pillars.map((p) => (
-              <li key={p.key} className="flex items-center gap-3">
-                <PillarMark k={p.key} size="sm" />
-                <span className="flex-1 text-[15px]">{p.name}</span>
-                <Gauge value={s[p.key]} label={p.name} />
-                <span className="w-6 text-right font-serif">{s[p.key]}</span>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-5 border-t border-line pt-4 text-sm text-ink-soft">The goal is a 5 on every rule. It&apos;s a pursuit that doesn&apos;t end.</p>
-          <p className="mt-2 text-xs text-ink-mute">These are your own ratings. FORGE is a development tool. It has not been validated as a psychometric instrument, and its scores can't be compared to EQ-i scores.</p>
-        </Card>
+      {edit ? (
+        <AssessmentForm pack={pack} entrepreneur={entrepreneur} useEntre={useEntre} instrument={a.instrument} lines={lines} role={identity?.role} defaults={s} reviseId={a.id} />
+      ) : (
+      <>
+      {updated && <p role="status" className="notice mb-5">Your ratings are updated.</p>}
+      <Card>
+        <p className="eyebrow">{revised ? "My updated ratings" : "My ratings"}</p>
+        <div className="mt-4"><ForgeReadout pack={pack} scores={s} lines={lines} /></div>
+        <p className="mt-5 border-t border-line pt-4 text-sm text-ink-soft">The goal is a 5 on every rule. It&apos;s a pursuit that doesn&apos;t end.</p>
+        <p className="mt-2 text-xs text-ink-mute">These are your own ratings. FORGE is a development tool. It has not been validated as a psychometric instrument, and its scores can&apos;t be compared to EQ-i scores.</p>
+        <Link href={`/assessment/${a.id}?edit=1`} className="btn-quiet mt-4 inline-flex">Update my ratings</Link>
+      </Card>
 
-        <Card>
+      {(pack.patternNote || r.flat) && (
+        <Card className="mt-5">
           {pack.patternNote && <p className="quote text-[15px]">{pack.patternNote}</p>}
           {r.flat && <p className="mt-4 text-sm text-alert">All five scores are the same. If you had to order them from strongest to weakest, which is fifth? That one is your real lowest. Choose it below.</p>}
         </Card>
-      </div>
+      )}
 
       {patterns.map((pt) => (
         <Card key={pt.id} className="mt-5 border-line">
@@ -106,30 +108,8 @@ export default async function AssessmentResult({ params, searchParams }: { param
       </a>
 
 
-      <Card className="mt-5">
-        <p className="eyebrow">Verify</p>
-        <h2 className="h2 mt-1">Full behavioral anchor tables</h2>
-        <p className="mt-2 text-[15px] muted">Read these, then revise any score that shifted. Many people score themselves differently once they see the full descriptions. That shift is the diagnostic working as intended.</p>
-        <form action={reviseAssessment} className="mt-5 space-y-6">
-          <input type="hidden" name="id" value={a.id} />
-          {pack.pillars.map((p) => (
-            <details key={p.key} className="rounded-2xl bg-field p-4" open={p.key === r.focus}>
-              <summary className="cursor-pointer flex items-center gap-3"><PillarMark k={p.key} size="sm" /><span className="font-medium">{p.name}</span><span className="ml-auto text-sm muted">first score {({ F: a.f, O: a.o, R: a.r, G: a.g, E: a.e })[p.key]}</span></summary>
-              <p className="mt-3 text-sm muted">{p.definition}</p>
-              <div className="mt-3 space-y-2">
-                {p.anchors.map((an) => (
-                  <label key={an.score} className="flex gap-3 rounded-lg p-2 hover:bg-paper cursor-pointer">
-                    <input type="radio" name={p.key} value={an.score} defaultChecked={s[p.key] === an.score} className="mt-1 accent-navy" />
-                    <span><span className="font-serif">{an.score}</span> <span className="font-medium">{an.level}.</span> <span className="text-[14px] text-ink-soft">{an.text}</span></span>
-                  </label>
-                ))}
-              </div>
-              <label className="block mt-3"><span className="label">One word that captures it</span><input name={`w${p.key}`} defaultValue={words[p.key]} maxLength={40} className="input max-w-xs" /></label>
-            </details>
-          ))}
-          <Submit className="btn-quiet">Save revised scores</Submit>
-        </form>
-      </Card>
+      </>
+      )}
     </>
   );
 }

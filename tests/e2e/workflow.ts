@@ -117,6 +117,9 @@ const submitAndWait = async (page: Page, selector: string) => {
   let assessmentUrl = "";
   await check("2. complete a FORGE assessment", async () => {
     await page.waitForSelector('nav[aria-label="Your journey"] >> text=Step 1 of 4');
+    // one page: all five rules, each with the client's own line and all five levels in full
+    assert.equal(await page.locator('input[type="radio"][name="E"]').count(), 5, "all five levels show up front");
+    assert.equal(await page.locator("text=What I wrote").count(), 5, "each rule shows what the client wrote");
     const scores: Record<string, number> = { F: 4, O: 3, R: 4, G: 3, E: 2 };
     for (const [k, v] of Object.entries(scores)) await page.locator(`input[name="${k}"][value="${v}"]`).check({ force: true });
     await page.locator("fieldset", { hasText: "Emotionally Anchored" }).locator("summary", { hasText: "Add a reflection" }).click();
@@ -127,6 +130,14 @@ const submitAndWait = async (page: Page, selector: string) => {
     assessmentUrl = page.url();
     await page.waitForSelector("text=The goal is a 5 on every rule");
     assert.equal(await page.locator("text=/ 25").count(), 0, "no total, no grade");
+    assert.equal(await page.locator("text=Full behavioral anchor tables").count(), 0, "no second rating page");
+    // update the ratings from the profile, on the same one-page form
+    await Promise.all([page.waitForURL(/\?edit=1$/), page.click('a:has-text("Update my ratings")')]);
+    assert.ok(await page.locator('input[name="E"][value="2"]').isChecked(), "the form opens with the current ratings");
+    await Promise.all([page.waitForURL(/\?updated=1$/), page.click('button:has-text("Save my ratings")')]);
+    await page.waitForSelector("text=Your ratings are updated");
+    await page.waitForSelector("text=My updated ratings");
+    await page.goto(assessmentUrl);
     await page.screenshot({ path: `${shots}/03-profile.png`, fullPage: true });
   });
 

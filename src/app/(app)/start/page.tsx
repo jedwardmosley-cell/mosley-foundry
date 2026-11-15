@@ -9,6 +9,8 @@ import { getJourney, JOURNEY_STEPS } from "@/lib/journey";
 import { saveWhoIAm } from "@/app/actions/identity";
 import { addCommitment, startCycle } from "@/app/actions/participant";
 import { AssessmentForm } from "@/components/AssessmentForm";
+import { ForgeReadout } from "@/components/ForgeReadout";
+import { linesOf } from "@/content/forgeLines";
 import { CycleFocusFields } from "@/components/CycleFocusFields";
 import { pillarScores } from "@/lib/focus";
 import { CYCLE_FOCUS } from "@/content/options";
@@ -29,7 +31,7 @@ export const metadata = { title: "Kickoff" };
 
 const STEP_COPY = [
   { title: WHO_TITLE, intro: "The FORGE framework, applied to you. Three short parts." },
-  { title: "Where I am", intro: "Score the five rules as the person you just described. It takes about five minutes." },
+  { title: "Where I am", intro: "Rate yourself on the five rules as the person you just described. This is the work to sit with." },
   { title: "Choose your focus", intro: "One or two things to work on, and that's it. Five short questions turn each one into a plan for 30 days, and one person finds out." },
   { title: "Build it into your week", intro: "Discipline by Design: one routine with a day and a time. After that, a check-in each day and a look back each week." },
 ];
@@ -39,7 +41,7 @@ const STEP_COPY = [
  * It reuses the same saves as the full pages, so nothing here is stored twice.
  * A coach can also walk a client through it live.
  */
-export default async function StartPage({ searchParams }: { searchParams: Promise<{ step?: string; part?: string }> }) {
+export default async function StartPage({ searchParams }: { searchParams: Promise<{ step?: string; part?: string; edit?: string }> }) {
   const u = await requireUser("PARTICIPANT");
   const sp = await searchParams;
   const journey = await getJourney(u.id);
@@ -157,31 +159,19 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
 
       {step === 2 && (
         <Card>
-          {!assessment ? (
+          {!assessment || sp.edit ? (
             <>
-              <p className="mb-5 text-[15px]">Tap a score from 1 to 5 for each rule. Score what you did this past month. A 3 is a fine place to start.</p>
-              <AssessmentForm pack={pack} entrepreneur={entrepreneur} useEntre={useEntre} instrument={instrument} next="/start" />
+              <p className="mb-5 text-[15px]">{assessment ? "Read each level again and choose the one that is true of you now." : "This is the deep work of FORGE. For each rule, read what you wrote and all five levels, then choose the one that is true of you this past month. Take your time with it."}</p>
+              <AssessmentForm pack={pack} entrepreneur={entrepreneur} useEntre={useEntre} instrument={instrument} next="/start" lines={linesOf(profile)} role={role} defaults={assessment ? scores : undefined} reviseId={assessment?.id} />
             </>
           ) : (
             <>
-              <p className="eyebrow">My scores</p>
-              <ul className="mt-4 space-y-3">
-                {pack.pillars.map((p) => {
-                  const v = scores[p.key as PillarKey];
-                  return (
-                    <li key={p.key} className="flex items-center gap-3">
-                      <PillarMark k={p.key} size="sm" />
-                      <span className="w-40 shrink-0 text-[15px]">{p.name}</span>
-                      <span className="flex flex-1 gap-1" aria-hidden>{[1, 2, 3, 4, 5].map((n) => <span key={n} className={`h-1.5 flex-1 rounded-full ${n <= v ? "bg-navy" : "bg-ink/[0.08]"}`} />)}</span>
-                      <span className="w-14 text-right text-sm text-ink-soft">{v} of 5</span>
-                    </li>
-                  );
-                })}
-              </ul>
+              <p className="eyebrow">My FORGE profile</p>
+              <div className="mt-4"><ForgeReadout pack={pack} scores={scores} lines={linesOf(profile)} /></div>
               <p className="mt-4 text-sm text-ink-soft">The goal is a 5 on every one. It&apos;s a pursuit that doesn&apos;t end.</p>
               <div className="mt-5 flex flex-wrap items-center gap-4">
                 <Link href={next} className="btn-primary inline-flex">{nextLabel}</Link>
-                <Link href={`/assessment/${assessment.id}`} className="text-sm btn-link">See my full results</Link>
+                <Link href="/start?step=2&edit=1" className="text-sm btn-link">Update my ratings</Link>
               </div>
             </>
           )}
