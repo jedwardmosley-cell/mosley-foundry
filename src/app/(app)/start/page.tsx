@@ -13,7 +13,6 @@ import { ForgeReadout } from "@/components/ForgeReadout";
 import { linesOf } from "@/content/forgeLines";
 import { CycleFocusFields } from "@/components/CycleFocusFields";
 import { pillarScores } from "@/lib/focus";
-import { CYCLE_FOCUS } from "@/content/options";
 import { PageHeader, Card, PillarMark, Field } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 import { StatementReveal } from "@/components/StatementReveal";
@@ -230,11 +229,6 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
               <input type="hidden" name="role" value={role} />
               <input type="hidden" name="template" value={template} />
               <input type="hidden" name="season" value="" />
-              <div>
-                <label htmlFor="title" className="label">My focus, in a few words</label>
-                <input id="title" name="title" required maxLength={160} placeholder="Stay curious when my decisions get challenged" className="input" />
-                <div className="mt-2"><Picks list={CYCLE_FOCUS[lowest]} target="title" folded="Ideas" /></div>
-              </div>
               <CycleFocusFields pillars={pack.pillars.map((p) => ({ key: p.key, name: p.name }))} initial={lowest} />
               <Submit>Next: five short questions</Submit>
             </form>

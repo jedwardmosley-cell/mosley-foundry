@@ -286,6 +286,10 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal(await page.locator("text=One move this week").count(), 0, "one move is folded into My focus");
     // a second focus fills slot 2; a third has to replace one
     await page.goto(`${BASE}/cycle/new`);
+    assert.ok(await page.locator('input[name="pillar"][value="O"]').isChecked(), "a second focus starts from the lowest rule not already in use");
+    await page.locator('label:has(input[name="pillar"][value="G"])').click();
+    await page.waitForSelector("text=Ideas for Growth Oriented");
+    assert.equal(await page.locator("text=Ideas for Outcome Aware").count(), 0, "the ideas follow the rule picked");
     await page.fill('input[name="title"]', "Give my team the full picture, early");
     await Promise.all([page.waitForURL(/\/cycle\/setup\?step=1$/), page.click('button:has-text("Start my 30 days")')]);
     const two = await db.developmentCycle.findMany({ where: { user: { email }, status: "ACTIVE" }, orderBy: { slot: "asc" } });

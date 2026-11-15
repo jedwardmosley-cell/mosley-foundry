@@ -1,8 +1,6 @@
 import { cyclePosition } from "@/lib/cycle";
 import { activeFocuses } from "@/lib/focusData";
 import { lowestRule, focusTitle, MAX_FOCUSES } from "@/lib/focus";
-import { CYCLE_FOCUS } from "@/content/options";
-import { Picks } from "@/components/Picks";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getContent } from "@/content";
@@ -38,9 +36,8 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
     db.assessment.findFirst({ where: { userId: u.id, isSecondOpinion: false }, orderBy: { completedAt: "desc" } }),
   ]);
   const full = active.length >= MAX_FOCUSES;
-  const startPillar = fromLink ?? lowestRule(assessment) ?? ((profile?.priorityPillar ?? "F") as PillarKey);
+  const startPillar = fromLink ?? lowestRule(assessment, full ? [] : active.map((c) => c.pillar)) ?? ((profile?.priorityPillar ?? "F") as PillarKey);
   const source = ["FEEDBACK", "COACH"].includes(sp.source ?? "") ? sp.source! : "";
-  const pName = (k: string) => pack.pillars.find((x) => x.key === k)?.name ?? k;
   return (
     <>
       <PageHeader eyebrow="Discipline by Design · My focus" title={active.length ? "Add a focus" : "Choose your focus"}>
@@ -67,11 +64,6 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
           <input type="hidden" name="source" value={source} />
           <input type="hidden" name="next" value={sp.next === "start" ? "start" : ""} />
           <div>
-            <label htmlFor="title" className="label">My focus, in a few words</label>
-            <input id="title" name="title" required maxLength={160} defaultValue={(sp.title ?? sp.focus ?? "").slice(0, 160)} placeholder="Stay curious when my decisions get challenged" className="input" />
-            <div className="mt-2"><Picks list={CYCLE_FOCUS[startPillar]} target="title" folded={`Ideas for ${pName(startPillar)}`} /></div>
-          </div>
-          <div>
             <label htmlFor="role" className="label">{identity?.role ? "Still about me as..." : "The seat these 30 days are about"}</label>
             <div className="flex items-center inputbox">
               <span className="pl-3.5 pr-1.5 py-2.5 text-[15px] text-ink-soft whitespace-nowrap">This is about me as</span>
@@ -79,7 +71,7 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
             </div>
             <p className="mt-1 text-xs text-ink-mute">One seat for each 30 days. Change it here if this month is about a different one.</p>
           </div>
-          <CycleFocusFields pillars={pack.pillars.map((p) => ({ key: p.key, name: p.name }))} initial={startPillar} initialFocus={(sp.focus ?? "").slice(0, 500)} identityBehavior={identity?.behavior.split("\n")[0].slice(0, 300) ?? ""} />
+          <CycleFocusFields pillars={pack.pillars.map((p) => ({ key: p.key, name: p.name }))} initial={startPillar} initialTitle={(sp.title ?? sp.focus ?? "").slice(0, 160)} initialFocus={(sp.focus ?? "").slice(0, 500)} identityBehavior={identity?.behavior.split("\n")[0].slice(0, 300) ?? ""} />
           {/* A season follows the first focus only. */}
           {active.some((c) => c.slot === 1) && !full ? null : continuing ? (
             <div className="rounded-xl border border-line bg-paper px-4 py-3">
