@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ReadTheBook } from "@/components/ReadTheBook";
 import { requireUser } from "@/lib/auth";
 import { checkInsFor } from "@/lib/focusData";
+import { getJourney, JOURNEY_STEPS } from "@/lib/journey";
 import { db } from "@/lib/db";
 import { getContent } from "@/content";
 import { cycleWeeks, cyclePosition, practiceSummary, CYCLE_TEMPLATES } from "@/lib/cycle";
@@ -42,7 +43,9 @@ export default async function CyclePage({ searchParams }: { searchParams: Promis
   const { weeks, decide } = cycleWeeks(cycle.template, pack);
   const pos = cyclePosition(cycle.startDate);
   const p = pack.pillars.find((x) => x.key === (cycle.pillar as PillarKey))!;
-  const checkIns = await checkInsFor(cycle);
+  const [checkIns, journey] = await Promise.all([checkInsFor(cycle), getJourney(u.id)]);
+  // The daily check-in opens after the kickoff, so until then this page points to the next kickoff step.
+  const kickoffStep = journey.current ? JOURNEY_STEPS.findIndex((st) => st.key === journey.current) + 1 : 0;
   const others = await db.developmentCycle.count({ where: { userId: u.id, status: "ACTIVE", NOT: { id: cycle.id } } });
   const byDate = new Map(checkIns.map((c) => [c.date, c]));
   const notes = JSON.parse(cycle.weekNotes) as Record<string, string>;
@@ -97,7 +100,9 @@ export default async function CyclePage({ searchParams }: { searchParams: Promis
         </div>
         <div className="mt-3 flex items-center justify-between text-sm">
           <span className="muted">{sum.done} done · {sum.partial} partial · {sum.notYet} not yet</span>
-          {!pos.finished && <Link href="/dashboard" className="btn-link">Check in today</Link>}
+          {!pos.finished && (kickoffStep
+            ? <Link href={`/start?step=${kickoffStep}`} className="btn-link">Next: {JOURNEY_STEPS[kickoffStep - 1].next.toLowerCase()}</Link>
+            : <Link href="/dashboard" className="btn-link">Check in today</Link>)}
         </div>
       </Card>
 
