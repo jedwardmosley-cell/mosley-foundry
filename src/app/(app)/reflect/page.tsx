@@ -125,7 +125,7 @@ export default async function ReflectPage() {
           {coach && <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="shared" defaultChecked={current?.shared} className="h-4 w-4 accent-navy" /> Share this week&apos;s reflection with my coach</label>}
           <Submit>Save this week</Submit>
         </form>
-        <Source>Questions from the Discipline by Design session, 3-Day Intensive facilitator guide (default set); Both Hands on the Wheel, Ch. 10</Source>
+        <Source>Questions from the Discipline by Design session, 3-Day Intensive facilitator guide (default set); Both Hands on the Wheel</Source>
       </Card>
       {past.length > 0 && (
         <div className="mt-6 space-y-3">

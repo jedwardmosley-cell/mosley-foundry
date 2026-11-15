@@ -14,7 +14,7 @@ import { BLUEPRINT_PICKS } from "@/content/options";
 import { withArticle } from "@/content/whoIAm";
 import { Picks } from "@/components/Picks";
 import { Icon, IconBadge, type IconName } from "@/components/Icon";
-import { SystemMap, type MapArea } from "@/components/SystemMap";
+import { SystemMap, type MapNode, type MapKind } from "@/components/SystemMap";
 import { FORGE_LINES, PRACTICE_STARTERS } from "@/content/forgeLines";
 import type { PathwayKey } from "@/content/program";
 import type { PillarKey } from "@/content/types";
@@ -57,26 +57,20 @@ export default async function MyRoadPage({ searchParams }: { searchParams: Promi
     { label: "Group", roles: ["GROUP"], add: "GROUP", line: first("Your groups") },
   ];
   const peopleNamed = peopleRows.filter((r) => rels.some((x) => r.roles.includes(x.role))).length;
-  // The map: one spoke per area. People areas count the people named; the others count what's on the list.
-  const SHORT: Record<string, string> = { ROUTINES: "Routines", WEEKLY: "Weekly planning", ACCOUNTABILITY: "Accountability", MENTORING: "Mentors", MENTEES: "Mentees", GROUPS: "Groups", RELATIONSHIPS: "Relationships", LEARNING: "Learning", LEADERSHIP: "Leadership", REVIEW: "Review" };
-  const PEOPLE_ROLES: Record<string, { roles: string[]; add: string }> = {
-    ACCOUNTABILITY: { roles: ["ACCOUNTABILITY_PARTNER"], add: "ACCOUNTABILITY_PARTNER" },
-    MENTORING: { roles: ["MENTOR", "COACH"], add: "MENTOR" },
-    MENTEES: { roles: ["MENTEE", "DIRECT_REPORT"], add: "MENTEE" },
-    GROUPS: { roles: ["GROUP"], add: "GROUP" },
-  };
-  const mapAreas: MapArea[] = BLUEPRINT_AREAS.map((a) => {
-    const pr = PEOPLE_ROLES[a.key];
-    const count = items.filter((i) => i.area === a.key).length + (pr ? rels.filter((r) => pr.roles.includes(r.role)).length : 0);
-    const href = pr ? (count ? "/network" : `/network?role=${pr.add}#add`) : count ? `#area-${a.key}` : `/road?add=${a.key}#area-${a.key}`;
-    return { key: a.key, label: SHORT[a.key] ?? a.label, count, href };
-  });
+  // The map: everything the client has built, around them. Only what is really there shows.
+  const today = new Date();
+  const ROLE_KIND: Record<string, MapKind> = { ACCOUNTABILITY_PARTNER: "partner", MENTOR: "guide", COACH: "guide", GROUP: "group", MENTEE: "develop", DIRECT_REPORT: "develop" };
+  const AREA_KIND: Record<string, MapKind> = { LEARNING: "learning", GROUPS: "group", MENTEES: "develop", MENTORING: "guide", ACCOUNTABILITY: "partner" };
+  const mapNodes: MapNode[] = [
+    ...items.map((c) => ({ id: c.id, label: c.title, kind: AREA_KIND[c.area] ?? ("routine" as MapKind), href: `#area-${c.area}` })),
+    ...rels.map((r) => ({ id: r.id, label: r.name, kind: ROLE_KIND[r.role] ?? ("partner" as MapKind), href: "/network", overdue: !!r.nextCheckIn && r.nextCheckIn < today })),
+  ];
 
   return (
     <>
       <PageHeader eyebrow="Discipline by Design" title="My Design">The system that makes it hard to fail: your routines, your people, your groups and programs, the people you develop. It stays, and it grows.</PageHeader>
-      <div className="card mb-8 !px-3 !py-5 sm:!p-6"><SystemMap name={u.name} areas={mapAreas} /></div>
-      <FromBook label="From the book, Chapter 10">
+      <div className="card mb-8 !px-3 !py-5 sm:!p-6"><SystemMap name={u.name} nodes={mapNodes} /></div>
+      <FromBook label="From the book">
         {d.intro[0] ? <><p>{d.intro.find((t) => t.startsWith("It's the deliberate construction"))}</p><p className="mt-2">{d.intro.find((t) => t.startsWith("The question isn't"))}</p></> : "The deliberate construction of the routines, relationships, environments, and accountability structures that support sustained development."}
       </FromBook>
 
@@ -204,7 +198,7 @@ export default async function MyRoadPage({ searchParams }: { searchParams: Promi
           {d.inventory.filter((i) => ["Your coach", "Your feed", "Your engine"].includes(i.label)).map((i) => (
             <p key={i.label} className="mt-2"><span className="font-medium text-ink">{i.label}. </span>{i.text}</p>
           ))}
-          <Source>Both Hands on the Wheel, Ch. 10 Discipline by Design, Your Design Inventory</Source>
+          <Source>Both Hands on the Wheel, Your Design Inventory</Source>
         </FromBook>
       )}
     </>

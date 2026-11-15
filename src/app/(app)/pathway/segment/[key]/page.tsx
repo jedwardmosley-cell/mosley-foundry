@@ -32,7 +32,7 @@ export default async function SegmentPage({ params }: { params: Promise<{ key: s
       </Card>
       {leading.length > 0 && (
         <Card className="mt-5">
-          <p className="eyebrow">From Ch. 10, Discipline by Design</p>
+          <p className="eyebrow">Discipline by Design</p>
           {leading.slice(0, 6).map((t) => <p key={t} className="mt-3 text-[15px] leading-relaxed">{t}</p>)}
         </Card>
       )}
