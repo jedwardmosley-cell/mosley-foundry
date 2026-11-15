@@ -1,5 +1,4 @@
 import { requireUser } from "@/lib/auth";
-import { watchAreas } from "@/lib/focus";
 import { db } from "@/lib/db";
 import { getContent } from "@/content";
 import { saveWeekly, skipWeekSend } from "@/app/actions/participant";
@@ -24,13 +23,6 @@ export default async function ReflectPage() {
   ]);
   // Weeks 2 to 4 of the 30 days: the week 1 answers come back with the week's question.
   const cycle = await db.developmentCycle.findFirst({ where: { userId: u.id, status: "ACTIVE" }, orderBy: [{ slot: "asc" }, { startDate: "desc" }] });
-  const [identity, latest, prof] = await Promise.all([
-    db.identityProfile.findUnique({ where: { userId: u.id }, select: { role: true, becoming: true } }),
-    db.assessment.findFirst({ where: { userId: u.id, isSecondOpinion: false }, orderBy: { completedAt: "desc" } }),
-    db.profile.findUnique({ where: { userId: u.id }, select: { priorityPillar: true, forgeStatement: true } }),
-  ]);
-  const watch = watchAreas(latest, prof?.priorityPillar).map((k) => pack.pillars.find((p) => p.key === k)?.name ?? k);
-  const describedAs = identity?.role ? `the ${identity.role} I described` : "the person I described";
   const pos = cycle ? cyclePosition(cycle.startDate) : null;
   const lookWeek = cycle?.setupDoneAt && pos && !pos.finished && pos.week >= 2 ? (pos.week as 2 | 3 | 4) : null;
   const answers = JSON.parse(cycle?.weekAnswers || "{}") as Record<string, Record<string, string | boolean>>;
@@ -108,21 +100,7 @@ export default async function ReflectPage() {
               ))}
             </div>
           </fieldset>
-          {(prof?.forgeStatement || identity?.becoming) && (
-            <fieldset>
-              <legend className="label">Did I act like {describedAs}?</legend>
-              <div className="flex flex-wrap gap-4">
-                {[["YES", "Yes"], ["MOSTLY", "Mostly"], ["NOT_YET", "Not yet"]].map(([v, l]) => (
-                  <label key={v} className="flex items-center gap-1.5 text-[15px]"><input type="radio" name="actedLike" value={v} defaultChecked={current?.actedLike === v} className="accent-navy" />{l}</label>
-                ))}
-              </div>
-            </fieldset>
-          )}
-          {watch.length > 0 && (
-            <Field label={`Where did my watch area show up this week? (${watch.join(" and ")})`} hint="Optional. A moment or two is enough.">
-              <input name="watchNote" defaultValue={current?.watchNote} maxLength={1500} className="input" />
-            </Field>
-          )}
+
           {commitments.length > 0 && (
             <fieldset>
               <legend className="label">Which commitments did you keep this week?</legend>

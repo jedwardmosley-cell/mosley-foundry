@@ -130,7 +130,7 @@ const submitAndWait = async (page: Page, selector: string) => {
   });
 
   await check("3. identify a development priority", async () => {
-    // The lowest score is the watch area; choosing it leads to My focus.
+    // Choosing a focus from the results leads to My focus, starting from the lowest score.
     await Promise.all([page.waitForURL(/\/cycle\/new\?pillar=E$/), page.click('button:has-text("choose my focus")')]);
     // the old plan address now opens Who I am: one activity
     await Promise.all([page.waitForURL("**/identity"), page.goto(`${BASE}/plan`)]);
@@ -208,7 +208,8 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.addInitScript(() => { (navigator as unknown as { share: (d: { text: string }) => Promise<void> }).share = async () => {}; });
     await page.goto(`${BASE}/cycle/new`);
     assert.equal(await page.locator('input[name="focus"][type="text"]').count(), 0, "the behavior box is gone: week 1 setup names it");
-    await page.waitForSelector("text=Your watch area is Emotionally Anchored");
+    assert.ok(await page.locator('input[name="pillar"][value="E"]').isChecked(), "ideas start from the lowest score");
+    assert.equal(await page.locator("text=watch area").count(), 0, "no watch area");
     await page.fill('input[name="title"]', "Stay curious when my decisions get challenged");
     await page.click('button:has-text("Start the cycle")');
     const plan = await doSetup(page, "Jamie Cole");
@@ -258,7 +259,6 @@ const submitAndWait = async (page: Page, selector: string) => {
   await check("7b. My focus: one or two, and that's it; My road holds it", async () => {
     await page.goto(`${BASE}/focus`);
     await page.waitForSelector("text=Stay curious when my decisions get challenged");
-    await page.waitForSelector("text=Watch area");
     await page.waitForSelector("text=Add a second focus");
     await page.goto(`${BASE}/road`);
     await page.waitForSelector("text=This road holds my focus");
@@ -373,19 +373,18 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal(priority.priorityPillar, "E", "choosing a kind of change never changes the FORGE priority");
   });
 
-  await check("7f. who I am is asked weekly, with the watch area, not every day", async () => {
+  await check("7f. who I am is asked every day; the weekly look back doesn't ask it again", async () => {
     const me = await db.user.findUniqueOrThrow({ where: { email } });
     await page.goto(`${BASE}/dashboard`);
-    assert.equal(await page.locator("text=Showed up as who I am?").count(), 0, "moved to the weekly look back");
+    await page.waitForSelector("text=Showed up as who I am?");
+    await page.locator('label:has(input[name="identityActed"][value="PARTLY"])').click();
+    await submitAndWait(page, 'button:has-text("Update today")');
+    let ci = await db.dailyCheckIn.findFirst({ where: { userId: me.id, identityActed: "PARTLY" } });
+    for (let i = 0; i < 25 && !ci; i++) { await page.waitForTimeout(200); ci = await db.dailyCheckIn.findFirst({ where: { userId: me.id, identityActed: "PARTLY" } }); }
+    assert.ok(ci, "the daily answer is saved");
     await page.goto(`${BASE}/reflect`);
-    await page.waitForSelector("text=Where did my watch area show up this week?");
-    await page.locator('label:has(input[name="actedLike"][value="MOSTLY"])').click();
-    await page.fill('input[name="watchNote"]', "Thursday's budget review");
-    await submitAndWait(page, 'button:has-text("Save this week")');
-    let w = await db.weeklyReflection.findFirst({ where: { userId: me.id } });
-    for (let i = 0; i < 25 && !w?.watchNote; i++) { await page.waitForTimeout(200); w = await db.weeklyReflection.findFirst({ where: { userId: me.id } }); }
-    assert.equal(w?.actedLike, "MOSTLY");
-    assert.equal(w?.watchNote, "Thursday's budget review");
+    assert.equal(await page.locator('input[name="actedLike"]').count(), 0, "not asked twice");
+    assert.equal(await page.locator("text=watch area").count(), 0, "no watch area");
   });
 
   await check("1b/7d. sign out, sign back in, saved progress and reflection retrieved", async () => {

@@ -10,7 +10,7 @@ import { getContent } from "@/content";
  */
 export const JOURNEY_STEPS = [
   { key: "identity", label: "Who's behind the wheel", next: "Claim who you are", href: "/identity" },
-  { key: "today", label: "Where I am", next: "See where you are today and your watch area", href: "/assessment" },
+  { key: "today", label: "Where I am", next: "See where you are today", href: "/assessment" },
   { key: "drive", label: "My focus", next: "Choose one or two things to work on", href: "/focus" },
   { key: "road", label: "My road", next: "One routine that holds your focus in place", href: "/road" },
 ] as const;

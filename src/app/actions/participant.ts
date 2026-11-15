@@ -13,7 +13,7 @@ import { addDays, ymd } from "@/lib/dates";
 import { PATHWAYS, BLUEPRINT_AREAS, RELATIONSHIP_ROLES, DAY30_DECISIONS, SEASON_DECISIONS, type Day30Decision } from "@/content/program";
 import { seasonForNewCycle } from "@/lib/season";
 import { activeFocuses } from "@/lib/focusData";
-import { freeSlot, watchAreas } from "@/lib/focus";
+import { freeSlot } from "@/lib/focus";
 import type { PillarKey } from "@/content/types";
 import { SHARE_SCOPES } from "@/lib/access";
 import { CHECKIN_TAGS } from "@/content/options";
@@ -101,7 +101,7 @@ export async function setPriority(fd: FormData) {
   const existing = await db.developmentGoal.findFirst({ where: { userId: u.id, pillar, status: "ACTIVE" } });
   if (existing) await db.developmentGoal.update({ where: { id: existing.id }, data: { isPriority: true } });
   else await db.developmentGoal.create({ data: { userId: u.id, pillar, isPriority: true } });
-  // The client's watch area. Next comes their focus: one or two things to work on.
+  // Next comes their focus: one or two things to work on.
   if (fromStart(fd)) redirect("/start?step=3");
   const working = await db.developmentCycle.count({ where: { userId: u.id, status: "ACTIVE" } });
   redirect(working ? "/focus" : `/cycle/new?pillar=${pillar}`);
@@ -259,15 +259,8 @@ export async function startCycle(fd: FormData) {
   }
   // One role per 30 days. A new role here also becomes the role in Who I am.
   if (role) await db.identityProfile.updateMany({ where: { userId: u.id, NOT: { role } }, data: { role } });
-  // Where the focus came from: the client's own pick, or their watch area when the pillar matches it.
-  let from = source;
-  if (!from) {
-    const [latest, prof] = await Promise.all([
-      db.assessment.findFirst({ where: { userId: u.id, isSecondOpinion: false }, orderBy: { completedAt: "desc" } }),
-      db.profile.findUnique({ where: { userId: u.id }, select: { priorityPillar: true } }),
-    ]);
-    from = watchAreas(latest, prof?.priorityPillar).includes(d.pillar as PillarKey) ? "WATCH" : "OWN";
-  }
+  // Where the focus came from: feedback, the coach, or the client's own pick.
+  const from = source || "OWN";
   // A season follows the first focus only.
   const season = slot === 1 ? seasonChoice : "";
   const s = await seasonForNewCycle(u.id, season);

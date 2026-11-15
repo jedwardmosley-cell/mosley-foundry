@@ -11,7 +11,7 @@ import type { PillarKey } from "@/content/types";
 import { PillarMark, PILLAR_FILL } from "@/components/ui";
 import { CheckInForm } from "@/components/CheckInForm";
 import { TimezoneSync } from "@/components/Timezone";
-import { watchAreas, focusTitle, MAX_FOCUSES } from "@/lib/focus";
+import { focusTitle, MAX_FOCUSES } from "@/lib/focus";
 import { Icon, IconBadge, type IconName } from "@/components/Icon";
 
 export const metadata = { title: "Today" };
@@ -24,7 +24,6 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   const { pack } = await getContent();
   const pillarKey = (d.profile.priorityPillar ?? d.cycle?.pillar) as PillarKey | undefined;
   const p = pillarKey ? pack.pillars.find((x) => x.key === pillarKey) : null;
-  const watch = watchAreas(d.assessment, d.profile.priorityPillar);
   const second = d.focuses.find((f) => f.slot === 2) ?? null;
   const secondPos = second ? cyclePosition(second.startDate) : null;
   const notSetUp = d.focuses.find((f) => !f.setupDoneAt) ?? null;
@@ -85,10 +84,9 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
             <p className="text-center text-[11px] uppercase tracking-[0.14em] text-ink-mute">{d.focuses.length > 1 ? "Focus 1 · " : "My focus · "}Week {pos.week} · {week.phase}{d.cycle.seasonMonth ? ` · Month ${d.cycle.seasonMonth} of 3` : ""}</p>
             <Link href={`/cycle?id=${d.cycle.id}`} className="mt-1 block text-center text-[17px] font-medium leading-snug text-ink">{d.cycle.title || d.cycle.plan || d.cycle.focus || week.work}</Link>
             {d.cycle.title && d.cycle.plan && <p className="mt-1 text-center text-sm text-ink-soft">{d.cycle.plan}</p>}
-            {watch.includes(d.cycle.pillar as PillarKey) && <p className="mt-2 text-center text-xs text-ink-mute">Runs through your watch area: {pack.pillars.find((x) => x.key === d.cycle!.pillar)?.name}</p>}
             {pos.finished
               ? <Link href={`/cycle?id=${d.cycle.id}`} className="mt-5 btn-primary w-full">Open my day 30 review</Link>
-              : <div className="mt-4"><CheckInForm existing={d.todayCheckIn} hasCoach={d.coaches.length > 0} /></div>}
+              : <div className="mt-4"><CheckInForm existing={d.todayCheckIn} hasCoach={d.coaches.length > 0} identityLevel={d.identity?.level} /></div>}
           </>
         ) : (
           <Link href="/start" className="mt-6 btn-primary w-full">Pick up where I left off</Link>
@@ -103,7 +101,6 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
           </div>
           <p className="mt-2 text-[17px] font-medium leading-snug text-heading">{focusTitle(second)}</p>
           {second.title && second.plan && <p className="mt-1 text-sm text-ink-soft">{second.plan}</p>}
-          {watch.includes(second.pillar as PillarKey) && <p className="mt-2 text-xs text-ink-mute">Runs through your watch area: {pack.pillars.find((x) => x.key === second.pillar)?.name}</p>}
           {secondPos.finished
             ? <Link href={`/cycle?id=${second.id}`} className="mt-4 btn-primary w-full">Open my day 30 review</Link>
             : <div className="mt-4"><CheckInForm existing={d.todayCheckIn ? { ...d.todayCheckIn, status: d.todayCheckIn.status2 } : null} hasCoach={false} slot={2} /></div>}

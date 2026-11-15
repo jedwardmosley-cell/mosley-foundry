@@ -1,6 +1,6 @@
 import { cyclePosition } from "@/lib/cycle";
 import { activeFocuses } from "@/lib/focusData";
-import { watchAreas, focusTitle, MAX_FOCUSES } from "@/lib/focus";
+import { lowestRule, focusTitle, MAX_FOCUSES } from "@/lib/focus";
 import { CYCLE_FOCUS } from "@/content/options";
 import { Picks } from "@/components/Picks";
 import { requireUser } from "@/lib/auth";
@@ -38,8 +38,7 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
     db.assessment.findFirst({ where: { userId: u.id, isSecondOpinion: false }, orderBy: { completedAt: "desc" } }),
   ]);
   const full = active.length >= MAX_FOCUSES;
-  const watch = watchAreas(assessment, profile?.priorityPillar);
-  const startPillar = fromLink ?? watch[0] ?? ((profile?.priorityPillar ?? "F") as PillarKey);
+  const startPillar = fromLink ?? lowestRule(assessment) ?? ((profile?.priorityPillar ?? "F") as PillarKey);
   const source = ["FEEDBACK", "COACH"].includes(sp.source ?? "") ? sp.source! : "";
   const pName = (k: string) => pack.pillars.find((x) => x.key === k)?.name ?? k;
   return (
@@ -47,11 +46,6 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
       <PageHeader eyebrow="Discipline by Design · My focus" title={active.length ? "Add a focus" : "Choose your focus"}>
         One or two things to work on, and that&apos;s it. Name it in a few words, then five short questions turn it into a plan for 30 days.
       </PageHeader>
-      {watch.length > 0 && (
-        <p role="note" className="mb-5 rounded-2xl bg-ink/[0.04] px-4 py-3 text-[15px] text-ink">
-          Your watch area is {watch.map(pName).join(" and ")}. Keep it in view as you choose. A focus that runs through it is a good place to start, but it doesn&apos;t have to.
-        </p>
-      )}
       <Card>
         <form action={startCycle} className="space-y-5">
           {full && (

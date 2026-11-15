@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { getContent } from "@/content";
 import { cyclePosition } from "@/lib/cycle";
 import { activeFocuses } from "@/lib/focusData";
-import { watchAreas, strengths, focusTitle, FOCUS_SOURCES, MAX_FOCUSES, type FocusSource } from "@/lib/focus";
+import { focusTitle, FOCUS_SOURCES, MAX_FOCUSES, type FocusSource } from "@/lib/focus";
 import { fmt } from "@/lib/dates";
 import type { PillarKey } from "@/content/types";
 import { PageHeader, PillarMark } from "@/components/ui";
@@ -13,7 +13,6 @@ export const metadata = { title: "My focus" };
 
 /**
  * My focus: the one or two development opportunities the client is working on, and nothing else.
- * The watch area from the FORGE reading sits above them as something to keep in view.
  */
 export default async function FocusPage() {
   const u = await requireUser("PARTICIPANT");
@@ -26,8 +25,6 @@ export default async function FocusPage() {
     db.developmentCycle.findMany({ where: { userId: u.id, status: { in: ["COMPLETED", "STOPPED"] } }, orderBy: { startDate: "desc" }, take: 4 }),
   ]);
   const name = (k: string) => pack.pillars.find((p) => p.key === k)?.name ?? k;
-  const watch = watchAreas(assessment, profile?.priorityPillar);
-  const strong = strengths(assessment);
   const statement = profile?.forgeStatement || identity?.becoming || profile?.destination || "";
 
   return (
@@ -41,25 +38,6 @@ export default async function FocusPage() {
           <p className="text-xs text-ink-mute">Who&apos;s behind the wheel</p>
           <p className="mt-1 font-serif text-[17px] leading-snug text-heading line-clamp-3">{statement}</p>
         </Link>
-      )}
-
-      {assessment && (watch.length > 0 || strong.length > 0) && (
-        <div className="mb-6 grid gap-3 sm:grid-cols-2">
-          {strong.length > 0 && (
-            <div className="tile">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-sage">Strengths</p>
-              <p className="mt-2 text-[15px] text-heading">{strong.map(name).join(" and ")}</p>
-              <p className="mt-1 text-sm text-ink-mute">Lean on these. They carry the work.</p>
-            </div>
-          )}
-          {watch.length > 0 && (
-            <div className="tile">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-clay">Watch area</p>
-              <p className="mt-2 text-[15px] text-heading">{watch.map(name).join(" and ")}</p>
-              <p className="mt-1 text-sm text-ink-mute">Keep it in view. It is not a separate task.</p>
-            </div>
-          )}
-        </div>
       )}
 
       <h2 className="sr-only">My focuses</h2>
@@ -76,7 +54,6 @@ export default async function FocusPage() {
                 <PillarMark k={f.pillar as PillarKey} size="sm" />{focusTitle(f)}
               </p>
               {f.plan ? <p className="mt-2 text-[15px] text-ink-soft">{f.plan}</p> : <p className="mt-2 text-[15px] text-link">Finish setting it up: five short questions and who finds out</p>}
-              {watch.includes(f.pillar as PillarKey) && <p className="mt-3 text-sm text-ink-mute">Runs through your watch area, {name(f.pillar)}. Expect some days to be partial.</p>}
             </Link>
           );
         })}
