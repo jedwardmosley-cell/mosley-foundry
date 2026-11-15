@@ -52,13 +52,12 @@ export default async function AssessmentResult({ params, searchParams }: { param
               </li>
             ))}
           </ul>
-          <p className="mt-5 border-t border-line pt-4 flex justify-between"><span className="muted">Total</span><span className="font-serif text-xl">{r.total} / 25</span></p>
+          <p className="mt-5 border-t border-line pt-4 text-sm text-ink-soft">The goal is a 5 on every rule. It&apos;s a pursuit that doesn&apos;t end.</p>
           <p className="mt-2 text-xs text-ink-mute">These are your own ratings. FORGE is a development tool. It has not been validated as a psychometric instrument, and its scores can't be compared to EQ-i scores.</p>
         </Card>
 
         <Card>
-          {r.band && <><p className="eyebrow">Reading your total: {r.band.label}</p><p className="mt-2 text-[15px] leading-relaxed">{r.band.text}</p></>}
-          {pack.patternNote && <p className="quote mt-5 text-[15px]">{pack.patternNote}</p>}
+          {pack.patternNote && <p className="quote text-[15px]">{pack.patternNote}</p>}
           {r.flat && <p className="mt-4 text-sm text-alert">All five scores are the same. If you had to order them from strongest to weakest, which is fifth? That one is your real lowest. Choose it below.</p>}
         </Card>
       </div>

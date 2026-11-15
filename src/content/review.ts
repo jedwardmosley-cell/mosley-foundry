@@ -96,15 +96,11 @@ export function reviewSets(): ReviewSet[] {
     {
       key: "today", title: "Today headlines", where: "Today, top card", file: "src/lib/todayHeadline.ts", draft: true,
       groups: [{
-        label: "Written by rule from the check-ins",
+        label: "Written by rule, with no counts or praise",
         items: [
-          todayHeadline({ cycle: false, finished: false, day: 0, practiced: 0, window: 0 }),
-          todayHeadline({ cycle: true, finished: true, day: 30, practiced: 0, window: 0 }),
-          todayHeadline({ cycle: true, finished: false, day: 2, practiced: 2, window: 2 }),
-          todayHeadline({ cycle: true, finished: false, day: 12, practiced: 9, window: 10 }),
-          todayHeadline({ cycle: true, finished: false, day: 12, practiced: 6, window: 10 }),
-          todayHeadline({ cycle: true, finished: false, day: 12, practiced: 3, window: 10 }),
-          todayHeadline({ cycle: true, finished: false, day: 12, practiced: 0, window: 10 }),
+          todayHeadline({ cycle: false, finished: false, day: 0 }),
+          todayHeadline({ cycle: true, finished: true, day: 30 }),
+          todayHeadline({ cycle: true, finished: false, day: 12 }),
         ].map((h) => `${h.label}. ${h.title} ${h.line}`),
       }],
     },

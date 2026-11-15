@@ -2,7 +2,7 @@ import { requireUser } from "@/lib/auth";
 import { loadParticipant } from "@/lib/participant";
 import { db } from "@/lib/db";
 import { getContent } from "@/content";
-import { scoresFrom, total } from "@/lib/forge";
+import { scoresFrom } from "@/lib/forge";
 import { practiceSummary } from "@/lib/cycle";
 import { toggleEntryShared } from "@/app/actions/participant";
 import { DAY30_DECISIONS, CHECKIN_STATUS } from "@/content/program";
@@ -36,7 +36,7 @@ export default async function HistoryPage() {
           <p className="eyebrow">FORGE readings</p>
           <div className="mt-3 overflow-x-auto">
             <table className="w-full text-[15px]">
-              <thead><tr className="text-left text-ink-mute text-xs"><th className="py-2 font-medium">Date</th>{PILLAR_KEYS.map((k) => <th key={k} className="font-medium text-center">{k}</th>)}<th className="font-medium text-right">Total</th></tr></thead>
+              <thead><tr className="text-left text-ink-mute text-xs"><th className="py-2 font-medium">Date</th>{PILLAR_KEYS.map((k) => <th key={k} className="font-medium text-center">{k}</th>)}</tr></thead>
               <tbody>
                 {d.assessments.map((a, i) => {
                   const s = scoresFrom(a);
@@ -45,7 +45,6 @@ export default async function HistoryPage() {
                     <tr key={a.id} className="border-t border-line">
                       <td className="py-2">{fmt(a.completedAt, { month: "short", day: "numeric", year: "numeric" })}</td>
                       {PILLAR_KEYS.map((k) => <td key={k} className="text-center">{s[k]}{prev && s[k] !== prev[k] && <span className={`ml-1 text-xs ${s[k] > prev[k] ? "text-link" : "text-alert"}`}>{s[k] > prev[k] ? "+" : ""}{s[k] - prev[k]}</span>}</td>)}
-                      <td className="text-right font-serif">{total(s)}</td>
                     </tr>
                   );
                 })}

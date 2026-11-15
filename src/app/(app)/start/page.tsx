@@ -31,7 +31,7 @@ const STEP_COPY = [
   { title: WHO_TITLE, intro: "The FORGE framework, applied to you. Three short parts." },
   { title: "Where I am", intro: "Score the five rules as the person you just described. It takes about five minutes." },
   { title: "Choose your focus", intro: "One or two things to work on, and that's it. Five short questions turn each one into a plan for 30 days, and one person finds out." },
-  { title: "What holds it in place", intro: "Discipline by Design: one routine with a day and a time. After that, a check-in each day and a look back each week." },
+  { title: "Build it into your week", intro: "Discipline by Design: one routine with a day and a time. After that, a check-in each day and a look back each week." },
 ];
 
 /**
@@ -191,7 +191,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
       {step === 4 && (
         <div className="space-y-5">
           <Card>
-            <h2 className="h3">One routine that holds your focus in place</h2>
+            <h2 className="h3">One routine that builds your focus into your week</h2>
             {commitments.length > 0 && <p className="mt-2 text-[15px]">✓ {commitments[commitments.length - 1].title}{commitments.length > 1 && <span className="text-ink-mute"> and {commitments.length - 1} more</span>}</p>}
             <form action={addCommitment} className="mt-4 space-y-3">
               <input type="hidden" name="next" value="/start" />

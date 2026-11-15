@@ -28,7 +28,7 @@ export default async function WeekOneSetup({ searchParams }: { searchParams: Pro
   const { step = "1" } = await searchParams;
   const cycle = await setupCycle(u.id);
   if (!cycle) redirect("/cycle/new");
-  // In the first session, finishing week 1 setup leads to the last step: what holds the focus in place.
+  // In the first session, finishing week 1 setup leads to the last step: a routine that builds the focus into the week.
   const doneHref = (await db.commitment.count({ where: { userId: u.id, active: true } })) ? "/dashboard?setup=done" : "/start?step=4";
   const [profile, people] = await Promise.all([
     db.profile.findUnique({ where: { userId: u.id } }),

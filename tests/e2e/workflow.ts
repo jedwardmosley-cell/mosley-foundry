@@ -125,7 +125,8 @@ const submitAndWait = async (page: Page, selector: string) => {
     await Promise.all([page.waitForURL(/\/assessment\/[a-z0-9]+$/), page.click('button:has-text("See my profile")')]);
     assert.ok(!/in the wild/i.test(await page.locator("main").innerText()), "FORGE in the Wild is retired");
     assessmentUrl = page.url();
-    await page.waitForSelector("text=16 / 25");
+    await page.waitForSelector("text=The goal is a 5 on every rule");
+    assert.equal(await page.locator("text=/ 25").count(), 0, "no total, no grade");
     await page.screenshot({ path: `${shots}/03-profile.png`, fullPage: true });
   });
 
@@ -678,7 +679,8 @@ const submitAndWait = async (page: Page, selector: string) => {
     await login(page, "coach@demo.bothhands.app");
     await page.goto(`${BASE}/coach/${dana.id}`);
     await page.waitForSelector("text=FORGE reading");
-    await page.waitForSelector("text=Total 16 / 25");
+    await page.waitForSelector("text=Self-rated");
+    assert.equal(await page.locator("text=/ 25").count(), 0, "the coach sees no total either");
     await page.waitForSelector("text=The question bought me five seconds");
     await page.waitForSelector("text=Impulse control when challenged in meetings");
     await page.screenshot({ path: `${shots}/09-coach-participant.png`, fullPage: true });

@@ -80,7 +80,7 @@ export default async function MyRoadPage() {
               ))}
             </ul>
           ) : (
-            <p className="mt-1 text-[15px]"><Link href="/focus" className="btn-link">Choose your focus</Link> first: one or two things to work on. The routines below hold it in place.</p>
+            <p className="mt-1 text-[15px]"><Link href="/focus" className="btn-link">Choose your focus</Link> first: one or two things to work on. The routines below build it into your week.</p>
           )}
         </div>
       </section>

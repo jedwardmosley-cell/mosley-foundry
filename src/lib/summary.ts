@@ -3,7 +3,7 @@ import { FORGE_LINES } from "@/content/forgeLines";
 import { getContent } from "@/content";
 import { PATHWAYS, RELATIONSHIP_ROLES, BLUEPRINT_AREAS, DAY30_DECISIONS } from "@/content/program";
 import { loadParticipant } from "./participant";
-import { scoresFrom, total } from "./forge";
+import { scoresFrom } from "./forge";
 import { practiceSummary } from "./cycle";
 import { fmt } from "./dates";
 import { db } from "./db";
@@ -31,10 +31,10 @@ export async function developmentSummary(userId: string, name: string) {
     if (d.identity.personaName) L.push(`**Performance identity:** ${d.identity.personaName}`);
   }
   if (d.assessments.length) {
-    L.push("", "## FORGE self-assessments", "", "| Date | F | O | R | G | E | Total |", "|---|---|---|---|---|---|---|");
+    L.push("", "## FORGE self-assessments", "", "| Date | F | O | R | G | E |", "|---|---|---|---|---|---|");
     for (const a of d.assessments) {
       const s = scoresFrom(a);
-      L.push(`| ${fmt(a.completedAt, { month: "short", day: "numeric", year: "numeric" })} | ${s.F} | ${s.O} | ${s.R} | ${s.G} | ${s.E} | ${total(s)} |`);
+      L.push(`| ${fmt(a.completedAt, { month: "short", day: "numeric", year: "numeric" })} | ${s.F} | ${s.O} | ${s.R} | ${s.G} | ${s.E} |`);
     }
     L.push("", "_These are self-ratings for personal development. They have not been validated as a psychometric measure._");
   }

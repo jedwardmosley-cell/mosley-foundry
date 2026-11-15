@@ -26,12 +26,10 @@ test("FORGE lines keep their I am and I do starts", () => {
 
 import { todayHeadline } from "../src/lib/todayHeadline";
 
-test("the Today headline follows the last 10 days", () => {
-  assert.equal(todayHeadline({ cycle: false, finished: false, day: 0, practiced: 0, window: 0 }).mood, "ready");
-  assert.equal(todayHeadline({ cycle: true, finished: true, day: 30, practiced: 9, window: 10 }).mood, "decide");
-  assert.equal(todayHeadline({ cycle: true, finished: false, day: 2, practiced: 1, window: 2 }).mood, "start");
-  assert.equal(todayHeadline({ cycle: true, finished: false, day: 12, practiced: 8, window: 10 }).mood, "strong");
-  assert.equal(todayHeadline({ cycle: true, finished: false, day: 12, practiced: 6, window: 10 }).title, "Building, day by day.");
-  assert.equal(todayHeadline({ cycle: true, finished: false, day: 12, practiced: 2, window: 10 }).mood, "care");
-  assert.match(todayHeadline({ cycle: true, finished: false, day: 12, practiced: 0, window: 10 }).line, /No check-ins/);
+test("the Today headline says where you are, with no counts or praise", () => {
+  assert.equal(todayHeadline({ cycle: false, finished: false, day: 0 }).mood, "ready");
+  assert.equal(todayHeadline({ cycle: true, finished: true, day: 30 }).mood, "decide");
+  const mid = todayHeadline({ cycle: true, finished: false, day: 12 });
+  assert.equal(mid.title, "Day 12 of 30.");
+  assert.doesNotMatch(`${mid.label} ${mid.title} ${mid.line}`, /\d+ of the last|keep it going|showing up|streak/i, "no counts or praise");
 });

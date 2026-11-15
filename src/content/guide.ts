@@ -24,25 +24,25 @@ export const CLIENT_GUIDE: GuideSection[] = [
     intro: "Everything in the app follows one path in two parts. FORGE is who is behind the wheel. Discipline by Design is how you drive. The bar at the top of each screen shows the four steps.",
     steps: [
       "Who's behind the wheel (FORGE). Name the seat you're in and how big a turn this is, work through the five rules of FORGE, and say it as My statement.",
-      "Where I am (FORGE). Score the five rules to see how close you are today, and pick one rule to work on.",
-      "My road (Discipline by Design). Name the behavior that would show it, then set up the routines and people that reinforce who you are.",
-      "30 days (Discipline by Design). Practice one behavior for 30 days with a two-minute daily check-in. On day 30, decide what comes next.",
+      "Where I am (FORGE). Score the five rules to see how close you are today. The goal is a 5 on every one.",
+      "My focus (Discipline by Design). Choose one or two things to work on, each for 30 days, and set each one up with five short questions and who finds out.",
+      "My road (Discipline by Design). Add one routine that builds your focus into your week.",
     ],
-    note: "Every step can be skipped and finished later. The bar keeps track for you.",
+    note: "Your daily check-in opens once all four steps are done. On day 30, you decide what comes next.",
   },
   {
     id: "first",
-    title: "Your first session",
+    title: "Your kickoff",
     time: "About 15 minutes, one time",
     intro: "After you pick your pathway, the app walks you through the four steps one screen at a time. Your coach can also go through it with you.",
     steps: [
       "Who's behind the wheel, in three short parts: your seat and how big a turn, then the five rules of FORGE, then My statement. Start with F. You can finish the rest during your first week.",
-      "Take the self-assessment, then pick one rule to work on first.",
-      "Add one routine and one person who will know whether you did it.",
-      "Choose one behavior and start your 30 days.",
+      "Take the self-assessment to see where you are on each rule.",
+      "Choose your focus, answer five short questions about it, and say who finds out.",
+      "Add one routine that builds your focus into your week.",
     ],
-    note: "You can skip any step and come back. Tap the next step in the bar at the top of the screen to pick up where you left off.",
-    link: { href: "/start", label: "Open your first session" },
+    note: "If you stop partway, the Today screen and the bar at the top show the next step, so you can pick up where you left off.",
+    link: { href: "/start", label: "Open your kickoff" },
   },
   {
     id: "identity",
@@ -62,8 +62,8 @@ export const CLIENT_GUIDE: GuideSection[] = [
   },
   {
     id: "daily",
-    title: "Your daily two minutes",
-    time: "2 minutes a day",
+    title: "Your daily check-in",
+    time: "A few taps a day",
     steps: [
       "Open the Today screen. It shows where you are going, what you are working on, and your practice for today.",
       "Tap Done, Partial or Not yet.",
@@ -91,9 +91,9 @@ export const CLIENT_GUIDE: GuideSection[] = [
   {
     id: "cycle",
     title: "30 days",
-    time: "30 days, 2 minutes a day",
+    time: "30 days, a few taps a day",
     steps: [
-      "Tap Start my 30 days. Name your focus and the rule it builds.",
+      "Tap Start my 30 days. Name your focus and the rule it builds. You can have one or two focuses at a time, and that's it.",
       "Each week has a focus. The Today screen shows the work for the week you are in.",
       "Log your practice each day from the Today screen.",
       "On day 28 the review opens. Decide whether to keep going on your own, go further with coaching, or start new 30 days.",

@@ -7,7 +7,7 @@ import { attentionFlags } from "@/lib/coachSummary";
 import { assignExercise, scheduleSession, saveSessionNotes, recordEqiInterpretation } from "@/app/actions/coach";
 import { getContent } from "@/content";
 import { cycleWeeks, cyclePosition, practiceSummary } from "@/lib/cycle";
-import { scoresFrom, total } from "@/lib/forge";
+import { scoresFrom } from "@/lib/forge";
 import { RELATIONSHIP_ROLES, SEGMENTS, CHECKIN_STATUS, DAY30_DECISIONS } from "@/content/program";
 import { fmt } from "@/lib/dates";
 import type { PillarKey } from "@/content/types";
@@ -123,7 +123,7 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
           {s.has("ASSESSMENT") ? (scores ? (
             <ul className="mt-3 space-y-2">
               {PILLAR_KEYS.map((k) => <li key={k} className="flex items-center gap-3"><PillarMark k={k} size="sm" /><span className="flex-1 text-sm">{pack.pillars.find((p) => p.key === k)?.name}</span><Gauge value={scores[k]} label={k} /><span className="w-4 text-right">{scores[k]}</span></li>)}
-              <li className="text-sm muted pt-1">Total {total(scores)} / 25 · self-rated {fmt(v.assessment!.completedAt)}</li>
+              <li className="text-sm muted pt-1">Self-rated {fmt(v.assessment!.completedAt)}</li>
             </ul>
           ) : <p className="mt-2 muted text-sm">No assessment yet.</p>) : <div className="mt-3"><NotShared scope="ASSESSMENT" /></div>}
         </Card>

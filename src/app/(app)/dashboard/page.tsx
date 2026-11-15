@@ -4,7 +4,7 @@ import { requireUser } from "@/lib/auth";
 import { loadParticipant } from "@/lib/participant";
 import { getContent } from "@/content";
 import { cycleWeeks, cyclePosition, practiceSummary } from "@/lib/cycle";
-import { fmt, daysBetween, ymd, addDays } from "@/lib/dates";
+import { fmt, daysBetween } from "@/lib/dates";
 import { todayHeadline } from "@/lib/todayHeadline";
 import { getJourney, JOURNEY_STEPS } from "@/lib/journey";
 import { withArticle } from "@/content/whoIAm";
@@ -22,7 +22,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   const u = await requireUser("PARTICIPANT");
   const [d, journey] = await Promise.all([loadParticipant(u.id), getJourney(u.id)]);
   if (!d.profile?.onboardedAt) redirect("/onboarding");
-  // The daily check-in opens once the whole kickoff is done: who, where, the focus and what holds it in place.
+  // The daily check-in opens once the whole kickoff is done: who, where, the focus and a routine.
   const kickoffStep = journey.current ? JOURNEY_STEPS.findIndex((s) => s.key === journey.current) + 1 : 0;
   const kickoff = kickoffStep ? JOURNEY_STEPS[kickoffStep - 1] : null;
   const { pack } = await getContent();
@@ -50,13 +50,9 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
     lastCommitments && { key: "c", href: "/coaching", icon: "check", text: lastCommitments.commitments, side: "Agreed" },
   ].filter(Boolean) as { key: string; href: string; icon: IconName; text: string; side: string }[];
 
-  // The headline: the last 10 days of this cycle, or fewer early on.
-  const w = pos && !pos.finished ? Math.min(10, pos.day) : 0;
-  const since = w ? ymd(addDays(new Date(), -(w - 1))) : "";
-  const recent = w ? d.checkIns.filter((c) => c.date >= since && (c.status === "DONE" || c.status === "PARTIAL")).length : 0;
-  const head = todayHeadline({ cycle: !!(d.cycle && pos), finished: !!pos?.finished, day: pos?.day ?? 0, practiced: recent, window: w });
+  const head = todayHeadline({ cycle: !!(d.cycle && pos), finished: !!pos?.finished, day: pos?.day ?? 0 });
   if (kickoffStep) Object.assign(head, { mood: "start", label: `Kickoff · step ${kickoffStep} of 4`, title: "Finish your kickoff", line: "Your daily check-in opens once all four steps are done." });
-  const moodTone = { strong: "text-link", building: "text-ink-soft", care: "text-alert", start: "text-ink-mute", ready: "text-ink-mute", decide: "text-ink-soft" }[head.mood];
+  const moodTone = { start: "text-ink-mute", ready: "text-ink-mute", decide: "text-ink-soft" }[head.mood];
   const overdue = d.relationships.filter((r) => r.nextCheckIn && daysBetween(new Date(), r.nextCheckIn) < 0).length;
 
   return (

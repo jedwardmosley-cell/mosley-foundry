@@ -3,7 +3,8 @@ import { withArticle } from "@/content/whoIAm";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getContent } from "@/content";
-import { scoresFrom, total } from "@/lib/forge";
+import { scoresFrom } from "@/lib/forge";
+import { PILLAR_KEYS } from "@/content/types";
 import { fmt } from "@/lib/dates";
 import { PageHeader, PillarMark, Draft, Source } from "@/components/ui";
 import { AssessmentForm } from "@/components/AssessmentForm";
@@ -60,7 +61,7 @@ export default async function AssessmentPage({ searchParams }: { searchParams: P
             {past.map((a) => (
               <li key={a.id} className="py-2 flex justify-between">
                 <Link href={`/assessment/${a.id}`} className="btn-link">{fmt(a.completedAt, { month: "short", day: "numeric", year: "numeric" })}</Link>
-                <span className="muted text-sm">{total(scoresFrom(a))} / 25</span>
+                <span className="muted text-sm">{(() => { const sc = scoresFrom(a); return PILLAR_KEYS.map((k) => `${k} ${sc[k]}`).join(" · "); })()}</span>
               </li>
             ))}
           </ul>
