@@ -135,7 +135,7 @@
 @media (max-width: 620px) { #mf .mf-cards, #mf .mf-cards-4 { grid-template-columns: minmax(0, 1fr); } }
 
 #mf .mf-cases .mf-card { display: flex; flex-direction: column; }
-#mf .mf-cases .mf-num { color: var(--accent); }
+#mf .mf-cases .mf-num { color: var(--accent); font-size: clamp(40px, 4.2vw, 58px); white-space: nowrap; }
 #mf .mf-cases .mf-card h3 { font-size: 20px; margin-top: 16px; }
 #mf .mf-cases .mf-card-num { margin-top: auto; padding-top: 18px; font-size: 12px; }
 #mf .mf-cases { margin-top: 44px; }
@@ -320,10 +320,11 @@
     <div class="mf-wrap">
       <p class="mf-eyebrow">The work so far</p>
       <h2 class="mf-h2">The promotion assumed the skills. I build them.</h2>
-      <ol class="mf-cards mf-cases">
+      <ol class="mf-cards mf-cards-4 mf-cases">
         <li class="mf-card"><div class="mf-num" data-count="10" data-suffix="x">10x</div><h3>A six-person leadership pilot grew to more than 60 leaders.</h3><p>It became part of the organization's succession and workforce planning.</p><span class="mf-card-num">Financial institution</span></li>
         <li class="mf-card"><div class="mf-num" data-count="300" data-suffix="+">300+</div><h3>Leaders trained to carry one strategy into 12 hospitals.</h3><p>Each hospital turned system goals into its own owners, measures, and reviews.</p><span class="mf-card-num">Health system</span></li>
         <li class="mf-card"><div class="mf-num" data-count="48">48</div><h3>Small business owners coached on profitability and access to capital.</h3><p>Including owners who started with no revenue and now have paying customers.</p><span class="mf-card-num">Small business advisory, since 2022</span></li>
+        <li class="mf-card"><div class="mf-num" data-count="250" data-prefix="$" data-suffix="K+">$250K+</div><h3>In capital accessed by the small business owners I coach.</h3><p>Across the businesses I've advised since 2022.</p><span class="mf-card-num">Small business advisory</span></li>
       </ol>
     </div>
   </section>
@@ -524,8 +525,8 @@
       en.forEach(function (e) {
         if (!e.isIntersecting) return;
         io.unobserve(e.target);
-        var el = e.target, end = +el.dataset.count, suf = el.dataset.suffix || '', t0 = null;
-        var step = function (ts) { if (!t0) t0 = ts; var k = Math.min((ts - t0) / 1400, 1); k = 1 - Math.pow(1 - k, 3); el.textContent = Math.round(end * k) + suf; if (k < 1) requestAnimationFrame(step); };
+        var el = e.target, end = +el.dataset.count, pre = el.dataset.prefix || '', suf = el.dataset.suffix || '', t0 = null;
+        var step = function (ts) { if (!t0) t0 = ts; var k = Math.min((ts - t0) / 1400, 1); k = 1 - Math.pow(1 - k, 3); el.textContent = pre + Math.round(end * k) + suf; if (k < 1) requestAnimationFrame(step); };
         requestAnimationFrame(step);
       });
     }, { threshold: .6 });
