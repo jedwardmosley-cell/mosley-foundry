@@ -113,8 +113,8 @@
 @keyframes mf-glow { from { background-position: 0% 50%; } to { background-position: 100% 50%; } }
 #mf .mf-hero .mf-lede { font-size: clamp(19px, 1.8vw, 23px); color: var(--bone); max-width: 34ch; }
 #mf .mf-ctas { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 34px; }
-#mf .mf-portrait { position: relative; max-width: 380px; justify-self: end; width: 100%; }
-#mf .mf-portrait img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: 50% 22%; border-radius: 2px; filter: saturate(.92) contrast(1.04); }
+#mf .mf-portrait { position: relative; max-width: 420px; justify-self: end; width: 100%; }
+#mf .mf-portrait img { width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; object-position: 50% 22%; border-radius: 2px; filter: saturate(.92) contrast(1.04); }
 #mf .mf-portrait img { box-shadow: 0 30px 80px -30px rgba(242,165,65,.45); border-bottom: 4px solid var(--copper); }
 #mf .mf-tag {
   position: absolute; left: 16px; bottom: 20px; background: var(--iron); border: 1px solid var(--iron-line);
@@ -123,7 +123,7 @@
 #mf .mf-tag strong { display: block; font-family: var(--display); font-size: 22px; letter-spacing: .04em; color: var(--molten); }
 @media (max-width: 860px) {
   #mf .mf-hero .mf-wrap { grid-template-columns: minmax(0, 1fr); }
-  #mf .mf-portrait { justify-self: start; max-width: 240px; margin-left: 14px; }
+  #mf .mf-portrait { justify-self: start; max-width: 320px; }
 }
 
 /* Marquee */
@@ -228,6 +228,16 @@
 @media (max-width: 560px) { #mf .mf-process.mf-process-4 { grid-template-columns: minmax(0, 1fr); } }
 
 #mf .mf-foot-line { font-family: var(--display); font-weight: 600; font-size: 20px; color: var(--bone); margin-bottom: 4px; }
+
+/* Contact page */
+#mf .mf-contact-hero { padding-block: clamp(56px, 8vw, 96px) clamp(32px, 4vw, 48px); }
+#mf .mf-contact-hero h1 { font-size: clamp(64px, 10vw, 140px); }
+#mf .mf-mockform { max-width: 720px; display: grid; gap: 18px; padding-bottom: 72px; }
+#mf .mf-mockform label { display: grid; gap: 8px; font-size: 15px; font-weight: 600; color: var(--bone); }
+#mf .mf-mockform input, #mf .mf-mockform select, #mf .mf-mockform textarea { font: inherit; font-weight: 400; color: var(--bone); background: var(--iron-2); border: 1px solid var(--iron-line); border-radius: 2px; padding: 14px 16px; width: 100%; }
+#mf .mf-mockform .mf-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+#mf .mf-mocknote { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; color: var(--copper); }
+@media (max-width: 620px) { #mf .mf-mockform .mf-row { grid-template-columns: minmax(0, 1fr); } }
 
 /* Quiz */
 #mf .mf-quiz { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: clamp(32px, 6vw, 80px); align-items: start; }
@@ -347,6 +357,7 @@
         <a href="/">Leadership</a>
         <a href="#mf-path">How it works</a>
         <a href="#mf-results">Sample results</a>
+        <a href="/contact">Contact</a>
         <a class="mf-btn mf-btn-hot" href="https://calendly.com/jason-mosley-mosleyfoundry/coaching-call" target="_blank" rel="noopener">Ask for a demo</a>
       </nav>
     </div>
