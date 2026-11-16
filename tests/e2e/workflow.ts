@@ -311,9 +311,13 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal(await page.locator('input[name="replace"]').count(), 2);
     // check in on each focus: the second one's status shares the day's row
     await page.goto(`${BASE}/dashboard`);
-    const second = page.locator('section[aria-label="Focus 2"]');
-    await second.locator('label:has(input[value="PARTIAL"])').click();
-    await Promise.all([page.waitForLoadState("networkidle"), second.locator('button:has-text("Save my daily check-in")').click()]);
+    // one check-in for the day: both focuses with equal weight, the identity question once, one save
+    await page.waitForSelector("text=My two focuses");
+    assert.equal(await page.locator('form:has(input[name="status2"]) button[type="submit"]').count(), 1, "one save for the day");
+    assert.equal(await page.locator('input[name="identityActed"][value="YES"]').count(), 1, "the identity question is asked once");
+    assert.ok(await page.locator('input[name="status"][value="DONE"]').isChecked(), "focus 1's answer from earlier is kept");
+    await page.locator('label:has(input[name="status2"][value="PARTIAL"])').click();
+    await Promise.all([page.waitForLoadState("networkidle"), page.click('button:has-text("Update my daily check-in")')]);
     let row = await db.dailyCheckIn.findFirst({ where: { user: { email }, cycle2Id: two[1].id } });
     for (let i = 0; i < 25 && !row; i++) { await page.waitForTimeout(200); row = await db.dailyCheckIn.findFirst({ where: { user: { email }, cycle2Id: two[1].id } }); }
     assert.equal(row?.status2, "PARTIAL");

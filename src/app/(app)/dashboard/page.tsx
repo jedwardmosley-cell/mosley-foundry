@@ -10,7 +10,7 @@ import { getJourney, JOURNEY_STEPS } from "@/lib/journey";
 import { withArticle } from "@/content/whoIAm";
 import type { PillarKey } from "@/content/types";
 import { PillarMark, PILLAR_FILL } from "@/components/ui";
-import { CheckInForm } from "@/components/CheckInForm";
+import { CheckInForm, type CheckInFocus } from "@/components/CheckInForm";
 import { TimezoneSync } from "@/components/Timezone";
 import { focusTitle, MAX_FOCUSES } from "@/lib/focus";
 import { Icon, IconBadge, type IconName } from "@/components/Icon";
@@ -28,8 +28,15 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   const { pack } = await getContent();
   const pillarKey = (d.profile.priorityPillar ?? d.cycle?.pillar) as PillarKey | undefined;
   const p = pillarKey ? pack.pillars.find((x) => x.key === pillarKey) : null;
-  const second = d.focuses.find((f) => f.slot === 2) ?? null;
-  const secondPos = second ? cyclePosition(second.startDate) : null;
+  // Today's check-in: every focus still in its 30 days, with equal weight, and one save for the day.
+  const inProgress: CheckInFocus[] = d.focuses
+    .map((f) => ({ f, p: cyclePosition(f.startDate) }))
+    .filter(({ p }) => !p.finished)
+    .map(({ f, p }) => ({ slot: (f.slot === 2 ? 2 : 1) as 1 | 2, id: f.id, title: focusTitle(f), plan: f.plan, day: p.day, pillar: f.pillar, status: !d.todayCheckIn ? "" : f.slot === 2 ? d.todayCheckIn.status2 : d.todayCheckIn.status }));
+  const finishedFocuses = d.focuses.filter((f) => cyclePosition(f.startDate).finished);
+  // With one focus in progress, Today shows its 30 days as an arc.
+  const solo = inProgress.length === 1 ? d.focuses.find((f) => f.id === inProgress[0].id) ?? null : null;
+  const soloPos = solo ? cyclePosition(solo.startDate) : null;
   const notSetUp = d.focuses.find((f) => !f.setupDoneAt) ?? null;
   const pos = d.cycle ? cyclePosition(d.cycle.startDate) : null;
   const week = d.cycle && pos ? cycleWeeks(d.cycle.template, pack).weeks[pos.week - 1] : null;
@@ -50,6 +57,8 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   ].filter(Boolean) as { key: string; href: string; icon: IconName; text: string; side: string }[];
 
   const head = todayHeadline({ cycle: !!(d.cycle && pos), finished: !!pos?.finished, day: pos?.day ?? 0 });
+  // Two focuses: each shows its own day below, so the headline belongs to neither.
+  if (!kickoffStep && inProgress.length > 1) Object.assign(head, { title: "Today.", line: "Practice your plans, then check in. A few taps is enough." });
   if (kickoffStep) Object.assign(head, { mood: "start", label: `Kickoff · step ${kickoffStep} of 4`, title: "Build your system first", line: kickoff?.key === "road" && journey.roadMissing.length ? `Still needed: ${journey.roadMissing.join(", ")}. Your daily check-in opens once your system is set up.` : "Your daily check-in opens once your system is set up." });
   const moodTone = { start: "text-ink-mute", ready: "text-ink-mute", decide: "text-ink-soft" }[head.mood];
   const overdue = d.relationships.filter((r) => r.nextCheckIn && daysBetween(new Date(), r.nextCheckIn) < 0).length;
@@ -92,32 +101,27 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
           </>
         ) : d.cycle && week && pos ? (
           <>
-            <DayArc day={pos.day} pillar={d.cycle.pillar as PillarKey} />
-            <p className="text-center text-[11px] uppercase tracking-[0.14em] text-ink-mute">{d.focuses.length > 1 ? "Focus 1 · " : "My focus · "}Week {pos.week} · {week.phase}{d.cycle.seasonMonth ? ` · Month ${d.cycle.seasonMonth} of 3` : ""}</p>
-            <Link href={`/cycle?id=${d.cycle.id}`} className="mt-1 block text-center text-[17px] font-medium leading-snug text-ink">{d.cycle.title || d.cycle.plan || d.cycle.focus || week.work}</Link>
-            {d.cycle.title && d.cycle.plan && <p className="mt-1 text-center text-sm text-ink-soft">{d.cycle.plan}</p>}
-            {pos.finished
-              ? <Link href={`/cycle?id=${d.cycle.id}`} className="mt-5 btn-primary w-full">Open my day 30 review</Link>
-              : <div className="mt-4"><CheckInForm existing={d.todayCheckIn} hasCoach={d.coaches.length > 0} identityLevel={d.identity?.level} /></div>}
+            {/* One focus: the arc for the 30 days. Two focuses: each sits in the check-in below, with equal weight. */}
+            {solo && soloPos && (
+              <>
+                <DayArc day={soloPos.day} pillar={solo.pillar as PillarKey} />
+                <p className="text-center text-[11px] uppercase tracking-[0.14em] text-ink-mute">My focus · Week {soloPos.week} · {cycleWeeks(solo.template, pack).weeks[soloPos.week - 1]?.phase}{solo.seasonMonth ? ` · Month ${solo.seasonMonth} of 3` : ""}</p>
+                <Link href={`/cycle?id=${solo.id}`} className="mt-1 block text-center text-[17px] font-medium leading-snug text-ink">{focusTitle(solo)}</Link>
+                {solo.title && solo.plan && <p className="mt-1 text-center text-sm text-ink-soft">{solo.plan}</p>}
+              </>
+            )}
+            {inProgress.length > 1 && <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-mute">My two focuses</p>}
+            {inProgress.length > 0 && (
+              <div className="mt-4"><CheckInForm existing={d.todayCheckIn} hasCoach={d.coaches.length > 0} identityLevel={d.identity?.level} focuses={inProgress} /></div>
+            )}
+            {finishedFocuses.map((f) => (
+              <Link key={f.id} href={`/cycle?id=${f.id}`} className="mt-4 btn-primary w-full">Open my day 30 review{d.focuses.length > 1 ? `: ${focusTitle(f)}` : ""}</Link>
+            ))}
           </>
         ) : (
           <Link href="/start" className="mt-6 btn-primary w-full">Pick up where I left off</Link>
         )}
       </section>
-
-      {second && secondPos && (
-        <section className="tile !p-5 sm:!p-6" aria-label="Focus 2">
-          <div className="flex items-baseline justify-between gap-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-mute">Focus 2 · day {secondPos.day} of 30</p>
-            <Link href={`/cycle?id=${second.id}`} className="text-sm btn-link">Open</Link>
-          </div>
-          <p className="mt-2 text-[17px] font-medium leading-snug text-heading">{focusTitle(second)}</p>
-          {second.title && second.plan && <p className="mt-1 text-sm text-ink-soft">{second.plan}</p>}
-          {kickoff ? null : secondPos.finished
-            ? <Link href={`/cycle?id=${second.id}`} className="mt-4 btn-primary w-full">Open my day 30 review</Link>
-            : <div className="mt-4"><CheckInForm existing={d.todayCheckIn ? { ...d.todayCheckIn, status: d.todayCheckIn.status2 } : null} hasCoach={false} slot={2} /></div>}
-        </section>
-      )}
 
       <div className="grid grid-cols-2 gap-3">
         {/* No practice count on Today: calm, not gamified. The day-by-day record is on the 30 days page. */}
