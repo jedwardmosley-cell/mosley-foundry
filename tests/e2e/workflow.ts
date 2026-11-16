@@ -292,7 +292,9 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.waitForSelector("text=Stay curious when my decisions get challenged");
     await page.waitForSelector("text=Add a second focus");
     await page.goto(`${BASE}/road`);
-    await page.waitForSelector("text=What this design builds");
+    // the design is built around the whole identity; the focus is one part of it
+    await page.waitForSelector("text=Built around who I am");
+    await page.waitForSelector("text=Your focus right now is one part of it");
     assert.equal(await page.locator("text=One move this week").count(), 0, "one move is folded into My focus");
     // a second focus fills slot 2; a third has to replace one
     await page.goto(`${BASE}/cycle/new`);
@@ -386,7 +388,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.waitForSelector(`main a:has-text("Who's behind the wheel") >> text=I am someone who follows through on what I say.`);
     // My road starts from the statement and holds the focus: no separate behavior to track
     await page.goto(`${BASE}/road`);
-    await page.waitForSelector("text=What this design builds");
+    await page.waitForSelector("text=Built around who I am");
     assert.equal(await page.locator('input[name="behavior"]').count(), 0);
     // identity reinvention, with the folded performance identity
     await page.goto(`${BASE}/identity`);

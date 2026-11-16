@@ -74,24 +74,27 @@ export default async function MyRoadPage({ searchParams }: { searchParams: Promi
         {d.intro[0] ? <><p>{d.intro.find((t) => t.startsWith("It's the deliberate construction"))}</p><p className="mt-2">{d.intro.find((t) => t.startsWith("The question isn't"))}</p></> : "The deliberate construction of the routines, relationships, environments, and accountability structures that support sustained development."}
       </FromBook>
 
-      {/* Who I am, then the behavior that shows it: the road starts from the person. */}
+      {/* The design is built around the whole identity, all five rules, not only the current focus. */}
       <section className="mb-10 overflow-hidden rounded-[24px] shadow-[0_24px_48px_-28px_rgb(var(--navy-deep)/0.8)]">
-        {(identity?.becoming || profile?.forgeStatement) && (
+        {(identity?.becoming || profile?.forgeStatement) ? (
           <Link href="/identity" className="block bg-[linear-gradient(150deg,rgb(var(--navy)),rgb(var(--navy-deep)))] px-5 py-6 sm:px-7 text-white transition hover:brightness-110">
-            <p className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.16em] text-[#F8CC78]">This design reinforces{identity?.role ? ` · as ${withArticle(identity.role)}` : ""}<Icon name="arrow" className="h-4 w-4 text-white/50" /></p>
-            <p className="mt-3 font-serif text-[20px] sm:text-[22px] leading-[1.3] tracking-[-0.01em] line-clamp-4"><span aria-hidden className="mr-1 text-[#F8CC78]">&ldquo;</span>{profile?.forgeStatement || identity?.becoming}</p>
+            <p className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.16em] text-[#F8CC78]">Built around who I am{identity?.role ? ` · as ${withArticle(identity.role)}` : ""}<Icon name="arrow" className="h-4 w-4 text-white/50" /></p>
+            <p className="mt-3 font-serif text-[20px] sm:text-[22px] leading-[1.3] tracking-[-0.01em] line-clamp-6"><span aria-hidden className="mr-1 text-[#F8CC78]">&ldquo;</span>{profile?.forgeStatement || identity?.becoming}</p>
+          </Link>
+        ) : (
+          <Link href="/identity" className="block bg-[linear-gradient(150deg,rgb(var(--navy)),rgb(var(--navy-deep)))] px-5 py-6 sm:px-7 text-white">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#F8CC78]">Built around who I am</p>
+            <p className="mt-2 text-[15px] text-white/80">Claim who you are first. Your design is built around it.</p>
           </Link>
         )}
         <div className="bg-card px-5 py-5 sm:px-7 sm:py-6">
-          <p className="label">What this design builds</p>
-          {focuses.length ? (
-            <ul className="mt-2 space-y-2">
-              {focuses.map((f) => (
-                <li key={f.id}><Link href={`/cycle?id=${f.id}`} className="flex items-start gap-2.5 text-[15px] text-heading hover:text-link"><PillarMark k={f.pillar as PillarKey} size="sm" />{focusTitle(f)}</Link></li>
-              ))}
-            </ul>
-          ) : (
-            <p className="mt-1 text-[15px]"><Link href="/focus" className="btn-link">Choose your focus</Link> first: one or two things to work on. The routines below build it into your week.</p>
+          <div className="flex items-center gap-1.5" aria-hidden>{FORGE_LINES.map((l) => <PillarMark key={l.pillar} k={l.pillar} size="sm" />)}</div>
+          <p className="mt-3 text-[15px] text-ink">Your routines, your people and your accountability support the whole of who you are, all five rules, every day. Not just one goal.</p>
+          {focuses.length > 0 && (
+            <p className="mt-3 text-sm text-ink-soft">
+              Your focus right now is one part of it:{" "}
+              {focuses.map((f, i) => <span key={f.id}>{i > 0 && " · "}<Link href={`/cycle?id=${f.id}`} className="btn-link">{focusTitle(f)}</Link></span>)}
+            </p>
           )}
         </div>
       </section>
