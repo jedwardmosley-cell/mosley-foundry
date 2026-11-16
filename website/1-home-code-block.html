@@ -134,6 +134,9 @@
 @media (max-width: 960px) { #mf .mf-cards, #mf .mf-cards-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } #mf .mf-series-head, #mf .mf-piq-head { grid-template-columns: minmax(0, 1fr); gap: 0; } }
 @media (max-width: 620px) { #mf .mf-cards, #mf .mf-cards-4 { grid-template-columns: minmax(0, 1fr); } }
 
+#mf .mf-cases .mf-card h3 { font-size: 22px; }
+#mf .mf-cases { margin-top: 44px; }
+
 /* Two-column text + list (AI, trust) */
 #mf .mf-ai { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(32px, 6vw, 80px); align-items: start; }
 #mf .mf-steps { border-top: 1px solid var(--line); }
@@ -312,14 +315,13 @@
 
   <section class="mf-band">
     <div class="mf-wrap">
-      <p class="mf-eyebrow">The track record</p>
+      <p class="mf-eyebrow">Selected work</p>
       <h2 class="mf-h2">The promotion assumed the skills. I build them.</h2>
-      <div class="mf-stats">
-        <div class="mf-stat"><div class="mf-num" data-count="15" data-suffix="+">15+</div><p>Years building leaders in finance, healthcare, and manufacturing</p></div>
-        <div class="mf-stat"><div class="mf-num" data-count="300" data-suffix="+">300+</div><p>Leaders trained in strategy deployment across a 12-hospital system</p></div>
-        <div class="mf-stat"><div class="mf-num" data-count="60" data-suffix="+">60+</div><p>Leaders reached by a program that started as a 6-person pilot</p></div>
-        <div class="mf-stat"><div class="mf-num" data-count="3">3</div><p>Books written on leadership and change</p></div>
-      </div>
+      <ol class="mf-cards mf-cases">
+        <li class="mf-card"><span class="mf-card-num">Federal Reserve Bank of Chicago</span><h3>A six-person pilot became a bank-wide leadership program.</h3><p>I started a cohort program with six supervisors. It grew to more than 60 current and future leaders and became part of the bank's succession and workforce planning.</p></li>
+        <li class="mf-card"><span class="mf-card-num">12-hospital health system</span><h3>One strategy, carried out the same way in every hospital.</h3><p>I trained more than 300 leaders to turn system strategy into goals, owners, and reviews in their own hospitals, using Hoshin Kanri.</p></li>
+        <li class="mf-card"><span class="mf-card-num">Fortune 500 manufacturer</span><h3>Asked back for the next program cycle.</h3><p>I facilitate Leadership Action Week a multi-day program for site and office leaders, and coach a cohort of senior leaders.</p></li>
+      </ol>
     </div>
   </section>
 
@@ -358,7 +360,7 @@
         <li class="mf-step"><span class="mf-step-icon">01</span><div><h3>Show them how</h3><p>Hands-on sessions on everyday uses: emails, schedules, reports, meeting notes, and planning.</p></div></li>
         <li class="mf-step"><span class="mf-step-icon">02</span><div><h3>Equip the managers</h3><p>Give them what they need to lead their teams through the change.</p></div></li>
         <li class="mf-step"><span class="mf-step-icon">03</span><div><h3>Build what fits</h3><p>Simple AI assistants for your team's real work, like follow-ups, status updates, and tracking.</p></div></li>
-        <li class="mf-step"><span class="mf-step-icon">04</span><div><h3>Make it stick</h3><p>Clear owners and regular follow-up, so use keeps growing after launch day.</p></div></li>
+        <li class="mf-step"><span class="mf-step-icon">04</span><div><h3>Track adoption</h3><p>Clear owners and regular follow-up, so use keeps growing after launch day.</p></div></li>
       </ol>
     </div>
   </section>
