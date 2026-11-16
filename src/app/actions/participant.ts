@@ -294,8 +294,10 @@ export async function startCycle(fd: FormData) {
   redirect("/cycle/setup?step=1");
 }
 
+const STATUS = z.enum(["DONE", "PARTIAL", "NOT_YET"]);
 const checkInSchema = z.object({
-  status: z.enum(["DONE", "PARTIAL", "NOT_YET"]),
+  status: STATUS.optional(),
+  status2: STATUS.optional(),
   note: text(1000),
   reflection: text(3000),
   shared: bool,
@@ -304,31 +306,28 @@ const checkInSchema = z.object({
   identityNote: text(500),
 });
 
+/** The day's check-in, in one save: an answer for each focus (status for slot 1, status2 for slot 2), and the day's detail once. */
 export async function logCheckIn(fd: FormData) {
   const u = await participant();
   const d = parse(checkInSchema, fd);
+  if (!d.status && !d.status2) throw new Error("Choose Done, Partial or Not yet.");
   const allowed = new Set(CHECKIN_TAGS.options);
   const tags = JSON.stringify(fd.getAll("tags").map(String).filter((t) => allowed.has(t)));
   const date = d.date ?? ymd();
-  // With two focuses, the second one's status goes in status2 on the same day's row.
-  const slot = fd.get("slot") === "2" ? 2 : 1;
-  const cycle = await db.developmentCycle.findFirst({ where: { userId: u.id, status: "ACTIVE", slot }, orderBy: { startDate: "desc" } });
-  if (slot === 2) {
-    if (!cycle) throw new Error("No second focus in progress.");
-    await db.dailyCheckIn.upsert({
-      where: { userId_date: { userId: u.id, date } },
-      create: { userId: u.id, date, status: "", status2: d.status, cycle2Id: cycle.id },
-      update: { status2: d.status, cycle2Id: cycle.id },
-    });
-    revalidatePath("/dashboard");
-    revalidatePath("/cycle");
-    return;
-  }
+  const [one, two] = await Promise.all([
+    d.status ? db.developmentCycle.findFirst({ where: { userId: u.id, status: "ACTIVE", slot: 1 }, orderBy: { startDate: "desc" } }) : null,
+    d.status2 ? db.developmentCycle.findFirst({ where: { userId: u.id, status: "ACTIVE", slot: 2 }, orderBy: { startDate: "desc" } }) : null,
+  ]);
+  if (d.status2 && !two) throw new Error("No second focus in progress.");
+  const focusData = {
+    ...(d.status ? { status: d.status, cycleId: one?.id ?? null } : {}),
+    ...(d.status2 ? { status2: d.status2, cycle2Id: two!.id } : {}),
+  };
+  const detail = { note: d.note, reflection: d.reflection, shared: d.shared, tags, ...(fd.has("identityActed") ? { identityActed: d.identityActed, identityNote: d.identityNote } : {}) };
   await db.dailyCheckIn.upsert({
     where: { userId_date: { userId: u.id, date } },
-    create: { userId: u.id, date, status: d.status, note: d.note, reflection: d.reflection, shared: d.shared, tags, identityActed: d.identityActed, identityNote: d.identityNote, cycleId: cycle?.id },
-    // The identity question moved to the weekly look back; answers saved before then are kept.
-    update: { status: d.status, note: d.note, reflection: d.reflection, shared: d.shared, tags, ...(fd.has("identityActed") ? { identityActed: d.identityActed, identityNote: d.identityNote } : {}) },
+    create: { userId: u.id, date, status: "", ...focusData, ...detail },
+    update: { ...focusData, ...detail },
   });
   revalidatePath("/dashboard");
   revalidatePath("/cycle");
