@@ -134,7 +134,10 @@
 @media (max-width: 960px) { #mf .mf-cards, #mf .mf-cards-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } #mf .mf-series-head, #mf .mf-piq-head { grid-template-columns: minmax(0, 1fr); gap: 0; } }
 @media (max-width: 620px) { #mf .mf-cards, #mf .mf-cards-4 { grid-template-columns: minmax(0, 1fr); } }
 
-#mf .mf-cases .mf-card h3 { font-size: 22px; }
+#mf .mf-cases .mf-card { display: flex; flex-direction: column; }
+#mf .mf-cases .mf-num { color: var(--accent); }
+#mf .mf-cases .mf-card h3 { font-size: 20px; margin-top: 16px; }
+#mf .mf-cases .mf-card-num { margin-top: auto; padding-top: 18px; font-size: 12px; }
 #mf .mf-cases { margin-top: 44px; }
 
 /* Two-column text + list (AI, trust) */
@@ -315,12 +318,12 @@
 
   <section class="mf-band">
     <div class="mf-wrap">
-      <p class="mf-eyebrow">Selected work</p>
+      <p class="mf-eyebrow">The work so far</p>
       <h2 class="mf-h2">The promotion assumed the skills. I build them.</h2>
       <ol class="mf-cards mf-cases">
-        <li class="mf-card"><span class="mf-card-num">Financial institution</span><h3>A six-person pilot became an organization-wide leadership program.</h3><p>I started a cohort program with six supervisors. It grew to more than 60 current and future leaders and became part of succession and workforce planning.</p></li>
-        <li class="mf-card"><span class="mf-card-num">12-hospital health system</span><h3>One strategy, carried out the same way in every hospital.</h3><p>I trained more than 300 leaders to turn system strategy into goals, owners, and reviews in their own hospitals, using Hoshin Kanri.</p></li>
-        <li class="mf-card"><span class="mf-card-num">Fortune 500 manufacturer</span><h3>Asked back for the next program cycle.</h3><p>I facilitate Leadership Action Week, a multi-day program for site and office leaders, and I coach a cohort of their senior leaders.</p></li>
+        <li class="mf-card"><div class="mf-num" data-count="10" data-suffix="x">10x</div><h3>A six-person leadership pilot grew to more than 60 leaders.</h3><p>It became part of the organization's succession and workforce planning.</p><span class="mf-card-num">Financial institution</span></li>
+        <li class="mf-card"><div class="mf-num" data-count="300" data-suffix="+">300+</div><h3>Leaders trained to carry one strategy into 12 hospitals.</h3><p>Each hospital turned system goals into its own owners, measures, and reviews.</p><span class="mf-card-num">Health system</span></li>
+        <li class="mf-card"><div class="mf-num" data-count="48">48</div><h3>Small business owners coached on profitability and access to capital.</h3><p>Including owners who started with no revenue and now have paying customers.</p><span class="mf-card-num">Small business advisory, since 2022</span></li>
       </ol>
     </div>
   </section>
