@@ -4,7 +4,7 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { findClosedDoors, tally, soundsLikeDistress, bookQuestions } from "../src/lib/tone";
+import { findClosedDoors, tally, soundsLikeDistress, bookQuestions, CLOSED_DOORS } from "../src/lib/tone";
 import { parseToneReading } from "../src/lib/ai";
 
 test("closed-door phrases are found as written, in order", () => {
@@ -65,4 +65,15 @@ test("the book's self-talk questions come from the Center Console chapter, quest
   ];
   assert.deepEqual(bookQuestions(chapters), ["Sample self-talk question two?", "Sample tone question?"]);
   assert.deepEqual(bookQuestions([]), [], "nothing without the licensed pack");
+});
+
+test("every defeated phrase comes with a new way to say it and why it matters, in the house style", () => {
+  const banned = /\u2014|\b(steady|drift|rhythm|navigate|resonate|lean into|under pressure|accumulate|compound)\b/i;
+  for (const d of CLOSED_DOORS) {
+    assert.ok(d.instead.length > 5 && d.why.length > 20, d.label);
+    assert.ok(!banned.test(d.instead + " " + d.why), `house style: ${d.label}`);
+  }
+  const [hit] = findClosedDoors("I can't do this");
+  assert.equal(hit.instead, "I haven't done this yet.");
+  assert.match(hit.why, /brain/);
 });

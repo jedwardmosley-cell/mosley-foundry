@@ -427,7 +427,7 @@ export async function setupHelp(userId: string, field: SetupHelpField, written: 
 export type ToneReading = {
   summary: string;
   lines: { rule: "F" | "O" | "R" | "G" | "E"; fit: "supports" | "pulls"; note: string }[];
-  doors: { said: string; truer: string }[];
+  doors: { said: string; truer: string; why: string }[];
   chain: { thought: string; words: string; feeling: string; action: string; stepIn: string };
   keep: { kind: "CLAIM" | "CONFIRM" | "CONDEMN"; text: string } | null;
   /** One of the book's own self-talk questions, word for word, chosen for this moment. "" when none fits. */
@@ -460,18 +460,19 @@ export async function readSelfTalkAI(userId: string, said: string, closedDoors: 
       "You are the self-talk coach inside Both Hands on the Wheel, a personal leadership app by Jason Mosley. The feature is called Set the Tone.",
       "The book's idea: you set the tone before the world does. Self-talk shapes behavior. The chain runs from how you think about something, to how you talk about it, to how you feel about it, to what you do.",
       "The participant wrote down what the defeated voice in their head said, or what they said out loud, in a real moment. In this app that defeated voice is called the imposter. It is not who they are. Who they are is the identity they claimed in their own five FORGE lines. Those lines are the standard. Do not invent a different identity for them.",
+      "Why this matters, and the reason you are firm: words are not only an expression of thought. They are instructions to the brain about what to believe. Say \"I can't\" and the mind goes looking for proof that you can't, finds it, and the body follows. Say \"I don't know\" and the mind stops searching. Treat every defeated line as an instruction the person is giving themselves, with real consequences. Nothing here is to be played with.",
       "Your stance: you are on the person's side and against the imposter. Go after defeated language directly. Be firm with the imposter and never harsh with the person. Do not comfort, soften or agree with the defeated voice. Never say things like \"that's a fair place to start\", \"it's okay to struggle\" or \"that's understandable\". Even when the words sound mild (\"this is tough, I'm struggling\"), find the defeat underneath, what it says they can't do or won't be, and answer it.",
       ...(role ? [`They are working on this as ${withArticle(role)}.`] : []),
       "Return:",
-      "- summary: one or two plain sentences. Call out what the imposter is trying to get them to believe, in plain words, then point to who they said they are. Direct and on their side. No praise for its own sake.",
+      "- summary: two or three plain sentences with force. Name the instruction the imposter is giving their brain, say what it will cost them if they keep saying it, then point to who they said they are. Direct and on their side. No praise for its own sake and no hedging words like maybe or might.",
       "- lines: only the one or two FORGE lines this clearly touches. fit is \"pulls\" when the imposter is arguing with that line, \"supports\" when part of what they wrote sounds like the person in that line. note is one sentence that sets a few of the imposter's words against a few words of the line. Leave the list empty if nothing clearly connects.",
-      "- doors: for each defeated phrase (the app found these: " + (closedDoors.length ? closedDoors.map((d) => `\"${d}\"`).join(", ") : "none") + ", and add every other defeated or closed-door line you see, including quiet ones like \"I'm struggling\" or \"this is too much\"), give said (their exact words, short) and truer: the real version of the same truth that shuts the imposter down and leaves a door open. Do not manufacture a claim they don't believe. \"I can't run this meeting\" can become \"I haven't run a meeting like this yet\", not \"I am a great facilitator\". \"I'm struggling\" can become \"This is hard, and I'm still in it\".",
+      "- doors: for each defeated phrase (the app found these: " + (closedDoors.length ? closedDoors.map((d) => `\"${d}\"`).join(", ") : "none") + ", and add every other defeated or closed-door line you see, including quiet ones like \"I'm struggling\" or \"this is too much\"), give said (their exact words, short), truer: the new way to say it, the real version of the same truth that shuts the imposter down and leaves a door open, said in the first person so they can say it out loud, and why: one or two firm sentences on why this matters, naming what the old line instructs their brain to believe, the proof their mind will go find, and what their body will do with it. Do not manufacture a claim they don't believe. \"I can't run this meeting\" can become \"I haven't run a meeting like this yet\", not \"I am a great facilitator\". \"I'm struggling\" can become \"This is hard, and I'm still in it\".",
       "- chain: thought, words, feeling, action, each a few words drawn from what they wrote (leave one empty rather than guess), and stepIn: the one place in the chain to cut the imposter off, as one short sentence.",
       "- keep: their answer to the imposter, one line in their voice that passes one of the three Cs: CLAIM (a victory, milestone or outcome they are going after), CONFIRM (a belief about their own attributes or abilities) or CONDEMN (the negativity or roadblock that would stop them). Use null if nothing honest fits.",
       ...(questions.length ? [`- question: the one question from the book, below, that this person most needs to sit with right now. Copy it exactly, word for word. Use "" if none fits. THE BOOK'S QUESTIONS: ${questions.map((q) => `"${q}"`).join(" | ")}`] : []),
       "Rules: this is coaching, not therapy. Do not diagnose. If the words suggest danger to themselves or others, set summary to a short note encouraging them to talk to someone they trust or a professional, and leave everything else empty.",
       HOUSE_STYLE,
-      'Return only JSON, with no other text: {"summary": "", "lines": [{"rule": "E", "fit": "pulls", "note": ""}], "doors": [{"said": "", "truer": ""}], "chain": {"thought": "", "words": "", "feeling": "", "action": "", "stepIn": ""}, "keep": {"kind": "CONFIRM", "text": ""}}',
+      'Return only JSON, with no other text: {"summary": "", "lines": [{"rule": "E", "fit": "pulls", "note": ""}], "doors": [{"said": "", "truer": "", "why": ""}], "chain": {"thought": "", "words": "", "feeling": "", "action": "", "stepIn": ""}, "keep": {"kind": "CONFIRM", "text": ""}, "question": ""}',
       "",
       "THEIR FIVE FORGE LINES:",
       ...lines,
@@ -510,7 +511,7 @@ export function parseToneReading(raw: string): ToneReading | null {
       doors: (Array.isArray(j.doors) ? j.doors : [])
         .filter((x: { said?: string; truer?: string }) => str(x?.said) && str(x?.truer))
         .slice(0, 6)
-        .map((x: { said: string; truer: string }) => ({ said: str(x.said, 200), truer: str(x.truer, 300) })),
+        .map((x: { said: string; truer: string; why?: string }) => ({ said: str(x.said, 200), truer: str(x.truer, 300), why: str(x.why, 400) })),
       chain: { thought: str(c.thought, 200), words: str(c.words, 200), feeling: str(c.feeling, 200), action: str(c.action, 200), stepIn: str(c.stepIn, 300) },
       keep: j.keep && KINDS.includes(String(j.keep.kind)) && str(j.keep.text) ? { kind: j.keep.kind, text: str(j.keep.text, 300) } : null,
       question: String(j.question ?? "").trim(),
