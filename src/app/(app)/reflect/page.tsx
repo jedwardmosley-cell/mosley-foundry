@@ -76,7 +76,7 @@ export default async function ReflectPage() {
       {toneCount > 0 && (
         <Link href="/tone" className="card mb-5 block transition hover:-translate-y-0.5">
           <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gold">Set the Tone</p>
-          <p className="mt-1 text-[15px]">Closed-door phrases this week: {toneCount}, mostly {toneTally.slice(0, 2).map((t) => `"${t.label}"`).join(" and ")}. Something to notice, not a score.</p>
+          <p className="mt-1 text-[15px]">The imposter talked {toneCount} {toneCount === 1 ? "time" : "times"} this week, mostly {toneTally.slice(0, 2).map((t) => `"${t.label}"`).join(" and ")}. Something to notice, not a score.</p>
         </Link>
       )}
       <Card>

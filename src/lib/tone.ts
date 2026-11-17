@@ -17,8 +17,18 @@ export const CLOSED_DOORS: { label: string; re: RegExp }[] = [
   { label: "there's no way", re: /\bthere(?:'s|s| is)\s+no\s+way\b/gi },
   { label: "I have no choice", re: /\bI\s+(?:have|got)\s+no\s+choice\b/gi },
   { label: "what's the point", re: /\bwhat(?:'s|s| is)\s+the\s+point\b/gi },
-  { label: "I'm such a ...", re: /\bI(?:'m|m| am)\s+such\s+an?\s+(?:idiot|failure|mess|fraud|loser|joke)\b/gi },
+  { label: "I'm such a ...", re: /\bI(?:'m|m| am)\s+such\s+an?\s+(?:idiot|failure|mess|fraud|imposter|impostor|loser|joke)\b/gi },
   { label: "why bother", re: /\bwhy\s+bother\b/gi },
+  { label: "I'm struggling", re: /\bI(?:'m|m| am)\s+(?:really\s+|so\s+|just\s+)?struggling\b/gi },
+  { label: "I'm not enough", re: /\bI(?:'m|m| am)\s+(?:just\s+)?not\s+(?:good\s+|smart\s+|strong\s+)?enough\b/gi },
+  { label: "this is too much", re: /\b(?:this|it)(?:'s|s| is)\s+(?:just\s+|all\s+)?too\s+much\b/gi },
+  // The imposter often talks in the second person.
+  { label: "you can't", re: /\byou\s+(?:can't|cant|cannot|can not)\b/gi },
+  { label: "you're not enough", re: /\byou(?:'re|re| are)\s+(?:just\s+)?not\s+(?:good\s+|smart\s+|strong\s+)?enough\b/gi },
+  { label: "you'll never ...", re: /\byou(?:'ll|ll| will)\s+never\s+(?:be|get|make|figure|finish|change|catch|measure)\b/gi },
+  { label: "you're such a ...", re: /\byou(?:'re|re| are)\s+such\s+an?\s+(?:idiot|failure|mess|fraud|imposter|impostor|loser|joke)\b/gi },
+  { label: "who am I to", re: /\bwho\s+am\s+I\s+to\b/gi },
+  { label: "I'll never ...", re: /\bI(?:'ll|ll| will)\s+never\s+(?:be|get|make|figure|finish|change|catch|measure)\b/gi },
 ];
 
 export type DoorHit = { label: string; said: string };

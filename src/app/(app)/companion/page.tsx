@@ -31,7 +31,7 @@ export default async function CompanionHome() {
       <Link href="/tone" className="card mb-5 flex items-center gap-4 transition hover:-translate-y-0.5">
         <span className="flex-1">
           <span className="block text-[15px] font-medium text-heading">Set the Tone</span>
-          <span className="block text-sm text-ink-soft">Write what you just said to yourself. See how it lines up with who you said you are.</span>
+          <span className="block text-sm text-ink-soft">Write down what the defeated voice just said. Take it apart against who you are.</span>
         </span>
         <span aria-hidden className="text-ink-mute">›</span>
       </Link>
