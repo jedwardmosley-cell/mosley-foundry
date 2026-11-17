@@ -6,6 +6,7 @@ const GROUPS: [string, [string, string, string][]][] = [
   ["FORGE", [
     ["/identity", "1. Who's behind the wheel", "The FORGE framework, applied to you: your seat, how big a turn, the five rules of one driver, and My statement."],
     ["/assessment", "2. Where I am", "Score the five rules. The goal is a 5 on every one."],
+    ["/tone", "Set the Tone", "Your self-talk, read against who you said you are. Private."],
   ]],
   ["Discipline by Design", [
     ["/focus", "3. My focus", "One or two things to work on, each with a plan for 30 days. That's it."],

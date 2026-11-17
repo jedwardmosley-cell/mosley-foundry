@@ -8,6 +8,8 @@ import { ShareSend } from "@/components/ShareSend";
 import { mondayOf, fmt } from "@/lib/dates";
 import { PageHeader, Card, Field, Privacy, Source } from "@/components/ui";
 import { Submit } from "@/components/Submit";
+import Link from "next/link";
+import { findClosedDoors, tally } from "@/lib/tone";
 
 export const metadata = { title: "Weekly look back" };
 
@@ -42,6 +44,19 @@ export default async function ReflectPage() {
     </div>
   );
   const held = new Set(JSON.parse(current?.held ?? "[]") as string[]);
+  // Set the Tone: the week's closed-door phrases, as a pattern to notice. Check-ins count only if the client turned that on.
+  const weekStart = new Date(`${weekOf}T00:00:00`);
+  const [toneWeek, toneProfile] = await Promise.all([
+    db.toneEntry.findMany({ where: { userId: u.id, createdAt: { gte: weekStart } }, select: { text: true } }),
+    db.profile.findUnique({ where: { userId: u.id }, select: { toneReadsWriting: true } }),
+  ]);
+  const toneTexts = toneWeek.map((t) => t.text);
+  if (toneProfile?.toneReadsWriting) {
+    const ci = await db.dailyCheckIn.findMany({ where: { userId: u.id, date: { gte: weekOf } }, select: { note: true, reflection: true, identityNote: true } });
+    toneTexts.push(...ci.map((c) => [c.note, c.reflection, c.identityNote].join(" ")));
+  }
+  const toneTally = tally(toneTexts.flatMap((t) => findClosedDoors(t)));
+  const toneCount = toneTally.reduce((a, t) => a + t.count, 0);
   const weekly = pack.discipline.inventory.find((i) => i.label === "Weekly")?.text;
   return (
     <>
@@ -57,6 +72,12 @@ export default async function ReflectPage() {
             <form action={skipWeekSend}><input type="hidden" name="week" value={lookWeek} /><button className="text-[15px] btn-link">Not this week</button></form>
           </div>
         </Card>
+      )}
+      {toneCount > 0 && (
+        <Link href="/tone" className="card mb-5 block transition hover:-translate-y-0.5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gold">Set the Tone</p>
+          <p className="mt-1 text-[15px]">Closed-door phrases this week: {toneCount}, mostly {toneTally.slice(0, 2).map((t) => `"${t.label}"`).join(" and ")}. Something to notice, not a score.</p>
+        </Link>
       )}
       <Card>
         <form action={saveWeekly} className="space-y-4">

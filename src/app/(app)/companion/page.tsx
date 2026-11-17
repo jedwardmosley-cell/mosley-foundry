@@ -27,6 +27,14 @@ export default async function CompanionHome() {
       <PageHeader eyebrow="Backs up your human coach" title="Help me with this">
         Grounded in Both Hands on the Wheel and your own recorded goals. It cites where its program content comes from, keeps what you recorded separate from its suggestions, and points you back to the people in your corner. It cannot see your private journal. It is not a therapist.
       </PageHeader>
+      {/* Set the Tone, one tap from the round + button: the moment self-talk turns, this is where it gets read. */}
+      <Link href="/tone" className="card mb-5 flex items-center gap-4 transition hover:-translate-y-0.5">
+        <span className="flex-1">
+          <span className="block text-[15px] font-medium text-heading">Set the Tone</span>
+          <span className="block text-sm text-ink-soft">Write what you just said to yourself. See how it lines up with who you said you are.</span>
+        </span>
+        <span aria-hidden className="text-ink-mute">›</span>
+      </Link>
       {!aiAvailable() && <Card className="mb-5"><p className="text-sm">The companion is not configured on this server. An administrator needs to set <code>ANTHROPIC_API_KEY</code>.</p></Card>}
       {profile?.aiEnabled === false && <Card className="mb-5"><p className="text-sm">You turned the companion off. <Link className="btn-link" href="/settings">Settings</Link></p></Card>}
       <div className="grid gap-4 sm:grid-cols-3">

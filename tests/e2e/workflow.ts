@@ -428,6 +428,35 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal(await page.locator("text=watch area").count(), 0, "no watch area");
   });
 
+  await check("7g. Set the Tone: self-talk read against the identity; closed doors counted; lines kept; private", async () => {
+    await page.goto(`${BASE}/tone`);
+    await page.fill('textarea[name="said"]', "E2E-TONE: I can't run this meeting. That's just how I am.");
+    await Promise.all([page.waitForURL(/\/tone\?entry=/), page.click('button:has-text("Read it")')]);
+    await page.waitForSelector("text=Closed doors");
+    await page.waitForSelector("text=(that's just how I am)");
+    // the three-day audit counts it
+    const audit = page.locator("section:has(h2:has-text('The last three days'))");
+    assert.ok((await audit.innerText()).includes("1 time"));
+    // keep a line of my own, sorted by the three Cs
+    await page.locator("summary:has-text('Add a line of your own')").click();
+    await page.fill('input[name="line"]', "E2E-LINE: I am the calm one in the room.");
+    await page.locator('details:has(input[name="line"]) select[name="kind"]').selectOption("CONFIRM");
+    await Promise.all([page.waitForURL(/kept=1/), page.locator('details:has(input[name="line"]) button:has-text("Keep it")').click()]);
+    await page.waitForSelector("text=E2E-LINE: I am the calm one in the room.");
+    // counting check-ins too is the client's choice, off until they turn it on
+    assert.equal((await db.profile.findFirstOrThrow({ where: { user: { email } } })).toneReadsWriting, false);
+    await Promise.all([page.waitForLoadState("networkidle"), page.click('button:has-text("Also count my check-ins and look backs")')]);
+    await page.waitForSelector("text=Also counting your check-in notes");
+    // distress stops the coaching and points to support
+    await page.fill('textarea[name="said"]', "E2E-TONE: some days I want to die");
+    await Promise.all([page.waitForURL(/care=1/), page.click('button:has-text("Read it")')]);
+    await page.waitForSelector("text=988");
+    assert.equal(await page.locator("text=Closed doors").count(), 0, "no coaching on distress");
+    // one tap from the round + button
+    await page.goto(`${BASE}/companion`);
+    await page.waitForSelector('main a[href="/tone"]:has-text("Set the Tone")');
+  });
+
   await check("1b/7d. sign out, sign back in, saved progress and reflection retrieved", async () => {
     await logout(page);
     await login(page, email, "e2e-password-123");
