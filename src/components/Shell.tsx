@@ -10,6 +10,7 @@ const PARTICIPANT_NAV: NavItem[] = [
   { href: "/dashboard", label: "Today", mobile: true },
   { href: "/identity", label: "1. Who's behind the wheel", group: "FORGE" },
   { href: "/assessment", label: "2. Where I am", group: "FORGE" },
+  { href: "/tone", label: "Set the Tone", group: "FORGE" },
   { href: "/focus", label: "3. My focus", tab: "Focus", mobile: true, group: "Discipline by Design" },
   { href: "/road", label: "4. My Design", group: "Discipline by Design" },
   { href: "/reflect", label: "Weekly look back", group: "Discipline by Design" },

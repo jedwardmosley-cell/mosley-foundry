@@ -56,6 +56,8 @@ model User {
   checkIns                      DailyCheckIn[]
   weeklyReflections             WeeklyReflection[]
   journal                       JournalEntry[]
+  toneEntries                   ToneEntry[]
+  toneLines                     ToneLine[]
   sharesGiven                   ShareGrant[]         @relation("ShareOwner")
   sharesReceived                ShareGrant[]         @relation("ShareGrantee")
   coaching                      CoachAssignment[]    @relation("AssignParticipant")
@@ -86,31 +88,33 @@ model Session {
 // ---------- Personal development profile ----------
 
 model Profile {
-  userId          String    @id
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  pathway         String    @default("PERSONAL") // enum: PERSONAL | LEADING_OTHERS | ENTREPRENEURIAL
-  destination     String    @default("") // F: I am statement (who I am becoming). Was the Destination Paragraph.
-  lineO           String    @default("") // O: I am statement (what someone with my identity pays attention to)
-  why             String    @default("") // R: I am statement (what makes it meaningful). Was the Why Sentence.
-  lineG           String    @default("") // G: I am statement (who I am at my limits)
-  lineE           String    @default("") // E: I am statement (who I am when emotions run high)
-  forgeStatement  String    @default("")
-  priorityPillar  String? // enum: F | O | R | G | E
-  reminderTime    String    @default("07:30")
-  reminderDays    String    @default("1,2,3,4,5")
-  remindersOn     Boolean   @default(false)
-  reminderBy      String    @default("EMAIL") // enum: EMAIL | CALENDAR | BOTH. How the daily check-in reminder arrives.
-  timezone        String    @default("") // IANA name from the client's browser, e.g. America/New_York. Email reminders wait until it is known.
-  lastReminderOn  String    @default("") // YYYY-MM-DD in the client's day: the last day a reminder email went out, so one day never gets two
-  weeklyOn        Boolean   @default(true) // the weekly plan email. On unless the client turns it off.
-  weeklySlot      String    @default("SUN_PM") // enum: SUN_PM (Sunday 6 pm) | MON_AM (Monday 7 am), the client's local time
-  lastWeeklyOn    String    @default("") // YYYY-MM-DD in the client's day: the last weekly email, so one week never gets two
-  calendarToken   String? // the private calendar link (looked up with findFirst; no unique constraint, so the production build needs no data-loss flag). Null means the link is off.
-  aiEnabled       Boolean   @default(true)
-  aiRetentionDays Int       @default(90)
-  eqiEnabled      Boolean   @default(false) // participant opted in to the EQ-i layer
-  onboardedAt     DateTime?
-  updatedAt       DateTime  @updatedAt
+  userId           String    @id
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pathway          String    @default("PERSONAL") // enum: PERSONAL | LEADING_OTHERS | ENTREPRENEURIAL
+  destination      String    @default("") // F: I am statement (who I am becoming). Was the Destination Paragraph.
+  lineO            String    @default("") // O: I am statement (what someone with my identity pays attention to)
+  why              String    @default("") // R: I am statement (what makes it meaningful). Was the Why Sentence.
+  lineG            String    @default("") // G: I am statement (who I am at my limits)
+  lineE            String    @default("") // E: I am statement (who I am when emotions run high)
+  forgeStatement   String    @default("")
+  priorityPillar   String? // enum: F | O | R | G | E
+  reminderTime     String    @default("07:30")
+  reminderDays     String    @default("1,2,3,4,5")
+  remindersOn      Boolean   @default(false)
+  reminderBy       String    @default("EMAIL") // enum: EMAIL | CALENDAR | BOTH. How the daily check-in reminder arrives.
+  timezone         String    @default("") // IANA name from the client's browser, e.g. America/New_York. Email reminders wait until it is known.
+  lastReminderOn   String    @default("") // YYYY-MM-DD in the client's day: the last day a reminder email went out, so one day never gets two
+  weeklyOn         Boolean   @default(true) // the weekly plan email. On unless the client turns it off.
+  weeklySlot       String    @default("SUN_PM") // enum: SUN_PM (Sunday 6 pm) | MON_AM (Monday 7 am), the client's local time
+  lastWeeklyOn     String    @default("") // YYYY-MM-DD in the client's day: the last weekly email, so one week never gets two
+  calendarToken    String? // the private calendar link (looked up with findFirst; no unique constraint, so the production build needs no data-loss flag). Null means the link is off.
+  aiEnabled        Boolean   @default(true)
+  // Set the Tone: also look for patterns in what the client writes in check-ins and weekly look backs. Off unless they turn it on.
+  toneReadsWriting Boolean   @default(false)
+  aiRetentionDays  Int       @default(90)
+  eqiEnabled       Boolean   @default(false) // participant opted in to the EQ-i layer
+  onboardedAt      DateTime?
+  updatedAt        DateTime  @updatedAt
 }
 
 model Assessment {
@@ -288,6 +292,31 @@ model JournalEntry {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   title     String   @default("")
   body      String
+  createdAt DateTime @default(now())
+}
+
+// ---------- Set the Tone: self-talk ----------
+
+// What the client said to themselves, and the reading of it against their FORGE identity. Private.
+model ToneEntry {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  text       String
+  closedDoor String   @default("[]") // JSON list of closed-door phrases found by rule, e.g. ["I can't"]
+  reading    String   @default("") // JSON: the coach's reading, or "" when there was none
+  createdAt  DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+// A line the client chose to keep: their own catalog, sorted by the three Cs (claim, confirm, condemn).
+model ToneLine {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  text      String
+  kind      String   @default("CLAIM") // enum: CLAIM | CONFIRM | CONDEMN
   createdAt DateTime @default(now())
 }
 

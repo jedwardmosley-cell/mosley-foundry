@@ -643,6 +643,8 @@ export async function startOver(_prev: StartOverState, fd: FormData): Promise<St
     db.season.deleteMany({ where: { userId } }),
     db.weeklyReflection.deleteMany({ where: { userId } }),
     db.journalEntry.deleteMany({ where: { userId } }),
+    db.toneEntry.deleteMany({ where: { userId } }),
+    db.toneLine.deleteMany({ where: { userId } }),
     db.commitment.deleteMany({ where: { userId } }),
     db.relationship.deleteMany({ where: { ownerId: userId } }),
     db.developmentGoal.deleteMany({ where: { userId } }),

@@ -8,7 +8,7 @@ import { scoresFrom } from "./forge";
 import { effectiveTone, toneBlock } from "./identityTone";
 import { FORGE_LINES, LINE_BY_FIELD, type LineField } from "@/content/forgeLines";
 import { EXAMPLE_PEOPLE, FOUR_THINGS, IDENTITY_TESTS, peopleFor } from "@/content/identityExamples";
-import { KIND_GUIDANCE, KIND_RULE, asRole } from "@/content/whoIAm";
+import { KIND_GUIDANCE, KIND_RULE, asRole, withArticle } from "@/content/whoIAm";
 import type { IdentityLevel } from "@/content/identity";
 import type { PathwayKey } from "@/content/program";
 
@@ -417,6 +417,96 @@ export async function setupHelp(userId: string, field: SetupHelpField, written: 
   try {
     const arr = JSON.parse(raw.slice(raw.indexOf("["), raw.lastIndexOf("]") + 1));
     return Array.isArray(arr) ? arr.filter((x) => typeof x === "string").map((x: string) => plainPunctuation(x).slice(0, 200)).slice(0, 6) : null;
+  } catch {
+    return null;
+  }
+}
+
+// ---------- Set the Tone: reading self-talk against the client's FORGE identity ----------
+
+export type ToneReading = {
+  summary: string;
+  lines: { rule: "F" | "O" | "R" | "G" | "E"; fit: "supports" | "pulls"; note: string }[];
+  doors: { said: string; truer: string }[];
+  chain: { thought: string; words: string; feeling: string; action: string; stepIn: string };
+  keep: { kind: "CLAIM" | "CONFIRM" | "CONDEMN"; text: string } | null;
+};
+
+/**
+ * Reads what the client said to themselves against their own five FORGE lines and statement.
+ * It names which lines the words support or pull against, offers truer open-door versions of closed-door
+ * phrases, lays out the self-talk chain, and offers one line to keep. Saves nothing.
+ */
+export async function readSelfTalkAI(userId: string, said: string, closedDoors: string[]): Promise<ToneReading | null> {
+  const client = new Anthropic();
+  const [prof, idRow, sources] = await Promise.all([
+    db.profile.findUnique({ where: { userId }, select: { destination: true, lineO: true, why: true, lineG: true, lineE: true, forgeStatement: true } }),
+    db.identityProfile.findUnique({ where: { userId }, select: { role: true, becoming: true, aiUse: true } }),
+    retrieve("self-talk tone setting language emotional control center console", 4),
+  ]);
+  const lines = FORGE_LINES.map((l) => `${l.pillar} (${l.label}): ${(prof?.[l.field] ?? "").trim() || "(not written yet)"}`);
+  const statement = prof?.forgeStatement || idRow?.becoming || "";
+  const role = idRow?.aiUse ? idRow.role : "";
+  const stream = client.beta.messages.stream({
+    model: AI_MODEL,
+    max_tokens: 2500,
+    thinking: { type: "adaptive" },
+    output_config: { effort: "low" },
+    betas: ["server-side-fallback-2026-07-01"],
+    fallbacks: "default",
+    system: [
+      "You are the self-talk coach inside Both Hands on the Wheel, a personal leadership app by Jason Mosley. The feature is called Set the Tone.",
+      "The book's idea: you set the tone before the world does. Self-talk shapes behavior. The chain runs from how you think about something, to how you talk about it, to how you feel about it, to what you do.",
+      "The participant wrote down what they said to themselves, or what they said out loud, in a real moment. Read it against the identity they claimed in their own five FORGE lines. Those lines are the standard. Do not invent a different identity for them.",
+      ...(role ? [`They are working on this as ${withArticle(role)}.`] : []),
+      "Return:",
+      "- summary: one or two plain sentences on what this self-talk says about what they believe right now. Kind and direct. No praise for its own sake.",
+      "- lines: only the one or two FORGE lines this clearly touches. fit is \"supports\" when the words fit that line, \"pulls\" when they work against it. note is one sentence that quotes a few of their words and a few words of the line. Leave the list empty if nothing clearly connects.",
+      "- doors: for each closed-door phrase (the app found these: " + (closedDoors.length ? closedDoors.map((d) => `\"${d}\"`).join(", ") : "none") + ", and add any others you see), give said (their exact words, short) and truer: the real version of the same truth that leaves a door open. Do not manufacture a claim they don't believe. \"I can't run this meeting\" can become \"I haven't run a meeting like this yet\", not \"I am a great facilitator\".",
+      "- chain: thought, words, feeling, action, each a few words drawn from what they wrote (leave one empty rather than guess), and stepIn: the one place in the chain they can most easily step in, as one short sentence.",
+      "- keep: one line worth keeping, in their voice, that passes one of the three Cs: CLAIM (a victory, milestone or outcome they are going after), CONFIRM (a belief about their own attributes or abilities) or CONDEMN (the negativity or roadblock that would stop them). Use null if nothing honest fits.",
+      "Rules: this is coaching, not therapy. Do not diagnose. If the words suggest danger to themselves or others, set summary to a short note encouraging them to talk to someone they trust or a professional, and leave everything else empty.",
+      HOUSE_STYLE,
+      'Return only JSON, with no other text: {"summary": "", "lines": [{"rule": "E", "fit": "pulls", "note": ""}], "doors": [{"said": "", "truer": ""}], "chain": {"thought": "", "words": "", "feeling": "", "action": "", "stepIn": ""}, "keep": {"kind": "CONFIRM", "text": ""}}',
+      "",
+      "THEIR FIVE FORGE LINES:",
+      ...lines,
+      statement ? `THEIR STATEMENT: ${statement}` : "",
+      "",
+      "PROGRAM GUIDANCE:",
+      sources.map((x) => `${x.ref}: ${x.text}`).join("\n\n") || "(none)",
+    ].join("\n"),
+    messages: [{ role: "user", content: `What I said to myself: ${said.trim()}` }],
+  });
+  const msg = await stream.finalMessage();
+  if (msg.stop_reason === "refusal") return null;
+  const raw = msg.content.filter((b) => b.type === "text").map((b) => (b as { text: string }).text).join("\n");
+  return parseToneReading(raw);
+}
+
+/** Reads the self-talk coach's JSON, keeping only well-formed parts. Exported for tests. */
+export function parseToneReading(raw: string): ToneReading | null {
+  const m = raw.match(/\{[\s\S]*\}/);
+  if (!m) return null;
+  try {
+    const j = JSON.parse(m[0]);
+    const str = (v: unknown, max = 600) => plainPunctuation(String(v ?? "")).trim().slice(0, max);
+    const RULES = ["F", "O", "R", "G", "E"];
+    const KINDS = ["CLAIM", "CONFIRM", "CONDEMN"];
+    const c = j.chain ?? {};
+    return {
+      summary: str(j.summary),
+      lines: (Array.isArray(j.lines) ? j.lines : [])
+        .filter((x: { rule?: string; fit?: string }) => RULES.includes(String(x?.rule)) && ["supports", "pulls"].includes(String(x?.fit)))
+        .slice(0, 2)
+        .map((x: { rule: string; fit: string; note?: string }) => ({ rule: x.rule as ToneReading["lines"][number]["rule"], fit: x.fit as "supports" | "pulls", note: str(x.note, 300) })),
+      doors: (Array.isArray(j.doors) ? j.doors : [])
+        .filter((x: { said?: string; truer?: string }) => str(x?.said) && str(x?.truer))
+        .slice(0, 6)
+        .map((x: { said: string; truer: string }) => ({ said: str(x.said, 200), truer: str(x.truer, 300) })),
+      chain: { thought: str(c.thought, 200), words: str(c.words, 200), feeling: str(c.feeling, 200), action: str(c.action, 200), stepIn: str(c.stepIn, 300) },
+      keep: j.keep && KINDS.includes(String(j.keep.kind)) && str(j.keep.text) ? { kind: j.keep.kind, text: str(j.keep.text, 300) } : null,
+    };
   } catch {
     return null;
   }
