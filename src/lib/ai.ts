@@ -422,33 +422,27 @@ export async function setupHelp(userId: string, field: SetupHelpField, written: 
   }
 }
 
-// ---------- Set the Tone: reading self-talk against the client's FORGE identity ----------
+// ---------- Set the Tone: language with power, with myself and with others ----------
 
-export type ToneReading = {
-  summary: string;
-  lines: { rule: "F" | "O" | "R" | "G" | "E"; fit: "supports" | "pulls"; note: string }[];
-  doors: { said: string; truer: string; why: string }[];
-  chain: { thought: string; words: string; feeling: string; action: string; stepIn: string };
-  keep: { kind: "CLAIM" | "CONFIRM" | "CONDEMN"; text: string } | null;
-  /** One of the book's own self-talk questions, word for word, chosen for this moment. "" when none fits. */
-  question: string;
-};
-
-/**
- * Reads what the client said to themselves against their own five FORGE lines and statement.
- * It names which lines the words support or pull against, offers truer open-door versions of closed-door
- * phrases, lays out the self-talk chain, and offers one line to keep. Saves nothing.
- */
-export async function readSelfTalkAI(userId: string, said: string, closedDoors: string[], questions: string[] = []): Promise<ToneReading | null> {
-  const client = new Anthropic();
+/** What the coach needs for both modes: the client's five lines, statement and seat, and the book's guidance. */
+async function toneContext(userId: string) {
   const [prof, idRow, sources] = await Promise.all([
     db.profile.findUnique({ where: { userId }, select: { destination: true, lineO: true, why: true, lineG: true, lineE: true, forgeStatement: true } }),
     db.identityProfile.findUnique({ where: { userId }, select: { role: true, becoming: true, aiUse: true } }),
-    retrieve("self-talk tone setting language emotional control center console", 4),
+    retrieve("self-talk tone setting language emotional temperature center console conversation", 4),
   ]);
-  const lines = FORGE_LINES.map((l) => `${l.pillar} (${l.label}): ${(prof?.[l.field] ?? "").trim() || "(not written yet)"}`);
-  const statement = prof?.forgeStatement || idRow?.becoming || "";
-  const role = idRow?.aiUse ? idRow.role : "";
+  return {
+    lines: FORGE_LINES.map((l) => `${l.pillar} (${l.label}): ${(prof?.[l.field] ?? "").trim() || "(not written yet)"}`),
+    statement: prof?.forgeStatement || idRow?.becoming || "",
+    role: idRow?.aiUse ? idRow.role : "",
+    sources,
+  };
+}
+
+const TONE_PRINCIPLE = "Why this matters: words are not only an expression of thought. They are instructions to the brain about what to believe, and they set the temperature for everyone who hears them. Say \"I can't\" and the mind goes looking for proof that you can't, finds it, and the body follows. Say \"I don't know\" and the mind stops searching. Blame someone and they defend instead of fix. Treat every word as an instruction with real consequences. Nothing here is to be played with.";
+
+async function askTone(system: string[], user: string) {
+  const client = new Anthropic();
   const stream = client.beta.messages.stream({
     model: AI_MODEL,
     max_tokens: 2500,
@@ -456,36 +450,67 @@ export async function readSelfTalkAI(userId: string, said: string, closedDoors: 
     output_config: { effort: "low" },
     betas: ["server-side-fallback-2026-07-01"],
     fallbacks: "default",
-    system: [
-      "You are the self-talk coach inside Both Hands on the Wheel, a personal leadership app by Jason Mosley. The feature is called Set the Tone.",
-      "The book's idea: you set the tone before the world does. Self-talk shapes behavior. The chain runs from how you think about something, to how you talk about it, to how you feel about it, to what you do.",
-      "The participant wrote down what the defeated voice in their head said, or what they said out loud, in a real moment. In this app that defeated voice is called the imposter. It is not who they are. Who they are is the identity they claimed in their own five FORGE lines. Those lines are the standard. Do not invent a different identity for them.",
-      "Why this matters, and the reason you are firm: words are not only an expression of thought. They are instructions to the brain about what to believe. Say \"I can't\" and the mind goes looking for proof that you can't, finds it, and the body follows. Say \"I don't know\" and the mind stops searching. Treat every defeated line as an instruction the person is giving themselves, with real consequences. Nothing here is to be played with.",
-      "Your stance: you are on the person's side and against the imposter. Go after defeated language directly. Be firm with the imposter and never harsh with the person. Do not comfort, soften or agree with the defeated voice. Never say things like \"that's a fair place to start\", \"it's okay to struggle\" or \"that's understandable\". Even when the words sound mild (\"this is tough, I'm struggling\"), find the defeat underneath, what it says they can't do or won't be, and answer it.",
-      ...(role ? [`They are working on this as ${withArticle(role)}.`] : []),
-      "Return:",
-      "- summary: two or three plain sentences with force. Name the instruction the imposter is giving their brain, say what it will cost them if they keep saying it, then point to who they said they are. Direct and on their side. No praise for its own sake and no hedging words like maybe or might.",
-      "- lines: only the one or two FORGE lines this clearly touches. fit is \"pulls\" when the imposter is arguing with that line, \"supports\" when part of what they wrote sounds like the person in that line. note is one sentence that sets a few of the imposter's words against a few words of the line. Leave the list empty if nothing clearly connects.",
-      "- doors: for each defeated phrase (the app found these: " + (closedDoors.length ? closedDoors.map((d) => `\"${d}\"`).join(", ") : "none") + ", and add every other defeated or closed-door line you see, including quiet ones like \"I'm struggling\" or \"this is too much\"), give said (their exact words, short), truer: the new way to say it, the real version of the same truth that shuts the imposter down and leaves a door open, said in the first person so they can say it out loud, and why: one or two firm sentences on why this matters, naming what the old line instructs their brain to believe, the proof their mind will go find, and what their body will do with it. Do not manufacture a claim they don't believe. \"I can't run this meeting\" can become \"I haven't run a meeting like this yet\", not \"I am a great facilitator\". \"I'm struggling\" can become \"This is hard, and I'm still in it\".",
-      "- chain: thought, words, feeling, action, each a few words drawn from what they wrote (leave one empty rather than guess), and stepIn: the one place in the chain to cut the imposter off, as one short sentence.",
-      "- keep: their answer to the imposter, one line in their voice that passes one of the three Cs: CLAIM (a victory, milestone or outcome they are going after), CONFIRM (a belief about their own attributes or abilities) or CONDEMN (the negativity or roadblock that would stop them). Use null if nothing honest fits.",
-      ...(questions.length ? [`- question: the one question from the book, below, that this person most needs to sit with right now. Copy it exactly, word for word. Use "" if none fits. THE BOOK'S QUESTIONS: ${questions.map((q) => `"${q}"`).join(" | ")}`] : []),
-      "Rules: this is coaching, not therapy. Do not diagnose. If the words suggest danger to themselves or others, set summary to a short note encouraging them to talk to someone they trust or a professional, and leave everything else empty.",
-      HOUSE_STYLE,
-      'Return only JSON, with no other text: {"summary": "", "lines": [{"rule": "E", "fit": "pulls", "note": ""}], "doors": [{"said": "", "truer": "", "why": ""}], "chain": {"thought": "", "words": "", "feeling": "", "action": "", "stepIn": ""}, "keep": {"kind": "CONFIRM", "text": ""}, "question": ""}',
-      "",
-      "THEIR FIVE FORGE LINES:",
-      ...lines,
-      statement ? `THEIR STATEMENT: ${statement}` : "",
-      "",
-      "PROGRAM GUIDANCE:",
-      sources.map((x) => `${x.ref}: ${x.text}`).join("\n\n") || "(none)",
-    ].join("\n"),
-    messages: [{ role: "user", content: `What I said to myself: ${said.trim()}` }],
+    system: system.join("\n"),
+    messages: [{ role: "user", content: user }],
   });
   const msg = await stream.finalMessage();
   if (msg.stop_reason === "refusal") return null;
-  const raw = msg.content.filter((b) => b.type === "text").map((b) => (b as { text: string }).text).join("\n");
+  return msg.content.filter((b) => b.type === "text").map((b) => (b as { text: string }).text).join("\n");
+}
+
+function toneFooter(ctx: Awaited<ReturnType<typeof toneContext>>) {
+  return [
+    HOUSE_STYLE,
+    "",
+    "THEIR FIVE FORGE LINES:",
+    ...ctx.lines,
+    ctx.statement ? `THEIR STATEMENT: ${ctx.statement}` : "",
+    "",
+    "PROGRAM GUIDANCE:",
+    ctx.sources.map((x) => `${x.ref}: ${x.text}`).join("\n\n") || "(none)",
+  ];
+}
+
+export type ToneReading = {
+  summary: string;
+  lines: { rule: "F" | "O" | "R" | "G" | "E"; fit: "supports" | "pulls"; note: string }[];
+  doors: { said: string; truer: string; why: string }[];
+  chain: { thought: string; words: string; feeling: string; action: string; stepIn: string };
+  keep: { kind: "CLAIM" | "CONFIRM" | "CONDEMN"; text: string } | null;
+  /** Coaching yourself by your own first name: one line. */
+  byName: string;
+  /** One of the book's own self-talk questions, word for word, chosen for this moment. "" when none fits. */
+  question: string;
+};
+
+/**
+ * With myself: reads what the client told themselves against their own five FORGE lines. Every limited-language
+ * line gets a new way to say it, in the first person, and why it matters. Saves nothing.
+ */
+export async function readSelfTalkAI(userId: string, said: string, closedDoors: string[], questions: string[] = [], firstName = ""): Promise<ToneReading | null> {
+  const ctx = await toneContext(userId);
+  const raw = await askTone([
+    "You are the Set the Tone coach inside Both Hands on the Wheel, a personal leadership app by Jason Mosley.",
+    "The book's idea: you set the tone before the world does. Self-talk shapes behavior. The chain runs from how you think about something, to how you talk about it, to how you feel about it, to what you do.",
+    TONE_PRINCIPLE,
+    "The participant wrote down, in their own words, what they just told themselves. This is their own voice, usually in the first person. Do not cast it as an enemy, an imposter or a second person. Your job is to catch limited language and replace it with language that has power, measured against the identity they claimed in their own five FORGE lines. Those lines are the standard. Do not invent a different identity for them.",
+    ...(ctx.role ? [`They are working on this as ${withArticle(ctx.role)}.`] : []),
+    "Be firm and on their side. Go after limited language directly. Do not comfort, soften or agree with it. Never say things like \"that's a fair place to start\", \"it's okay to struggle\" or \"that's understandable\". Even when the words sound mild (\"this is tough, I'm struggling\"), find the limit underneath, what it says they can't do or won't be, and answer it. No hedging words like maybe or might.",
+    "Return:",
+    "- summary: two or three plain sentences with force. Name what these words are instructing their brain to believe, what it will cost if they keep saying it, and point to who they said they are.",
+    "- doors: for each limited-language phrase (the app found these: " + (closedDoors.length ? closedDoors.map((d) => `"${d}"`).join(", ") : "none") + ", and add every other one you see, including quiet ones like \"I'm struggling\" or \"this is too much\"), give said (their exact words, short), truer (the new way to say it, first person, short enough to say out loud, in this style: \"I can't\" becomes \"I'll try\"; \"I don't know\" becomes \"Not sure right now, but I'll find out\"; never a made-up claim they don't believe), and why (one or two firm sentences: what the old words instruct their brain to believe, the proof their mind will go find, and what their body will do with it).",
+    "- lines: only the one or two FORGE lines this clearly touches. fit is \"pulls\" when the words work against that line, \"supports\" when part of what they wrote sounds like the person in that line. note is one sentence that sets a few of their words against a few words of the line. Empty if nothing clearly connects.",
+    "- chain: thought, words, feeling, action, each a few words drawn from what they wrote (leave one empty rather than guess), and stepIn: the one place in the chain to cut it off, as one short sentence.",
+    "- keep: one line worth keeping, in their voice, that passes one of the three Cs: CLAIM (a victory, milestone or outcome they are going after), CONFIRM (a belief about their own attributes or abilities) or CONDEMN (the negativity or roadblock that would stop them). null if nothing honest fits.",
+    firstName
+      ? `- byName: one or two sentences in which they coach themselves by their own first name, ${firstName}, the way a good coach would talk to them: \"${firstName}, you've handled harder rooms than this. Start with the first five minutes.\" Grounded in what they wrote and in their FORGE lines. No hype.`
+      : "- byName: \"\".",
+    ...(questions.length ? [`- question: the one question from the book, below, that this person most needs to sit with right now. Copy it exactly, word for word. Use "" if none fits. THE BOOK'S QUESTIONS: ${questions.map((q) => `"${q}"`).join(" | ")}`] : ["- question: \"\"."]),
+    "Rules: this is coaching, not therapy. Do not diagnose. If the words suggest danger to themselves or others, set summary to a short note encouraging them to talk to someone they trust or a professional, and leave everything else empty.",
+    'Return only JSON, with no other text: {"summary": "", "doors": [{"said": "", "truer": "", "why": ""}], "lines": [{"rule": "E", "fit": "pulls", "note": ""}], "chain": {"thought": "", "words": "", "feeling": "", "action": "", "stepIn": ""}, "keep": {"kind": "CONFIRM", "text": ""}, "byName": "", "question": ""}',
+    ...toneFooter(ctx),
+  ], `What I told myself: ${said.trim()}`);
+  if (!raw) return null;
   const r = parseToneReading(raw);
   // Only the book's own words: a question that isn't one of them, word for word, is dropped.
   if (r && !questions.includes(r.question)) r.question = "";
@@ -514,8 +539,76 @@ export function parseToneReading(raw: string): ToneReading | null {
         .map((x: { said: string; truer: string; why?: string }) => ({ said: str(x.said, 200), truer: str(x.truer, 300), why: str(x.why, 400) })),
       chain: { thought: str(c.thought, 200), words: str(c.words, 200), feeling: str(c.feeling, 200), action: str(c.action, 200), stepIn: str(c.stepIn, 300) },
       keep: j.keep && KINDS.includes(String(j.keep.kind)) && str(j.keep.text) ? { kind: j.keep.kind, text: str(j.keep.text, 300) } : null,
+      byName: str(j.byName, 400),
       question: String(j.question ?? "").trim(),
     };
+  } catch {
+    return null;
+  }
+}
+
+export type ConversationReading = {
+  /** The tone to set: what the room needs from them. */
+  tone: string;
+  /** The first sentence, written out. */
+  opener: string;
+  /** What they were tempted to say, kept in meaning, rewritten with confidence and safety. */
+  rewrite: string;
+  /** What the original words would do to the other person, and what the new words do instead. */
+  why: string;
+  /** Two or three questions so the other person talks. */
+  questions: string[];
+  /** One line to bring the temperature back down if it goes sideways. */
+  sideways: string;
+  /** How their own FORGE line shows up in this conversation. "" when none clearly does. */
+  identity: string;
+};
+
+/**
+ * With someone else, "How do I say it?": the client is about to have a hard conversation, or wants to lead or
+ * encourage someone. Returns the tone to set, an opener, a rewrite of what they were tempted to say, why it
+ * matters, questions to ask and a way back if it goes sideways. Saves nothing.
+ */
+export async function readConversationAI(userId: string, who: string, situation: string, tempted: string): Promise<ConversationReading | null> {
+  const ctx = await toneContext(userId);
+  const raw = await askTone([
+    "You are the Set the Tone coach inside Both Hands on the Wheel, a personal leadership app by Jason Mosley.",
+    "The book's idea: you set the tone before the world does. A leader's words set the ceiling before the room has a chance to find the floor. When the language changes, the temperature in the room changes.",
+    TONE_PRINCIPLE,
+    "The participant is about to talk with someone: a hard conversation, feedback, or a moment to lead or encourage. Help them say it with confidence and power and with psychological safety for the other person: direct about the issue, respectful of the person, curious about what happened. Keep what they mean. Drop blame, sarcasm, labels about the person and questions that are really accusations (\"what's wrong with you?\").",
+    ...(ctx.role ? [`They are doing this as ${withArticle(ctx.role)}.`] : []),
+    "Return:",
+    "- tone: one or two sentences on the temperature to set and what the other person needs to feel to engage (safe enough to be honest, clear on what matters).",
+    "- opener: the first sentence or two they say, written out, ready to use.",
+    "- rewrite: what they were tempted to say, rewritten. Same point, said with confidence and without blame. If they gave nothing, write what they could say.",
+    "- why: two or three firm sentences. What their original words would do to the other person (defend, shut down, comply without committing) and what the new words do instead.",
+    "- questions: two or three open questions that get the other person talking. Short.",
+    "- sideways: one line to say if it starts going badly, to bring the temperature back down without dropping the point.",
+    "- identity: one sentence on how one of their own FORGE lines shows up in this conversation, quoting a few words of the line. \"\" if none clearly fits.",
+    "Rules: this is coaching for everyday leadership and relationships. Do not give legal or HR advice; if the situation involves harassment, safety or anything legal, say in tone that they should involve HR or the right professional. No hedging words like maybe or might.",
+    'Return only JSON, with no other text: {"tone": "", "opener": "", "rewrite": "", "why": "", "questions": [""], "sideways": "", "identity": ""}',
+    ...toneFooter(ctx),
+  ], [`Who: ${who.trim() || "(not given)"}`, `What's going on: ${situation.trim() || "(not given)"}`, `What I'm tempted to say: ${tempted.trim() || "(not given)"}`].join("\n"));
+  return raw ? parseConversationReading(raw) : null;
+}
+
+/** Reads the conversation coach's JSON. Exported for tests. */
+export function parseConversationReading(raw: string): ConversationReading | null {
+  const m = raw.match(/\{[\s\S]*\}/);
+  if (!m) return null;
+  try {
+    const j = JSON.parse(m[0]);
+    const str = (v: unknown, max = 600) => plainPunctuation(String(v ?? "")).trim().slice(0, max);
+    const r: ConversationReading = {
+      tone: str(j.tone),
+      opener: str(j.opener, 400),
+      rewrite: str(j.rewrite),
+      why: str(j.why),
+      questions: (Array.isArray(j.questions) ? j.questions : []).map((q: unknown) => str(q, 200)).filter(Boolean).slice(0, 3),
+      sideways: str(j.sideways, 300),
+      identity: str(j.identity, 300),
+    };
+    return r.opener || r.rewrite ? r : null;
   } catch {
     return null;
   }

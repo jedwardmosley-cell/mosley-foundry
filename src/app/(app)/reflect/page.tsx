@@ -47,7 +47,7 @@ export default async function ReflectPage() {
   // Set the Tone: the week's closed-door phrases, as a pattern to notice. Check-ins count only if the client turned that on.
   const weekStart = new Date(`${weekOf}T00:00:00`);
   const [toneWeek, toneProfile] = await Promise.all([
-    db.toneEntry.findMany({ where: { userId: u.id, createdAt: { gte: weekStart } }, select: { text: true } }),
+    db.toneEntry.findMany({ where: { userId: u.id, mode: "SELF", createdAt: { gte: weekStart } }, select: { text: true } }),
     db.profile.findUnique({ where: { userId: u.id }, select: { toneReadsWriting: true } }),
   ]);
   const toneTexts = toneWeek.map((t) => t.text);
@@ -76,7 +76,7 @@ export default async function ReflectPage() {
       {toneCount > 0 && (
         <Link href="/tone" className="card mb-5 block transition hover:-translate-y-0.5">
           <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gold">Set the Tone</p>
-          <p className="mt-1 text-[15px]">The imposter talked {toneCount} {toneCount === 1 ? "time" : "times"} this week, mostly {toneTally.slice(0, 2).map((t) => `"${t.label}"`).join(" and ")}. Something to notice, not a score.</p>
+          <p className="mt-1 text-[15px]">Limited language in what you told yourself this week: {toneCount}, mostly {toneTally.slice(0, 2).map((t) => `"${t.label}"`).join(" and ")}. Something to notice, not a score.</p>
         </Link>
       )}
       <Card>
