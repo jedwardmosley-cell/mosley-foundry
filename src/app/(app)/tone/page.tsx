@@ -68,6 +68,7 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
   const questions = bookQuestions(pack.chapters);
   const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
   const todaysQuestion = questions.length ? questions[dayOfYear % questions.length] : "";
+  const modeEntries = entries.filter((e) => (e.mode === "OTHERS") === (mode === "OTHERS"));
   const doorList = (self?.doors.length ? self.doors : ruleDoors.map((d) => ({ said: d.said, truer: d.instead, why: d.why })));
 
   return (
@@ -289,6 +290,8 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
         </section>
       )}
 
+      {/* Self-talk only from here: the count and my lines belong to "With myself". */}
+      {mode === "SELF" && (<>
       <section className="mt-10">
         <h2 className="h2">The last three days</h2>
         <p className="mt-1 text-sm text-ink-soft">Limited language in what you told yourself, counted. A pattern to notice, not a score.</p>
@@ -343,17 +346,18 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
           </details>
         </div>
       </section>
+      </>)}
 
-      {entries.length > 0 && (
+      {modeEntries.length > 0 && (
         <details className="mt-10">
-          <summary className="cursor-pointer text-sm text-link">Earlier entries ({entries.length})</summary>
+          <summary className="cursor-pointer text-sm text-link">{mode === "OTHERS" ? "Earlier conversations" : "Earlier entries"} ({modeEntries.length})</summary>
           <ul className="mt-3 divide-y divide-line/60">
-            {entries.map((e) => {
+            {modeEntries.map((e) => {
               const n = (JSON.parse(e.closedDoor || "[]") as string[]).length;
               return (
                 <li key={e.id} className="py-2.5">
                   <Link href={`/tone?entry=${e.id}`} className="block hover:text-link">
-                    <span className="block text-xs text-ink-mute">{fmt(e.createdAt, { month: "short", day: "numeric" })} · {e.mode === "OTHERS" ? `With ${e.who || "someone else"}` : "With myself"}{e.mode !== "OTHERS" && n ? ` · ${n} limiting ${n === 1 ? "phrase" : "phrases"}` : ""}</span>
+                    <span className="block text-xs text-ink-mute">{fmt(e.createdAt, { month: "short", day: "numeric" })}{e.mode === "OTHERS" ? ` · With ${e.who || "someone else"}` : n ? ` · ${n} limiting ${n === 1 ? "phrase" : "phrases"}` : ""}</span>
                     <span className="line-clamp-2 text-[15px]">{e.mode === "OTHERS" ? e.situation : e.text}</span>
                   </Link>
                 </li>
