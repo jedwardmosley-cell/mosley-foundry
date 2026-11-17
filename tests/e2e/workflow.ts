@@ -430,6 +430,8 @@ const submitAndWait = async (page: Page, selector: string) => {
 
   await check("7g. Set the Tone: self-talk read against the identity; closed doors counted; lines kept; private", async () => {
     await page.goto(`${BASE}/tone`);
+    // the book's own self-talk questions, when the licensed content is installed
+    if (fs.existsSync("src/content/licensed/pack.json")) await page.waitForSelector('section[aria-label="From the book"] >> text=self-talk');
     await page.fill('textarea[name="said"]', "E2E-TONE: I can't run this meeting. That's just how I am.");
     await Promise.all([page.waitForURL(/\/tone\?entry=/), page.click('button:has-text("Take it apart")')]);
     await page.waitForSelector("text=Shut it down");

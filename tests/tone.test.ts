@@ -4,7 +4,7 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { findClosedDoors, tally, soundsLikeDistress } from "../src/lib/tone";
+import { findClosedDoors, tally, soundsLikeDistress, bookQuestions } from "../src/lib/tone";
 import { parseToneReading } from "../src/lib/ai";
 
 test("closed-door phrases are found as written, in order", () => {
@@ -56,4 +56,13 @@ test("the coach's reading keeps only well-formed parts", () => {
   assert.equal(r!.keep?.kind, "CONFIRM");
   assert.equal(parseToneReading('{"keep": {"kind": "PRAISE", "text": "x"}}')?.keep, null, "only claim, confirm or condemn");
   assert.equal(parseToneReading("not json"), null);
+});
+
+test("the book's self-talk questions come from the Center Console chapter, questions only", () => {
+  const chapters = [
+    { title: "The Rearview Mirror", refuel: ["Sample self-talk question one?"], reflect: [] },
+    { title: "The Center Console", refuel: ["Sample tone question?", "Breathe."], reflect: ["Sample self-talk question two?", "Name one win."] },
+  ];
+  assert.deepEqual(bookQuestions(chapters), ["Sample self-talk question two?", "Sample tone question?"]);
+  assert.deepEqual(bookQuestions([]), [], "nothing without the licensed pack");
 });

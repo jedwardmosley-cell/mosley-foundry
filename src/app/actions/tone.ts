@@ -7,7 +7,8 @@ import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { parse, bool } from "@/lib/validation";
 import { aiAvailable, readSelfTalkAI } from "@/lib/ai";
-import { findClosedDoors, soundsLikeDistress } from "@/lib/tone";
+import { findClosedDoors, soundsLikeDistress, bookQuestions } from "@/lib/tone";
+import { getContent } from "@/content";
 
 const participant = () => requireUser("PARTICIPANT");
 
@@ -27,7 +28,8 @@ export async function readSelfTalk(fd: FormData) {
   if (!aiAvailable() || profile?.aiEnabled === false) redirect(`/tone?entry=${entry.id}&ai=off`);
   let note = "";
   try {
-    const reading = await readSelfTalkAI(u.id, said, doors.map((d) => d.said));
+    const { pack } = await getContent();
+    const reading = await readSelfTalkAI(u.id, said, doors.map((d) => d.said), bookQuestions(pack.chapters));
     if (reading) await db.toneEntry.update({ where: { id: entry.id }, data: { reading: JSON.stringify(reading) } });
     else note = "none";
   } catch (err) {

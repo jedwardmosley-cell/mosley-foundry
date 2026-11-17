@@ -430,6 +430,8 @@ export type ToneReading = {
   doors: { said: string; truer: string }[];
   chain: { thought: string; words: string; feeling: string; action: string; stepIn: string };
   keep: { kind: "CLAIM" | "CONFIRM" | "CONDEMN"; text: string } | null;
+  /** One of the book's own self-talk questions, word for word, chosen for this moment. "" when none fits. */
+  question: string;
 };
 
 /**
@@ -437,7 +439,7 @@ export type ToneReading = {
  * It names which lines the words support or pull against, offers truer open-door versions of closed-door
  * phrases, lays out the self-talk chain, and offers one line to keep. Saves nothing.
  */
-export async function readSelfTalkAI(userId: string, said: string, closedDoors: string[]): Promise<ToneReading | null> {
+export async function readSelfTalkAI(userId: string, said: string, closedDoors: string[], questions: string[] = []): Promise<ToneReading | null> {
   const client = new Anthropic();
   const [prof, idRow, sources] = await Promise.all([
     db.profile.findUnique({ where: { userId }, select: { destination: true, lineO: true, why: true, lineG: true, lineE: true, forgeStatement: true } }),
@@ -466,6 +468,7 @@ export async function readSelfTalkAI(userId: string, said: string, closedDoors: 
       "- doors: for each defeated phrase (the app found these: " + (closedDoors.length ? closedDoors.map((d) => `\"${d}\"`).join(", ") : "none") + ", and add every other defeated or closed-door line you see, including quiet ones like \"I'm struggling\" or \"this is too much\"), give said (their exact words, short) and truer: the real version of the same truth that shuts the imposter down and leaves a door open. Do not manufacture a claim they don't believe. \"I can't run this meeting\" can become \"I haven't run a meeting like this yet\", not \"I am a great facilitator\". \"I'm struggling\" can become \"This is hard, and I'm still in it\".",
       "- chain: thought, words, feeling, action, each a few words drawn from what they wrote (leave one empty rather than guess), and stepIn: the one place in the chain to cut the imposter off, as one short sentence.",
       "- keep: their answer to the imposter, one line in their voice that passes one of the three Cs: CLAIM (a victory, milestone or outcome they are going after), CONFIRM (a belief about their own attributes or abilities) or CONDEMN (the negativity or roadblock that would stop them). Use null if nothing honest fits.",
+      ...(questions.length ? [`- question: the one question from the book, below, that this person most needs to sit with right now. Copy it exactly, word for word. Use "" if none fits. THE BOOK'S QUESTIONS: ${questions.map((q) => `"${q}"`).join(" | ")}`] : []),
       "Rules: this is coaching, not therapy. Do not diagnose. If the words suggest danger to themselves or others, set summary to a short note encouraging them to talk to someone they trust or a professional, and leave everything else empty.",
       HOUSE_STYLE,
       'Return only JSON, with no other text: {"summary": "", "lines": [{"rule": "E", "fit": "pulls", "note": ""}], "doors": [{"said": "", "truer": ""}], "chain": {"thought": "", "words": "", "feeling": "", "action": "", "stepIn": ""}, "keep": {"kind": "CONFIRM", "text": ""}}',
@@ -482,7 +485,10 @@ export async function readSelfTalkAI(userId: string, said: string, closedDoors: 
   const msg = await stream.finalMessage();
   if (msg.stop_reason === "refusal") return null;
   const raw = msg.content.filter((b) => b.type === "text").map((b) => (b as { text: string }).text).join("\n");
-  return parseToneReading(raw);
+  const r = parseToneReading(raw);
+  // Only the book's own words: a question that isn't one of them, word for word, is dropped.
+  if (r && !questions.includes(r.question)) r.question = "";
+  return r;
 }
 
 /** Reads the self-talk coach's JSON, keeping only well-formed parts. Exported for tests. */
@@ -507,6 +513,7 @@ export function parseToneReading(raw: string): ToneReading | null {
         .map((x: { said: string; truer: string }) => ({ said: str(x.said, 200), truer: str(x.truer, 300) })),
       chain: { thought: str(c.thought, 200), words: str(c.words, 200), feeling: str(c.feeling, 200), action: str(c.action, 200), stepIn: str(c.stepIn, 300) },
       keep: j.keep && KINDS.includes(String(j.keep.kind)) && str(j.keep.text) ? { kind: j.keep.kind, text: str(j.keep.text, 300) } : null,
+      question: String(j.question ?? "").trim(),
     };
   } catch {
     return null;

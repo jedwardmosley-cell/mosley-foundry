@@ -64,3 +64,13 @@ const DISTRESS = [
 export function soundsLikeDistress(text: string): boolean {
   return DISTRESS.some((re) => re.test(text));
 }
+
+/**
+ * The book's own self-talk questions, from the Center Console chapter (Mindset and Tone Setting) in the
+ * licensed content. Read at runtime, never written into the code. Empty when the licensed pack isn't installed.
+ */
+export function bookQuestions(chapters: { title: string; refuel: string[]; reflect: string[] }[]): string[] {
+  const c = chapters.find((x) => /center console/i.test(x.title));
+  if (!c) return [];
+  return [...c.reflect, ...c.refuel].filter((t) => t.trim().endsWith("?") && /self-talk|tone|language|temperature|believe|voice/i.test(t));
+}

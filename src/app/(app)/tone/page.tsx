@@ -2,7 +2,8 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { fmt, addDays, ymd } from "@/lib/dates";
-import { findClosedDoors, tally, type DoorHit } from "@/lib/tone";
+import { findClosedDoors, tally, bookQuestions, type DoorHit } from "@/lib/tone";
+import { getContent } from "@/content";
 import type { ToneReading } from "@/lib/ai";
 import { readSelfTalk, keepToneLine, removeToneLine, deleteToneEntry, setToneReadsWriting } from "@/app/actions/tone";
 import { PageHeader, Card, PillarMark } from "@/components/ui";
@@ -54,6 +55,11 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
     return l ? (profile?.[l.field] ?? "") : "";
   };
   const hasLines = FORGE_LINES.some((l) => profile?.[l.field]?.trim());
+  // The book's own self-talk questions. One a day up front; the rest a tap away.
+  const { pack } = await getContent();
+  const questions = bookQuestions(pack.chapters);
+  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+  const todaysQuestion = questions.length ? questions[dayOfYear % questions.length] : "";
 
   return (
     <>
@@ -86,6 +92,21 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
           </div>
         </form>
       </Card>
+
+      {todaysQuestion && !current && !sp.care && (
+        <section className="mt-6 border-l-2 border-gold/60 pl-5" aria-label="From the book">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gold">From the book</p>
+          <p className="mt-2 font-serif text-[20px] leading-snug text-heading">{todaysQuestion}</p>
+          {questions.length > 1 && (
+            <details className="mt-3">
+              <summary className="cursor-pointer text-sm text-link">More questions from the book</summary>
+              <ul className="mt-2 space-y-2">
+                {questions.filter((q) => q !== todaysQuestion).map((q) => <li key={q} className="font-serif text-[16px] leading-snug text-ink">{q}</li>)}
+              </ul>
+            </details>
+          )}
+        </section>
+      )}
 
       {current && !sp.care && (
         <section className="mt-6 space-y-4" aria-label="The reading">
@@ -159,6 +180,13 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
                 <p className="text-xs text-ink-mute">Change the words until they sound like you.</p>
               </form>
             </Card>
+          )}
+
+          {reading?.question && (
+            <section className="border-l-2 border-gold/60 pl-5" aria-label="Sit with this">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gold">Sit with this · from the book</p>
+              <p className="mt-2 font-serif text-[20px] leading-snug text-heading">{reading.question}</p>
+            </section>
           )}
 
           <form action={deleteToneEntry}><input type="hidden" name="id" value={current.id} /><button className="text-sm text-ink-mute hover:text-alert">Delete this entry</button></form>
