@@ -5,7 +5,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { findClosedDoors, tally, soundsLikeDistress, bookQuestions, CLOSED_DOORS } from "../src/lib/tone";
-import { parseToneReading } from "../src/lib/ai";
+import { parseToneReading, parseConversationReading } from "../src/lib/ai";
 
 test("closed-door phrases are found as written, in order", () => {
   const hits = findClosedDoors("I can't run this meeting. That's just how I am, I'm not good at conflict. I don't know how to fix it.");
@@ -74,6 +74,14 @@ test("every defeated phrase comes with a new way to say it and why it matters, i
     assert.ok(!banned.test(d.instead + " " + d.why), `house style: ${d.label}`);
   }
   const [hit] = findClosedDoors("I can't do this");
-  assert.equal(hit.instead, "I haven't done this yet.");
+  assert.equal(hit.instead, "I'll try.");
   assert.match(hit.why, /brain/);
+});
+
+test("the conversation reading keeps only well-formed parts", () => {
+  const r = parseConversationReading(`{"tone": "Calm and direct \u2014 no blame.", "opener": "I want to talk about the deadline.", "rewrite": "This slipped again. Walk me through it.", "why": "Blame makes people defend.", "questions": ["What got in the way?", "", "What do you need?", "Q3", "Q4"], "sideways": "Let's slow down.", "identity": ""}`);
+  assert.ok(r);
+  assert.equal(r!.tone, "Calm and direct, no blame.", "no em dashes");
+  assert.deepEqual(r!.questions, ["What got in the way?", "What do you need?", "Q3"], "empty questions dropped, three at most");
+  assert.equal(parseConversationReading('{"tone": "x"}'), null, "needs an opener or a rewrite");
 });

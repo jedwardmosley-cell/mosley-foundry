@@ -297,13 +297,16 @@ model JournalEntry {
 
 // ---------- Set the Tone: self-talk ----------
 
-// What the client said to themselves, and the reading of it against their FORGE identity. Private.
+// Set the Tone, with myself (self-talk) or with someone else (how do I say it), and the reading. Private.
 model ToneEntry {
   id         String   @id @default(cuid())
   userId     String
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  text       String
-  closedDoor String   @default("[]") // JSON list of closed-door phrases found by rule, e.g. ["I can't"]
+  mode       String   @default("SELF") // enum: SELF (what I told myself) | OTHERS (how do I say it to someone)
+  who        String   @default("") // OTHERS: who the conversation is with
+  situation  String   @default("") // OTHERS: what's going on
+  text       String // SELF: what I told myself. OTHERS: what I'm tempted to say.
+  closedDoor String   @default("[]") // JSON list of limited-language phrases found by rule, e.g. ["I can't"]
   reading    String   @default("") // JSON: the coach's reading, or "" when there was none
   createdAt  DateTime @default(now())
 
