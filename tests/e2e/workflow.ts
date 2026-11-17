@@ -466,6 +466,10 @@ const submitAndWait = async (page: Page, selector: string) => {
     await Promise.all([page.waitForURL(/\/tone\?entry=/), page.click('button:has-text("How do I say it?")')]);
     await page.waitForSelector("text=Before you talk with E2E-WHO my direct report");
     await page.waitForSelector("text=E2E-SITUATION: they missed the deadline again");
+    // each mode keeps to itself: no self-talk count or lines under a conversation
+    assert.equal(await page.locator("h2:has-text('The last three days')").count(), 0);
+    assert.equal(await page.locator("h2:has-text('My lines')").count(), 0);
+    await page.waitForSelector("summary:has-text('Earlier conversations (1)')");
     const saved = await db.toneEntry.findFirstOrThrow({ where: { user: { email }, mode: "OTHERS" } });
     assert.equal(saved.who, "E2E-WHO my direct report");
     // conversations don't count toward the self-talk tally
