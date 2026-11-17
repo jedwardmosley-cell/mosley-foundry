@@ -4,7 +4,7 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { findClosedDoors, tally, soundsLikeDistress } from "../src/lib/tone";
+import { findClosedDoors, tally, soundsLikeDistress, bookQuestions } from "../src/lib/tone";
 import { parseToneReading } from "../src/lib/ai";
 
 test("closed-door phrases are found as written, in order", () => {
@@ -14,8 +14,19 @@ test("closed-door phrases are found as written, in order", () => {
   assert.deepEqual(findClosedDoors("I cant do it and i cannot stop").map((h) => h.label), ["I can't", "I can't"], "spelling and case vary");
 });
 
+test("quieter defeated language is caught too", () => {
+  assert.deepEqual(findClosedDoors("This is tough, I'm struggling. It's too much and I'm not good enough. Who am I to lead this? I'll never catch up.").map((h) => h.label),
+    ["I'm struggling", "this is too much", "I'm not enough", "who am I to", "I'll never ..."]);
+});
+
+test("the imposter talking in the second person is caught", () => {
+  assert.deepEqual(findClosedDoors("You can't run this meeting. You're not good enough. You'll never be a real leader. You're such a fraud.").map((h) => h.label),
+    ["you can't", "you're not enough", "you'll never ...", "you're such a ..."]);
+  assert.deepEqual(findClosedDoors("You can do this. You'll never stop growing."), []);
+});
+
 test("open-door language is left alone", () => {
-  assert.deepEqual(findClosedDoors("I haven't run a meeting like this yet. I never give up. I know how to ask for help."), []);
+  assert.deepEqual(findClosedDoors("I haven't run a meeting like this yet. I never give up. I'll never stop trying. I know how to ask for help."), []);
   assert.deepEqual(findClosedDoors("I can do hard things"), []);
 });
 
@@ -45,4 +56,13 @@ test("the coach's reading keeps only well-formed parts", () => {
   assert.equal(r!.keep?.kind, "CONFIRM");
   assert.equal(parseToneReading('{"keep": {"kind": "PRAISE", "text": "x"}}')?.keep, null, "only claim, confirm or condemn");
   assert.equal(parseToneReading("not json"), null);
+});
+
+test("the book's self-talk questions come from the Center Console chapter, questions only", () => {
+  const chapters = [
+    { title: "The Rearview Mirror", refuel: ["Sample self-talk question one?"], reflect: [] },
+    { title: "The Center Console", refuel: ["Sample tone question?", "Breathe."], reflect: ["Sample self-talk question two?", "Name one win."] },
+  ];
+  assert.deepEqual(bookQuestions(chapters), ["Sample self-talk question two?", "Sample tone question?"]);
+  assert.deepEqual(bookQuestions([]), [], "nothing without the licensed pack");
 });

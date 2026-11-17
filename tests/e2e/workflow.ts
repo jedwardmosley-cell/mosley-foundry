@@ -430,9 +430,11 @@ const submitAndWait = async (page: Page, selector: string) => {
 
   await check("7g. Set the Tone: self-talk read against the identity; closed doors counted; lines kept; private", async () => {
     await page.goto(`${BASE}/tone`);
+    // the book's own self-talk questions, when the licensed content is installed
+    if (fs.existsSync("src/content/licensed/pack.json")) await page.waitForSelector('section[aria-label="From the book"] >> text=self-talk');
     await page.fill('textarea[name="said"]', "E2E-TONE: I can't run this meeting. That's just how I am.");
-    await Promise.all([page.waitForURL(/\/tone\?entry=/), page.click('button:has-text("Read it")')]);
-    await page.waitForSelector("text=Closed doors");
+    await Promise.all([page.waitForURL(/\/tone\?entry=/), page.click('button:has-text("Take it apart")')]);
+    await page.waitForSelector("text=Shut it down");
     await page.waitForSelector("text=(that's just how I am)");
     // the three-day audit counts it
     const audit = page.locator("section:has(h2:has-text('The last three days'))");
@@ -449,9 +451,9 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.waitForSelector("text=Also counting your check-in notes");
     // distress stops the coaching and points to support
     await page.fill('textarea[name="said"]', "E2E-TONE: some days I want to die");
-    await Promise.all([page.waitForURL(/care=1/), page.click('button:has-text("Read it")')]);
+    await Promise.all([page.waitForURL(/care=1/), page.click('button:has-text("Take it apart")')]);
     await page.waitForSelector("text=988");
-    assert.equal(await page.locator("text=Closed doors").count(), 0, "no coaching on distress");
+    assert.equal(await page.locator("text=Shut it down").count(), 0, "no coaching on distress");
     // one tap from the round + button
     await page.goto(`${BASE}/companion`);
     await page.waitForSelector('main a[href="/tone"]:has-text("Set the Tone")');

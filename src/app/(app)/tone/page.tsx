@@ -2,7 +2,8 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { fmt, addDays, ymd } from "@/lib/dates";
-import { findClosedDoors, tally, type DoorHit } from "@/lib/tone";
+import { findClosedDoors, tally, bookQuestions, type DoorHit } from "@/lib/tone";
+import { getContent } from "@/content";
 import type { ToneReading } from "@/lib/ai";
 import { readSelfTalk, keepToneLine, removeToneLine, deleteToneEntry, setToneReadsWriting } from "@/app/actions/tone";
 import { PageHeader, Card, PillarMark } from "@/components/ui";
@@ -54,11 +55,16 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
     return l ? (profile?.[l.field] ?? "") : "";
   };
   const hasLines = FORGE_LINES.some((l) => profile?.[l.field]?.trim());
+  // The book's own self-talk questions. One a day up front; the rest a tap away.
+  const { pack } = await getContent();
+  const questions = bookQuestions(pack.chapters);
+  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+  const todaysQuestion = questions.length ? questions[dayOfYear % questions.length] : "";
 
   return (
     <>
       <PageHeader eyebrow="FORGE" title="Set the Tone">
-        You set the tone before the world does. Write down what you said to yourself, or what you said out loud, and see how it lines up with who you said you are.
+        That defeated voice in your head isn&apos;t you. It&apos;s an imposter. Write down exactly what it said, and take it apart against who you said you are.
       </PageHeader>
 
       {sp.care && (
@@ -76,36 +82,51 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
 
       <Card>
         <form action={readSelfTalk} className="space-y-3">
-          <label htmlFor="said" className="label">What did you say to yourself?</label>
+          <label htmlFor="said" className="label">What did the imposter say?</label>
           <textarea id="said" name="said" required minLength={3} maxLength={3000} className="textarea !min-h-[110px]"
-            placeholder="Write it the way it sounded in your head. &quot;I can't run this meeting, they never listen to me.&quot;" />
+            placeholder="Word for word, the way it sounded. &quot;You can't run this meeting. They never listen to you anyway.&quot;" />
           <DictationHint />
           <div className="flex flex-wrap items-center gap-3">
-            <Submit>Read it</Submit>
+            <Submit>Take it apart</Submit>
             <span className="text-sm text-ink-soft">{hasLines ? "Read against your five FORGE lines." : <>Works best once you&apos;ve written your five lines in <Link href="/identity" className="btn-link">Who&apos;s behind the wheel</Link>.</>}</span>
           </div>
         </form>
       </Card>
 
+      {todaysQuestion && !current && !sp.care && (
+        <section className="mt-6 border-l-2 border-gold/60 pl-5" aria-label="From the book">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gold">From the book</p>
+          <p className="mt-2 font-serif text-[20px] leading-snug text-heading">{todaysQuestion}</p>
+          {questions.length > 1 && (
+            <details className="mt-3">
+              <summary className="cursor-pointer text-sm text-link">More questions from the book</summary>
+              <ul className="mt-2 space-y-2">
+                {questions.filter((q) => q !== todaysQuestion).map((q) => <li key={q} className="font-serif text-[16px] leading-snug text-ink">{q}</li>)}
+              </ul>
+            </details>
+          )}
+        </section>
+      )}
+
       {current && !sp.care && (
         <section className="mt-6 space-y-4" aria-label="The reading">
           <Card>
-            <p className="text-xs text-ink-mute">You said, {fmt(current.createdAt, { weekday: "short", hour: "numeric", minute: "2-digit" })}</p>
+            <p className="text-xs text-ink-mute">The imposter said, {fmt(current.createdAt, { weekday: "short", hour: "numeric", minute: "2-digit" })}</p>
             <p className="mt-1 font-serif text-[18px] leading-snug text-heading">&ldquo;{current.text}&rdquo;</p>
             {reading?.summary && <p className="mt-3 text-[15px]">{reading.summary}</p>}
-            {sp.ai === "off" && <p className="mt-3 text-sm text-ink-soft">Help me with this is off, so this shows the closed-door phrases only. Turn it on in Settings for the full reading against your FORGE lines.</p>}
-            {(sp.ai === "busy" || sp.ai === "none") && <p className="mt-3 text-sm text-ink-soft">The full reading didn&apos;t come through this time. The closed-door phrases are below. Try again in a minute.</p>}
+            {sp.ai === "off" && <p className="mt-3 text-sm text-ink-soft">Help me with this is off, so this shows the defeated phrases only. Turn it on in Settings to take it apart against your FORGE lines.</p>}
+            {(sp.ai === "busy" || sp.ai === "none") && <p className="mt-3 text-sm text-ink-soft">The full reading didn&apos;t come through this time. The defeated phrases are below. Try again in a minute.</p>}
           </Card>
 
           {reading && reading.lines.length > 0 && (
             <Card>
-              <h2 className="h3">Against your FORGE lines</h2>
+              <h2 className="h3">Who you said you are</h2>
               <ul className="mt-3 space-y-3">
                 {reading.lines.map((l, i) => (
                   <li key={i} className="flex gap-3">
                     <PillarMark k={l.rule as PillarKey} size="sm" />
                     <div>
-                      <p className={`text-sm font-medium ${l.fit === "supports" ? "text-link" : "text-alert"}`}>{l.fit === "supports" ? "Fits this line" : "Pulls against this line"}</p>
+                      <p className={`text-sm font-medium ${l.fit === "supports" ? "text-link" : "text-alert"}`}>{l.fit === "supports" ? "This part sounds like you" : "The imposter is arguing with this line"}</p>
                       {lineFor(l.rule) && <p className="mt-0.5 text-sm text-ink-mute">Your line: {lineFor(l.rule)}</p>}
                       <p className="mt-1 text-[15px]">{l.note}</p>
                     </div>
@@ -117,8 +138,8 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
 
           {(reading?.doors.length || ruleDoors.length) ? (
             <Card>
-              <h2 className="h3">Closed doors</h2>
-              <p className="mt-1 text-sm text-ink-soft">Not a made-up claim. The real version of the same truth, with the door left open.</p>
+              <h2 className="h3">Shut it down</h2>
+              <p className="mt-1 text-sm text-ink-soft">Every defeated line, answered with the truth. No hype and no made-up claims.</p>
               <ul className="mt-3 space-y-3">
                 {reading?.doors.length
                   ? reading.doors.map((d, i) => (
@@ -130,7 +151,7 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
                   : ruleDoors.map((d, i) => <li key={i} className="rounded-2xl bg-ink/[0.04] px-4 py-3 text-[15px]">&ldquo;{d.said}&rdquo; <span className="text-sm text-ink-mute">({d.label})</span></li>)}
               </ul>
             </Card>
-          ) : reading ? <Card><p className="text-[15px]">No closed-door phrases in this one.</p></Card> : null}
+          ) : reading ? <Card><p className="text-[15px]">No defeated phrases in this one.</p></Card> : null}
 
           {reading && (reading.chain.thought || reading.chain.stepIn) && (
             <Card>
@@ -140,13 +161,13 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
                   <li key={k} className="rounded-2xl bg-ink/[0.04] px-3 py-2.5"><p className="text-xs text-ink-mute">{k}</p><p className="mt-0.5 text-[15px]">{v}</p></li>
                 ))}
               </ol>
-              {reading.chain.stepIn && <p className="mt-3 text-[15px]"><span className="font-medium text-heading">Where to step in: </span>{reading.chain.stepIn}</p>}
+              {reading.chain.stepIn && <p className="mt-3 text-[15px]"><span className="font-medium text-heading">Where to cut it off: </span>{reading.chain.stepIn}</p>}
             </Card>
           )}
 
           {reading?.keep && (
             <Card>
-              <h2 className="h3">A line to keep</h2>
+              <h2 className="h3">Your answer to the imposter</h2>
               <form action={keepToneLine} className="mt-3 space-y-3">
                 <input type="hidden" name="entry" value={current.id} />
                 <input name="line" defaultValue={reading.keep.text} maxLength={300} className="input" aria-label="Line to keep" />
@@ -161,13 +182,20 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
             </Card>
           )}
 
+          {reading?.question && (
+            <section className="border-l-2 border-gold/60 pl-5" aria-label="Sit with this">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gold">Sit with this · from the book</p>
+              <p className="mt-2 font-serif text-[20px] leading-snug text-heading">{reading.question}</p>
+            </section>
+          )}
+
           <form action={deleteToneEntry}><input type="hidden" name="id" value={current.id} /><button className="text-sm text-ink-mute hover:text-alert">Delete this entry</button></form>
         </section>
       )}
 
       <section className="mt-10">
         <h2 className="h2">The last three days</h2>
-        <p className="mt-1 text-sm text-ink-soft">Closed-door phrases in your words, counted. A pattern to notice, not a score.</p>
+        <p className="mt-1 text-sm text-ink-soft">How often the imposter talked, counted. A pattern to notice, not a score.</p>
         <Card className="mt-3">
           {audit.length ? (
             <ul className="space-y-1.5">
@@ -183,8 +211,8 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
       </section>
 
       <section id="keep" className="mt-10 scroll-mt-24">
-        <h2 className="h2">Lines I keep</h2>
-        <p className="mt-1 text-sm text-ink-soft">Your own catalog. A good line does one of three things: claim, confirm or condemn.</p>
+        <h2 className="h2">My answers</h2>
+        <p className="mt-1 text-sm text-ink-soft">Lines that shut the imposter down, in your own words. A good one does one of three things: claim, confirm or condemn.</p>
         {sp.kept && <p role="status" className="notice mt-3">Kept.</p>}
         <div className="mt-3 space-y-3">
           {(Object.keys(THREE_CS) as C[]).map((k) => {
@@ -229,7 +257,7 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
               return (
                 <li key={e.id} className="py-2.5">
                   <Link href={`/tone?entry=${e.id}`} className="block hover:text-link">
-                    <span className="block text-xs text-ink-mute">{fmt(e.createdAt, { month: "short", day: "numeric" })}{n ? ` · ${n} closed-door ${n === 1 ? "phrase" : "phrases"}` : ""}</span>
+                    <span className="block text-xs text-ink-mute">{fmt(e.createdAt, { month: "short", day: "numeric" })}{n ? ` · ${n} defeated ${n === 1 ? "phrase" : "phrases"}` : ""}</span>
                     <span className="line-clamp-2 text-[15px]">{e.text}</span>
                   </Link>
                 </li>
