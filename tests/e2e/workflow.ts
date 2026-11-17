@@ -435,7 +435,9 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.fill('textarea[name="said"]', "E2E-TONE: I can't run this meeting. That's just how I am.");
     await Promise.all([page.waitForURL(/\/tone\?entry=/), page.click('button:has-text("Take it apart")')]);
     await page.waitForSelector("text=Shut it down");
-    await page.waitForSelector("text=(that's just how I am)");
+    await page.waitForSelector("text=Say this instead");
+    await page.waitForSelector("text=That's how I've handled it so far.");
+    await page.waitForSelector("text=Your words are instructions.");
     // the three-day audit counts it
     const audit = page.locator("section:has(h2:has-text('The last three days'))");
     assert.ok((await audit.innerText()).includes("1 time"));

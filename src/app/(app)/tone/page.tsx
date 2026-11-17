@@ -65,6 +65,10 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
     <>
       <PageHeader eyebrow="FORGE" title="Set the Tone">
         That defeated voice in your head isn&apos;t you. It&apos;s an imposter. Write down exactly what it said, and take it apart against who you said you are.
+        <span className="mt-3 block rounded-2xl border border-gold/40 px-4 py-3 text-[15px] text-ink">
+          <span className="block font-medium text-heading">Your words are instructions.</span>
+          They&apos;re more than a way to say what you think. They tell your brain what to believe. Say &ldquo;I can&apos;t&rdquo; and your mind goes looking for proof that you can&apos;t. It finds it, and your body follows. Say the truth with the door open and your mind goes looking for the way. This is nothing to play with.
+        </span>
       </PageHeader>
 
       {sp.care && (
@@ -118,6 +122,28 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
             {(sp.ai === "busy" || sp.ai === "none") && <p className="mt-3 text-sm text-ink-soft">The full reading didn&apos;t come through this time. The defeated phrases are below. Try again in a minute.</p>}
           </Card>
 
+          {(reading?.doors.length || ruleDoors.length) ? (
+            <Card>
+              <h2 className="h3">Shut it down</h2>
+              <p className="mt-1 text-sm text-ink-soft">Every defeated line gets a new way to say it. Say it out loud.</p>
+              <ul className="mt-4 space-y-4">
+                {(reading?.doors.length ? reading.doors : ruleDoors.map((d) => ({ said: d.said, truer: d.instead, why: d.why }))).map((d, i) => (
+                  <li key={i} className="rounded-2xl bg-ink/[0.04] px-4 py-4">
+                    <p className="text-[15px] text-ink-mute line-through decoration-alert/60">{d.said}</p>
+                    <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-gold">Say this instead</p>
+                    <p className="mt-1 font-serif text-[21px] leading-snug text-heading">{d.truer}</p>
+                    {d.why && (
+                      <>
+                        <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-mute">Why it matters</p>
+                        <p className="mt-1 text-[15px] text-ink">{d.why}</p>
+                      </>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          ) : reading ? <Card><p className="text-[15px]">No defeated phrases in this one.</p></Card> : null}
+
           {reading && reading.lines.length > 0 && (
             <Card>
               <h2 className="h3">Who you said you are</h2>
@@ -136,22 +162,6 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
             </Card>
           )}
 
-          {(reading?.doors.length || ruleDoors.length) ? (
-            <Card>
-              <h2 className="h3">Shut it down</h2>
-              <p className="mt-1 text-sm text-ink-soft">Every defeated line, answered with the truth. No hype and no made-up claims.</p>
-              <ul className="mt-3 space-y-3">
-                {reading?.doors.length
-                  ? reading.doors.map((d, i) => (
-                    <li key={i} className="rounded-2xl bg-ink/[0.04] px-4 py-3">
-                      <p className="text-[15px] text-ink-soft line-through decoration-ink-mute/50">{d.said}</p>
-                      <p className="mt-1 text-[15px] font-medium text-heading">{d.truer}</p>
-                    </li>
-                  ))
-                  : ruleDoors.map((d, i) => <li key={i} className="rounded-2xl bg-ink/[0.04] px-4 py-3 text-[15px]">&ldquo;{d.said}&rdquo; <span className="text-sm text-ink-mute">({d.label})</span></li>)}
-              </ul>
-            </Card>
-          ) : reading ? <Card><p className="text-[15px]">No defeated phrases in this one.</p></Card> : null}
 
           {reading && (reading.chain.thought || reading.chain.stepIn) && (
             <Card>
