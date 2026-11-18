@@ -34,7 +34,7 @@ export function CycleFocusFields({ pillars, initial, initialTitle = "", initialF
         {/* key: a new rule shows its own ideas. */}
         <div className="mt-2" key={pillar}><Picks list={CYCLE_FOCUS[pillar]} target="title" folded={`Ideas for ${name}`} /></div>
       </div>
-      {/* The behavior comes from the setup questions. One carried in (from EQ-i, My Design or last month) starts the new response. */}
+      {/* The behavior comes from the setup questions. One carried in (from EQ-i, the Vehicle Controls or last month) starts the new response. */}
       <input type="hidden" name="focus" value={initialFocus || identityBehavior} />
       <p className="text-sm text-ink-soft">
         Next, five short questions name the moment you want to change and what you&apos;ll do instead.

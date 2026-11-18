@@ -1,4 +1,5 @@
 import { requireUser } from "@/lib/auth";
+import { NAMES } from "@/content/names";
 import { db } from "@/lib/db";
 import { getContent } from "@/content";
 import { saveWeekly, skipWeekSend } from "@/app/actions/participant";
@@ -11,7 +12,7 @@ import { Submit } from "@/components/Submit";
 import Link from "next/link";
 import { findClosedDoors, tally } from "@/lib/tone";
 
-export const metadata = { title: "Weekly look back" };
+export const metadata = { title: "The Mirrors" };
 
 export default async function ReflectPage() {
   const u = await requireUser("PARTICIPANT");
@@ -60,7 +61,7 @@ export default async function ReflectPage() {
   const weekly = pack.discipline.inventory.find((i) => i.label === "Weekly")?.text;
   return (
     <>
-      <PageHeader eyebrow={`Week of ${fmt(weekOf, { month: "long", day: "numeric" })}`} title="Look back at your week and plan the next one">
+      <PageHeader eyebrow={`Week of ${fmt(weekOf, { month: "long", day: "numeric" })}`} title={NAMES.mirrors.name} plain={NAMES.mirrors.plain}>
         {weekly ?? "One appointment at the start of the week to decide what matters, and one at the end to look back."}
       </PageHeader>
       {askSend && partner && cycle && lookWeek && (
@@ -108,7 +109,7 @@ export default async function ReflectPage() {
                 <>
                   {cycle.plan && <p className="font-serif text-[18px] leading-snug text-heading">{cycle.plan}</p>}
                   <textarea name="look_keep" aria-label="What keeps this going" placeholder="A routine, a person, a reminder, a place..." defaultValue={String(thisWeek?.keep ?? "")} className="textarea !min-h-[80px]" maxLength={1500} />
-                  <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="look_routine" className="h-4 w-4 accent-navy" /> Put it in My Design as a weekly routine</label>
+                  <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="look_routine" className="h-4 w-4 accent-navy" /> Put it in the Vehicle Controls as a weekly routine</label>
                 </>
               )}
             </section>

@@ -16,7 +16,7 @@ import { activeSeason, nextMonth } from "@/lib/season";
 import { SEASON_LENGTH } from "@/content/program";
 import type { PillarKey } from "@/content/types";
 
-export const metadata = { title: "My focus" };
+export const metadata = { title: "The Windshield" };
 
 export default async function NewCycle({ searchParams }: { searchParams: Promise<{ pillar?: string; focus?: string; season?: string; title?: string; source?: string; next?: string; full?: string }> }) {
   const sp = await searchParams;
@@ -40,7 +40,7 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
   const source = ["FEEDBACK", "COACH"].includes(sp.source ?? "") ? sp.source! : "";
   return (
     <>
-      <PageHeader eyebrow="Discipline by Design · My focus" title={active.length ? "Add a focus" : "Choose your focus"}>
+      <PageHeader eyebrow="Discipline by Design" title={active.length ? "Add a focus" : "Choose your focus"}>
         One or two things to work on, and that&apos;s it. Name it in a few words, then five short questions turn it into a plan for 30 days.
       </PageHeader>
       <Card>

@@ -1,5 +1,5 @@
 /**
- * My Design as a mind map: the client in the middle and four sections around them, like the first people map.
+ * the Vehicle Controls as a mind map: the client in the middle and four sections around them, like the first people map.
  * Who guides me (top), who walks with me (right), who I develop (bottom) and what I do (left).
  * Only what the client has added shows as a point; the sections are always labeled so the shape is clear.
  */
@@ -44,7 +44,7 @@ export function SystemMap({ name, nodes }: { name: string; nodes: MapNode[] }) {
     });
   });
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="mx-auto w-full max-w-[440px] h-auto" role="img" aria-label={`My Design: ${nodes.length} ${nodes.length === 1 ? "thing" : "things"} around you`}>
+    <svg viewBox={`0 0 ${W} ${H}`} className="mx-auto w-full max-w-[440px] h-auto" role="img" aria-label={`The Vehicle Controls: ${nodes.length} ${nodes.length === 1 ? "thing" : "things"} around you`}>
       <circle cx={cx} cy={cy} r={R} fill="none" stroke="rgb(var(--line))" strokeDasharray="3 5" />
       {/* The road through the middle: the center line runs from who guides you to who you develop, crossed by who walks with you and what you do. */}
       <line x1={cx} y1={28} x2={cx} y2={H - 26} stroke="rgb(var(--lane))" strokeWidth={4} strokeDasharray="14 9" />

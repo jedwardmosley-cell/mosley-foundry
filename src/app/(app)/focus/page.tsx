@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NAMES } from "@/content/names";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getContent } from "@/content";
@@ -9,7 +10,7 @@ import { fmt } from "@/lib/dates";
 import type { PillarKey } from "@/content/types";
 import { PageHeader, PillarMark } from "@/components/ui";
 
-export const metadata = { title: "My focus" };
+export const metadata = { title: "The Windshield" };
 
 /**
  * My focus: the one or two development opportunities the client is working on, and nothing else.
@@ -29,7 +30,7 @@ export default async function FocusPage() {
 
   return (
     <>
-      <PageHeader eyebrow="Discipline by Design" title="My focus">
+      <PageHeader eyebrow="Discipline by Design" title={NAMES.windshield.name} plain={NAMES.windshield.plain}>
         One or two things to work on, and that&apos;s it. Each one moves you toward who&apos;s behind the wheel.
       </PageHeader>
 

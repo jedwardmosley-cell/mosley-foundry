@@ -8,7 +8,7 @@ type Props = {
   done: Record<string, boolean>;
   current: string | null;
   cycle: { day: number; week: number; phase: string; finished: boolean; seasonMonth?: number | null } | null;
-  /** What Who's behind the wheel still needs, so "still open" says why. */
+  /** What the Driver's Seat still needs, so "still open" says why. */
   identityMissing?: string[];
   /** What the system still needs. */
   roadMissing?: string[];

@@ -1,4 +1,5 @@
 import { fiveLines } from "@/content/forgeLines";
+import { NAMES } from "@/content/names";
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -19,7 +20,7 @@ import { StatementReveal } from "@/components/StatementReveal";
 import { Picks } from "@/components/Picks";
 import { IdentitySpectrum } from "@/components/IdentitySpectrum";
 
-export const metadata = { title: "Who's behind the wheel" };
+export const metadata = { title: "The Driver's Seat" };
 
 export default async function IdentityPage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
   const u = await requireUser("PARTICIPANT");
@@ -44,7 +45,7 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
 
   return (
     <>
-      <PageHeader eyebrow="FORGE" title={WHO_TITLE}>{WHO_INTRO}</PageHeader>
+      <PageHeader eyebrow="FORGE" title={WHO_TITLE} plain={NAMES.seat.plain}>{WHO_INTRO}</PageHeader>
 
       {/* Say exactly what keeps this step open, with a link to each part. */}
       {!saved && gaps.length > 0 && (id || profile?.forgeStatement || profile?.destination) && (
@@ -124,11 +125,11 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
             </fieldset>
             <fieldset>
               <legend className="label">What my coach can see</legend>
-              <p className="text-sm text-ink-soft">Only if you turn on <Link href="/sharing" className="btn-link">Who's behind the wheel in Sharing</Link>. Check-in notes stay private.</p>
+              <p className="text-sm text-ink-soft">Only if you turn on <Link href="/sharing" className="btn-link">the Driver's Seat in Sharing</Link>. Check-in notes stay private.</p>
               {id.level === "REINVENT" && (
                 <label className="mt-2 flex items-start gap-2 text-[15px]">
                   <input type="checkbox" name="sharePersona" defaultChecked={id.sharePersona} className="mt-1 h-4 w-4 accent-navy" />
-                  <span>When Who's behind the wheel is shared, include my performance identity too.</span>
+                  <span>When the Driver's Seat is shared, include my performance identity too.</span>
                 </label>
               )}
             </fieldset>

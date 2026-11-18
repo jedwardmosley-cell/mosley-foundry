@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NAMES } from "@/content/names";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { fmt, addDays, ymd } from "@/lib/dates";
@@ -73,7 +74,7 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
 
   return (
     <>
-      <PageHeader eyebrow="FORGE" title="Set the Tone">
+      <PageHeader eyebrow="FORGE" title={NAMES.tone.name} plain={NAMES.tone.plain}>
         How you talk to yourself, and to the people around you, sets the tone before anything else happens. Use it when your own words start to limit you, and before a conversation that matters.
         <span className="mt-4 block border-l-4 border-lane pl-4 text-[15px] text-ink">
           <span className="block font-medium text-heading">Your words are instructions.</span>

@@ -7,13 +7,13 @@ import { signOut } from "@/app/actions/auth";
 
 // Client menu, in journey order. The phone tab bar keeps five tabs; everything else is under More.
 const PARTICIPANT_NAV: NavItem[] = [
-  { href: "/dashboard", label: "Today", mobile: true },
-  { href: "/identity", label: "1. Who's behind the wheel", group: "FORGE" },
-  { href: "/assessment", label: "2. Where I am", group: "FORGE" },
+  { href: "/dashboard", label: "The Dashboard", tab: "Dashboard", mobile: true },
+  { href: "/identity", label: "1. The Driver's Seat", group: "FORGE" },
+  { href: "/assessment", label: "2. The Rules of the Road", group: "FORGE" },
   { href: "/tone", label: "Set the Tone", group: "FORGE" },
-  { href: "/focus", label: "3. My focus", tab: "Focus", mobile: true, group: "Discipline by Design" },
-  { href: "/road", label: "4. My Design", group: "Discipline by Design" },
-  { href: "/reflect", label: "Weekly look back", group: "Discipline by Design" },
+  { href: "/focus", label: "3. The Windshield", tab: "Windshield", mobile: true, group: "Discipline by Design" },
+  { href: "/road", label: "4. The Vehicle Controls", group: "Discipline by Design" },
+  { href: "/reflect", label: "The Mirrors", group: "Discipline by Design" },
   { href: "/network", label: "People", mobile: true, group: "Support" },
   { href: "/coaching", label: "Coaching", tab: "Coach", mobile: true, group: "Support" },
   { href: "/companion", label: "Help me with this", group: "Support" },
@@ -66,7 +66,7 @@ export function Shell({ user, children, journey }: { user: CurrentUser; children
 
       {/* Phone: a floating, solid menu bar. Clients also get a round button for Help me with this. */}
       <div className="md:hidden fixed bottom-3 inset-x-3 z-30 flex items-end gap-2">
-        <nav aria-label="Primary" className="flex-1 grid rounded-full border border-line/50 bg-card shadow-[0_16px_40px_-14px_rgb(0_0_0/0.35)]" style={{ gridTemplateColumns: `repeat(${nav.filter((n) => n.mobile).length}, minmax(0, 1fr))` }}>
+        <nav aria-label="Primary" className="flex-1 min-w-0 flex px-1 rounded-full border border-line/50 bg-card shadow-[0_16px_40px_-14px_rgb(0_0_0/0.35)]">
           {(nav as NavItem[]).filter((n) => n.mobile).map((n) => (
             <NavLink key={n.href} href={n.href} variant="tab">{n.tab ?? n.label}</NavLink>
           ))}

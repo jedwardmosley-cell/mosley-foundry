@@ -94,7 +94,7 @@ export function weeklyEmail(d: WeeklyDigest) {
   if (d.routines.length) blocks.push({ title: "Your routines", lines: d.routines.map((r) => `${r.title}${r.when ? ` (${r.when})` : ""}`) });
   if (d.people.length) blocks.push({ title: "Check-ins due", lines: d.people.map((p) => `${p.name}, ${p.when}`) });
   if (d.session) blocks.push({ title: "Coaching", lines: [d.session] });
-  if (!blocks.length) blocks.push({ title: "A clear week", lines: ["Nothing is scheduled yet. Add a routine in My Design, or start 30 days on one change."] });
+  if (!blocks.length) blocks.push({ title: "A clear week", lines: ["Nothing is scheduled yet. Add a routine in the Vehicle Controls, or start 30 days on one change."] });
 
   const text = [
     `Hi ${first},`,

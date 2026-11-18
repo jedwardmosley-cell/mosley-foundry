@@ -16,7 +16,7 @@ import { TimezoneSync } from "@/components/Timezone";
 import { focusTitle, MAX_FOCUSES } from "@/lib/focus";
 import { Icon, IconBadge, type IconName } from "@/components/Icon";
 
-export const metadata = { title: "Today" };
+export const metadata = { title: "The Dashboard" };
 
 export default async function Dashboard({ searchParams }: { searchParams: Promise<{ setup?: string; checked?: string }> }) {
   const { setup, checked } = await searchParams;
@@ -60,7 +60,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   const head = todayHeadline({ cycle: !!(d.cycle && pos), finished: !!pos?.finished, day: pos?.day ?? 0 });
   // Two focuses: each shows its own day below, so the headline belongs to neither.
   if (!kickoffStep && inProgress.length > 1) Object.assign(head, { title: "Today.", line: "Practice your plans, then check in. A few taps is enough." });
-  if (kickoffStep) Object.assign(head, { mood: "start", label: `Kickoff, step ${kickoffStep} of 4`, title: "Build your system first", line: kickoff?.key === "road" && journey.roadMissing.length ? `Still needed: ${journey.roadMissing.join(", ")}. Your daily check-in opens once your system is set up.` : "Your daily check-in opens once your system is set up." });
+  if (kickoffStep) Object.assign(head, { mood: "start", label: `Getting in the Driver's Seat, step ${kickoffStep} of 4`, title: "Build your system first", line: kickoff?.key === "road" && journey.roadMissing.length ? `Still needed: ${journey.roadMissing.join(", ")}. Your daily check-in opens once your system is set up.` : "Your daily check-in opens once your system is set up." });
   const moodTone = { start: "text-ink-mute", ready: "text-ink-mute", decide: "text-ink-soft" }[head.mood];
   const overdue = d.relationships.filter((r) => r.nextCheckIn && daysBetween(new Date(), r.nextCheckIn) < 0).length;
 
@@ -134,7 +134,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
 
         {/* Who I am: the anchor of the day, set like a page from the book. */}
         <Link href="/identity" className="glow col-span-2 block rounded-[22px] p-5 sm:p-6 transition hover:-translate-y-0.5">
-          <p className="flex items-center justify-between eyebrow !text-gold">{d.identity?.role ? `Who's behind the wheel, as ${withArticle(d.identity.role)}` : "Who's behind the wheel"}<Icon name="arrow" className="h-4 w-4 text-ink-mute" /></p>
+          <p className="flex items-center justify-between eyebrow !text-gold">{d.identity?.role ? `In the driver's seat, as ${withArticle(d.identity.role)}` : "The Driver's Seat"}<Icon name="arrow" className="h-4 w-4 text-ink-mute" /></p>
           <p className="mt-3 font-serif text-[21px] sm:text-[23px] leading-[1.3] tracking-[-0.01em] text-heading line-clamp-4">
             <span aria-hidden className="mr-1 gold-text">&ldquo;</span>{statement || "Claim who you are."}
           </p>
@@ -144,7 +144,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         <Link href="/focus" className="tile col-span-2 flex items-center gap-4 transition hover:-translate-y-0.5">
           {p ? <PillarMark k={p.key} /> : <IconBadge name="step" />}
           <div className="flex-1 min-w-0">
-            <p className="text-[13px] text-ink-mute">My focus</p>
+            <p className="text-[13px] text-ink-mute">The Windshield</p>
             <p className="mt-0.5 text-[15px] font-medium leading-snug text-ink line-clamp-2">
               {d.focuses.length === 0 ? "Choose one or two things to work on" : d.focuses.length < MAX_FOCUSES ? "One focus in progress. There's room for one more, if you want it." : "Two focuses in progress. That's the most."}
             </p>

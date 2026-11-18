@@ -26,7 +26,7 @@ const anyDraft = (r: Record<string, OptionList>) => Object.values(r).some((v) =>
 export function reviewSets(): ReviewSet[] {
   return [
     {
-      key: "who", title: "Who's behind the wheel: seats, kinds of change and the FORGE opening", where: "Who's behind the wheel, steps 1 to 3", file: "src/content/whoIAm.ts", draft: WHO_I_AM_STATUS === "draft",
+      key: "who", title: "The Driver's Seat: seats, kinds of change and the FORGE opening", where: "The Driver's Seat, steps 1 to 3", file: "src/content/whoIAm.ts", draft: WHO_I_AM_STATUS === "draft",
       groups: [
         ...Object.entries(ROLE_PICKS).map(([k, v]) => ({ label: `Role picks, ${PATHWAY_NAME[k]}`, items: v })),
         { label: "Kinds of change", items: IDENTITY_LEVELS.map((k) => `${LEVELS[k].name}: ${LEVELS[k].line}`) },
@@ -37,18 +37,18 @@ export function reviewSets(): ReviewSet[] {
       ],
     },
     {
-      key: "lines", title: "The five FORGE questions", where: "Who's behind the wheel, the five rules", file: "src/content/forgeLines.ts", draft: FORGE_LINES_STATUS === "draft",
+      key: "lines", title: "The five FORGE questions", where: "The Driver's Seat, the five rules", file: "src/content/forgeLines.ts", draft: FORGE_LINES_STATUS === "draft",
       groups: FORGE_LINES.map((l) => ({ label: `${l.pillar} · ${l.label}`, items: [l.question, `What it is about: ${l.shapes}`, `Hint: ${l.hint}`] })),
     },
     {
-      key: "examples", title: "Identity examples", where: "Who's behind the wheel, under each question", file: "src/content/identityExamples.ts", draft: IDENTITY_EXAMPLES_STATUS === "draft",
+      key: "examples", title: "Identity examples", where: "The Driver's Seat, under each question", file: "src/content/identityExamples.ts", draft: IDENTITY_EXAMPLES_STATUS === "draft",
       groups: [
         { label: "The four tests", items: IDENTITY_TESTS },
         ...EXAMPLE_PEOPLE.map((p) => ({ label: `${p.who} · ${LEVELS[p.level].name.toLowerCase()}`, items: [p.claim, ...FORGE_LINES.map((l) => `${l.pillar}: ${p.lines[l.field]}`)] })),
       ],
     },
     {
-      key: "picks", title: "Identity quick picks", where: "Who's behind the wheel and My Design", file: "src/content/identity.ts", draft: PICKS_STATUS === "draft",
+      key: "picks", title: "Identity quick picks", where: "The Driver's Seat and the Vehicle Controls", file: "src/content/identity.ts", draft: PICKS_STATUS === "draft",
       groups: [
         ...Object.entries(SITUATION_PICKS).map(([k, v]) => ({ label: `Situation, ${PATHWAY_NAME[k]}`, items: v })),
         ...Object.entries(BEHAVIOR_PICKS).map(([k, v]) => ({ label: `Behavior, ${PATHWAY_NAME[k]}`, items: v })),
@@ -60,14 +60,14 @@ export function reviewSets(): ReviewSet[] {
     },
     { key: "focus", title: "30-day focus ideas", where: "30 days, start a cycle", file: "src/content/options.ts", draft: anyDraft(CYCLE_FOCUS), groups: lists(CYCLE_FOCUS, (k) => PILLAR_NAME[k]) },
     {
-      key: "starters", title: "Practice starters", where: "My Design, routines", file: "src/content/forgeLines.ts", draft: true,
+      key: "starters", title: "Practice starters", where: "The Vehicle Controls, routines", file: "src/content/forgeLines.ts", draft: true,
       groups: Object.entries(PRACTICE_STARTERS).flatMap(([k, v]) => Object.entries(v).map(([p, items]) => ({ label: `${PILLAR_NAME[k]}, ${PATHWAY_NAME[p]}`, items }))),
     },
-    { key: "blueprint", title: "My Design picks", where: "My Design, add to an area", file: "src/content/options.ts", draft: anyDraft(BLUEPRINT_PICKS), groups: lists(BLUEPRINT_PICKS) },
+    { key: "blueprint", title: "Vehicle Controls picks", where: "The Vehicle Controls, add to an area", file: "src/content/options.ts", draft: anyDraft(BLUEPRINT_PICKS), groups: lists(BLUEPRINT_PICKS) },
     { key: "people", title: "Relationship purposes", where: "People", file: "src/content/options.ts", draft: anyDraft(RELATIONSHIP_PURPOSE), groups: lists(RELATIONSHIP_PURPOSE) },
-    { key: "tags", title: "Check-in tags", where: "Today, add detail", file: "src/content/options.ts", draft: CHECKIN_TAGS.status === "draft", groups: [{ label: "Where?", items: CHECKIN_TAGS.options }] },
+    { key: "tags", title: "Check-in tags", where: "The Dashboard, add detail", file: "src/content/options.ts", draft: CHECKIN_TAGS.status === "draft", groups: [{ label: "Where?", items: CHECKIN_TAGS.options }] },
     {
-      key: "feedback", title: "My feedback", where: "Where I am, My feedback", file: "src/content/feedback.ts", draft: FEEDBACK_STATUS === "draft",
+      key: "feedback", title: "My feedback", where: "The Rules of the Road, My feedback", file: "src/content/feedback.ts", draft: FEEDBACK_STATUS === "draft",
       groups: [{ label: "Sources", items: Object.values(FEEDBACK_SOURCES) }, { label: "Wording", items: Object.values(FEEDBACK_COPY) }],
     },
     {
@@ -89,7 +89,7 @@ export function reviewSets(): ReviewSet[] {
       ],
     },
     {
-      key: "today", title: "Today headlines", where: "Today, top card", file: "src/lib/todayHeadline.ts", draft: true,
+      key: "today", title: "Dashboard headlines", where: "The Dashboard, top card", file: "src/lib/todayHeadline.ts", draft: true,
       groups: [{
         label: "Written by rule, with no counts or praise",
         items: [

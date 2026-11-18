@@ -1,4 +1,5 @@
 import { DAY_CHOICES as DAY_LABELS, isScheduled, scheduleOf, daysToText } from "@/lib/schedule";
+import { NAMES } from "@/content/names";
 import { requireUser } from "@/lib/auth";
 import { activeFocuses } from "@/lib/focusData";
 import { focusTitle } from "@/lib/focus";
@@ -19,7 +20,7 @@ import { FORGE_LINES, PRACTICE_STARTERS } from "@/content/forgeLines";
 import type { PathwayKey } from "@/content/program";
 import type { PillarKey } from "@/content/types";
 
-export const metadata = { title: "My Design" };
+export const metadata = { title: "The Vehicle Controls" };
 
 const CADENCES = { DAILY: "Daily", WEEKLY: "Weekly", MONTHLY: "Monthly", QUARTERLY: "Quarterly", ONCE: "One time" };
 const AREA_ICON: Record<string, IconName> = { ROUTINES: "sun", WEEKLY: "calendar", RELATIONSHIPS: "people", LEARNING: "book", LEADERSHIP: "flag", REVIEW: "repeat" };
@@ -68,7 +69,7 @@ export default async function MyRoadPage({ searchParams }: { searchParams: Promi
 
   return (
     <>
-      <PageHeader eyebrow="Discipline by Design" title="My Design">The system that makes it hard to fail: your routines, your people, your groups and programs, the people you develop. It stays, and it grows.</PageHeader>
+      <PageHeader eyebrow="Discipline by Design" title={NAMES.controls.name} plain={NAMES.controls.plain}>The system that makes it hard to fail: your routines, your people, your groups and programs, the people you develop. It stays, and it grows.</PageHeader>
       <div className="mb-8"><SystemMap name={u.name} nodes={mapNodes} /></div>
       <FromBook label="From the book">
         {d.intro[0] ? <><p>{d.intro.find((t) => t.startsWith("It's the deliberate construction"))}</p><p className="mt-2">{d.intro.find((t) => t.startsWith("The question isn't"))}</p></> : "The deliberate construction of the routines, relationships, environments, and accountability structures that support sustained development."}

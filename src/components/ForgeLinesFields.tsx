@@ -47,7 +47,7 @@ export function FiveSides({ profile, pathway, role, level, ai, teach = {}, rules
         <details className="mt-3 text-sm">
           <summary className="cursor-pointer text-link font-medium">Is it an identity?</summary>
           <ol className="mt-2 list-decimal pl-5 space-y-1 text-ink-soft">{IDENTITY_TESTS.map((t) => <li key={t}>{t}</li>)}</ol>
-          <p className="mt-2 text-ink-soft">The behaviors come next, in My Design and your 30 days.</p>
+          <p className="mt-2 text-ink-soft">The behaviors come next, in the Vehicle Controls and your 30 days.</p>
         </details>
       </div>
       {FORGE_LINES.map((l) => {
@@ -111,7 +111,7 @@ export function FiveSides({ profile, pathway, role, level, ai, teach = {}, rules
   );
 }
 
-/** My statement: the single identity statement, built from the five. This is what Today shows. */
+/** My statement: the single identity statement, built from the five. This is what the Dashboard shows. */
 export function MyStatement({ statement, earlier, ai, hint, saved, n }: { statement: string; earlier?: string; ai: boolean; hint?: string; saved?: Saved; n?: number }) {
   return (
     <div>

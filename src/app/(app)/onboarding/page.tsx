@@ -10,7 +10,7 @@ export default async function Onboarding() {
   const u = await requireUser("PARTICIPANT");
   return (
     <>
-      <PageHeader eyebrow="Kickoff" title={`Which program are you in, ${u.name.split(" ")[0]}?`}>
+      <PageHeader eyebrow="Getting in the Driver's Seat" title={`Which program are you in, ${u.name.split(" ")[0]}?`}>
         This sets which program materials you see. Next, you&apos;ll name the seat you&apos;re in. You can change the program later.
       </PageHeader>
       <div className="grid gap-4">

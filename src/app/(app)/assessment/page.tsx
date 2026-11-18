@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NAMES } from "@/content/names";
 import { withArticle } from "@/content/whoIAm";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -10,7 +11,7 @@ import { PageHeader, PillarMark, Draft, Source } from "@/components/ui";
 import { AssessmentForm } from "@/components/AssessmentForm";
 import { linesOf } from "@/content/forgeLines";
 
-export const metadata = { title: "Where I am" };
+export const metadata = { title: "The Rules of the Road" };
 
 export default async function AssessmentPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const { next } = await searchParams;
@@ -25,7 +26,7 @@ export default async function AssessmentPage({ searchParams }: { searchParams: P
 
   return (
     <>
-      <PageHeader eyebrow={useEntre ? "self-assessment · Step 2 · for entrepreneurs" : "self-assessment · Step 2"} title="Where I am">
+      <PageHeader eyebrow={useEntre ? "FORGE, for entrepreneurs" : "FORGE"} title={NAMES.rules.name} plain={NAMES.rules.plain}>
         {useEntre ? entrepreneur!.intro.filter((t) => !/measures five behaviors/i.test(t)).slice(0, 3).map((t) => <p key={t} className="mb-2">{t}</p>) : (
           <p>This is the deep work of FORGE. For each rule, read what you wrote and all five levels, then choose the one that is true of you this past month. Take your time with it.</p>
         )}

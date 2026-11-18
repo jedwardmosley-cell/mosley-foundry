@@ -85,7 +85,7 @@ export const PERSONA_FIELDS: { key: "personaName" | "personaQualities" | "person
 export const NO_RANK_NOTE = "These three describe how big a turn you want to make. They say nothing about your worth, your health, or how far along you are. Reinvention does not rank above core alignment or role transition.";
 export const PERSONA_NOTE = "A performance identity is a practice tool you choose on purpose. It is a way to prepare for demanding situations. It is still you, and it makes no claim about changing your psychology.";
 
-// ---------- Part 2: how the level shapes FORGE, My Design and the daily check-in ----------
+// ---------- Part 2: how the level shapes FORGE, the Vehicle Controls and the daily check-in ----------
 
 /**
  * One prompt per FORGE pillar per level. DRAFT FOR AUTHOR REVIEW.
@@ -132,7 +132,7 @@ export type PracticeAction =
 export const PRACTICE: Record<IdentityLevel, { text: string; action: PracticeAction }[]> = {
   CORE: [
     { text: "One repeatable daily behavior", action: { kind: "commit", area: "ROUTINES", cadence: "DAILY", from: "behavior", button: "Add my behavior as a daily routine" } },
-    { text: "Simple weekly look back", action: { kind: "link", href: "/reflect", button: "Open the weekly look back" } },
+    { text: "Simple weekly look back", action: { kind: "link", href: "/reflect", button: "Open the Mirrors" } },
     { text: "Optional accountability relationship", action: { kind: "link", href: "/network?role=ACCOUNTABILITY_PARTNER#add", button: "Add an accountability partner" } },
   ],
   ROLE: [
@@ -162,7 +162,7 @@ export const CHECKIN_IDENTITY = {
  * coach can suggest identity work without choosing a level for the client.
  */
 export const IDENTITY_EXERCISES: { title: string; text: string }[] = [
-  { title: "Claim who you are", text: "Open Who's behind the wheel and write My statement as a present-tense claim that starts with I am. Read it out loud. Then choose the level that fits the size of change you want. It is your call, and you can change it later." },
+  { title: "Claim who you are", text: "Open the Driver's Seat and write My statement as a present-tense claim that starts with I am. Read it out loud. Then choose the level that fits the size of change you want. It is your call, and you can change it later." },
   { title: "The behavior that shows it", text: "Write one behavior another person could see you do if you had already become this person. Then do it once this week and write what happened." },
   { title: "Evidence of the week", text: "Look back at your check-ins this week. Where did you show up as who you said you are? Write two moments, and one where you did not." },
   { title: "Prepare for a demanding situation", text: "Pick one demanding situation coming up. Read your I am statement, then write how you will prepare for it and the first thing you will do when it starts." },

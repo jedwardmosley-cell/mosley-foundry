@@ -179,7 +179,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.waitForSelector("text=As a manager, who is the person I'm driving toward?");
     // FORGE is taught on the page: the opening, each rule from the book, and what this means with the research
     await page.waitForSelector("text=You only ever rise to the level of who you believe you are.");
-    assert.equal(await page.locator("h1", { hasText: "Who's behind the wheel" }).count(), 1);
+    assert.equal(await page.locator("h1", { hasText: "The Driver's Seat" }).count(), 1);
     await page.waitForSelector("text=Know your destination.");
     assert.equal(await page.locator('summary:has-text("What this means")').count(), 5, "every letter teaches before it asks");
     const f = page.locator("section#f");
@@ -214,8 +214,8 @@ const submitAndWait = async (page: Page, selector: string) => {
     await Promise.all([page.waitForLoadState("networkidle"), weekly.locator('button[type="submit"]:has-text("Add")').click()]);
     await page.waitForSelector("text=Plan the week ahead");
     // the map: the client in the middle, and only what they have added around them
-    await page.waitForSelector('svg[aria-label="My Design: 2 things around you"]');
-    assert.equal(await page.locator('svg[aria-label^="My Design"] a').count(), 2, "no empty category slots");
+    await page.waitForSelector('svg[aria-label="The Vehicle Controls: 2 things around you"]');
+    assert.equal(await page.locator('svg[aria-label^="The Vehicle Controls"] a').count(), 2, "no empty category slots");
     assert.equal(await page.locator("text=Chapter 10").count(), 0, "no chapter numbers");
     await page.screenshot({ path: `${shots}/04-my-road.png`, fullPage: false });
   });
@@ -260,7 +260,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.goto(`${BASE}/road`);
     const bar = page.locator('nav[aria-label="Your journey"]');
     await bar.locator("text=Day 1 of 30").waitFor();
-    assert.equal(await bar.locator("text=(done)").count(), 4, "Who I am, Where I am, My road and 30 days");
+    assert.equal(await bar.locator("text=(done)").count(), 4, "Who I am, the Rules of the Road, My road and 30 days");
   });
 
   await check("7. record a daily reflection", async () => {
@@ -353,7 +353,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await Promise.all([page.waitForLoadState("networkidle"), add.locator('button:has-text("Add")').click()]);
     await page.waitForSelector("text=Make this a focus");
     assert.equal(await page.locator('button:has-text("Share with")').count(), 0, "no share button without a coach");
-    await Promise.all([page.waitForURL("**/road"), page.click('button:has-text("Add to My Design")')]);
+    await Promise.all([page.waitForURL("**/road"), page.click('button:has-text("Add to the Vehicle Controls")')]);
     await page.waitForSelector("text=One breath before I answer");
     // the AI switch turns on for this entry only
     await page.goto(`${BASE}/feedback/${fb.id}`);
@@ -377,7 +377,7 @@ const submitAndWait = async (page: Page, selector: string) => {
   await check("7e. Who I am: three equal kinds, one statement on Today, behavior on My road, history kept", async () => {
     const me = await db.user.findUniqueOrThrow({ where: { email } });
     await page.goto(`${BASE}/dashboard`);
-    await page.waitForSelector(`main a:has-text("Who's behind the wheel, as a manager") >> text=I am a leader my team trusts with bad news.`);
+    await page.waitForSelector(`main a:has-text("In the driver's seat, as a manager") >> text=I am a leader my team trusts with bad news.`);
     await page.goto(`${BASE}/identity`);
     assert.ok(!(await page.content()).includes("Identity shift"), "one activity, one name");
     for (const name of ["Core alignment", "Role transition", "Reinvention"]) await page.locator("label", { hasText: name }).click();
@@ -389,7 +389,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal(id.becoming, "I am someone who follows through on what I say.");
     assert.equal((await db.profile.findUniqueOrThrow({ where: { userId: me.id } })).forgeStatement, id.becoming);
     await page.goto(`${BASE}/dashboard`);
-    await page.waitForSelector(`main a:has-text("Who's behind the wheel") >> text=I am someone who follows through on what I say.`);
+    await page.waitForSelector(`main a:has-text("The Driver's Seat") >> text=I am someone who follows through on what I say.`);
     // My road starts from the statement and holds the focus: no separate behavior to track
     await page.goto(`${BASE}/road`);
     await page.waitForSelector("text=Built around who I am");
@@ -555,7 +555,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await g.waitForSelector("text=Step 3 of 4 · question 1 of 5");
     await doSetup(g, "Pat Partner", "Pause before I answer", "**/start?step=4");
     // 4. build the system, one screen each: a daily routine, a weekly planning time, an accountability partner
-    await g.waitForSelector("text=Kickoff · Step 4 of 4, part 1 of 3");
+    await g.waitForSelector("text=Getting in the Driver's Seat, step 4 of 4, part 1 of 3");
     await g.goto(`${BASE}/dashboard`);
     await g.waitForSelector("text=Build your system first");
     assert.equal(await g.locator('button:has-text("Save my daily check-in")').count(), 0, "no check-in until the system is built");
@@ -563,12 +563,12 @@ const submitAndWait = async (page: Page, selector: string) => {
     await g.locator('summary:has-text("Ideas")').click();
     await g.locator('button:has-text("Journaling")').click();
     await Promise.all([g.waitForURL(/\/start\?step=4&saved=routines$/), g.click('button:has-text("Add daily routine")')]);
-    await g.waitForSelector("text=Kickoff · Step 4 of 4, part 2 of 3");
+    await g.waitForSelector("text=Getting in the Driver's Seat, step 4 of 4, part 2 of 3");
     await Promise.all([g.waitForURL(/\/start\?step=4&saved=weekly$/), g.click('button:has-text("Add weekly planning time")')]);
     // Pat came in as the accountability partner who finds out, so the third piece is already in place
     await g.waitForSelector("text=Your system is set up.");
     await g.waitForSelector('a:has-text("An accountability partner")');
-    await g.click('a:has-text("Finish and go to Today")');
+    await g.click('a:has-text("Finish and go to the Dashboard")');
     await g.waitForSelector('button:has-text("Save my daily check-in")');
     // for the season checks below: make this month 1 of a season, started 29 days ago, so today is day 30
     {
@@ -850,8 +850,8 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.goto(`${BASE}/coach/${dana.id}`);
     assert.ok(!(await page.content()).includes("E2E-ROLE"), "the role is not visible before the client shares Who I am");
     await dp.goto(`${BASE}/sharing`);
-    await Promise.all([dp.waitForLoadState("networkidle"), dp.click(`button[aria-label^="Share: Who's behind the wheel"]`)]);
-    await dp.waitForSelector(`button[aria-label^="Stop sharing: Who's behind the wheel"]`);
+    await Promise.all([dp.waitForLoadState("networkidle"), dp.click(`button[aria-label^="Share: The Driver's Seat"]`)]);
+    await dp.waitForSelector(`button[aria-label^="Stop sharing: The Driver's Seat"]`);
     await page.goto(`${BASE}/coach/${dana.id}`);
     await page.waitForSelector("text=E2E-ROLE");
     assert.ok(!(await page.content()).includes("E2E-PERSONA"), "persona needs its own tick");
@@ -1002,7 +1002,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await dp.waitForSelector("text=The FORGE Framework: Five Rules for the Road");
     const lib = await dp.locator("main").innerText();
     for (const t of ["What FORGE is", "Future Focused", "Emotionally Anchored", "In practice", "How the five work together", "When emotion takes the wheel"]) assert.ok(lib.toLowerCase().includes(t.toLowerCase()), `Library has ${t}`);
-    assert.ok(!/Jay's Journey|The Rules of the Road|\bJay\b/.test(lib), "the old Library content is gone, and no one from the book is named");
+    assert.ok(!/Jay's Journey|\bJay\b/.test(lib), "the old Library content is gone, and no one from the book is named");
     assert.ok(lib.includes("Questions for the road") && lib.includes("The Flight You Keep Missing"), "the stories' concepts stand on their own as exercises");
     // each rule's full guide teaches from the guide, with the research
     await dp.goto(`${BASE}/forge/f/guide`);

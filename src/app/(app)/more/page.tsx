@@ -4,15 +4,15 @@ import { PageHeader } from "@/components/ui";
 
 const GROUPS: [string, [string, string, string][]][] = [
   ["FORGE", [
-    ["/identity", "1. Who's behind the wheel", "The FORGE framework, applied to you: your seat, how big a turn, the five rules of one driver, and My statement."],
-    ["/assessment", "2. Where I am", "Score the five rules. The goal is a 5 on every one."],
+    ["/identity", "1. The Driver's Seat", "The FORGE framework, applied to you: your seat, how big a turn, the five rules of one driver, and My statement."],
+    ["/assessment", "2. The Rules of the Road", "Score the five rules. The goal is a 5 on every one."],
     ["/tone", "Set the Tone", "Language with power: what you tell yourself, and how to say it to someone else. Private."],
   ]],
   ["Discipline by Design", [
-    ["/focus", "3. My focus", "One or two things to work on, each with a plan for 30 days. That's it."],
-    ["/road", "4. My Design", "Discipline by Design: the routines and people that build your focus into your week."],
+    ["/focus", "3. The Windshield", "One or two things to work on, each with a plan for 30 days. That's it."],
+    ["/road", "4. The Vehicle Controls", "Discipline by Design: the routines and people that build your focus into your week."],
     ["/season", "Season", "Three rounds of 30 days, about 90 days, and the review at the end."],
-    ["/reflect", "Weekly look back", "Did I do what I said I was going to do?"],
+    ["/reflect", "The Mirrors", "Look back at your week. Did I do what I said I was going to do?"],
   ]],
   ["Support", [
     ["/coaching", "Coaching", "Sessions and exercises from your coach."],

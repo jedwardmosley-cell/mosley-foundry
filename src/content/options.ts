@@ -47,7 +47,7 @@ export const CHECKIN_TAGS: OptionList = { status: "draft", options: [
   "In a meeting", "One-on-one", "With my team", "With a client or customer", "At home", "On my own",
 ] };
 
-/** Quick picks for each My Design area. */
+/** Quick picks for each Vehicle Controls area. */
 export const BLUEPRINT_PICKS: Record<string, OptionList> = {
   ROUTINES: { status: "draft", basis: "ch10", options: ["Fifteen minutes before the day starts", "Reading", "Journaling", "Prayer or quiet reflection", "Moving my body", "Reading My statement"] },
   WEEKLY: { status: "draft", basis: "ch10", options: ["Plan the week ahead", "Look back: did I do what I said?", "Check my three signals"] },
@@ -58,7 +58,7 @@ export const BLUEPRINT_PICKS: Record<string, OptionList> = {
   RELATIONSHIPS: { status: "draft", options: ["Reach out to one person in my circle each week", "Coffee conversation, nothing to ask for", "Thank-you note to someone who helped me"] },
   LEARNING: { status: "draft", basis: "ch10", options: ["A book I am working through right now", "A course or certification", "A podcast worth becoming like", "Audit my feed"] },
   LEADERSHIP: { status: "draft", options: ["Every commitment gets an owner, a date, and a follow-up", "Follow up on what my team said they would do", "Delegate one task I am still doing myself"] },
-  REVIEW: { status: "draft", options: ["Quarterly destination check", "Monthly look at My Design", "Re-take the self-assessment every 90 days"] },
+  REVIEW: { status: "draft", options: ["Quarterly destination check", "Monthly look at the Vehicle Controls", "Re-take the self-assessment every 90 days"] },
 };
 
 /** Purpose quick picks per relationship role. */

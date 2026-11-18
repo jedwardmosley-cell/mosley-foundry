@@ -19,10 +19,10 @@ export const SHARE_SCOPES = {
   ASSESSMENT: "FORGE scores",
   PRACTICE: "Practice completion (Done / Partial / Not yet) and cycle progress",
   REFLECTIONS: "Reflections I mark as shared",
-  BLUEPRINT: "My Design: my routines, commitments and people areas (Discipline by Design)",
+  BLUEPRINT: "The Vehicle Controls: my routines, commitments and people areas (Discipline by Design)",
   NETWORK: "Accountability relationships (names, roles, check-in cadence)",
   EQI: "What I'm working on from my feedback, each one I share",
-  IDENTITY: "Who's behind the wheel: my statement, my kind of change and my defining behavior",
+  IDENTITY: "The Driver's Seat: my statement, my kind of change and my defining behavior",
   FEEDBACK: "My feedback: the 360 and EQ-i summaries I choose to share, one at a time",
   PLAN: "My 30-day plan: the moment, the feeling, what I usually do, what I'll do instead, and what makes it hard",
 } as const;

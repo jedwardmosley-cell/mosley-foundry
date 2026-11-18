@@ -35,15 +35,15 @@ export default async function NetworkPage({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      <PageHeader eyebrow="My Design" title="My people">
+      <PageHeader eyebrow="The Vehicle Controls" title="My people">
         {rels.length === 0 ? (pack.nobodyNote ?? "A life built around growth needs people built around growth.") : "The people around your growth, and how often you check in with each one."}
       </PageHeader>
 
       <div className="grid gap-5 md:grid-cols-[1fr_1fr]">
         <Link href="/road" className="card flex flex-col justify-center hover:border-navy/40">
-          <p className="eyebrow">My Design</p>
+          <p className="eyebrow">The Vehicle Controls</p>
           <p className="mt-1 text-[15px]">Your people are one part of your design, with your routines, groups and programs. See the whole map.</p>
-          <span className="mt-2 text-sm btn-link">Open My Design</span>
+          <span className="mt-2 text-sm btn-link">Open the Vehicle Controls</span>
         </Link>
         <Card>
           <p className="eyebrow">Your people</p>
