@@ -46,7 +46,7 @@ export default async function LibraryPage() {
               <header className="flex items-start gap-3.5">
                 <PillarMark k={k} />
                 <div>
-                  <h2 className="font-serif text-[24px] leading-tight text-heading">{line.label}</h2>
+                  <h2 className="h2">{line.label}</h2>
                   <p className="mt-0.5 font-serif text-[18px] italic" style={{ color: "rgb(var(--pc))" }}>{rule}</p>
                 </div>
               </header>

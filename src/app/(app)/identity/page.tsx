@@ -144,7 +144,7 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
           <ul className="mt-2 divide-y divide-line">
             {history.map((h) => (
               <li key={h.id} className="py-2.5">
-                <p className="text-xs text-ink-mute">{fmt(h.startedAt, { month: "short", day: "numeric", year: "numeric" })} to {fmt(h.endedAt, { month: "short", day: "numeric", year: "numeric" })} · {LEVELS[h.level as IdentityLevel]?.name}{h.personaName ? ` · ${h.personaName}` : ""}</p>
+                <p className="text-xs text-ink-mute">{fmt(h.startedAt, { month: "short", day: "numeric", year: "numeric" })} to {fmt(h.endedAt, { month: "short", day: "numeric", year: "numeric" })}, {LEVELS[h.level as IdentityLevel]?.name}{h.personaName ? `, ${h.personaName}` : ""}</p>
                 <p className="text-[15px]">{h.becoming}</p>
                 {h.behavior && <p className="text-sm text-ink-soft">Behavior: {h.behavior}</p>}
               </li>

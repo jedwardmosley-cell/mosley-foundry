@@ -266,7 +266,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
                     <form key={x.id} action={makeAccountabilityPartner} className="flex items-center justify-between gap-3 rounded-2xl bg-ink/[0.04] px-4 py-2.5">
                       <input type="hidden" name="id" value={x.id} />
                       <input type="hidden" name="next" value="/start" />
-                      <span className="text-[15px]">{x.name} <span className="text-sm text-ink-mute">· {RELATIONSHIP_ROLES[x.role as keyof typeof RELATIONSHIP_ROLES] ?? x.role}</span></span>
+                      <span className="text-[15px]">{x.name}<span className="text-sm text-ink-mute">, {RELATIONSHIP_ROLES[x.role as keyof typeof RELATIONSHIP_ROLES] ?? x.role}</span></span>
                       <Submit className="btn-quiet !py-1.5 text-sm">Make {x.name.split(" ")[0]} my partner</Submit>
                     </form>
                   ))}

@@ -38,13 +38,13 @@ export function reviewSets(): ReviewSet[] {
     },
     {
       key: "lines", title: "The five FORGE questions", where: "The Driver's Seat, the five rules", file: "src/content/forgeLines.ts", draft: FORGE_LINES_STATUS === "draft",
-      groups: FORGE_LINES.map((l) => ({ label: `${l.pillar} · ${l.label}`, items: [l.question, `What it is about: ${l.shapes}`, `Hint: ${l.hint}`] })),
+      groups: FORGE_LINES.map((l) => ({ label: `${l.pillar}: ${l.label}`, items: [l.question, `What it is about: ${l.shapes}`, `Hint: ${l.hint}`] })),
     },
     {
       key: "examples", title: "Identity examples", where: "The Driver's Seat, under each question", file: "src/content/identityExamples.ts", draft: IDENTITY_EXAMPLES_STATUS === "draft",
       groups: [
         { label: "The four tests", items: IDENTITY_TESTS },
-        ...EXAMPLE_PEOPLE.map((p) => ({ label: `${p.who} · ${LEVELS[p.level].name.toLowerCase()}`, items: [p.claim, ...FORGE_LINES.map((l) => `${l.pillar}: ${p.lines[l.field]}`)] })),
+        ...EXAMPLE_PEOPLE.map((p) => ({ label: `${p.who}, ${LEVELS[p.level].name.toLowerCase()}`, items: [p.claim, ...FORGE_LINES.map((l) => `${l.pillar}: ${p.lines[l.field]}`)] })),
       ],
     },
     {

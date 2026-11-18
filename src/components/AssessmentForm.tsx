@@ -43,7 +43,7 @@ export function AssessmentForm({ pack, entrepreneur, useEntre, instrument, next,
             <PillarMark k={p.key} size="lg" />
             <span className="min-w-0 flex-1">
               <span className="block h2">{p.name}</span>
-              <span data-pick className="block text-sm text-ink-soft">{defaults ? `${defaults[p.key]} · ${p.anchors.find((a) => a.score === defaults[p.key])?.level ?? ""}` : "Not rated yet"}</span>
+              <span data-pick className="block text-sm text-ink-soft">{defaults ? `${defaults[p.key]}: ${p.anchors.find((a) => a.score === defaults[p.key])?.level ?? ""}` : "Not rated yet"}</span>
             </span>
             <span aria-hidden className="text-ink-mute transition group-open:rotate-90">›</span>
           </summary>
@@ -65,7 +65,7 @@ export function AssessmentForm({ pack, entrepreneur, useEntre, instrument, next,
                   <label key={an.score} className="block cursor-pointer">
                     <input type="radio" name={p.key} value={an.score} data-level={an.level} required defaultChecked={defaults?.[p.key] === an.score} className="peer sr-only" />
                     <span className="flex gap-3 rounded-2xl border border-ink/10 bg-field p-3.5 transition hover:border-navy/40 peer-checked:border-navy peer-checked:bg-navy/[0.06] peer-checked:ring-2 peer-checked:ring-navy/30 peer-focus-visible:ring-4 peer-focus-visible:ring-navy/20">
-                      <span className="w-6 shrink-0 font-serif text-xl text-heading">{an.score}</span>
+                      <span className="w-6 shrink-0 font-extrabold text-xl text-heading">{an.score}</span>
                       <span>
                         <span className="block text-[15px] font-medium text-heading">{an.level}</span>
                         <span className="mt-0.5 block text-[14px] leading-snug text-ink-soft">{an.text}</span>

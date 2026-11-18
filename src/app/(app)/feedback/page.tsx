@@ -40,9 +40,9 @@ export default async function FeedbackList() {
                     <p className="text-[16px] font-medium text-heading">{f.title}</p>
                     <p className="text-sm text-ink-mute">
                       {FEEDBACK_SOURCES[f.source as keyof typeof FEEDBACK_SOURCES] ?? f.source}
-                      {f.takenOn ? ` · ${fmt(f.takenOn, { month: "long", year: "numeric" })}` : ""}
-                      {f._count.priorities ? ` · working on ${f._count.priorities}` : ""}
-                      {f.fileName ? " · file attached" : ""}
+                      {f.takenOn ? `, ${fmt(f.takenOn, { month: "long", year: "numeric" })}` : ""}
+                      {f._count.priorities ? `, working on ${f._count.priorities}` : ""}
+                      {f.fileName ? ", file attached" : ""}
                     </p>
                     <div className="mt-2 flex flex-wrap items-center gap-1.5">
                       <span className="chip">{f.shareCoach ? "Shared with my coach" : "Private"}</span>

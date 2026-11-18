@@ -56,7 +56,7 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
   return (
     <>
       <PageHeader eyebrow="Participant summary" title={v.participant.name}>
-        Shared with you: {v.scopes.length ? v.scopes.map((x) => SHARE_SCOPES[x as ShareScope].split(" (")[0].split(",")[0]).join(" · ") : "nothing yet"}.
+        Shared with you: {v.scopes.length ? v.scopes.map((x) => SHARE_SCOPES[x as ShareScope].split(" (")[0].split(",")[0]).join(", ") : "nothing yet"}.
       </PageHeader>
 
       <div className="grid gap-5 md:grid-cols-2">
@@ -101,13 +101,13 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
         {s.has("PRACTICE") ? (
           <>
             {v.cycle && pos && week && (
-              <p className="mt-3 text-[15px]"><span className="font-medium">{v.cycle.seasonMonth ? `Season month ${v.cycle.seasonMonth} of 3, ` : ""}Day {pos.day}, {week.phase}.</span> {v.cycle.focus}{v.cycle.status === "COMPLETED" && v.cycle.decision ? ` · Day 30 decision: ${DAY30_DECISIONS[v.cycle.decision as keyof typeof DAY30_DECISIONS]}` : ""}</p>
+              <p className="mt-3 text-[15px]"><span className="font-medium">{v.cycle.seasonMonth ? `Season month ${v.cycle.seasonMonth} of 3, ` : ""}Day {pos.day}, {week.phase}.</span> {v.cycle.focus}{v.cycle.status === "COMPLETED" && v.cycle.decision ? `, Day 30 decision: ${DAY30_DECISIONS[v.cycle.decision as keyof typeof DAY30_DECISIONS]}` : ""}</p>
             )}
-            <p className="mt-2 text-sm">Last 30 entries: {practice.done} done · {practice.partial} partial · {practice.notYet} not yet</p>
+            <p className="mt-2 text-sm">Last 30 entries: {practice.done} done, {practice.partial} partial, {practice.notYet} not yet</p>
             {(() => {
               const counts = new Map<string, number>();
               v.practice.forEach((p) => p.tags.forEach((t) => counts.set(t, (counts.get(t) ?? 0) + 1)));
-              return counts.size > 0 ? <p className="mt-1 text-sm muted">Where it showed up: {[...counts].sort((a, b) => b[1] - a[1]).map(([t, n]) => `${t} (${n})`).join(" · ")}</p> : null;
+              return counts.size > 0 ? <p className="mt-1 text-sm muted">Where it showed up: {[...counts].sort((a, b) => b[1] - a[1]).map(([t, n]) => `${t} (${n})`).join(", ")}</p> : null;
             })()}
             <div className="mt-3 flex gap-1">
               {[...v.practice].reverse().map((p) => <span key={p.date} title={`${p.date} ${p.status}`} className={`h-4 flex-1 rounded ${p.status === "DONE" ? PILLAR_FILL[stripPillar].full : p.status === "PARTIAL" ? PILLAR_FILL[stripPillar].part : "bg-line"}`} />)}
@@ -130,7 +130,7 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
           <p className="eyebrow">Upcoming accountability</p>
           {s.has("NETWORK") ? (
             <ul className="mt-3 divide-y divide-line">
-              {v.relationships.map((r) => <li key={r.id} className="py-2 flex justify-between text-[15px]"><span>{r.name} <span className="muted text-sm">· {RELATIONSHIP_ROLES[r.role as keyof typeof RELATIONSHIP_ROLES]}</span></span><span className="text-sm muted">{fmt(r.nextCheckIn)}</span></li>)}
+              {v.relationships.map((r) => <li key={r.id} className="py-2 flex justify-between text-[15px]"><span>{r.name}<span className="muted text-sm">, {RELATIONSHIP_ROLES[r.role as keyof typeof RELATIONSHIP_ROLES]}</span></span><span className="text-sm muted">{fmt(r.nextCheckIn)}</span></li>)}
             </ul>
           ) : <div className="mt-3"><NotShared scope="NETWORK" /></div>}
         </Card>
@@ -141,8 +141,8 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
         {s.has("REFLECTIONS") ? (
           sharedReflections.length || v.weekly.length ? (
             <ul className="mt-3 space-y-3">
-              {v.weekly.map((w) => <li key={w.id} className="rounded-xl bg-paper p-3 text-[15px]"><p className="text-xs text-ink-mute">Week of {fmt(w.weekOf)} · did it: {w.didIt || "-"}</p><p>Built: {w.built}</p><p>Avoided: {w.avoided}</p><p>Next: {w.nextWeek}</p></li>)}
-              {sharedReflections.map((r) => <li key={r.date} className="rounded-xl bg-paper p-3 text-[15px]"><p className="text-xs text-ink-mute">{fmt(r.date)}{r.status ? ` · ${CHECKIN_STATUS[r.status as keyof typeof CHECKIN_STATUS]}` : ""}</p>{r.note && <p>{r.note}</p>}{r.reflection && <p className="text-ink-soft">{r.reflection}</p>}</li>)}
+              {v.weekly.map((w) => <li key={w.id} className="rounded-xl bg-paper p-3 text-[15px]"><p className="text-xs text-ink-mute">Week of {fmt(w.weekOf)}, did it: {w.didIt || "-"}</p><p>Built: {w.built}</p><p>Avoided: {w.avoided}</p><p>Next: {w.nextWeek}</p></li>)}
+              {sharedReflections.map((r) => <li key={r.date} className="rounded-xl bg-paper p-3 text-[15px]"><p className="text-xs text-ink-mute">{fmt(r.date)}{r.status ? `, ${CHECKIN_STATUS[r.status as keyof typeof CHECKIN_STATUS]}` : ""}</p>{r.note && <p>{r.note}</p>}{r.reflection && <p className="text-ink-soft">{r.reflection}</p>}</li>)}
             </ul>
           ) : <p className="mt-2 text-sm muted">Reflection sharing is on, but no individual entries are marked shared.</p>
         ) : <div className="mt-3"><NotShared scope="REFLECTIONS" /></div>}
@@ -151,7 +151,7 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
       {s.has("BLUEPRINT") && v.commitments.length > 0 && (
         <Card className="mt-5">
           <p className="eyebrow">The Vehicle Controls</p>
-          <ul className="mt-3 space-y-1 text-[15px]">{v.commitments.map((c) => <li key={c.id}>{c.title}{c.when ? <span className="muted"> · {c.when}</span> : null}</li>)}</ul>
+          <ul className="mt-3 space-y-1 text-[15px]">{v.commitments.map((c) => <li key={c.id}>{c.title}{c.when ? <span className="muted">, {c.when}</span> : null}</li>)}</ul>
         </Card>
       )}
 
@@ -160,7 +160,7 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
           <p className="eyebrow">The Driver's Seat</p>
           {v.identity ? (
             <>
-              <p className="mt-2 text-sm">{v.identity.role && <span className="font-medium">As {withArticle(v.identity.role)} · </span>}<span className="chip">{LEVELS[v.identity.level as IdentityLevel].name}</span> <span className="text-ink-mute">The client chose this kind of change.</span></p>
+              <p className="mt-2 text-sm">{v.identity.role && <span className="font-medium">As {withArticle(v.identity.role)}, </span>}<span className="chip">{LEVELS[v.identity.level as IdentityLevel].name}</span> <span className="text-ink-mute">The client chose this kind of change.</span></p>
               <p className="mt-3 font-serif text-[16px] leading-relaxed">{v.identity.becoming}</p>
               {v.identity.situation && <p className="mt-2 text-[15px]"><span className="text-ink-mute">Why now: </span>{v.identity.situation}</p>}
               {v.identity.behavior && <p className="mt-1 text-[15px]"><span className="text-ink-mute">Behavior that shows it: </span>{v.identity.behavior}</p>}
@@ -175,7 +175,7 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
               {(() => {
                 const a = v.practice.filter((p) => p.identityActed);
                 const yes = a.filter((p) => p.identityActed === "YES").length, partly = a.filter((p) => p.identityActed === "PARTLY").length;
-                return a.length ? <p className="mt-3 text-sm">Showed up as who they are, last {a.length} answers: {yes} yes · {partly} partly · {a.length - yes - partly} not yet</p> : null;
+                return a.length ? <p className="mt-3 text-sm">Showed up as who they are, last {a.length} answers: {yes} yes, {partly} partly, {a.length - yes - partly} not yet</p> : null;
               })()}
             </>
           ) : <p className="mt-2 text-sm muted">Sharing is on, but the client has not claimed who they are yet.</p>}
@@ -189,7 +189,7 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
             <ul className="mt-3 space-y-4">
               {v.feedback.map((f) => (
                 <li key={f.id}>
-                  <p className="text-[15px] font-medium">{f.title}{f.takenOn ? <span className="font-normal text-ink-mute"> · {f.takenOn.toLocaleDateString("en-US", { month: "long", year: "numeric" })}</span> : null}</p>
+                  <p className="text-[15px] font-medium">{f.title}{f.takenOn ? <span className="font-normal text-ink-mute">, {f.takenOn.toLocaleDateString("en-US", { month: "long", year: "numeric" })}</span> : null}</p>
                   {f.summary && <p className="mt-1 whitespace-pre-line font-serif text-[16px] leading-relaxed">{f.summary}</p>}
                   {(JSON.parse(f.pillars || "[]") as string[]).length > 0 && <p className="mt-1 text-sm text-ink-mute">Linked to FORGE {(JSON.parse(f.pillars) as string[]).join(", ")}</p>}
                   {f.fileName && <a href={`/feedback/${f.id}/file`} target="_blank" rel="noopener" className="mt-1 inline-block text-sm btn-link">{f.fileName}</a>}
@@ -237,7 +237,7 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
           </form>
           {work.exercises.length > 0 && (
             <ul className="mt-5 divide-y divide-line">
-              {work.exercises.map((x) => <li key={x.id} className="py-2 text-[15px]"><span className="font-medium">{x.title}</span> <span className="muted text-sm">· {x.status.toLowerCase().replace("_", " ")}</span>{x.response && <p className="text-sm text-ink-soft mt-1">{x.response}</p>}</li>)}
+              {work.exercises.map((x) => <li key={x.id} className="py-2 text-[15px]"><span className="font-medium">{x.title}</span><span className="muted text-sm">, {x.status.toLowerCase().replace("_", " ")}</span>{x.response && <p className="text-sm text-ink-soft mt-1">{x.response}</p>}</li>)}
             </ul>
           )}
         </Card>

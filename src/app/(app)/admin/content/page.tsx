@@ -15,7 +15,7 @@ export default async function ContentReview() {
     groups: src
       ? (["F", "O", "R", "G", "E"] as const).filter((k) => src.cards[k]).map((k) => {
           const c = src.cards[k]!;
-          return { label: `${k} · ${c.rule}`, items: [c.means, `From the road: ${c.road} ${c.roadMore}`.trim(), `Why it works: ${c.why} ${c.whyMore}`.trim(), `Sources: ${c.sources}`, `How it connects: ${c.connects}`, `Before you write: ${[c.beforeIntro, ...c.before].filter(Boolean).join(" ")}`] };
+          return { label: `${k}: ${c.rule}`, items: [c.means, `From the road: ${c.road} ${c.roadMore}`.trim(), `Why it works: ${c.why} ${c.whyMore}`.trim(), `Sources: ${c.sources}`, `How it connects: ${c.connects}`, `Before you write: ${[c.beforeIntro, ...c.before].filter(Boolean).join(" ")}`] };
         })
       : [{ label: "Not installed", items: ["Upload forge-source.md at /setup to see the cards here."] }],
   };

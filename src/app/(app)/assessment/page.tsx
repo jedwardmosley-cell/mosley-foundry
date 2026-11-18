@@ -63,7 +63,7 @@ export default async function AssessmentPage({ searchParams }: { searchParams: P
             {past.map((a) => (
               <li key={a.id} className="py-2 flex justify-between">
                 <Link href={`/assessment/${a.id}`} className="btn-link">{fmt(a.completedAt, { month: "short", day: "numeric", year: "numeric" })}</Link>
-                <span className="muted text-sm">{(() => { const sc = scoresFrom(a); return PILLAR_KEYS.map((k) => `${k} ${sc[k]}`).join(" · "); })()}</span>
+                <span className="muted text-sm">{(() => { const sc = scoresFrom(a); return PILLAR_KEYS.map((k) => `${k} ${sc[k]}`).join(", "); })()}</span>
               </li>
             ))}
           </ul>

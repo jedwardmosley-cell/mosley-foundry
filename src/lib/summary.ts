@@ -15,7 +15,7 @@ export async function developmentSummary(userId: string, name: string) {
   const { pack } = await getContent();
   const L: string[] = [];
   const pName = (k: string) => pack.pillars.find((p) => p.key === k)?.name ?? k;
-  L.push(`# Development summary: ${name}`, `Both Hands on the Wheel · generated ${fmt(new Date(), { month: "long", day: "numeric", year: "numeric" })}`, "");
+  L.push(`# Development summary: ${name}`, `Both Hands on the Wheel, generated ${fmt(new Date(), { month: "long", day: "numeric", year: "numeric" })}`, "");
   if (d.profile) {
     L.push(`**Pathway:** ${PATHWAYS[d.profile.pathway as keyof typeof PATHWAYS]?.name}`);
     if (d.profile.priorityPillar) L.push(`**First focus rule:** ${pName(d.profile.priorityPillar)}`);

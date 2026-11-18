@@ -28,7 +28,7 @@ export default async function AdminHome() {
         {cohorts.map((c) => (
           <Link key={c.id} href={`/admin/cohorts/${c.id}`} className="card block hover:border-navy/40">
             <div className="flex justify-between gap-3"><h2 className="h3">{c.name}</h2><span className="text-sm muted">{c._count.members} enrolled</span></div>
-            <p className="text-sm muted mt-1">Leading Others · {DELIVERY_FORMATS[c.deliveryFormat as keyof typeof DELIVERY_FORMATS].label} · starts {fmt(c.startDate, { month: "long", day: "numeric", year: "numeric" })}</p>
+            <p className="text-sm muted mt-1">Leading Others, {DELIVERY_FORMATS[c.deliveryFormat as keyof typeof DELIVERY_FORMATS].label}, starts {fmt(c.startDate, { month: "long", day: "numeric", year: "numeric" })}</p>
           </Link>
         ))}
       </div>

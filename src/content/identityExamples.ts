@@ -155,7 +155,7 @@ export const afterIAm = (s: string) => s.replace(/^I am\s+/, "");
 const KIND_NAME: Record<string, string> = { CORE: "core alignment", ROLE: "role transition", REINVENT: "reinvention" };
 
 export function exampleGroups(field: LineField | "claim", pathway: PathwayKey, role = "", level = "") {
-  return peopleFor(pathway, role, level).map((p) => ({ label: `${p.who} · ${KIND_NAME[p.level]}`, options: [afterIAm(field === "claim" ? p.claim : p.lines[field])] }));
+  return peopleFor(pathway, role, level).map((p) => ({ label: `${p.who}, ${KIND_NAME[p.level]}`, options: [afterIAm(field === "claim" ? p.claim : p.lines[field])] }));
 }
 
 /** Placeholder text for a box: the closest person's statement. */

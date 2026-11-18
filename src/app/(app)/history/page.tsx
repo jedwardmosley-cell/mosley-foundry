@@ -62,9 +62,9 @@ export default async function HistoryPage() {
               const s = practiceSummary(c.checkIns);
               return (
                 <li key={c.id} className="rounded-xl bg-paper p-3">
-                  <p className="font-medium">{pack.pillars.find((p) => p.key === c.pillar)?.name} · {fmt(c.startDate, { month: "short", day: "numeric", year: "numeric" })}{c.seasonMonth ? ` · season month ${c.seasonMonth}` : ""}</p>
+                  <p className="font-medium">{pack.pillars.find((p) => p.key === c.pillar)?.name}, {fmt(c.startDate, { month: "short", day: "numeric", year: "numeric" })}{c.seasonMonth ? `, season month ${c.seasonMonth}` : ""}</p>
                   {c.focus && <p className="text-sm text-ink-soft">{c.focus}</p>}
-                  <p className="text-sm mt-1">{s.done} done · {s.partial} partial · {s.notYet} not yet · {c.status === "COMPLETED" ? DAY30_DECISIONS[c.decision as keyof typeof DAY30_DECISIONS] : c.status.toLowerCase()}</p>
+                  <p className="text-sm mt-1">{s.done} done, {s.partial} partial, {s.notYet} not yet, {c.status === "COMPLETED" ? DAY30_DECISIONS[c.decision as keyof typeof DAY30_DECISIONS] : c.status.toLowerCase()}</p>
                   {c.finalReview && <p className="mt-2 text-[15px]">{c.finalReview}</p>}
                 </li>
               );
@@ -80,7 +80,7 @@ export default async function HistoryPage() {
           {reflections.map((r) => (
             <li key={r.id} className="py-3">
               <div className="flex items-center justify-between gap-3">
-                <span className="text-sm font-medium">{fmt(r.date, { weekday: "short", month: "short", day: "numeric" })} · {CHECKIN_STATUS[r.status as keyof typeof CHECKIN_STATUS]}</span>
+                <span className="text-sm font-medium">{fmt(r.date, { weekday: "short", month: "short", day: "numeric" })}, {CHECKIN_STATUS[r.status as keyof typeof CHECKIN_STATUS]}</span>
                 <span className="flex items-center gap-3">
                   <Privacy shared={r.shared} />
                   {hasCoach && (

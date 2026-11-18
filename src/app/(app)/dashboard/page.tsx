@@ -181,7 +181,7 @@ function Tile({ href, icon, label, value, word, tone = "text-ink-mute", children
   return (
     <Link href={href} className={`tile block transition hover:-translate-y-0.5 ${className}`}>
       <p className="flex items-center gap-2.5 text-[13px] text-ink-soft"><IconBadge name={icon} className="!h-7 !w-7 [&>svg]:!h-4 [&>svg]:!w-4" />{label}<Icon name="arrow" className="ml-auto h-4 w-4 text-ink-mute" /></p>
-      {value !== undefined && <p className="mt-4 font-serif text-[44px] leading-none tracking-[-0.02em] text-heading">{value}</p>}
+      {value !== undefined && <p className="mt-4 font-extrabold text-[44px] leading-none tracking-[-0.02em] text-heading">{value}</p>}
       {word && <p className={`mt-1.5 text-[13px] ${tone}`}>{word}</p>}
       {children}
     </Link>

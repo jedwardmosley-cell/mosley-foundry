@@ -21,7 +21,7 @@ export default async function CoachingPage() {
       <div className="space-y-4">
         {exercises.map((x) => (
           <Card key={x.id}>
-            <p className="text-xs text-ink-mute">From {x.coach.name}{x.dueOn ? ` · due ${fmt(x.dueOn)}` : ""}</p>
+            <p className="text-xs text-ink-mute">From {x.coach.name}{x.dueOn ? `, due ${fmt(x.dueOn)}` : ""}</p>
             <h3 className="h3 mt-1">{x.title}</h3>
             {x.instructions && <p className="mt-2 text-[15px] whitespace-pre-wrap">{x.instructions}</p>}
             <form action={respondExercise} className="mt-4 space-y-3">
@@ -43,7 +43,7 @@ export default async function CoachingPage() {
       <div className="space-y-4">
         {sessions.map((s) => (
           <Card key={s.id}>
-            <p className="h3">{fmt(s.scheduledAt, { weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" })} · {s.coach.name}</p>
+            <p className="h3">{fmt(s.scheduledAt, { weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" })}, {s.coach.name}</p>
             {s.agenda && <p className="mt-2 text-[15px]"><span className="text-ink-mute">Agenda: </span>{s.agenda}</p>}
             {s.commitments && <p className="mt-2 text-[15px]"><span className="text-ink-mute">Agreed commitments: </span>{s.commitments}</p>}
             <form action={saveSessionPrep} className="mt-4 space-y-3">

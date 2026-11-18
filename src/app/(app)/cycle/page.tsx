@@ -32,7 +32,7 @@ export default async function CyclePage({ searchParams }: { searchParams: Promis
     const month = season ? nextMonth(season.cycles.length) : null;
     return (
       <>
-        <PageHeader eyebrow="Discipline by Design · 30 days" title={season ? (month ? `Month ${month} of my season` : "My season is done") : "No active cycle"} />
+        <PageHeader eyebrow="Discipline by Design, 30 days" title={season ? (month ? `Month ${month} of my season` : "My season is done") : "No active cycle"} />
         {season && month && <Empty title={`Start month ${month}`} href="/cycle/new" cta="Start">Pick the rule and the behavior for the next 30 days.</Empty>}
         {season && !month && <Empty title="Review your season" href="/season" cta="Open Wheel Alignment">Three months are done. Look back, then decide what comes next.</Empty>}
         {!season && <Empty title="Choose your focus" href="/focus" cta="Open the Windshield">One or two things to work on, each for 30 days. That's it.</Empty>}
@@ -61,7 +61,7 @@ export default async function CyclePage({ searchParams }: { searchParams: Promis
 
   return (
     <>
-      <PageHeader eyebrow={cycle.seasonMonth ? `Discipline by Design · Season, month ${cycle.seasonMonth} of ${SEASON_LENGTH}` : "Discipline by Design · 30 days"} title={`Day ${pos.day} of 30`}>
+      <PageHeader eyebrow={cycle.seasonMonth ? `Season, month ${cycle.seasonMonth} of ${SEASON_LENGTH}` : "Discipline by Design, 30 days"} title={`Day ${pos.day} of 30`}>
         <span className="inline-flex items-center gap-2"><PillarMark k={p.key} size="sm" /> {cycle.title || cycle.focus || p.name}</span>
         {others > 0 && <Link href="/focus" className="ml-3 text-sm btn-link">Both focuses</Link>}
         {cycle.seasonMonth && <Link href="/season" className="ml-3 text-sm btn-link">See the season</Link>}
@@ -99,7 +99,7 @@ export default async function CyclePage({ searchParams }: { searchParams: Promis
           })}
         </div>
         <div className="mt-3 flex items-center justify-between text-sm">
-          <span className="muted">{sum.done} done · {sum.partial} partial · {sum.notYet} not yet</span>
+          <span className="muted">{sum.done} done, {sum.partial} partial, {sum.notYet} not yet</span>
           {!pos.finished && (kickoffStep
             ? <Link href={`/start?step=${kickoffStep}`} className="btn-link">Next: {JOURNEY_STEPS[kickoffStep - 1].next.toLowerCase()}</Link>
             : <Link href="/dashboard" className="btn-link">Check in today</Link>)}
@@ -109,7 +109,7 @@ export default async function CyclePage({ searchParams }: { searchParams: Promis
       {weeks.filter((w) => w.week === pos.week && !pos.finished).map((w) => (
         <Card key={w.week} className="mt-5 border-navy/40">
           <p className="eyebrow">This week</p>
-          <h2 className="h2 mt-1">Week {w.week} · {w.phase}</h2>
+          <h2 className="h2 mt-1">Week {w.week}: {w.phase}</h2>
           <p className="mt-2 text-[15px] leading-relaxed">{w.work}</p>
           <WeekForm cycleId={cycle.id} week={w.week} status={wstat[w.week]} note={notes[w.week]} />
         </Card>
@@ -124,7 +124,7 @@ export default async function CyclePage({ searchParams }: { searchParams: Promis
               <li key={w.week}>
                 <details className="px-5 py-3.5">
                   <summary className={`cursor-pointer flex items-center justify-between gap-3 ${past ? "" : "text-ink-mute"}`}>
-                    <span className="text-[15px]">Week {w.week} · {w.phase}</span>
+                    <span className="text-[15px]">Week {w.week}: {w.phase}</span>
                     <span className="text-xs text-ink-mute">{past ? (st ? CHECKIN_STATUS[st] : "Not logged") : "Coming up"}</span>
                   </summary>
                   <p className="mt-2 text-sm text-ink-soft">{w.work}</p>
@@ -141,7 +141,7 @@ export default async function CyclePage({ searchParams }: { searchParams: Promis
                 <ReadTheBook kind="deeper" className="mt-2" />
                 {partner && (pos.day >= 30 || pos.finished) && !sentKinds.has("day30") && !skipped && (
                   <div className="mt-4 rounded-2xl bg-ink/[0.04] px-4 py-4">
-                    <p className="font-serif text-[20px] leading-tight text-heading">Send your 30 days to {partner.name.split(" ")[0]}?</p>
+                    <p className="font-sans font-extrabold text-[20px] leading-tight text-heading">Send your 30 days to {partner.name.split(" ")[0]}?</p>
                     <p className="mt-2 whitespace-pre-line text-[15px]">{day30Text}</p>
                     <div className="mt-3 flex items-center gap-5">
                       <ShareSend message={day30Text} to={partner.id} email={partner.email} kind="day30" label="Send" />
@@ -191,7 +191,7 @@ function PastCycles({ past }: { past: { id: string; pillar: string; startDate: D
       <ul className="mt-2 divide-y divide-line">
         {past.map((c) => (
           <li key={c.id} className="py-2 flex justify-between text-[15px]">
-            <span>{c.pillar} · {fmt(c.startDate, { month: "short", day: "numeric", year: "numeric" })}</span>
+            <span>{c.pillar}, {fmt(c.startDate, { month: "short", day: "numeric", year: "numeric" })}</span>
             <span className="muted text-sm">{c.status === "COMPLETED" ? DAY30_DECISIONS[c.decision as keyof typeof DAY30_DECISIONS] ?? "Completed" : "Stopped"}</span>
           </li>
         ))}

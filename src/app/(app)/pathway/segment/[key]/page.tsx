@@ -20,7 +20,7 @@ export default async function SegmentPage({ params }: { params: Promise<{ key: s
   const leading = key === "04" ? pack.discipline.leadingOthers : [];
   return (
     <>
-      <PageHeader eyebrow={`Leading Others · Segment ${s.key}`} title={s.title}>{s.summary}</PageHeader>
+      <PageHeader eyebrow={`Leading Others, Segment ${s.key}`} title={s.title}>{s.summary}</PageHeader>
       <Card>
         <p className="eyebrow">Connected FORGE principles</p>
         <ul className="mt-3 space-y-3">

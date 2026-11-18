@@ -19,12 +19,12 @@ export default async function Reports() {
           <Card key={r.cohort.id}>
             <h2 className="h3">{r.cohort.name}</h2>
             <dl className="mt-3 grid grid-cols-3 gap-3 text-center">
-              <div className="rounded-xl bg-paper p-3"><dd className="font-serif text-2xl">{r.n}</dd><dt className="text-xs muted">enrolled</dt></div>
-              <div className="rounded-xl bg-paper p-3"><dd className="font-serif text-2xl">{r.completedPct == null ? "·" : `${r.completedPct}%`}</dd><dt className="text-xs muted">completed all segments</dt></div>
-              <div className="rounded-xl bg-paper p-3"><dd className="font-serif text-2xl">{r.reinforcingPct == null ? "·" : `${r.reinforcingPct}%`}</dd><dt className="text-xs muted">active in reinforcement</dt></div>
+              <div className="rounded-xl bg-paper p-3"><dd className="font-sans font-extrabold text-2xl text-heading">{r.n}</dd><dt className="text-xs muted">enrolled</dt></div>
+              <div className="rounded-xl bg-paper p-3"><dd className="font-sans font-extrabold text-2xl text-heading">{r.completedPct == null ? "None yet" : `${r.completedPct}%`}</dd><dt className="text-xs muted">completed all segments</dt></div>
+              <div className="rounded-xl bg-paper p-3"><dd className="font-sans font-extrabold text-2xl text-heading">{r.reinforcingPct == null ? "None yet" : `${r.reinforcingPct}%`}</dd><dt className="text-xs muted">active in reinforcement</dt></div>
             </dl>
             <ul className="mt-4 grid grid-cols-6 gap-2 text-center text-xs">
-              {r.bySegment.map((s) => <li key={s.key} className="rounded-lg border border-line p-2"><span className="block font-serif text-ink-mute">{s.key}</span>{s.pct == null ? "·" : `${s.pct}%`}</li>)}
+              {r.bySegment.map((s) => <li key={s.key} className="rounded-lg border border-line p-2"><span className="block font-bold text-ink-mute">{s.key}</span>{s.pct == null ? "None yet" : `${s.pct}%`}</li>)}
             </ul>
             {r.small && <p className="mt-3 text-xs text-ink-mute">Fewer than {MIN_GROUP} participants: percentages hidden.</p>}
           </Card>

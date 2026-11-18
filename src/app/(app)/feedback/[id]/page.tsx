@@ -69,7 +69,7 @@ export default async function FeedbackEntry({ params, searchParams }: { params: 
     <>
       <Link href="/feedback" className="text-sm btn-link">My feedback</Link>
       <PageHeader title={f.title}>
-        {FEEDBACK_SOURCES[f.source as keyof typeof FEEDBACK_SOURCES] ?? f.source}{f.takenOn ? ` · ${fmt(f.takenOn, { month: "long", year: "numeric" })}` : ""} · {f.shareCoach ? "Shared with my coach" : "Private"}
+        {FEEDBACK_SOURCES[f.source as keyof typeof FEEDBACK_SOURCES] ?? f.source}{f.takenOn ? `, ${fmt(f.takenOn, { month: "long", year: "numeric" })}` : ""}, {f.shareCoach ? "Shared with my coach" : "Private"}
       </PageHeader>
 
       <Card>
@@ -99,8 +99,8 @@ export default async function FeedbackEntry({ params, searchParams }: { params: 
                 <div className="min-w-0 flex-1">
                   <h3 className="text-[16px] font-medium leading-snug text-heading">{e.label}</h3>
                   <p className="mt-0.5 text-sm text-ink-soft">
-                    {pillarName || "No rule yet"} · {e.practice ? <>Practice: {e.practice}</> : "No practice yet"}
-                    {shared && <> · <span className="text-ink-mute">Shared with my coach</span></>}
+                    {pillarName || "No rule yet"}, {e.practice ? <>Practice: {e.practice}</> : "No practice yet"}
+                    {shared && <>, <span className="text-ink-mute">Shared with my coach</span></>}
                   </p>
                 </div>
               </div>

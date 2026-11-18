@@ -48,11 +48,11 @@ export default async function CoachHome() {
               <div className="mt-3 text-[15px] space-y-1.5">
                 <p className="flex items-center gap-2">{pk ? <><PillarMark k={pk} size="sm" /> {pack.pillars.find((p) => p.key === pk)?.name}</> : <span className="muted">Focus not shared</span>}</p>
                 {ps && (v.cycle?.status === "ACTIVE"
-                  ? <p className="text-sm font-medium">{v.cycle.seasonMonth ? `Season month ${v.cycle.seasonMonth} of ${SEASON_LENGTH} · ` : ""}Day {cyclePosition(v.cycle.startDate).day} of 30</p>
+                  ? <p className="text-sm font-medium">{v.cycle.seasonMonth ? `Season month ${v.cycle.seasonMonth} of ${SEASON_LENGTH}, ` : ""}Day {cyclePosition(v.cycle.startDate).day} of 30</p>
                   : <p className="text-sm muted">No 30 days under way</p>)}
-                {ps ? <p className="text-sm">Practice, last 30 days: {ps.done} done · {ps.partial} partial · {ps.notYet} not yet</p> : <p className="text-sm muted">Practice not shared</p>}
+                {ps ? <p className="text-sm">Practice, last 30 days: {ps.done} done, {ps.partial} partial, {ps.notYet} not yet</p> : <p className="text-sm muted">Practice not shared</p>}
               </div>
-              {flags.length > 0 && <ul className="mt-3 space-y-1">{flags.map((f) => <li key={f} className="text-sm text-alert">· {f}</li>)}</ul>}
+              {flags.length > 0 && <ul className="mt-3 space-y-1 list-disc pl-5">{flags.map((f) => <li key={f} className="text-sm text-alert">{f}</li>)}</ul>}
             </Link>
           );
         })}
