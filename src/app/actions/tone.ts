@@ -104,12 +104,15 @@ export async function practiceConversation(fd: FormData) {
   redirect(`/companion/${c.id}`);
 }
 
-/** Keep a line in the client's own catalog, sorted by the three Cs. */
+/** Keep a power statement in the client's Glove Box, sorted by the three Cs. */
 export async function keepToneLine(fd: FormData) {
   const u = await participant();
-  const d = parse(z.object({ line: z.string().trim().min(2).max(300), kind: z.enum(["CLAIM", "CONFIRM", "CONDEMN"]), entry: z.string().optional() }), fd);
+  const d = parse(z.object({ line: z.string().trim().min(2).max(300), kind: z.enum(["CLAIM", "CONFIRM", "CONDEMN"]), entry: z.string().optional(), back: z.string().optional() }), fd);
   await db.toneLine.create({ data: { userId: u.id, text: d.line, kind: d.kind } });
   revalidatePath("/tone");
+  revalidatePath("/glovebox");
+  // Kept from the Glove Box itself: stay there. Kept from a reading in Set the Tone: stay on the reading.
+  if (d.back === "glovebox") redirect("/glovebox?kept=1");
   redirect(`/tone?kept=1${d.entry ? `&entry=${d.entry}` : ""}#keep`);
 }
 
@@ -118,6 +121,7 @@ export async function removeToneLine(fd: FormData) {
   const { id } = parse(z.object({ id: z.string() }), fd);
   await db.toneLine.deleteMany({ where: { id, userId: u.id } });
   revalidatePath("/tone");
+  revalidatePath("/glovebox");
 }
 
 export async function deleteToneEntry(fd: FormData) {

@@ -12,6 +12,7 @@ const PARTICIPANT_NAV: NavItem[] = [
   { href: "/identity", label: "1. The Driver's Seat", group: "FORGE" },
   { href: "/assessment", label: "2. The Rules of the Road", group: "FORGE" },
   { href: "/tone", label: "Set the Tone", mobile: true, tabOrder: 4, group: "FORGE" },
+  { href: "/glovebox", label: "The Glove Box", group: "FORGE" },
   { href: "/focus", label: "3. The Windshield", group: "Discipline by Design" },
   { href: "/road", label: "4. The Vehicle Controls", group: "Discipline by Design" },
   { href: "/reflect", label: "The Mirrors", group: "Discipline by Design" },

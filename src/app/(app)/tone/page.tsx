@@ -6,31 +6,20 @@ import { fmt, addDays, ymd } from "@/lib/dates";
 import { consoleExercise, findClosedDoors, tally, bookQuestions, type DoorHit } from "@/lib/tone";
 import { getContent } from "@/content";
 import { aiAvailable, type ToneReading, type ConversationReading } from "@/lib/ai";
-import { readSelfTalk, prepConversation, practiceConversation, keepToneLine, removeToneLine, deleteToneEntry, setToneReadsWriting, setToneAudit } from "@/app/actions/tone";
+import { readSelfTalk, prepConversation, practiceConversation, keepToneLine, deleteToneEntry, setToneReadsWriting, setToneAudit } from "@/app/actions/tone";
 
 const fmtDay = (d: Date) => fmt(d, { weekday: "long", month: "short", day: "numeric" });
 import { PageHeader, Card, PillarMark } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 import { DictationHint } from "@/components/Picks";
 import { FORGE_LINES } from "@/content/forgeLines";
+import { THREE_CS, type ThreeC } from "@/content/threeCs";
+import { InTheBook } from "@/components/InTheBook";
 import type { PillarKey } from "@/content/types";
 
 export const metadata = { title: "Set the Tone" };
 
-const THREE_CS = {
-  CLAIM: { name: "Claim", line: "A victory, a milestone or an outcome I'm going after", example: "I'm leading the team that hits this quarter's number." },
-  CONFIRM: { name: "Confirm", line: "A belief about what I'm capable of", example: "I stay calm when a decision gets challenged." },
-  CONDEMN: { name: "Condemn", line: "The negativity or the roadblock that would stop me", example: "Old doubts don't get a vote on today." },
-} as const;
-
-/** The book's own words for an exercise, folded under a tap. Read from the licensed content at runtime. */
-const InTheBook = ({ lines }: { lines: string[] }) => lines.length ? (
-  <details className="mt-3">
-    <summary className="cursor-pointer text-sm text-link">In the book</summary>
-    <div className="mt-2 border-l-4 border-lane pl-4 space-y-1.5 text-[15px] text-ink">{lines.map((t) => <p key={t}>{t}</p>)}</div>
-  </details>
-) : null;
-type C = keyof typeof THREE_CS;
+type C = ThreeC;
 
 const Label = ({ children, gold = false }: { children: React.ReactNode; gold?: boolean }) => (
   <p className={`text-[13px] font-bold ${gold ? "text-gold" : "text-ink-mute"}`}>{children}</p>
@@ -235,7 +224,7 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
 
           {self?.keep && (
             <Card>
-              <h2 className="h3">A line to keep</h2>
+              <h2 className="h3">A power statement to keep</h2>
               <form action={keepToneLine} className="mt-3 space-y-3">
                 <input type="hidden" name="entry" value={current.id} />
                 <input name="line" defaultValue={self.keep.text} maxLength={300} className="input" aria-label="Line to keep" />
@@ -243,9 +232,10 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
                   <select name="kind" defaultValue={self.keep.kind} className="input !w-auto" aria-label="Which C">
                     {(Object.keys(THREE_CS) as C[]).map((k) => <option key={k} value={k}>{THREE_CS[k].name}</option>)}
                   </select>
-                  <Submit className="btn-quiet">Keep it</Submit>
+                  <Submit className="btn-quiet">Put it in the Glove Box</Submit>
                 </div>
                 <p className="text-xs text-ink-mute">Change the words until they sound like you.</p>
+                {sp.kept && <p role="status" className="notice">In your Glove Box. <Link href="/glovebox" className="btn-link">Open it</Link></p>}
               </form>
             </Card>
           )}
@@ -364,44 +354,12 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
       </section>
 
       <section id="keep" className="mt-10 scroll-mt-24">
-        <h2 className="h2">My lines</h2>
-        <p className="mt-1 text-[15px] text-ink-soft">Your own collection of lines worth keeping: something you read, something someone said to you, or a rewrite from above that landed. Read them before a moment that matters, so your words are already set when you get there.</p>
-        <p className="mt-2 text-[15px] text-ink-soft">To decide if a line is worth keeping, test it against the three Cs. A good line does at least one of them:</p>
-        <InTheBook lines={consoleExercise(pack.chapters, "catalog")} />
-        {sp.kept && <p role="status" className="notice mt-3">Kept.</p>}
-        <div className="mt-3 space-y-3">
-          {(Object.keys(THREE_CS) as C[]).map((k) => {
-            const mine = lines.filter((l) => l.kind === k);
-            return (
-              <Card key={k}>
-                <p className="text-sm"><span className="font-medium text-heading">{THREE_CS[k].name}.</span> <span className="text-ink-soft">{THREE_CS[k].line}</span></p>
-                {mine.length === 0 && <p className="mt-1.5 text-sm text-ink-mute">For example: <span className="italic">&ldquo;{THREE_CS[k].example}&rdquo;</span> Nothing kept here yet.</p>}
-                {mine.length > 0 && (
-                  <ul className="mt-2 divide-y divide-line/60">
-                    {mine.map((l) => (
-                      <li key={l.id} className="flex items-start justify-between gap-3 py-2">
-                        <span className="font-serif text-[16px] leading-snug text-heading">{l.text}</span>
-                        <form action={removeToneLine}><input type="hidden" name="id" value={l.id} /><button className="text-xs text-ink-mute hover:text-alert" aria-label={`Remove ${l.text}`}>Remove</button></form>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </Card>
-            );
-          })}
-          <details className="card">
-            <summary className="cursor-pointer text-sm text-link">Add a line of your own</summary>
-            <form action={keepToneLine} className="mt-3 space-y-3">
-              <input name="line" required maxLength={300} className="input" aria-label="Your line" placeholder="Something you read, heard or told yourself that's worth keeping" />
-              <div className="flex flex-wrap items-center gap-3">
-                <select name="kind" defaultValue="CONFIRM" className="input !w-auto" aria-label="Which C">
-                  {(Object.keys(THREE_CS) as C[]).map((k) => <option key={k} value={k}>{THREE_CS[k].name}</option>)}
-                </select>
-                <Submit className="btn-quiet">Keep it</Submit>
-              </div>
-            </form>
-          </details>
-        </div>
+        <Link href="/glovebox" className="card block transition hover:bg-ink/[0.03]">
+          <p className="flex items-center justify-between"><span className="h3">The Glove Box</span><span className="text-sm text-link">Open</span></p>
+          <p className="mt-1 text-[15px] text-ink-soft">{lines.length ? `${lines.length} power ${lines.length === 1 ? "statement" : "statements"} kept within reach, sorted by claim, confirm and condemn.` : "Where your power statements go: lines that claim, confirm or condemn, kept within reach. Nothing in it yet."}</p>
+          {lines[0] && <p className="mt-2 font-serif text-[17px] leading-snug text-heading">&ldquo;{lines[0].text}&rdquo;</p>}
+          {sp.kept && !current && <p role="status" className="notice mt-3">In your Glove Box.</p>}
+        </Link>
       </section>
       </>)}
 

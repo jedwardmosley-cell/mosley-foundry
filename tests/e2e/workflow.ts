@@ -446,12 +446,16 @@ const submitAndWait = async (page: Page, selector: string) => {
     // the three-day audit counts it
     const audit = page.locator("section:has(h2:has-text('Three-day language audit'))");
     assert.ok((await audit.innerText()).includes("1 time"));
-    // keep a line of my own, sorted by the three Cs
-    await page.locator("summary:has-text('Add a line of your own')").click();
+    // keep a power statement in the Glove Box, sorted by the three Cs
+    await Promise.all([page.waitForURL("**/glovebox"), page.click('main a[href="/glovebox"]')]);
     await page.fill('input[name="line"]', "E2E-LINE: I am the calm one in the room.");
-    await page.locator('details:has(input[name="line"]) select[name="kind"]').selectOption("CONFIRM");
-    await Promise.all([page.waitForURL(/kept=1/), page.locator('details:has(input[name="line"]) button:has-text("Keep it")').click()]);
+    await page.locator('form:has(input[name="line"]) select[name="kind"]').selectOption("CONFIRM");
+    await Promise.all([page.waitForURL(/glovebox\?kept=1/), page.click('button:has-text("Put it in the Glove Box")')]);
     await page.waitForSelector("text=E2E-LINE: I am the calm one in the room.");
+    await page.waitForSelector('section[aria-label="For today"]');
+    assert.equal((await db.toneLine.findFirstOrThrow({ where: { user: { email }, text: { startsWith: "E2E-LINE" } } })).kind, "CONFIRM");
+    await page.goto(`${BASE}/tone`);
+    await page.waitForSelector('main a[href="/glovebox"]:has-text("1 power statement kept")');
     // counting check-ins too is the client's choice, off until they turn it on
     assert.equal((await db.profile.findFirstOrThrow({ where: { user: { email } } })).toneReadsWriting, false);
     await Promise.all([page.waitForLoadState("networkidle"), page.click('button:has-text("Also count my check-ins and the Mirrors")')]);
@@ -472,7 +476,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.waitForSelector("text=E2E-SITUATION: they missed the deadline again");
     // each mode keeps to itself: no self-talk count or lines under a conversation
     assert.equal(await page.locator("h2:has-text('Three-day language audit')").count(), 0);
-    assert.equal(await page.locator("h2:has-text('My lines')").count(), 0);
+    assert.equal(await page.locator('main a[href="/glovebox"]').count(), 0);
     await page.waitForSelector("summary:has-text('Earlier conversations (1)')");
     const saved = await db.toneEntry.findFirstOrThrow({ where: { user: { email }, mode: "OTHERS" } });
     assert.equal(saved.who, "E2E-WHO my direct report");
