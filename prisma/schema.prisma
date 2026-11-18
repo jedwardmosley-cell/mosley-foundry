@@ -111,6 +111,7 @@ model Profile {
   aiEnabled        Boolean   @default(true)
   // Set the Tone: also look for patterns in what the client writes in check-ins and weekly look backs. Off unless they turn it on.
   toneReadsWriting Boolean   @default(false)
+  toneAuditAt      DateTime? // Set the Tone: when the client started their three-day language audit, or null if never
   aiRetentionDays  Int       @default(90)
   eqiEnabled       Boolean   @default(false) // participant opted in to the EQ-i layer
   onboardedAt      DateTime?

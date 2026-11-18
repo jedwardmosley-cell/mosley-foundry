@@ -3,24 +3,23 @@ import { NAMES } from "@/content/names";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { fmt, addDays, ymd } from "@/lib/dates";
-import { findClosedDoors, tally, bookQuestions, type DoorHit } from "@/lib/tone";
+import { consoleExercise, findClosedDoors, tally, bookQuestions, type DoorHit } from "@/lib/tone";
 import { getContent } from "@/content";
 import { aiAvailable, type ToneReading, type ConversationReading } from "@/lib/ai";
-import { readSelfTalk, prepConversation, practiceConversation, keepToneLine, removeToneLine, deleteToneEntry, setToneReadsWriting } from "@/app/actions/tone";
+import { readSelfTalk, prepConversation, practiceConversation, keepToneLine, deleteToneEntry, setToneReadsWriting, setToneAudit } from "@/app/actions/tone";
+
+const fmtDay = (d: Date) => fmt(d, { weekday: "long", month: "short", day: "numeric" });
 import { PageHeader, Card, PillarMark } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 import { DictationHint } from "@/components/Picks";
 import { FORGE_LINES } from "@/content/forgeLines";
+import { THREE_CS, type ThreeC } from "@/content/threeCs";
+import { InTheBook } from "@/components/InTheBook";
 import type { PillarKey } from "@/content/types";
 
 export const metadata = { title: "Set the Tone" };
 
-const THREE_CS = {
-  CLAIM: { name: "Claim", line: "A victory, a milestone or an outcome I'm going after" },
-  CONFIRM: { name: "Confirm", line: "A belief about what I'm capable of" },
-  CONDEMN: { name: "Condemn", line: "The negativity or the roadblock that would stop me" },
-} as const;
-type C = keyof typeof THREE_CS;
+type C = ThreeC;
 
 const Label = ({ children, gold = false }: { children: React.ReactNode; gold?: boolean }) => (
   <p className={`text-[13px] font-bold ${gold ? "text-gold" : "text-ink-mute"}`}>{children}</p>
@@ -34,23 +33,28 @@ const Label = ({ children, gold = false }: { children: React.ReactNode; gold?: b
 export default async function TonePage({ searchParams }: { searchParams: Promise<{ entry?: string; care?: string; ai?: string; kept?: string; mode?: string }> }) {
   const sp = await searchParams;
   const u = await requireUser("PARTICIPANT");
-  const since = addDays(new Date(), -3);
   const [entries, lines, profile, current] = await Promise.all([
     db.toneEntry.findMany({ where: { userId: u.id }, orderBy: { createdAt: "desc" }, take: 30 }),
     db.toneLine.findMany({ where: { userId: u.id }, orderBy: { createdAt: "desc" } }),
-    db.profile.findUnique({ where: { userId: u.id }, select: { toneReadsWriting: true, aiEnabled: true, destination: true, lineO: true, why: true, lineG: true, lineE: true } }),
+    db.profile.findUnique({ where: { userId: u.id }, select: { toneReadsWriting: true, toneAuditAt: true, aiEnabled: true, destination: true, lineO: true, why: true, lineG: true, lineE: true } }),
     sp.entry ? db.toneEntry.findFirst({ where: { id: sp.entry, userId: u.id } }) : null,
   ]);
   const mode: "SELF" | "OTHERS" = current ? (current.mode === "OTHERS" ? "OTHERS" : "SELF") : sp.mode === "others" ? "OTHERS" : "SELF";
   const aiOn = aiAvailable() && profile?.aiEnabled !== false;
 
   // The three-day count: limited language in what the client told themselves, and, if they turned it on, in what they write elsewhere.
-  const recent = entries.filter((e) => e.mode === "SELF" && e.createdAt >= since);
+  // The book's three-day audit runs from the day the client starts it: day 1, 2 and 3, then their pattern.
+  const auditStart = profile?.toneAuditAt ?? null;
+  const auditEnd = auditStart ? addDays(auditStart, 3) : null;
+  const auditState: "none" | "running" | "done" = !auditStart ? "none" : new Date() < auditEnd! ? "running" : "done";
+  const auditDay = auditStart ? Math.min(3, Math.floor((Date.now() - auditStart.getTime()) / 864e5) + 1) : 0;
+  const inAudit = (d: Date) => !!auditStart && d >= auditStart && d < auditEnd!;
+  const recent = entries.filter((e) => e.mode === "SELF" && inAudit(e.createdAt));
   const hits: DoorHit[] = recent.flatMap((e) => findClosedDoors(e.text));
-  if (profile?.toneReadsWriting) {
+  if (profile?.toneReadsWriting && auditStart) {
     const [checkIns, weeks] = await Promise.all([
-      db.dailyCheckIn.findMany({ where: { userId: u.id, date: { gte: ymd(since) } }, select: { note: true, reflection: true, identityNote: true } }),
-      db.weeklyReflection.findMany({ where: { userId: u.id, createdAt: { gte: since } }, select: { built: true, avoided: true, nextWeek: true } }),
+      db.dailyCheckIn.findMany({ where: { userId: u.id, date: { gte: ymd(auditStart), lt: ymd(auditEnd!) } }, select: { note: true, reflection: true, identityNote: true } }),
+      db.weeklyReflection.findMany({ where: { userId: u.id, createdAt: { gte: auditStart, lt: auditEnd! } }, select: { built: true, avoided: true, nextWeek: true } }),
     ]);
     for (const c of checkIns) hits.push(...findClosedDoors([c.note, c.reflection, c.identityNote].join(" ")));
     for (const w of weeks) hits.push(...findClosedDoors([w.built, w.avoided, w.nextWeek].join(" ")));
@@ -198,18 +202,29 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
           {self && (self.chain.thought || self.chain.stepIn) && (
             <Card>
               <h2 className="h3">The chain</h2>
-              <ol className="mt-3 grid gap-2 sm:grid-cols-4">
-                {([["How I think about it", self.chain.thought], ["How I talk about it", self.chain.words], ["How I feel", self.chain.feeling], ["What I do", self.chain.action]] as const).filter(([, v]) => v).map(([k, v]) => (
-                  <li key={k} className="rounded-2xl bg-ink/[0.04] px-3 py-2.5"><p className="text-xs text-ink-mute">{k}</p><p className="mt-0.5 text-[15px]">{v}</p></li>
+              <p className="mt-1 text-[15px] text-ink-soft">Words don&apos;t stay words. How you think about something shapes how you talk about it. How you talk about it shapes how you feel. How you feel shows up in what you do. Here is that chain for what you wrote, link by link, so you can see where to step in.</p>
+              <ol className="mt-3 space-y-1.5">
+                {([["How I think about it", self.chain.thought], ["So I talk about it like this", self.chain.words], ["So I feel", self.chain.feeling], ["So I do this", self.chain.action]] as const).filter(([, v]) => v).map(([k, v], i) => (
+                  <li key={k} className="flex gap-3 rounded-2xl bg-ink/[0.04] px-3 py-2.5">
+                    <span aria-hidden className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-navy text-[12px] font-bold text-white">{i + 1}</span>
+                    <span><span className="block text-xs text-ink-mute">{k}</span><span className="block mt-0.5 text-[15px]">{v}</span></span>
+                  </li>
                 ))}
               </ol>
-              {self.chain.stepIn && <p className="mt-3 text-[15px]"><span className="font-medium text-heading">Where to cut it off: </span>{self.chain.stepIn}</p>}
+              {self.chain.stepIn && (
+                <div className="mt-3 border-l-4 border-lane pl-4">
+                  <p className="text-sm font-bold text-heading">Where to step in</p>
+                  <p className="mt-0.5 text-[15px]">{self.chain.stepIn}</p>
+                  <p className="mt-1 text-sm text-ink-soft">Change one link and the ones after it change too. The earlier you step in, the less you have to fight later.</p>
+                </div>
+              )}
+              <InTheBook lines={consoleExercise(pack.chapters, "chain")} />
             </Card>
           )}
 
           {self?.keep && (
             <Card>
-              <h2 className="h3">A line to keep</h2>
+              <h2 className="h3">A power statement to keep</h2>
               <form action={keepToneLine} className="mt-3 space-y-3">
                 <input type="hidden" name="entry" value={current.id} />
                 <input name="line" defaultValue={self.keep.text} maxLength={300} className="input" aria-label="Line to keep" />
@@ -217,9 +232,10 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
                   <select name="kind" defaultValue={self.keep.kind} className="input !w-auto" aria-label="Which C">
                     {(Object.keys(THREE_CS) as C[]).map((k) => <option key={k} value={k}>{THREE_CS[k].name}</option>)}
                   </select>
-                  <Submit className="btn-quiet">Keep it</Submit>
+                  <Submit className="btn-quiet">Put it in the Glove Box</Submit>
                 </div>
                 <p className="text-xs text-ink-mute">Change the words until they sound like you.</p>
+                {sp.kept && <p role="status" className="notice">In your Glove Box. <Link href="/glovebox" className="btn-link">Open it</Link></p>}
               </form>
             </Card>
           )}
@@ -294,58 +310,56 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
       {/* Self-talk only from here: the count and my lines belong to "With myself". */}
       {mode === "SELF" && (<>
       <section className="mt-10">
-        <h2 className="h2">The last three days</h2>
-        <p className="mt-1 text-sm text-ink-soft">Limited language in what you told yourself, counted. A pattern to notice, not a score.</p>
+        <h2 className="h2">Three-day language audit</h2>
+        <p className="mt-1 text-[15px] text-ink-soft">For three days, catch every time you say something that shuts a door before you&apos;ve tried, like &ldquo;I can&apos;t&rdquo;, &ldquo;I don&apos;t know&rdquo; or &ldquo;that&apos;s just how I am&rdquo;, and replace it with something that leaves a door open. One slip is noise. Three days is enough to see your pattern, and the phrase at the top is the one to replace first.</p>
+        <InTheBook lines={consoleExercise(pack.chapters, "audit")} />
         <Card className="mt-3">
-          {audit.length ? (
-            <ul className="space-y-1.5">
-              {audit.map((a) => <li key={a.label} className="flex justify-between text-[15px]"><span>&ldquo;{a.label}&rdquo;</span><span className="text-ink-soft">{a.count} {a.count === 1 ? "time" : "times"}</span></li>)}
+          {auditState === "none" && (
+            <form action={setToneAudit}>
+              <input type="hidden" name="on" value="true" />
+              <p className="text-[15px]">Start whenever you&apos;re ready. Each time you catch yourself, write it under With myself at the top of this page. It&apos;s counted here, with a better way to say it.</p>
+              <Submit className="btn-primary mt-3">Start my three days</Submit>
+            </form>
+          )}
+          {auditState !== "none" && (
+            <p className="mb-3 text-[15px]">
+              {auditState === "running"
+                ? <><span className="font-bold text-heading">Day {auditDay} of 3.</span> Ends {fmtDay(auditEnd!)}. Each time you catch yourself, write it under With myself at the top.</>
+                : <><span className="font-bold text-heading">Your three days are done.</span> {fmtDay(auditStart!)} to {fmtDay(addDays(auditEnd!, -1))}. {audit.length ? "Here is your pattern." : "Nothing shut a door in what you wrote. That's worth noticing too."}</>}
+            </p>
+          )}
+          {auditState !== "none" && audit.length > 0 && (
+            <ul className="divide-y divide-line/60">
+              {audit.map((a, i) => (
+                <li key={a.label} className="py-2 first:pt-0">
+                  <p className="flex justify-between gap-3 text-[15px]"><span className="font-medium text-heading">&ldquo;{a.label}&rdquo;</span><span className="shrink-0 text-ink-soft">{a.count} {a.count === 1 ? "time" : "times"}</span></p>
+                  <p className="mt-0.5 text-sm text-ink-soft">{i === 0 && auditState === "done" ? "Replace this one first. " : ""}Say instead: <span className="text-ink">{a.instead}</span></p>
+                </li>
+              ))}
             </ul>
-          ) : <p className="text-[15px] text-ink-soft">{recent.length || profile?.toneReadsWriting ? "None found in the last three days." : "Nothing written here in the last three days."}</p>}
-          <form action={setToneReadsWriting} className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-3">
+          )}
+          {auditState === "running" && audit.length === 0 && <p className="text-[15px] text-ink-soft">Nothing counted yet.</p>}
+          {auditState !== "none" && (
+            <form action={setToneAudit} className="mt-3">
+              <input type="hidden" name="on" value={auditState === "done" ? "true" : "false"} />
+              <Submit className="btn-quiet !py-1.5 text-sm">{auditState === "done" ? "Start another three days" : "Stop the audit"}</Submit>
+            </form>
+          )}
+          {auditState === "running" && <form action={setToneReadsWriting} className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-3">
             <input type="hidden" name="on" value={profile?.toneReadsWriting ? "false" : "true"} />
-            <span className="text-sm text-ink-soft">{profile?.toneReadsWriting ? "Also counting your check-in notes and weekly look backs." : "Only what you write here is counted."}</span>
-            <Submit className="btn-quiet !py-1.5 text-sm">{profile?.toneReadsWriting ? "Count only what I write here" : "Also count my check-ins and look backs"}</Submit>
-          </form>
+            <span className="text-sm text-ink-soft">{profile?.toneReadsWriting ? "Also counting your daily check-in notes and the Mirrors. Nothing is shared, it only adds to this count." : "Only what you write here is counted. You can also count your daily check-in notes and the Mirrors. Nothing is shared."}</span>
+            <Submit className="btn-quiet !py-1.5 text-sm">{profile?.toneReadsWriting ? "Count only what I write here" : "Also count my check-ins and the Mirrors"}</Submit>
+          </form>}
         </Card>
       </section>
 
       <section id="keep" className="mt-10 scroll-mt-24">
-        <h2 className="h2">My lines</h2>
-        <p className="mt-1 text-sm text-ink-soft">Lines with power, in your own words. A good one does one of three things: claim, confirm or condemn.</p>
-        {sp.kept && <p role="status" className="notice mt-3">Kept.</p>}
-        <div className="mt-3 space-y-3">
-          {(Object.keys(THREE_CS) as C[]).map((k) => {
-            const mine = lines.filter((l) => l.kind === k);
-            return (
-              <Card key={k}>
-                <p className="text-sm"><span className="font-medium text-heading">{THREE_CS[k].name}.</span> <span className="text-ink-soft">{THREE_CS[k].line}</span></p>
-                {mine.length > 0 && (
-                  <ul className="mt-2 divide-y divide-line/60">
-                    {mine.map((l) => (
-                      <li key={l.id} className="flex items-start justify-between gap-3 py-2">
-                        <span className="font-serif text-[16px] leading-snug text-heading">{l.text}</span>
-                        <form action={removeToneLine}><input type="hidden" name="id" value={l.id} /><button className="text-xs text-ink-mute hover:text-alert" aria-label={`Remove ${l.text}`}>Remove</button></form>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </Card>
-            );
-          })}
-          <details className="card">
-            <summary className="cursor-pointer text-sm text-link">Add a line of your own</summary>
-            <form action={keepToneLine} className="mt-3 space-y-3">
-              <input name="line" required maxLength={300} className="input" aria-label="Your line" placeholder="Something you read, heard or told yourself that's worth keeping" />
-              <div className="flex flex-wrap items-center gap-3">
-                <select name="kind" defaultValue="CONFIRM" className="input !w-auto" aria-label="Which C">
-                  {(Object.keys(THREE_CS) as C[]).map((k) => <option key={k} value={k}>{THREE_CS[k].name}</option>)}
-                </select>
-                <Submit className="btn-quiet">Keep it</Submit>
-              </div>
-            </form>
-          </details>
-        </div>
+        <Link href="/glovebox" className="card block transition hover:bg-ink/[0.03]">
+          <p className="flex items-center justify-between"><span className="h3">The Glove Box</span><span className="text-sm text-link">Open</span></p>
+          <p className="mt-1 text-[15px] text-ink-soft">{lines.length ? `${lines.length} power ${lines.length === 1 ? "statement" : "statements"} kept within reach, sorted by claim, confirm and condemn.` : "Where your power statements go: lines that claim, confirm or condemn, kept within reach. Nothing in it yet."}</p>
+          {lines[0] && <p className="mt-2 font-serif text-[17px] leading-snug text-heading">&ldquo;{lines[0].text}&rdquo;</p>}
+          {sp.kept && !current && <p role="status" className="notice mt-3">In your Glove Box.</p>}
+        </Link>
       </section>
       </>)}
 
