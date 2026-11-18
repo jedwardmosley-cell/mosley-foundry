@@ -6,7 +6,9 @@ import { fmt, addDays, ymd } from "@/lib/dates";
 import { consoleExercise, findClosedDoors, tally, bookQuestions, type DoorHit } from "@/lib/tone";
 import { getContent } from "@/content";
 import { aiAvailable, type ToneReading, type ConversationReading } from "@/lib/ai";
-import { readSelfTalk, prepConversation, practiceConversation, keepToneLine, removeToneLine, deleteToneEntry, setToneReadsWriting } from "@/app/actions/tone";
+import { readSelfTalk, prepConversation, practiceConversation, keepToneLine, removeToneLine, deleteToneEntry, setToneReadsWriting, setToneAudit } from "@/app/actions/tone";
+
+const fmtDay = (d: Date) => fmt(d, { weekday: "long", month: "short", day: "numeric" });
 import { PageHeader, Card, PillarMark } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 import { DictationHint } from "@/components/Picks";
@@ -42,23 +44,28 @@ const Label = ({ children, gold = false }: { children: React.ReactNode; gold?: b
 export default async function TonePage({ searchParams }: { searchParams: Promise<{ entry?: string; care?: string; ai?: string; kept?: string; mode?: string }> }) {
   const sp = await searchParams;
   const u = await requireUser("PARTICIPANT");
-  const since = addDays(new Date(), -3);
   const [entries, lines, profile, current] = await Promise.all([
     db.toneEntry.findMany({ where: { userId: u.id }, orderBy: { createdAt: "desc" }, take: 30 }),
     db.toneLine.findMany({ where: { userId: u.id }, orderBy: { createdAt: "desc" } }),
-    db.profile.findUnique({ where: { userId: u.id }, select: { toneReadsWriting: true, aiEnabled: true, destination: true, lineO: true, why: true, lineG: true, lineE: true } }),
+    db.profile.findUnique({ where: { userId: u.id }, select: { toneReadsWriting: true, toneAuditAt: true, aiEnabled: true, destination: true, lineO: true, why: true, lineG: true, lineE: true } }),
     sp.entry ? db.toneEntry.findFirst({ where: { id: sp.entry, userId: u.id } }) : null,
   ]);
   const mode: "SELF" | "OTHERS" = current ? (current.mode === "OTHERS" ? "OTHERS" : "SELF") : sp.mode === "others" ? "OTHERS" : "SELF";
   const aiOn = aiAvailable() && profile?.aiEnabled !== false;
 
   // The three-day count: limited language in what the client told themselves, and, if they turned it on, in what they write elsewhere.
-  const recent = entries.filter((e) => e.mode === "SELF" && e.createdAt >= since);
+  // The book's three-day audit runs from the day the client starts it: day 1, 2 and 3, then their pattern.
+  const auditStart = profile?.toneAuditAt ?? null;
+  const auditEnd = auditStart ? addDays(auditStart, 3) : null;
+  const auditState: "none" | "running" | "done" = !auditStart ? "none" : new Date() < auditEnd! ? "running" : "done";
+  const auditDay = auditStart ? Math.min(3, Math.floor((Date.now() - auditStart.getTime()) / 864e5) + 1) : 0;
+  const inAudit = (d: Date) => !!auditStart && d >= auditStart && d < auditEnd!;
+  const recent = entries.filter((e) => e.mode === "SELF" && inAudit(e.createdAt));
   const hits: DoorHit[] = recent.flatMap((e) => findClosedDoors(e.text));
-  if (profile?.toneReadsWriting) {
+  if (profile?.toneReadsWriting && auditStart) {
     const [checkIns, weeks] = await Promise.all([
-      db.dailyCheckIn.findMany({ where: { userId: u.id, date: { gte: ymd(since) } }, select: { note: true, reflection: true, identityNote: true } }),
-      db.weeklyReflection.findMany({ where: { userId: u.id, createdAt: { gte: since } }, select: { built: true, avoided: true, nextWeek: true } }),
+      db.dailyCheckIn.findMany({ where: { userId: u.id, date: { gte: ymd(auditStart), lt: ymd(auditEnd!) } }, select: { note: true, reflection: true, identityNote: true } }),
+      db.weeklyReflection.findMany({ where: { userId: u.id, createdAt: { gte: auditStart, lt: auditEnd! } }, select: { built: true, avoided: true, nextWeek: true } }),
     ]);
     for (const c of checkIns) hits.push(...findClosedDoors([c.note, c.reflection, c.identityNote].join(" ")));
     for (const w of weeks) hits.push(...findClosedDoors([w.built, w.avoided, w.nextWeek].join(" ")));
@@ -313,25 +320,46 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
       {/* Self-talk only from here: the count and my lines belong to "With myself". */}
       {mode === "SELF" && (<>
       <section className="mt-10">
-        <h2 className="h2">The last three days</h2>
-        <p className="mt-1 text-[15px] text-ink-soft">A three-day check on your language. Each time you write under With myself, phrases that shut a door before you&apos;ve tried, like &ldquo;I can&apos;t&rdquo;, &ldquo;I don&apos;t know&rdquo; or &ldquo;that&apos;s just how I am&rdquo;, are counted here. One slip is noise. The same phrase three times is a pattern, and that&apos;s the one to replace first. This is something to notice, not a score.</p>
+        <h2 className="h2">Three-day language audit</h2>
+        <p className="mt-1 text-[15px] text-ink-soft">For three days, catch every time you say something that shuts a door before you&apos;ve tried, like &ldquo;I can&apos;t&rdquo;, &ldquo;I don&apos;t know&rdquo; or &ldquo;that&apos;s just how I am&rdquo;, and replace it with something that leaves a door open. One slip is noise. Three days is enough to see your pattern, and the phrase at the top is the one to replace first.</p>
         <InTheBook lines={consoleExercise(pack.chapters, "audit")} />
         <Card className="mt-3">
-          {audit.length ? (
+          {auditState === "none" && (
+            <form action={setToneAudit}>
+              <input type="hidden" name="on" value="true" />
+              <p className="text-[15px]">Start whenever you&apos;re ready. Each time you catch yourself, write it under With myself at the top of this page. It&apos;s counted here, with a better way to say it.</p>
+              <Submit className="btn-primary mt-3">Start my three days</Submit>
+            </form>
+          )}
+          {auditState !== "none" && (
+            <p className="mb-3 text-[15px]">
+              {auditState === "running"
+                ? <><span className="font-bold text-heading">Day {auditDay} of 3.</span> Ends {fmtDay(auditEnd!)}. Each time you catch yourself, write it under With myself at the top.</>
+                : <><span className="font-bold text-heading">Your three days are done.</span> {fmtDay(auditStart!)} to {fmtDay(addDays(auditEnd!, -1))}. {audit.length ? "Here is your pattern." : "Nothing shut a door in what you wrote. That's worth noticing too."}</>}
+            </p>
+          )}
+          {auditState !== "none" && audit.length > 0 && (
             <ul className="divide-y divide-line/60">
-              {audit.map((a) => (
+              {audit.map((a, i) => (
                 <li key={a.label} className="py-2 first:pt-0">
                   <p className="flex justify-between gap-3 text-[15px]"><span className="font-medium text-heading">&ldquo;{a.label}&rdquo;</span><span className="shrink-0 text-ink-soft">{a.count} {a.count === 1 ? "time" : "times"}</span></p>
-                  <p className="mt-0.5 text-sm text-ink-soft">Say instead: <span className="text-ink">{a.instead}</span></p>
+                  <p className="mt-0.5 text-sm text-ink-soft">{i === 0 && auditState === "done" ? "Replace this one first. " : ""}Say instead: <span className="text-ink">{a.instead}</span></p>
                 </li>
               ))}
             </ul>
-          ) : <p className="text-[15px] text-ink-soft">{recent.length || profile?.toneReadsWriting ? "None found in the last three days. Keep writing what you tell yourself, and anything that shuts a door will show up here with a better way to say it." : "Nothing written here in the last three days. Write what you told yourself at the top of this page, and anything that shuts a door will show up here with a better way to say it."}</p>}
-          <form action={setToneReadsWriting} className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-3">
+          )}
+          {auditState === "running" && audit.length === 0 && <p className="text-[15px] text-ink-soft">Nothing counted yet.</p>}
+          {auditState !== "none" && (
+            <form action={setToneAudit} className="mt-3">
+              <input type="hidden" name="on" value={auditState === "done" ? "true" : "false"} />
+              <Submit className="btn-quiet !py-1.5 text-sm">{auditState === "done" ? "Start another three days" : "Stop the audit"}</Submit>
+            </form>
+          )}
+          {auditState === "running" && <form action={setToneReadsWriting} className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-3">
             <input type="hidden" name="on" value={profile?.toneReadsWriting ? "false" : "true"} />
             <span className="text-sm text-ink-soft">{profile?.toneReadsWriting ? "Also counting your daily check-in notes and the Mirrors. Nothing is shared, it only adds to this count." : "Only what you write here is counted. You can also count your daily check-in notes and the Mirrors. Nothing is shared."}</span>
-            <Submit className="btn-quiet !py-1.5 text-sm">{profile?.toneReadsWriting ? "Count only what I write here" : "Also count my check-ins and look backs"}</Submit>
-          </form>
+            <Submit className="btn-quiet !py-1.5 text-sm">{profile?.toneReadsWriting ? "Count only what I write here" : "Also count my check-ins and the Mirrors"}</Submit>
+          </form>}
         </Card>
       </section>
 

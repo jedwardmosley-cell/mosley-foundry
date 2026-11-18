@@ -137,3 +137,11 @@ export async function setToneReadsWriting(fd: FormData) {
   revalidatePath("/reflect");
 }
 
+
+/** Start (or start again) the book's three-day language audit. Stopping it clears the start date. */
+export async function setToneAudit(fd: FormData) {
+  const u = await participant();
+  const { on } = parse(z.object({ on: bool }), fd);
+  await db.profile.update({ where: { userId: u.id }, data: { toneAuditAt: on ? new Date() : null } });
+  revalidatePath("/tone");
+}

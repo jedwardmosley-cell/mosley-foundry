@@ -432,6 +432,10 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.goto(`${BASE}/tone`);
     // the book's own self-talk questions, when the licensed content is installed
     if (fs.existsSync("src/content/licensed/pack.json")) await page.waitForSelector('section[aria-label="From the book"] p.font-serif');
+    // the three-day audit is the client's to start; nothing is counted before then
+    await page.waitForSelector("button:has-text('Start my three days')");
+    await Promise.all([page.waitForLoadState("networkidle"), page.click("button:has-text('Start my three days')")]);
+    await page.waitForSelector("text=Day 1 of 3.");
     await page.fill('textarea[name="said"]', "E2E-TONE: I can't run this meeting. That's just how I am.");
     await Promise.all([page.waitForURL(/\/tone\?entry=/), page.click('button:has-text("Rewrite it")')]);
     await page.waitForSelector('h2:text-is("Limited language")');
@@ -440,7 +444,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.waitForSelector("text=That's how I've handled it so far.");
     await page.waitForSelector("text=Your words are instructions.");
     // the three-day audit counts it
-    const audit = page.locator("section:has(h2:has-text('The last three days'))");
+    const audit = page.locator("section:has(h2:has-text('Three-day language audit'))");
     assert.ok((await audit.innerText()).includes("1 time"));
     // keep a line of my own, sorted by the three Cs
     await page.locator("summary:has-text('Add a line of your own')").click();
@@ -450,7 +454,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.waitForSelector("text=E2E-LINE: I am the calm one in the room.");
     // counting check-ins too is the client's choice, off until they turn it on
     assert.equal((await db.profile.findFirstOrThrow({ where: { user: { email } } })).toneReadsWriting, false);
-    await Promise.all([page.waitForLoadState("networkidle"), page.click('button:has-text("Also count my check-ins and look backs")')]);
+    await Promise.all([page.waitForLoadState("networkidle"), page.click('button:has-text("Also count my check-ins and the Mirrors")')]);
     await page.waitForSelector("text=Also counting your daily check-in notes");
     // distress stops the coaching and points to support
     await page.fill('textarea[name="said"]', "E2E-TONE: some days I want to die");
@@ -467,14 +471,14 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.waitForSelector("text=Before you talk with E2E-WHO my direct report");
     await page.waitForSelector("text=E2E-SITUATION: they missed the deadline again");
     // each mode keeps to itself: no self-talk count or lines under a conversation
-    assert.equal(await page.locator("h2:has-text('The last three days')").count(), 0);
+    assert.equal(await page.locator("h2:has-text('Three-day language audit')").count(), 0);
     assert.equal(await page.locator("h2:has-text('My lines')").count(), 0);
     await page.waitForSelector("summary:has-text('Earlier conversations (1)')");
     const saved = await db.toneEntry.findFirstOrThrow({ where: { user: { email }, mode: "OTHERS" } });
     assert.equal(saved.who, "E2E-WHO my direct report");
     // conversations don't count toward the self-talk tally
     await page.goto(`${BASE}/tone`);
-    assert.ok((await page.locator("section:has(h2:has-text('The last three days'))").innerText()).includes("1 time"));
+    assert.ok((await page.locator("section:has(h2:has-text('Three-day language audit'))").innerText()).includes("1 time"));
     // one tap from the round + button
     await page.goto(`${BASE}/companion`);
     await page.waitForSelector('main a[href="/tone"]:has-text("Set the Tone")');
