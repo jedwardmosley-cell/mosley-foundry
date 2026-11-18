@@ -5,22 +5,23 @@ import { NavLink } from "./NavLink";
 import { BrandMark } from "./BrandMark";
 import { signOut } from "@/app/actions/auth";
 
-// Client menu, in journey order. The phone tab bar keeps five tabs; everything else is under More.
+// Client menu, in journey order. On the phone, the journey bar up top covers the four steps and the Mirrors,
+// so the tab bar holds what it does not: the Dashboard, People, Coach, Set the Tone and More (in `tabOrder`).
 const PARTICIPANT_NAV: NavItem[] = [
-  { href: "/dashboard", label: "The Dashboard", tab: "Dashboard", mobile: true },
+  { href: "/dashboard", label: "The Dashboard", tab: "Dashboard", mobile: true, tabOrder: 1 },
   { href: "/identity", label: "1. The Driver's Seat", group: "FORGE" },
   { href: "/assessment", label: "2. The Rules of the Road", group: "FORGE" },
-  { href: "/tone", label: "Set the Tone", group: "FORGE" },
-  { href: "/focus", label: "3. The Windshield", tab: "Windshield", mobile: true, group: "Discipline by Design" },
+  { href: "/tone", label: "Set the Tone", mobile: true, tabOrder: 4, group: "FORGE" },
+  { href: "/focus", label: "3. The Windshield", group: "Discipline by Design" },
   { href: "/road", label: "4. The Vehicle Controls", group: "Discipline by Design" },
   { href: "/reflect", label: "The Mirrors", group: "Discipline by Design" },
-  { href: "/network", label: "People", mobile: true, group: "Support" },
-  { href: "/coaching", label: "Coaching", tab: "Coach", mobile: true, group: "Support" },
+  { href: "/network", label: "People", mobile: true, tabOrder: 2, group: "Support" },
+  { href: "/coaching", label: "Coaching", tab: "Coach", mobile: true, tabOrder: 3, group: "Support" },
   { href: "/companion", label: "Help me with this", group: "Support" },
-  { href: "/more", label: "More", mobile: true, desktop: false },
+  { href: "/more", label: "More", mobile: true, tabOrder: 5, desktop: false },
   { href: "/more", label: "More", group: "Support" },
 ];
-type NavItem = { href: string; label: string; tab?: string; mobile?: boolean; desktop?: boolean; group?: string };
+type NavItem = { href: string; label: string; tab?: string; mobile?: boolean; desktop?: boolean; group?: string; tabOrder?: number };
 const GUIDE_TAB = { href: "/guide", label: "Guide", mobile: true };
 
 const COACH_NAV = [
@@ -67,7 +68,7 @@ export function Shell({ user, children, journey }: { user: CurrentUser; children
       {/* Phone: a floating, solid menu bar. Clients also get a round button for Help me with this. */}
       <div className="md:hidden fixed bottom-3 inset-x-3 z-30 flex items-end gap-2">
         <nav aria-label="Primary" className="flex-1 min-w-0 flex px-1 rounded-full border border-line/50 bg-card shadow-[0_16px_40px_-14px_rgb(0_0_0/0.35)]">
-          {(nav as NavItem[]).filter((n) => n.mobile).map((n) => (
+          {(nav as NavItem[]).filter((n) => n.mobile).sort((a, b) => (a.tabOrder ?? 0) - (b.tabOrder ?? 0)).map((n) => (
             <NavLink key={n.href} href={n.href} variant="tab">{n.tab ?? n.label}</NavLink>
           ))}
         </nav>
