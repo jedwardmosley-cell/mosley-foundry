@@ -66,7 +66,7 @@ export default async function ReflectPage() {
       </PageHeader>
       {askSend && partner && cycle && lookWeek && (
         <Card className="mb-5">
-          <h2 className="font-serif text-[24px] leading-tight text-heading">Send this to {partner.name.split(" ")[0]}?</h2>
+          <h2 className="h2">Send this to {partner.name.split(" ")[0]}?</h2>
           <p className="mt-3 rounded-2xl bg-ink/[0.04] px-4 py-3 text-[15px]">{weekMessage(lookWeek, thisWeek as Record<string, string>, cycle.newResponse)}</p>
           <div className="mt-4 flex items-center gap-5">
             <ShareSend message={weekMessage(lookWeek, thisWeek as Record<string, string>, cycle.newResponse)} to={partner.id} email={partner.email} kind={`week${lookWeek}` as "week2" | "week3" | "week4"} label="Send" />
@@ -86,12 +86,12 @@ export default async function ReflectPage() {
           {lookWeek && cycle && (
             <section className="space-y-3 border-b border-line/70 pb-6">
               <input type="hidden" name="look_week" value={lookWeek} />
-              <p className="section-label">{WEEK_QUESTIONS[lookWeek].title} · look again</p>
+              <p className="section-label">{WEEK_QUESTIONS[lookWeek].title}, look again</p>
               <h2 className="font-serif text-[24px] leading-tight text-heading">{WEEK_QUESTIONS[lookWeek].question}</h2>
               {lookWeek === 2 && (
                 <>
-                  <label className="block"><span className="text-xs text-ink-mute">{first.situation ? `${FIRST_GUESS} · ` : ""}The situation</span><textarea name="look_situation" defaultValue={cycle.situation} className="textarea mt-1 !min-h-[64px]" maxLength={1500} /></label>
-                  <label className="block"><span className="text-xs text-ink-mute">{first.feeling ? `${FIRST_GUESS} · ` : ""}The feeling</span><textarea name="look_feeling" defaultValue={cycle.feeling} className="textarea mt-1 !min-h-[64px]" maxLength={1500} /></label>
+                  <label className="block"><span className="text-xs text-ink-mute">{first.situation ? `${FIRST_GUESS}, ` : ""}The situation</span><textarea name="look_situation" defaultValue={cycle.situation} className="textarea mt-1 !min-h-[64px]" maxLength={1500} /></label>
+                  <label className="block"><span className="text-xs text-ink-mute">{first.feeling ? `${FIRST_GUESS}, ` : ""}The feeling</span><textarea name="look_feeling" defaultValue={cycle.feeling} className="textarea mt-1 !min-h-[64px]" maxLength={1500} /></label>
                   {seg("look_real", REAL_CHOICES, thisWeek?.real)}
                   <p className="text-xs text-ink-mute">Change the words above if it was something else. Your first guess is kept.</p>
                 </>
@@ -130,7 +130,7 @@ export default async function ReflectPage() {
                 {commitments.map((c) => (
                   <label key={c.id} className="flex items-start gap-2.5 text-[15px] cursor-pointer">
                     <input type="checkbox" name="held" value={c.id} defaultChecked={held.has(c.id)} className="mt-1 h-4 w-4 accent-navy" />
-                    <span>{c.title}{c.when ? <span className="text-ink-mute"> · {c.when}</span> : null}</span>
+                    <span>{c.title}{c.when ? <span className="text-ink-mute">, {c.when}</span> : null}</span>
                   </label>
                 ))}
               </div>

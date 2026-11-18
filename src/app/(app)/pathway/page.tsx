@@ -48,7 +48,7 @@ export default async function PathwayPage() {
               return (
                 <Link key={s.key} href={`/pathway/segment/${s.key}`} className="card block hover:border-navy/40">
                   <div className="flex items-start gap-4">
-                    <span className="font-serif text-2xl text-ink-mute w-8">{s.key}</span>
+                    <span className="font-extrabold text-2xl text-ink-mute w-8">{s.key}</span>
                     <div className="flex-1">
                       <h2 className="h3">{s.title}</h2>
                       <p className="text-[14px] text-ink-soft mt-1">{s.summary}</p>

@@ -18,7 +18,7 @@ export function RuleAccordion({ formId }: { formId: string }) {
       const here = input.closest<HTMLDetailsElement>("details[data-rule]");
       if (!here) return;
       const pick = here.querySelector<HTMLElement>("[data-pick]");
-      if (pick) pick.textContent = `${input.value} · ${input.dataset.level ?? ""}`;
+      if (pick) pick.textContent = `${input.value}: ${input.dataset.level ?? ""}`;
       window.setTimeout(() => {
         here.open = false;
         const next = rules().find((d) => !rated(d));

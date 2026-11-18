@@ -6,7 +6,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <section className="hidden md:flex flex-col justify-between bg-navy-deep text-white p-12">
           <p className="flex items-center gap-3 text-[13px] text-white/60"><BrandMark size={34} className="text-white" /> Mosley Foundry</p>
           <div>
-            <h1 className="font-serif text-5xl leading-[1.1]">Both Hands<br />on the Wheel</h1>
+            <h1 className="font-sans font-extrabold text-5xl leading-[1.05] tracking-[-0.02em]">Both Hands<br />on the Wheel</h1>
             <p className="mt-6 text-lg text-white/80 max-w-sm">Lead yourself. Develop others. Build a life by design.</p>
           </div>
           <p className="text-sm text-white/50">Created by Jason Mosley</p>
@@ -15,7 +15,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <div className="w-full max-w-sm">
             <div className="md:hidden mb-10">
               <BrandMark size={40} className="text-heading mb-3" />
-              <p className="font-serif text-3xl text-heading">Both Hands on the Wheel</p>
+              <p className="font-sans font-extrabold text-3xl tracking-[-0.01em] text-heading">Both Hands on the Wheel</p>
               <p className="mt-2 muted">Lead yourself. Develop others. Build a life by design.</p>
             </div>
             {children}

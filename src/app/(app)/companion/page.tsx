@@ -54,7 +54,7 @@ export default async function CompanionHome() {
             {convos.map((c) => (
               <li key={c.id} className="py-2.5 flex justify-between gap-3">
                 <Link href={`/companion/${c.id}`} className="btn-link truncate">{c.title}</Link>
-                <span className="text-xs muted shrink-0">{fmt(c.createdAt)} · deletes {fmt(c.expiresAt)}</span>
+                <span className="text-xs muted shrink-0">{fmt(c.createdAt)}, deletes {fmt(c.expiresAt)}</span>
               </li>
             ))}
           </ul>

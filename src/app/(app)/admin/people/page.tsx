@@ -44,7 +44,7 @@ export default async function People() {
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-[16px] font-medium text-heading">{u.name}</p>
-                      <p className="text-sm text-ink-soft break-all">{u.email} · asked {fmt(u.createdAt, { month: "short", day: "numeric" })}</p>
+                      <p className="text-sm text-ink-soft break-all">{u.email}, asked {fmt(u.createdAt, { month: "short", day: "numeric" })}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <form action={approveUser}><input type="hidden" name="userId" value={u.id} /><button className="btn-primary !px-5 !py-2 text-sm">Approve</button></form>
@@ -70,7 +70,7 @@ export default async function People() {
                 <div className="min-w-0">
                   <p className="text-[15px] font-medium text-heading">{plain(u.name)}{u.isDemo && <span className="ml-2 chip">Demo</span>}</p>
                   <p className="text-sm text-ink-soft break-all">
-                    {u.email} · {ROLE[u.role] ?? u.role}{coaches.length ? ` · coach: ${coaches.join(", ")}` : ""}
+                    {u.email}, {ROLE[u.role] ?? u.role}{coaches.length ? `, coach: ${coaches.join(", ")}` : ""}
                   </p>
                 </div>
                 <div className="flex items-center gap-3">

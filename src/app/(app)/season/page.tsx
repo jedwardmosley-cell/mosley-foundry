@@ -63,9 +63,9 @@ export default async function SeasonPage() {
               <li key={i} className="px-5 py-3.5 flex items-start gap-3">
                 {c ? <PillarMark k={c.pillar as PillarKey} size="sm" /> : <span className="h-6 w-6 rounded-full border border-dashed border-line" />}
                 <div className="flex-1 min-w-0">
-                  <p className="text-[15px]"><span className="font-medium">Month {i + 1}</span>{c ? ` · ${name(c.pillar)}` : ""}</p>
+                  <p className="text-[15px]"><span className="font-medium">Month {i + 1}</span>{c ? `: ${name(c.pillar)}` : ""}</p>
                   {c ? (
-                    <p className="text-sm text-ink-soft">{c.focus}{s ? ` · ${s.done} done, ${s.partial} partial` : ""}{c.decision ? ` · ${DAY30_DECISIONS[c.decision as keyof typeof DAY30_DECISIONS] ?? ""}` : c.status === "ACTIVE" ? " · in progress" : ""}</p>
+                    <p className="text-sm text-ink-soft">{c.focus}{s ? `, ${s.done} done, ${s.partial} partial` : ""}{c.decision ? `, ${DAY30_DECISIONS[c.decision as keyof typeof DAY30_DECISIONS] ?? ""}` : c.status === "ACTIVE" ? ", in progress" : ""}</p>
                   ) : <p className="text-sm text-ink-mute">{open ? "Not started" : "Skipped"}</p>}
                 </div>
               </li>
@@ -138,7 +138,7 @@ export default async function SeasonPage() {
           <ul className="mt-2 divide-y divide-line">
             {seasons.slice(1).map((s) => (
               <li key={s.id} className="py-2 flex justify-between gap-3 text-[15px]">
-                <span>{fmt(s.startedAt, { month: "short", day: "numeric", year: "numeric" })} · {s.cycles.map((c) => c.pillar).join(", ")}</span>
+                <span>{fmt(s.startedAt, { month: "short", day: "numeric", year: "numeric" })}, {s.cycles.map((c) => c.pillar).join(", ")}</span>
                 <span className="text-sm text-ink-mute">{SEASON_DECISIONS[s.decision as keyof typeof SEASON_DECISIONS] ?? s.status.toLowerCase()}</span>
               </li>
             ))}

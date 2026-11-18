@@ -9,10 +9,10 @@ export type SetupField = "situation" | "feeling" | "oldResponse" | "newResponse"
 
 export const SETUP_STEPS: { field: SetupField; label: string; question: string; hint: string; show?: "E" | "G" | "five"; placeholder: string }[] = [
   { field: "situation", label: "The situation", question: "When does this happen?", hint: "Name the moment as plainly as you can: where you are, who's there, what just happened.", placeholder: "When someone pushes back on my decision in a meeting" },
-  { field: "feeling", label: "The feeling · E", question: "What do you feel in that moment?", hint: "Whatever words fit. There is no right answer.", show: "E", placeholder: "Heat in my chest. Like I'm being tested." },
+  { field: "feeling", label: "The feeling (E)", question: "What do you feel in that moment?", hint: "Whatever words fit. There is no right answer.", show: "E", placeholder: "Heat in my chest. Like I'm being tested." },
   { field: "oldResponse", label: "The old response", question: "What do you usually do?", hint: "The thing the old you does on autopilot. No judgment here. Just name it.", placeholder: "I defend the decision right away." },
   { field: "newResponse", label: "The new response", question: "What does the person you're becoming do instead?", hint: "One thing you could do in that moment.", show: "five", placeholder: "Pause, take one breath, and ask one question before I answer." },
-  { field: "gap", label: "The gap · G", question: "What makes the new response hard?", hint: "What do you need to learn or let go of?", show: "G", placeholder: "Letting go of needing to have the answer already." },
+  { field: "gap", label: "The gap (G)", question: "What makes the new response hard?", hint: "What do you need to learn or let go of?", show: "G", placeholder: "Letting go of needing to have the answer already." },
 ];
 
 export const FIRST_GUESS = "First guess";
@@ -28,9 +28,9 @@ export const FINDS_OUT_ROLES = ["ACCOUNTABILITY_PARTNER", "MENTOR", "COACH", "GR
 export const MENTEE_ROLES = ["MENTEE", "DIRECT_REPORT"] as const;
 
 export const WEEK_QUESTIONS: Record<2 | 3 | 4, { title: string; question: string }> = {
-  2: { title: "Week 2 · Interrupt It", question: "Was that the real situation and the real feeling?" },
-  3: { title: "Week 3 · Replace It", question: "Is the new response working? Is the gap smaller?" },
-  4: { title: "Week 4 · Sustain It", question: "What keeps this going after day 30?" },
+  2: { title: "Week 2: Interrupt It", question: "Was that the real situation and the real feeling?" },
+  3: { title: "Week 3: Replace It", question: "Is the new response working? Is the gap smaller?" },
+  4: { title: "Week 4: Sustain It", question: "What keeps this going after day 30?" },
 };
 export const REAL_CHOICES = { YES: "Yes, that's it", CLOSE: "Close", NO: "No" } as const;
 export const WORKING_CHOICES = { YES: "Yes", PARTLY: "Partly", NOT_YET: "Not yet" } as const;

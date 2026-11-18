@@ -39,7 +39,7 @@ export default async function AssessmentResult({ params, searchParams }: { param
 
   return (
     <>
-      <PageHeader eyebrow={`FORGE · ${fmt(a.completedAt, { month: "long", day: "numeric", year: "numeric" })}`} title={edit ? "Update my ratings" : "My FORGE profile"}>
+      <PageHeader eyebrow={`FORGE, ${fmt(a.completedAt, { month: "long", day: "numeric", year: "numeric" })}`} title={edit ? "Update my ratings" : "My FORGE profile"}>
         {edit ? "Read each level again and choose the one that is true of you now." : "Your five scores are not five separate grades. They are a pattern."}
         {a.instrument === "FORGE_DRAFT" && <span className="ml-2"><Draft>Draft instrument</Draft></span>}
       </PageHeader>
@@ -77,7 +77,7 @@ export default async function AssessmentResult({ params, searchParams }: { param
         <div className="mt-3 flex flex-wrap gap-2">
           {r.lowest.length > 1 && <span className="text-sm muted mr-1">Tied lowest:</span>}
           {(r.lowest.length > 1 ? r.lowest : PILLAR_KEYS).map((k) => (
-            <a key={k} href={`?focus=${k}`} className={`chip ${k === r.focus ? "!bg-navy !text-white !border-navy" : ""}`}>{k} · {s[k]}</a>
+            <a key={k} href={`?focus=${k}`} className={`chip ${k === r.focus ? "!bg-navy !text-white !border-navy" : ""}`}>{k} {s[k]}</a>
           ))}
         </div>
         <div className="mt-4 flex items-center gap-3">
@@ -102,7 +102,7 @@ export default async function AssessmentResult({ params, searchParams }: { param
       )}
 
       <a href="/identity" className="card block mt-5 hover:border-navy/40">
-        <p className="eyebrow">FORGE · Step 1</p>
+        <p className="eyebrow">Step 1</p>
         <h2 className="h2 mt-1">The Driver's Seat</h2>
         <p className="mt-2 text-[15px] muted">Your scores show where you are. The Driver's Seat is where you claim who you are, and how big a change you are making. Your scores do not decide it.</p>
       </a>

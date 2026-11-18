@@ -35,7 +35,7 @@ export default async function CohortAdmin({ params }: { params: Promise<{ id: st
 
   return (
     <>
-      <PageHeader eyebrow="Leading Others cohort" title={cohort.name}>{DELIVERY_FORMATS[cohort.deliveryFormat as keyof typeof DELIVERY_FORMATS].label} · reinforcement {cohort.reinforceDays} days</PageHeader>
+      <PageHeader eyebrow="Leading Others cohort" title={cohort.name}>{DELIVERY_FORMATS[cohort.deliveryFormat as keyof typeof DELIVERY_FORMATS].label}, reinforcement {cohort.reinforceDays} days</PageHeader>
 
       {flash && (
         <Card className="mb-5 border-line">
@@ -52,7 +52,7 @@ export default async function CohortAdmin({ params }: { params: Promise<{ id: st
             return (
               <form key={s.id} action={updateSession} className="grid gap-3 sm:grid-cols-[1fr_auto_auto_auto_auto] items-end rounded-xl bg-paper p-3">
                 <input type="hidden" name="id" value={s.id} /><input type="hidden" name="cohortId" value={cohort.id} />
-                <p className="text-[15px]"><span className="text-ink-mute font-serif mr-2">{seg.key}</span>{seg.title}</p>
+                <p className="text-[15px]"><span className="text-ink-mute font-bold mr-2">{seg.key}</span>{seg.title}</p>
                 <Field label="Starts"><input type="datetime-local" name="startsAt" defaultValue={local(s.startsAt)} className="input" /></Field>
                 <Field label="Facilitator">
                   <select name="facilitatorId" defaultValue={s.facilitatorId ?? ""} className="input">

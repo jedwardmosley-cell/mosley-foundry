@@ -65,7 +65,7 @@ export default async function NetworkPage({ searchParams }: { searchParams: Prom
           // Each person is one line until opened, so a long list stays short on a phone.
           <details key={r.id} className="card group !py-4" data-person={r.name}>
             <summary className="flex cursor-pointer list-none flex-wrap items-baseline justify-between gap-2 [&::-webkit-details-marker]:hidden">
-              <h3 className="h3">{r.name} <span className="muted font-normal">· {RELATIONSHIP_ROLES[r.role as keyof typeof RELATIONSHIP_ROLES]}</span></h3>
+              <h3 className="h3">{r.name}<span className="muted font-normal">, {RELATIONSHIP_ROLES[r.role as keyof typeof RELATIONSHIP_ROLES]}</span></h3>
               <span className={`text-sm ${r.overdue ? "text-alert" : "muted"}`}>{r.overdue ? "was due" : "next"} {fmt(r.nextCheckIn)} <span aria-hidden className="ml-1 inline-block transition group-open:rotate-90">›</span></span>
             </summary>
             <p className="mt-1 text-sm muted">Every {r.cadenceDays} days</p>
@@ -74,7 +74,7 @@ export default async function NetworkPage({ searchParams }: { searchParams: Prom
               <ul className="mt-3 space-y-2 text-sm">
                 {r.checkIns.map((c) => (
                   <li key={c.id} className="rounded-lg bg-paper p-2.5">
-                    <span className="font-medium">{fmt(c.occurredOn)}</span> · {c.happened ? "Met" : "Did not happen"}
+                    <span className="font-medium">{fmt(c.occurredOn)}</span>, {c.happened ? "Met" : "Did not happen"}
                     {c.lessons && <span className="block text-ink-soft">Lesson: {c.lessons}</span>}
                     {c.agreedActions && <span className="block text-ink-soft">Agreed: {c.agreedActions}</span>}
                   </li>

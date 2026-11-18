@@ -20,12 +20,12 @@ export default async function CoachCohorts() {
       {reports.map((r) => (
         <Card key={r.cohort.id} className="mb-5">
           <h2 className="h2">{r.cohort.name}</h2>
-          <p className="text-sm muted">{DELIVERY_FORMATS[r.cohort.deliveryFormat as keyof typeof DELIVERY_FORMATS].label} · {r.n} participants</p>
+          <p className="text-sm muted">{DELIVERY_FORMATS[r.cohort.deliveryFormat as keyof typeof DELIVERY_FORMATS].label}, {r.n} participants</p>
           <ul className="mt-4 divide-y divide-line">
             {r.bySegment.map((s) => (
               <li key={s.key} className="py-2 flex justify-between gap-3 text-[15px]">
-                <span><span className="text-ink-mute font-serif mr-2">{s.key}</span>{s.title}</span>
-                <span className="muted text-sm">{fmt(s.startsAt, { month: "short", day: "numeric", hour: "numeric" })} · {s.pct == null ? `${s.present} present` : `${s.pct}% present`}</span>
+                <span><span className="text-ink-mute font-bold mr-2">{s.key}</span>{s.title}</span>
+                <span className="muted text-sm">{fmt(s.startsAt, { month: "short", day: "numeric", hour: "numeric" })}, {s.pct == null ? `${s.present} present` : `${s.pct}% present`}</span>
               </li>
             ))}
           </ul>

@@ -51,14 +51,14 @@ export default async function WeekOneSetup({ searchParams }: { searchParams: Pro
         {JOURNEY_STEPS.map((s, i) => <li key={s.key}><span className={`block h-1.5 rounded-full ${i === 2 ? "bg-heading" : journey.done[s.key] ? "bg-navy" : "bg-line"}`} /><span className="sr-only">Step {i + 1}: {s.label}</span></li>)}
       </ol>
       <div className="mb-8 flex items-center justify-between gap-4 text-sm text-ink-mute">
-        <span>Step 3 of 4 · {where}</span>
+        <span>Step 3 of 4, {where}</span>
         <Link href="/start?step=3" className="shrink-0 hover:text-ink">Finish later</Link>
       </div>
     </>
   ) : (
     <>
       <div className="flex items-center justify-between text-sm text-ink-mute">
-        <span>Focus setup{n <= 5 ? ` · question ${n} of 5` : ""}</span>
+        <span>Focus setup{n <= 5 ? `, question ${n} of 5` : ""}</span>
         <Link href="/dashboard" className="hover:text-ink">Finish later</Link>
       </div>
       <div className="mt-2 mb-8 flex gap-1" aria-hidden>{Array.from({ length: TOTAL }, (_, i) => <span key={i} className={`h-1 flex-1 rounded-full ${i < n ? "bg-navy" : "bg-ink/[0.08]"}`} />)}</div>
@@ -151,7 +151,7 @@ export default async function WeekOneSetup({ searchParams }: { searchParams: Pro
     <article className="max-w-xl">
       {bar}
       <p className="section-label">Discipline by Design</p>
-      <h1 className="mt-2 font-serif text-[30px] leading-[1.15] tracking-[-0.01em] text-heading">{WHO_FINDS_OUT.title}</h1>
+      <h1 className="mt-2 h1">{WHO_FINDS_OUT.title}</h1>
       {findsOut.length ? (
         <>
           <p className="mt-2 mb-5 text-[15px] text-ink-soft">{WHO_FINDS_OUT.hint}</p>
@@ -160,7 +160,7 @@ export default async function WeekOneSetup({ searchParams }: { searchParams: Pro
         </>
       ) : (
         <>
-          <p className="mt-5 font-serif text-[21px] leading-snug text-heading">{WHO_FINDS_OUT.empty}</p>
+          <p className="mt-5 text-[18px] font-semibold leading-snug text-heading">{WHO_FINDS_OUT.empty}</p>
           <p className="mt-3 text-[15px] text-ink-soft">{WHO_FINDS_OUT.emptyHint}</p>
           <form action={addFindsOutPerson} className="mt-6 space-y-3">
             <input name="name" required maxLength={120} placeholder="Name" aria-label="Name" className="input" />

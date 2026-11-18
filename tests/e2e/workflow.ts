@@ -531,7 +531,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     // examples stay folded under Examples, closest person first (the newly promoted manager); tapping one fills the box
     assert.equal(await g.locator("text=For example").count(), 0, "no example line under the questions");
     await g.locator('summary:has-text("Examples")').first().click();
-    await g.waitForSelector("text=Newly promoted manager · role transition");
+    await g.waitForSelector("text=Newly promoted manager, role transition");
     await g.locator('button:has-text("a manager measured by what my team can do.")').first().click();
     assert.equal(await g.inputValue('textarea[name="destination"]'), "a manager measured by what my team can do.");
     await Promise.all([g.waitForURL("**/start?step=1&part=3"), g.click('button:has-text("Save and continue")')]);
@@ -552,7 +552,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await g.fill('input[name="title"]', "Stay curious when my decisions get challenged");
     assert.ok(await g.locator('input[name="pillar"][value="E"]').isChecked(), "starts from the lowest score");
     await Promise.all([g.waitForURL(/\/cycle\/setup\?step=1$/), g.click('button:has-text("Next: five short questions")')]);
-    await g.waitForSelector("text=Step 3 of 4 · question 1 of 5");
+    await g.waitForSelector("text=Step 3 of 4, question 1 of 5");
     await doSetup(g, "Pat Partner", "Pause before I answer", "**/start?step=4");
     // 4. build the system, one screen each: a daily routine, a weekly planning time, an accountability partner
     await g.waitForSelector("text=Getting in the Driver's Seat, step 4 of 4, part 1 of 3");
@@ -627,7 +627,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal(cycles[0].seasonId, cycles[1].seasonId, "both months are in one season");
     // the review: month rows, then close the season
     await g.goto(`${BASE}/season`);
-    await g.waitForSelector("text=Month 2 · Emotionally Anchored");
+    await g.waitForSelector("text=Month 2: Emotionally Anchored");
     await g.waitForSelector("text=Take the self-assessment");
     await g.waitForSelector("text=The review opens when month 2 ends.");
     assert.equal(await g.locator('input[name="decision"][value="KEEP_GOING"]').count(), 0, "no closing the season mid-month");

@@ -59,7 +59,7 @@ export function FiveSides({ profile, pathway, role, level, ai, teach = {}, rules
             <header className="flex items-start gap-3.5">
               <PillarMark k={l.pillar} />
               <div className="min-w-0">
-                <h3 className="font-serif text-[22px] leading-tight text-heading">{l.label}</h3>
+                <h3 className="font-sans font-extrabold text-[20px] leading-tight text-heading">{l.label}</h3>
                 {rule && <p className="mt-0.5 font-serif text-[17px] italic" style={{ color: "rgb(var(--pc))" }}>{rule}</p>}
                 <p className="mt-1.5 text-sm text-ink-soft">{l.shapes}</p>
               </div>

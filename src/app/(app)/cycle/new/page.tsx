@@ -77,7 +77,7 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
             <div className="rounded-xl border border-line bg-paper px-4 py-3">
               <input type="hidden" name="season" value="continue" />
               <p className="font-medium">Month {month} of {SEASON_LENGTH} in my season</p>
-              <p className="text-sm text-ink-soft mt-0.5">{open!.cycles.map((c, i) => `Month ${i + 1}: ${pack.pillars.find((p) => p.key === c.pillar)?.name ?? c.pillar}`).join(" · ")}</p>
+              <p className="text-sm text-ink-soft mt-0.5">{open!.cycles.map((c, i) => `Month ${i + 1}: ${pack.pillars.find((p) => p.key === c.pillar)?.name ?? c.pillar}`).join(", ")}</p>
               <Link href="/cycle/new?season=none" className="mt-1 inline-block text-xs text-ink-mute hover:text-ink">Start this one outside the season</Link>
             </div>
           ) : (
@@ -99,7 +99,7 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
                     <label key={k} className="option !flex gap-3 !p-3 cursor-pointer">
                       <input type="radio" name="template" value={k} defaultChecked={k === defaultTemplate} className="mt-1 accent-navy" />
                       <span>
-                        <span className="font-medium text-[15px]">{w.map((x) => x.phase).join(" · ")}</span>
+                        <span className="font-medium text-[15px]">{w.map((x) => x.phase).join(", ")}</span>
                       </span>
                     </label>
                   );
