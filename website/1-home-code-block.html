@@ -2,32 +2,29 @@
 <style>#mf{width:100vw;position:relative;left:50%;margin-left:-50vw;}</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
 <style>
-/* Layout: white and mist-gray bands with a 1180px inner wrap; navy only for the marquee, gut check, closing call and footer.
-   Color: navy ink, one oxblood accent, warm-neutral grays. Type: Archivo for headlines, Inter for text. */
+/* Mosley Foundry. Left-aligned on a 1180px grid; white pages, a few stone bands, navy only for the closing call.
+   Color: paper, stone, ink, slate, oxblood (from the headshot). Type: Archivo wide for headlines and UI, Source Serif for reading.
+   One bold move: the track record written as a sentence with counting numbers. Everything else stays quiet. */
 #mf {
   --paper: #ffffff;
-  --mist: #f4f3f0;
-  --line: #e3e1dc;
-  --ink: #14213d;
-  --text: #2a2f3a;
-  --muted: #5d6370;
-  --navy: #14213d;
-  --navy-deep: #0e182e;
-  --navy-line: rgba(255,255,255,.16);
+  --stone: #ecebe7;
+  --ink: #1a2233;
+  --slate: #5a6272;
+  --oxblood: #7a1f2b;
+  --line: #d9d7d1;
+  --navy-line: rgba(255,255,255,.18);
   --on-navy: #ffffff;
-  --on-navy-muted: #b8bfcd;
-  --accent: #7a1f2b;
-  --accent-on-navy: #e2b08f;
-  --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
-  --body: "Inter", "Helvetica Neue", Arial, sans-serif;
+  --on-navy-soft: #c3c8d3;
+  --sans: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
   color-scheme: light;
   background: var(--paper);
-  color: var(--text);
-  font-family: var(--body);
-  font-size: 18px;
-  line-height: 1.6;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 19px;
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
@@ -37,352 +34,265 @@
 #mf h1, #mf h2, #mf h3, #mf p, #mf li, #mf a, #mf span, #mf blockquote, #mf figcaption, #mf dt, #mf dd, #mf strong, #mf b, #mf em { color: inherit; font-family: inherit; line-height: inherit; }
 #mf img { max-width: 100%; display: block; }
 #mf button { font: inherit; color: inherit; cursor: pointer; }
-#mf :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
-#mf .mf-sparks { display: none; }
+#mf a { text-underline-offset: 3px; text-decoration-thickness: 1px; }
+#mf :focus-visible { outline: 3px solid var(--oxblood); outline-offset: 3px; }
 
-#mf .mf-wrap {
-  max-width: 1180px; margin: 0 auto;
-  padding-left: max(24px, env(safe-area-inset-left, 0px));
-  padding-right: max(24px, env(safe-area-inset-right, 0px));
-}
-#mf .mf-band { padding-block: clamp(72px, 9vw, 120px); background: var(--paper); }
-#mf .mf-light { background: var(--mist); }
-#mf .mf-iron2, #mf .mf-final { background: var(--navy); color: var(--on-navy); }
+#mf .mf-wrap { max-width: 1180px; margin: 0 auto; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); }
+#mf .mf-band { padding-block: clamp(72px, 9vw, 120px); }
+#mf .mf-stone { background: var(--stone); }
+#mf .mf-ruled > .mf-wrap { position: relative; padding-top: clamp(56px, 7vw, 88px); }
+#mf .mf-ruled > .mf-wrap::before { content: ""; position: absolute; top: 0; left: max(24px, env(safe-area-inset-left, 0px)); right: max(24px, env(safe-area-inset-right, 0px)); height: 1px; background: var(--line); }
+#mf .mf-ruled { padding-top: 0; }
 
-/* Type */
-#mf .mf-eyebrow { font-size: 13px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
-#mf .mf-iron2 .mf-eyebrow, #mf .mf-final .mf-eyebrow { color: var(--accent-on-navy); }
-#mf .mf-h2, #mf h1 {
-  font-family: var(--display); font-weight: 700; color: var(--ink); letter-spacing: -.02em; text-wrap: balance;
-}
-#mf .mf-h2 { font-size: clamp(34px, 4.4vw, 56px); line-height: 1.06; margin-top: 14px; max-width: 22ch; }
-#mf .mf-iron2 .mf-h2, #mf .mf-final .mf-h2, #mf .mf-iron2 h1 { color: var(--on-navy); }
-#mf .mf-lede { font-size: clamp(18px, 1.5vw, 20px); max-width: 58ch; margin-top: 20px; color: var(--muted); }
-#mf .mf-iron2 .mf-lede, #mf .mf-final .mf-lede { color: var(--on-navy-muted); }
+/* Type scale */
+#mf h1, #mf .mf-h2 { font-family: var(--sans); font-stretch: 125%; font-weight: 700; color: var(--ink); text-wrap: balance; }
+#mf h1 { font-size: clamp(42px, 5.6vw, 78px); line-height: 1.02; letter-spacing: -.015em; }
+#mf .mf-h2 { font-size: clamp(30px, 3.4vw, 44px); line-height: 1.1; letter-spacing: -.01em; max-width: 20ch; }
+#mf h3 { font-family: var(--sans); font-weight: 600; font-size: 20px; line-height: 1.3; color: var(--ink); }
+#mf .mf-lede { font-size: clamp(19px, 1.6vw, 22px); line-height: 1.55; color: var(--slate); max-width: 34em; margin-top: 20px; }
+#mf .mf-small { font-family: var(--sans); font-size: 15px; color: var(--slate); }
 
-/* Buttons */
-#mf .mf-btn {
-  display: inline-flex; align-items: center; gap: 10px; text-decoration: none;
-  font-family: var(--body); font-weight: 600; font-size: 16px; letter-spacing: .01em;
-  padding: 15px 24px; border-radius: 4px; border: 1.5px solid transparent;
-  transition: background-color .2s ease, border-color .2s ease, color .2s ease;
-}
-#mf .mf-btn-hot { background: var(--accent); color: #fff; }
-#mf .mf-btn-hot:hover { background: #5f1621; }
-#mf .mf-btn-ghost { border-color: var(--ink); color: var(--ink); background: transparent; }
-#mf .mf-btn-ghost:hover { background: var(--ink); color: #fff; }
-#mf .mf-iron2 .mf-btn-hot, #mf .mf-final .mf-btn-hot { background: #fff; color: var(--navy); }
-#mf .mf-iron2 .mf-btn-hot:hover, #mf .mf-final .mf-btn-hot:hover { background: var(--mist); }
-#mf .mf-btn .mf-arrow { transition: transform .2s ease; }
-#mf .mf-btn:hover .mf-arrow { transform: translateX(3px); }
-#mf .mf-ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+/* Buttons and links */
+#mf .mf-ctas { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 28px; margin-top: 34px; }
+#mf .mf-btn { display: inline-block; font-family: var(--sans); font-weight: 600; font-size: 16px; line-height: 1; text-decoration: none; padding: 17px 26px; border-radius: 3px; background: var(--oxblood); color: #fff; transition: background-color .15s ease; }
+#mf .mf-btn:hover { background: #5e1721; }
+#mf .mf-link { font-family: var(--sans); font-weight: 600; font-size: 16px; color: var(--ink); text-decoration: underline; }
+#mf .mf-link:hover { color: var(--oxblood); }
 
 /* Nav */
-#mf .mf-nav { position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,.94); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
-#mf .mf-nav .mf-wrap { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 72px; }
-#mf .mf-logo { font-family: var(--display); font-weight: 800; font-size: 21px; letter-spacing: -.01em; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 10px; white-space: nowrap; }
-#mf .mf-logo-mark { width: 10px; height: 22px; background: var(--accent); }
-#mf .mf-links { display: flex; gap: 28px; align-items: center; }
-#mf .mf-links a { font-size: 15px; font-weight: 500; text-decoration: none; color: var(--muted); }
+#mf .mf-nav { position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,.96); border-bottom: 1px solid var(--line); }
+#mf .mf-nav .mf-wrap { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 70px; }
+#mf .mf-logo { font-family: var(--sans); font-stretch: 125%; font-weight: 800; font-size: 20px; color: var(--ink); text-decoration: none; white-space: nowrap; }
+#mf .mf-links { display: flex; align-items: center; gap: 26px; }
+#mf .mf-links a { font-family: var(--sans); font-size: 15px; font-weight: 500; color: var(--slate); text-decoration: none; }
 #mf .mf-links a:hover { color: var(--ink); }
-#mf .mf-links .mf-btn { font-size: 14px; padding: 10px 16px; color: #fff; white-space: nowrap; }
-@media (max-width: 860px) { #mf .mf-links a:not(.mf-btn) { display: none; } }
-@media (max-width: 420px) { #mf .mf-logo { font-size: 18px; } #mf .mf-links .mf-btn { padding: 9px 12px; } }
+#mf .mf-links .mf-btn { color: #fff; font-size: 14px; padding: 12px 16px; }
+@media (max-width: 900px) { #mf .mf-links a:not(.mf-btn) { display: none; } }
+@media (max-width: 420px) { #mf .mf-logo { font-size: 17px; } #mf .mf-links .mf-btn { padding: 11px 12px; } }
 
-/* Hero */
-#mf .mf-hero { padding-block: clamp(56px, 8vw, 104px); background: var(--paper); }
-#mf .mf-hero .mf-wrap { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr); gap: clamp(32px, 6vw, 80px); align-items: center; }
-#mf .mf-hero h1 { font-size: clamp(46px, 6.6vw, 92px); line-height: 1; letter-spacing: -.035em; margin-top: 18px; }
-#mf .mf-hero h1 .mf-hot { color: var(--accent); }
-#mf .mf-hero .mf-lede { font-size: clamp(19px, 1.7vw, 22px); color: var(--text); max-width: 40ch; }
-#mf .mf-portrait { max-width: 420px; width: 100%; justify-self: end; }
-#mf .mf-portrait img { width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; object-position: 50% 22%; border-radius: 4px; }
-#mf .mf-tag { margin-top: 14px; font-size: 14px; color: var(--muted); }
-#mf .mf-tag strong { display: block; font-family: var(--display); font-weight: 700; font-size: 18px; color: var(--ink); }
+/* Hero: text on the grid, portrait running to the right edge */
+#mf .mf-hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 40%); min-height: 560px; }
+#mf .mf-hero-text { padding-block: clamp(56px, 8vw, 112px); padding-right: clamp(24px, 4vw, 64px); padding-left: max(24px, calc((100vw - 1180px) / 2 + 24px)); align-self: center; }
+#mf .mf-hero-photo { position: relative; min-height: 100%; }
+#mf .mf-hero-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 22%; }
+#mf .mf-hero .mf-lede { color: var(--ink); max-width: 30em; }
+#mf .mf-byline { margin-top: 40px; }
 @media (max-width: 860px) {
-  #mf .mf-hero .mf-wrap { grid-template-columns: minmax(0, 1fr); }
-  #mf .mf-portrait { justify-self: start; max-width: 340px; }
+  #mf .mf-hero { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+  #mf .mf-hero-photo { min-height: 0; aspect-ratio: 1 / 1; max-height: 70vh; }
+  #mf .mf-hero-text { padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); padding-block: 48px 56px; }
 }
 
-/* Marquee */
-#mf .mf-marquee { background: var(--navy); color: var(--on-navy); overflow: hidden; padding-block: 18px; }
-#mf .mf-track { display: flex; width: max-content; animation: mf-scroll 60s linear infinite; }
-#mf .mf-track span { font-family: var(--display); font-weight: 600; font-size: clamp(18px, 2vw, 24px); padding-right: 36px; white-space: nowrap; display: inline-flex; align-items: center; gap: 36px; }
-#mf .mf-track span::after { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-on-navy); }
-@keyframes mf-scroll { to { transform: translateX(-50%); } }
+/* Track record sentence */
+#mf .mf-record { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: clamp(28px, 5vw, 72px); align-items: start; }
+#mf .mf-record .mf-h2 { font-size: clamp(24px, 2.4vw, 30px); max-width: 14ch; }
+#mf .mf-sentence { font-size: clamp(25px, 2.7vw, 36px); line-height: 1.45; color: var(--ink); max-width: 26em; }
+#mf .mf-n { font-family: var(--sans); font-stretch: 125%; font-weight: 700; color: var(--oxblood); font-variant-numeric: tabular-nums; white-space: nowrap; }
+#mf .mf-record-note { margin-top: 28px; }
+@media (max-width: 860px) { #mf .mf-record { grid-template-columns: minmax(0, 1fr); } }
 
-/* Numbers */
-#mf .mf-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin-top: 52px; border-top: 1px solid var(--line); }
-#mf .mf-stat { padding: 28px 24px 0 0; }
-#mf .mf-stat + .mf-stat { padding-left: 24px; border-left: 1px solid var(--line); }
-#mf .mf-num { font-family: var(--display); font-weight: 700; font-size: clamp(44px, 5.4vw, 72px); line-height: 1; letter-spacing: -.03em; color: var(--ink); font-variant-numeric: tabular-nums; }
-#mf .mf-stat p { color: var(--muted); font-size: 16px; margin-top: 12px; max-width: 26ch; }
-@media (max-width: 860px) {
-  #mf .mf-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  #mf .mf-stat, #mf .mf-stat + .mf-stat { padding: 24px 12px 24px 0; border-left: 0; border-bottom: 1px solid var(--line); }
-}
+/* Numbered lists: Leadership Series, steps */
+#mf .mf-series { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: clamp(32px, 5vw, 72px); margin-top: 48px; }
+#mf .mf-series li { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 12px; padding: 24px 0 26px; border-top: 1px solid var(--line); }
+#mf .mf-ix { font-family: var(--sans); font-stretch: 125%; font-weight: 700; font-size: 18px; color: var(--oxblood); padding-top: 1px; }
+#mf .mf-series p, #mf .mf-steps p { color: var(--slate); font-size: 17px; margin-top: 6px; }
+#mf .mf-steps li { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 12px; padding: 22px 0; border-top: 1px solid var(--line); }
+#mf .mf-steps li:last-child { border-bottom: 1px solid var(--line); }
+@media (max-width: 760px) { #mf .mf-series { grid-template-columns: minmax(0, 1fr); } }
 
-/* Cards (Leadership Series, ProcessIQ gaps) */
-#mf .mf-series-head, #mf .mf-piq-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-items: end; }
-#mf .mf-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin-top: 52px; }
-#mf .mf-cards-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-#mf .mf-card { background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 28px 26px 30px; min-width: 0; transition: border-color .2s ease; }
-#mf .mf-card:hover { border-color: var(--ink); }
-#mf .mf-card-num { font-size: 13px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
-#mf .mf-card h3 { font-family: var(--display); font-weight: 700; font-size: 23px; line-height: 1.2; letter-spacing: -.01em; color: var(--ink); margin-top: 14px; }
-#mf .mf-card p { color: var(--muted); font-size: 16px; margin-top: 10px; }
-@media (max-width: 960px) { #mf .mf-cards, #mf .mf-cards-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } #mf .mf-series-head, #mf .mf-piq-head { grid-template-columns: minmax(0, 1fr); gap: 0; } }
-@media (max-width: 620px) { #mf .mf-cards, #mf .mf-cards-4 { grid-template-columns: minmax(0, 1fr); } }
+/* Two columns */
+#mf .mf-split { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(32px, 6vw, 88px); align-items: start; }
+#mf .mf-split-even { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+#mf .mf-tools { margin-top: 22px; font-size: 17px; color: var(--slate); max-width: 30em; }
+@media (max-width: 860px) { #mf .mf-split, #mf .mf-split-even { grid-template-columns: minmax(0, 1fr); } }
 
-#mf .mf-cases .mf-card { display: flex; flex-direction: column; }
-#mf .mf-cases .mf-num { color: var(--accent); font-size: clamp(40px, 4.2vw, 58px); white-space: nowrap; }
-#mf .mf-cases .mf-card h3 { font-size: 20px; margin-top: 16px; }
-#mf .mf-cases .mf-card-num { margin-top: auto; padding-top: 18px; font-size: 12px; }
-#mf .mf-cases { margin-top: 44px; }
-
-/* Two-column text + list (AI, trust) */
-#mf .mf-ai { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(32px, 6vw, 80px); align-items: start; }
-#mf .mf-steps { border-top: 1px solid var(--line); }
-#mf .mf-step { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 16px; padding: 22px 0; border-bottom: 1px solid var(--line); }
-#mf .mf-step-icon { font-family: var(--display); font-weight: 700; font-size: 15px; color: var(--accent); padding-top: 3px; }
-#mf .mf-step h3 { font-family: var(--display); font-weight: 700; font-size: 21px; color: var(--ink); line-height: 1.25; }
-#mf .mf-step p { color: var(--muted); font-size: 16px; margin-top: 4px; }
-#mf .mf-tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 26px; }
-#mf .mf-chip { font-size: 13px; font-weight: 500; border: 1px solid var(--line); background: var(--paper); border-radius: 999px; padding: 6px 12px; color: var(--text); }
-@media (max-width: 860px) { #mf .mf-ai { grid-template-columns: minmax(0, 1fr); } }
-
-/* ProcessIQ strip */
-#mf .mf-strip { padding-block: clamp(36px, 5vw, 56px); }
-#mf .mf-strip .mf-wrap { display: flex; flex-wrap: wrap; gap: 20px 40px; align-items: center; justify-content: space-between; }
-#mf .mf-strip-text { font-family: var(--display); font-weight: 500; font-size: clamp(21px, 2.2vw, 27px); line-height: 1.3; color: var(--ink); margin-top: 8px; max-width: 40ch; }
-#mf .mf-strip-text b { font-weight: 800; color: var(--accent); }
+/* ProcessIQ line */
+#mf .mf-aside { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 16px 40px; }
+#mf .mf-aside p { font-size: clamp(21px, 2vw, 26px); line-height: 1.4; max-width: 30em; }
+#mf .mf-aside b { font-family: var(--sans); font-stretch: 125%; font-weight: 700; }
 
 /* Gut check */
-#mf .mf-quiz { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: clamp(32px, 6vw, 80px); align-items: start; }
-#mf .mf-qbox { background: var(--paper); color: var(--text); border-radius: 8px; padding: clamp(24px, 4vw, 40px); }
-#mf .mf-qbar { height: 4px; background: var(--line); border-radius: 2px; margin-bottom: 24px; overflow: hidden; }
-#mf .mf-qbar i { display: block; height: 100%; width: 20%; background: var(--accent); transition: width .35s ease; }
-#mf .mf-qmeta { font-size: 13px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
-#mf .mf-qtext { font-family: var(--display); font-weight: 700; font-size: clamp(23px, 2.4vw, 30px); line-height: 1.2; color: var(--ink); margin-top: 8px; text-wrap: balance; }
+#mf .mf-qbox { background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: clamp(24px, 4vw, 40px); }
+#mf .mf-qbar { height: 3px; background: var(--stone); margin-bottom: 24px; }
+#mf .mf-qbar i { display: block; height: 100%; width: 20%; background: var(--oxblood); transition: width .3s ease; }
+#mf .mf-qmeta { font-family: var(--sans); font-size: 14px; color: var(--slate); }
+#mf .mf-qtext { font-family: var(--sans); font-weight: 600; font-size: clamp(22px, 2.2vw, 27px); line-height: 1.25; color: var(--ink); margin-top: 6px; text-wrap: balance; }
 #mf .mf-opts { display: grid; gap: 10px; margin-top: 22px; }
-#mf .mf-opt { text-align: left; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; font-size: 16px; line-height: 1.4; display: flex; gap: 14px; align-items: center; transition: border-color .2s ease, background-color .2s ease; }
-#mf .mf-opt:hover { border-color: var(--ink); background: var(--mist); }
-#mf .mf-opt b { flex: none; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; background: var(--mist); color: var(--ink); font-size: 13px; font-weight: 600; }
-#mf .mf-result h3 { font-family: var(--display); font-weight: 700; font-size: clamp(32px, 3.6vw, 44px); line-height: 1.05; color: var(--accent); margin-top: 10px; }
-#mf .mf-result p { color: var(--muted); margin-top: 12px; }
-#mf .mf-result .mf-ctas { margin-top: 24px; }
-#mf .mf-result .mf-btn-hot { background: var(--accent); color: #fff; }
-#mf .mf-reset { background: none; border: 0; text-decoration: underline; text-underline-offset: 4px; color: var(--muted); font-size: 15px; padding: 0; }
-@media (max-width: 860px) { #mf .mf-quiz { grid-template-columns: minmax(0, 1fr); } }
+#mf .mf-opt { text-align: left; font-family: var(--serif); font-size: 18px; line-height: 1.4; background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px; display: flex; gap: 14px; align-items: baseline; transition: border-color .15s ease; }
+#mf .mf-opt:hover { border-color: var(--ink); }
+#mf .mf-opt b { font-family: var(--sans); font-weight: 700; font-size: 14px; color: var(--oxblood); flex: none; }
+#mf .mf-result h3 { font-family: var(--sans); font-stretch: 125%; font-weight: 700; font-size: clamp(30px, 3.2vw, 40px); line-height: 1.05; color: var(--oxblood); margin-top: 8px; }
+#mf .mf-result p { color: var(--slate); margin-top: 12px; }
+#mf .mf-reset { background: none; border: 0; padding: 0; font-family: var(--sans); font-size: 15px; color: var(--slate); text-decoration: underline; text-underline-offset: 3px; }
 
-/* Process (Heat. Hammer. Temper.) */
-#mf .mf-process { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(20px, 3vw, 40px); margin-top: 52px; }
-#mf .mf-proc { border-top: 2px solid var(--ink); padding-top: 20px; }
-#mf .mf-proc-tag { font-size: 13px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
-#mf .mf-proc h3 { font-family: var(--display); font-weight: 700; font-size: 28px; color: var(--ink); line-height: 1.1; margin-top: 8px; }
-#mf .mf-proc p { color: var(--muted); margin-top: 10px; font-size: 16px; }
-@media (max-width: 760px) { #mf .mf-process { grid-template-columns: minmax(0, 1fr); } }
+/* Heat, hammer, temper */
+#mf .mf-three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(24px, 4vw, 56px); margin-top: 48px; }
+#mf .mf-three > div { border-top: 2px solid var(--ink); padding-top: 18px; }
+#mf .mf-tag { font-family: var(--sans); font-stretch: 125%; font-weight: 700; font-size: 15px; color: var(--oxblood); }
+#mf .mf-three h3 { margin-top: 6px; font-size: 24px; }
+#mf .mf-three p { color: var(--slate); font-size: 17px; margin-top: 10px; }
+@media (max-width: 760px) { #mf .mf-three { grid-template-columns: minmax(0, 1fr); } }
 
 /* Testimonials */
-#mf .mf-quotes { margin-top: 36px; display: grid; grid-template-columns: minmax(0, 1fr); }
-#mf .mf-q { grid-area: 1 / 1; opacity: 0; visibility: hidden; transition: opacity .4s ease, visibility .4s; }
-#mf .mf-q.is-on { opacity: 1; visibility: visible; }
-#mf .mf-q blockquote { font-family: var(--display); font-weight: 500; font-size: clamp(25px, 3vw, 38px); line-height: 1.3; letter-spacing: -.01em; color: var(--ink); max-width: 34ch; }
-#mf .mf-q blockquote::before { content: "\201C"; display: block; font-family: Georgia, serif; font-size: 72px; line-height: .8; color: var(--accent); margin-bottom: 6px; }
-#mf .mf-q figcaption { margin-top: 24px; font-weight: 600; font-size: 16px; color: var(--ink); }
-#mf .mf-q figcaption span { display: block; font-weight: 400; color: var(--muted); margin-top: 2px; }
-#mf .mf-qnav { display: flex; align-items: center; gap: 12px; margin-top: 36px; }
-#mf .mf-arrowbtn { width: 46px; height: 46px; border: 1px solid var(--line); border-radius: 50%; background: var(--paper); display: grid; place-items: center; font-size: 18px; color: var(--ink); transition: border-color .2s ease; }
+#mf .mf-quotes { display: grid; grid-template-columns: minmax(0, 1fr); margin-top: 40px; }
+#mf .mf-q { grid-area: 1 / 1; visibility: hidden; opacity: 0; transition: opacity .3s ease, visibility .3s; }
+#mf .mf-q.is-on { visibility: visible; opacity: 1; }
+#mf .mf-q blockquote { font-size: clamp(24px, 2.6vw, 33px); line-height: 1.4; color: var(--ink); max-width: 30em; }
+#mf .mf-q figcaption { margin-top: 22px; font-family: var(--sans); font-weight: 600; font-size: 16px; }
+#mf .mf-q figcaption span { display: block; font-weight: 400; color: var(--slate); }
+#mf .mf-qnav { display: flex; align-items: center; gap: 10px; margin-top: 34px; }
+#mf .mf-arrowbtn { width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 50%; background: var(--paper); display: grid; place-items: center; font-family: var(--sans); font-size: 17px; color: var(--ink); }
 #mf .mf-arrowbtn:hover { border-color: var(--ink); }
-#mf .mf-count { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; margin-left: 6px; }
-#mf .mf-dots { display: flex; gap: 6px; margin-left: auto; }
-#mf .mf-dots button { width: 8px; height: 8px; border-radius: 50%; border: 0; padding: 0; background: var(--line); }
-#mf .mf-dots button.is-on { background: var(--accent); }
-@media (max-width: 620px) { #mf .mf-dots { display: none; } }
+#mf .mf-count { font-family: var(--sans); font-size: 15px; color: var(--slate); margin-left: 8px; font-variant-numeric: tabular-nums; }
 
 /* About */
-#mf .mf-about { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: clamp(32px, 6vw, 80px); }
-#mf .mf-about-copy p { color: var(--muted); margin-top: 16px; max-width: 60ch; }
-#mf .mf-about-copy p.mf-big { font-family: var(--display); font-weight: 700; font-size: clamp(26px, 2.8vw, 36px); line-height: 1.15; letter-spacing: -.02em; color: var(--accent); margin-top: 24px; }
-#mf .mf-facts { align-self: start; border-top: 1px solid var(--line); }
+#mf .mf-about p { margin-top: 18px; max-width: 34em; color: var(--ink); }
+#mf .mf-about .mf-says { font-family: var(--sans); font-stretch: 125%; font-weight: 700; font-size: clamp(24px, 2.4vw, 31px); line-height: 1.2; margin-top: 26px; }
+#mf .mf-facts { border-top: 1px solid var(--line); }
 #mf .mf-fact { padding: 18px 0; border-bottom: 1px solid var(--line); }
-#mf .mf-fact dt { font-size: 13px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
-#mf .mf-fact dd { margin-top: 6px; font-size: 16px; color: var(--text); }
-#mf .mf-creds { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
-#mf .mf-iron2 .mf-facts, #mf .mf-iron2 .mf-fact { border-color: var(--navy-line); }
-#mf .mf-iron2 .mf-fact dt { color: var(--accent-on-navy); }
-#mf .mf-iron2 .mf-fact dd { color: var(--on-navy); }
-@media (max-width: 860px) { #mf .mf-about { grid-template-columns: minmax(0, 1fr); } }
+#mf .mf-fact dt { font-family: var(--sans); font-weight: 600; font-size: 15px; color: var(--oxblood); }
+#mf .mf-fact dd { margin-top: 4px; font-size: 17px; color: var(--ink); }
 
 /* FAQ */
-#mf .mf-faq { margin-top: 40px; border-top: 1px solid var(--ink); max-width: 860px; }
+#mf .mf-faq { margin-top: 36px; max-width: 46em; border-top: 1px solid var(--line); }
 #mf .mf-faq details { border-bottom: 1px solid var(--line); }
-#mf .mf-faq summary { list-style: none; cursor: pointer; padding: 20px 44px 20px 0; position: relative; font-family: var(--display); font-weight: 600; font-size: 21px; color: var(--ink); }
+#mf .mf-faq summary { list-style: none; cursor: pointer; padding: 20px 40px 20px 0; position: relative; font-family: var(--sans); font-weight: 600; font-size: 20px; color: var(--ink); }
 #mf .mf-faq summary::-webkit-details-marker { display: none; }
-#mf .mf-faq summary::after { content: "+"; position: absolute; right: 6px; top: 14px; font-size: 28px; font-weight: 400; color: var(--accent); transition: transform .2s ease; }
-#mf .mf-faq details[open] summary::after { transform: rotate(45deg); }
-#mf .mf-faq details p { color: var(--muted); padding-bottom: 22px; max-width: 64ch; }
+#mf .mf-faq summary::after { content: "+"; position: absolute; right: 4px; top: 16px; font-size: 26px; font-weight: 400; color: var(--oxblood); }
+#mf .mf-faq details[open] summary::after { content: "\2212"; }
+#mf .mf-faq details p { color: var(--slate); padding-bottom: 22px; max-width: 38em; }
 
-/* Closing call to action */
-#mf .mf-final { text-align: center; }
-#mf .mf-final .mf-h2 { margin-inline: auto; max-width: 20ch; font-size: clamp(36px, 5vw, 64px); }
-#mf .mf-final .mf-lede { margin-inline: auto; }
-#mf .mf-final .mf-ctas { justify-content: center; }
-#mf .mf-email { margin-top: 24px; font-size: 15px; color: var(--on-navy-muted); }
-#mf .mf-email a { color: var(--on-navy); }
-#mf .mf-light .mf-email, #mf .mf-band:not(.mf-iron2):not(.mf-final) .mf-email { color: var(--muted); }
-
-/* Footer */
-#mf .mf-foot { background: var(--navy-deep); color: var(--on-navy-muted); padding-block: 32px; font-size: 14px; }
-#mf .mf-foot .mf-wrap { display: flex; flex-wrap: wrap; gap: 14px 28px; justify-content: space-between; align-items: center; }
-#mf .mf-foot-line { font-family: var(--display); font-weight: 600; font-size: 17px; color: var(--on-navy); margin-bottom: 4px; }
-#mf .mf-foot nav { display: flex; gap: 22px; flex-wrap: wrap; }
+/* Closing call and footer */
+#mf .mf-close { background: var(--ink); color: var(--on-navy); }
+#mf .mf-close .mf-h2 { color: var(--on-navy); max-width: 18ch; }
+#mf .mf-close .mf-lede { color: var(--on-navy-soft); }
+#mf .mf-close .mf-btn { background: var(--paper); color: var(--ink); }
+#mf .mf-close .mf-btn:hover { background: var(--stone); }
+#mf .mf-close .mf-small { color: var(--on-navy-soft); margin-top: 22px; }
+#mf .mf-close .mf-small a { color: var(--on-navy); }
+#mf .mf-close .mf-facts, #mf .mf-close .mf-fact { border-color: var(--navy-line); }
+#mf .mf-close .mf-fact dt { color: var(--on-navy-soft); }
+#mf .mf-close .mf-fact dd, #mf .mf-close .mf-fact dd a { color: var(--on-navy); }
+#mf .mf-foot { background: var(--ink); color: var(--on-navy-soft); border-top: 1px solid var(--navy-line); padding-block: 30px; font-family: var(--sans); font-size: 14px; }
+#mf .mf-foot .mf-wrap { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px 32px; }
+#mf .mf-foot-line { font-size: 16px; font-weight: 600; color: var(--on-navy); margin-bottom: 2px; }
+#mf .mf-foot nav { display: flex; flex-wrap: wrap; gap: 22px; }
 #mf .mf-foot a { text-decoration: none; }
 #mf .mf-foot a:hover { color: var(--on-navy); }
 
 /* ProcessIQ page */
-#mf .mf-piq-hero .mf-wrap { display: block; }
-#mf .mf-piq-hero h1 { max-width: 16ch; }
-#mf .mf-shot { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #fff; box-shadow: 0 24px 60px -32px rgba(20,33,61,.35); }
-#mf .mf-shot-bar { display: flex; gap: 6px; padding: 10px 12px; border-bottom: 1px solid var(--line); background: var(--mist); }
-#mf .mf-shot-bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--line); }
+#mf .mf-page-hero { padding-block: clamp(56px, 8vw, 104px) clamp(48px, 6vw, 80px); }
+#mf .mf-page-hero h1 { max-width: 15ch; }
+#mf .mf-shot { border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: #fff; }
 #mf .mf-shot img { width: 100%; height: auto; }
-#mf .mf-piq-hero .mf-shot { margin-top: 52px; }
-#mf .mf-sample { font-size: 14px; color: var(--muted); margin-top: 14px; }
+#mf .mf-page-hero .mf-shot { margin-top: 56px; }
+#mf .mf-caption { font-family: var(--sans); font-size: 14px; color: var(--slate); margin-top: 12px; }
+#mf .mf-gaps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: clamp(32px, 5vw, 72px); margin-top: 44px; }
+#mf .mf-gaps li { padding: 22px 0 24px; border-top: 1px solid var(--line); }
+#mf .mf-gaps p { color: var(--slate); font-size: 17px; margin-top: 6px; }
 #mf .mf-feats { display: grid; gap: clamp(56px, 8vw, 96px); margin-top: 52px; }
-#mf .mf-feat { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: clamp(28px, 5vw, 64px); align-items: center; }
-#mf .mf-feat.mf-rev { grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); }
-#mf .mf-feat.mf-rev > :first-child { order: 2; }
-#mf .mf-feat h3 { font-family: var(--display); font-weight: 700; font-size: clamp(26px, 2.6vw, 34px); line-height: 1.1; letter-spacing: -.015em; color: var(--ink); margin-top: 10px; }
-#mf .mf-feat p { color: var(--muted); margin-top: 12px; }
-#mf .mf-trust { display: grid; gap: 14px; margin-top: 18px; }
-#mf .mf-trust li { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 10px; font-size: 16px; color: var(--muted); }
-#mf .mf-trust li::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-top: 9px; }
-#mf .mf-trust b { color: var(--ink); font-weight: 600; }
-@media (max-width: 960px) { #mf .mf-feat, #mf .mf-feat.mf-rev { grid-template-columns: minmax(0, 1fr); } #mf .mf-feat.mf-rev > :first-child { order: 0; } }
+#mf .mf-feat { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(28px, 5vw, 64px); align-items: center; }
+#mf .mf-feat h3 { font-stretch: 125%; font-weight: 700; font-size: clamp(23px, 2.2vw, 28px); line-height: 1.15; }
+#mf .mf-feat > div > p { color: var(--slate); margin-top: 12px; }
+#mf .mf-points { margin-top: 16px; display: grid; gap: 10px; }
+#mf .mf-points li { font-size: 17px; color: var(--slate); padding-left: 18px; position: relative; }
+#mf .mf-points li::before { content: ""; position: absolute; left: 0; top: .72em; width: 7px; height: 2px; background: var(--oxblood); }
+#mf .mf-points b { color: var(--ink); font-weight: 600; }
+@media (max-width: 860px) { #mf .mf-gaps, #mf .mf-feat { grid-template-columns: minmax(0, 1fr); } }
 
 /* Contact page */
-#mf .mf-contact-hero { padding-block: clamp(56px, 8vw, 96px) clamp(28px, 4vw, 40px); }
 #mf .mf-mockform { max-width: 720px; display: grid; gap: 18px; padding-bottom: 80px; }
-#mf .mf-mockform label { display: grid; gap: 8px; font-size: 15px; font-weight: 600; color: var(--ink); }
-#mf .mf-mockform input, #mf .mf-mockform select, #mf .mf-mockform textarea { font: inherit; font-weight: 400; color: var(--text); background: #fff; border: 1px solid #cfccc5; border-radius: 4px; padding: 13px 14px; width: 100%; }
+#mf .mf-mockform label { display: grid; gap: 8px; font-family: var(--sans); font-size: 15px; font-weight: 600; color: var(--ink); }
+#mf .mf-mockform input, #mf .mf-mockform select, #mf .mf-mockform textarea { font-family: var(--sans); font-size: 16px; font-weight: 400; color: var(--ink); background: #fff; border: 1px solid #c9c6bf; border-radius: 3px; padding: 13px 14px; width: 100%; }
 #mf .mf-mockform .mf-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
-#mf .mf-mocknote { font-size: 13px; color: var(--accent); }
+#mf .mf-mockform .mf-btn { border: 0; justify-self: start; }
+#mf .mf-mocknote { font-family: var(--sans); font-size: 14px; color: var(--oxblood); }
 @media (max-width: 620px) { #mf .mf-mockform .mf-row { grid-template-columns: minmax(0, 1fr); } }
 
-@media (prefers-reduced-motion: reduce) {
-  #mf *, #mf *::before, #mf *::after { animation: none !important; transition: none !important; }
-}
+@media (prefers-reduced-motion: reduce) { #mf *, #mf *::before, #mf *::after { transition: none !important; animation: none !important; } }
 </style>
-
 <div id="mf">
 
   <header class="mf-nav">
     <div class="mf-wrap">
-      <a class="mf-logo" href="#mf-top"><span class="mf-logo-mark" aria-hidden="true"></span>Mosley Foundry</a>
+      <a class="mf-logo" href="#mf-top">Mosley Foundry</a>
       <nav class="mf-links" aria-label="Sections">
         <a href="#mf-series">Leadership Series</a>
         <a href="#mf-ai">AI for Leaders</a>
         <a href="/processiq">ProcessIQ</a>
         <a href="#mf-about">About</a>
         <a href="/contact">Contact</a>
-        <a class="mf-btn mf-btn-hot" href="https://calendly.com/jason-mosley-mosleyfoundry/coaching-call" target="_blank" rel="noopener">Schedule a call</a>
+        <a class="mf-btn" href="https://calendly.com/jason-mosley-mosleyfoundry/coaching-call" target="_blank" rel="noopener">Schedule a call</a>
       </nav>
     </div>
   </header>
 
   <section class="mf-hero" id="mf-top">
-    <div class="mf-wrap">
-      <div>
-        <p class="mf-eyebrow">Leadership development &middot; Practical AI &middot; Chicago</p>
-        <h1>Where leaders are <span class="mf-hot">forged.</span></h1>
-        <p class="mf-lede">Foundational leadership skills and practical AI for project managers, supervisors, and frontline managers.</p>
-        <div class="mf-ctas">
-          <a class="mf-btn mf-btn-hot" href="https://calendly.com/jason-mosley-mosleyfoundry/coaching-call" target="_blank" rel="noopener">Schedule a call <span class="mf-arrow" aria-hidden="true">&rarr;</span></a>
-          <a class="mf-btn mf-btn-ghost" href="#mf-check">Take the 2-minute gut check</a>
-        </div>
+    <div class="mf-hero-text">
+      <h1>Where leaders are forged.</h1>
+      <p class="mf-lede">Foundational leadership skills and practical AI for project managers, supervisors, and frontline managers.</p>
+      <div class="mf-ctas">
+        <a class="mf-btn" href="https://calendly.com/jason-mosley-mosleyfoundry/coaching-call" target="_blank" rel="noopener">Schedule a call</a>
+        <a class="mf-link" href="#mf-check">Take the 2-minute gut check</a>
       </div>
-      <figure class="mf-portrait">
-        <img src="https://images.squarespace-cdn.com/content/v1/6ae0085634be725153bde62b/a922de5e-6681-43c3-a7d5-b2d9b2c3ae7b/IMG_2970.jpeg?format=1000w" alt="Jason Mosley, founder of Mosley Foundry" width="733" height="1100">
-        <figcaption class="mf-tag"><strong>Jason Mosley</strong>Founder, Mosley Foundry</figcaption>
-      </figure>
+      <p class="mf-small mf-byline">Jason Mosley, founder. Based in Chicago.</p>
+    </div>
+    <div class="mf-hero-photo">
+      <img src="https://images.squarespace-cdn.com/content/v1/6ae0085634be725153bde62b/a922de5e-6681-43c3-a7d5-b2d9b2c3ae7b/IMG_2970.jpeg?format=1000w" alt="Jason Mosley, founder of Mosley Foundry" width="733" height="1100">
     </div>
   </section>
 
-  <div class="mf-marquee" aria-hidden="true">
-    <div class="mf-track">
-      <span>Leading others</span><span>Hard conversations</span><span>Accountability</span><span>Leading through change</span><span>Practical AI</span><span>Knowing yourself as a leader</span>
-      <span>Leading others</span><span>Hard conversations</span><span>Accountability</span><span>Leading through change</span><span>Practical AI</span><span>Knowing yourself as a leader</span>
-    </div>
-  </div>
-
-  <section class="mf-band">
-    <div class="mf-wrap">
-      <p class="mf-eyebrow">The work so far</p>
+  <section class="mf-band mf-stone">
+    <div class="mf-wrap mf-record">
       <h2 class="mf-h2">I build the skills the job assumes you already have.</h2>
-      <ol class="mf-cards mf-cards-4 mf-cases">
-        <li class="mf-card"><div class="mf-num" data-count="10" data-suffix="x">10x</div><h3>A six-person leadership pilot grew to more than 60 leaders.</h3><p>It became part of the organization's succession and workforce planning.</p><span class="mf-card-num">Financial institution</span></li>
-        <li class="mf-card"><div class="mf-num" data-count="300" data-suffix="+">300+</div><h3>Leaders trained to carry one strategy into 12 hospitals.</h3><p>Each hospital turned system goals into its own owners, measures, and reviews.</p><span class="mf-card-num">Health system</span></li>
-        <li class="mf-card"><div class="mf-num" data-count="48">48</div><h3>Small business owners coached on profitability and access to capital.</h3><p>Including owners who started with no revenue and now have paying customers.</p><span class="mf-card-num">Small business advisory, since 2022</span></li>
-        <li class="mf-card"><div class="mf-num" data-count="250" data-prefix="$" data-suffix="K+">$250K+</div><h3>In capital accessed by the small business owners I coach.</h3><p>Across the businesses I've advised since 2022.</p><span class="mf-card-num">Small business advisory</span></li>
-      </ol>
+      <p class="mf-sentence">Since 2022, I've coached <span class="mf-n" data-count="48">48</span> small business owners, including some who started with no revenue, and together they've accessed <span class="mf-n" data-count="250" data-prefix="$" data-suffix="K+">$250K+</span> in capital. Before that, I trained <span class="mf-n" data-count="300" data-suffix="+">300+</span> leaders to carry one strategy into 12 hospitals, and grew a six-person leadership pilot at a financial institution <span class="mf-n" data-count="10" data-suffix="x">10x</span>, to more than 60 leaders.</p>
     </div>
   </section>
 
-  <section class="mf-band mf-light" id="mf-series">
+  <section class="mf-band" id="mf-series">
     <div class="mf-wrap">
-      <div class="mf-series-head">
+      <h2 class="mf-h2">A six-session series for the people who lead the work.</h2>
+      <p class="mf-lede">For supervisors, frontline managers, and project leads. Whether you lead with a title or only with influence, the problems are the same: expectations aren't clear, hard conversations get put off, and change fades after launch.</p>
+      <ol class="mf-series">
+        <li><span class="mf-ix">1</span><div><h3>Leading Others</h3><p>Move from doing the work to multiplying it. Set expectations, delegate with confidence, and keep your relationships with former peers intact.</p></div></li>
+        <li><span class="mf-ix">2</span><div><h3>Knowing Yourself as a Leader</h3><p>Take the EQ-i 2.0, a validated emotional intelligence assessment, and see how your reactions in tough moments shape what your team experiences. Then learn to choose your response.</p></div></li>
+        <li><span class="mf-ix">3</span><div><h3>Hard Conversations</h3><p>Raise issues while they're still small. Know when a situation calls for coaching, performance management, or escalation.</p></div></li>
+        <li><span class="mf-ix">4</span><div><h3>Driving Accountability</h3><p>Turn commitments into named owners and real deadlines. Build follow-through that happens whether or not you're the one checking.</p></div></li>
+        <li><span class="mf-ix">5</span><div><h3>Leading Through Change</h3><p>Lead well when the information is incomplete. Sort what's yours to decide from what needs someone else, and move your team from going through the motions to buying in.</p></div></li>
+        <li><span class="mf-ix">6</span><div><h3>Practical AI for Leaders</h3><p>Hands-on work with AI on the tasks leaders actually handle: emails, schedules, reports, and meeting notes. Then how to bring your team along.</p></div></li>
+      </ol>
+      <div class="mf-ctas"><a class="mf-link" href="https://calendly.com/jason-mosley-mosleyfoundry/coaching-call" target="_blank" rel="noopener">Talk about the series</a></div>
+    </div>
+  </section>
+
+  <section class="mf-band mf-ruled" id="mf-ai">
+    <div class="mf-wrap">
+      <div class="mf-split">
         <div>
-          <p class="mf-eyebrow">The Leadership Series</p>
-          <h2 class="mf-h2">A six-session series for the people who lead the work.</h2>
+          <h2 class="mf-h2">The tools are ready. Are your leaders?</h2>
+          <p class="mf-lede">Your company bought the tools. Most of your people still aren't using them. That's a leadership and accountability problem, and it's fixable.</p>
+          <p class="mf-tools">I work with the tools your company already has, including Microsoft Copilot Studio, Claude, Claude Code, Gemini, NotebookLM, and Notion.</p>
         </div>
-        <p class="mf-lede">For supervisors, frontline managers, and project leads. Whether you lead with a title or only with influence, the problems are the same: expectations aren't clear, hard conversations get put off, and change fades after launch.</p>
+        <ol class="mf-steps">
+          <li><span class="mf-ix">1</span><div><h3>Show them how</h3><p>Hands-on sessions on everyday uses: emails, schedules, reports, meeting notes, and planning.</p></div></li>
+          <li><span class="mf-ix">2</span><div><h3>Equip the managers</h3><p>Give them what they need to lead their teams through the change.</p></div></li>
+          <li><span class="mf-ix">3</span><div><h3>Build what fits</h3><p>Simple AI assistants for your team's real work, like follow-ups, status updates, and tracking.</p></div></li>
+          <li><span class="mf-ix">4</span><div><h3>Track adoption</h3><p>Clear owners and regular follow-up, so use keeps growing after launch day.</p></div></li>
+        </ol>
       </div>
-      <ol class="mf-cards">
-        <li class="mf-card"><span class="mf-card-num">Session 01</span><h3>Leading Others</h3><p>Move from doing the work to multiplying it. Set expectations, delegate with confidence, and keep your relationships with former peers intact.</p></li>
-        <li class="mf-card"><span class="mf-card-num">Session 02</span><h3>Knowing Yourself as a Leader</h3><p>Take the EQ-i 2.0, a validated emotional intelligence assessment, and see how your reactions in tough moments shape what your team experiences. Then learn to choose your response.</p></li>
-        <li class="mf-card"><span class="mf-card-num">Session 03</span><h3>Hard Conversations</h3><p>Raise issues while they're still small. Know when a situation calls for coaching, performance management, or escalation.</p></li>
-        <li class="mf-card"><span class="mf-card-num">Session 04</span><h3>Driving Accountability</h3><p>Turn commitments into named owners and real deadlines. Build follow-through that happens whether or not you're the one checking.</p></li>
-        <li class="mf-card"><span class="mf-card-num">Session 05</span><h3>Leading Through Change</h3><p>Lead well when the information is incomplete. Sort what's yours to decide from what needs someone else, and move your team from going through the motions to buying in.</p></li>
-        <li class="mf-card"><span class="mf-card-num">Session 06</span><h3>Practical AI for Leaders</h3><p>Hands-on work with AI on the tasks leaders actually handle: emails, schedules, reports, and meeting notes. Then how to bring your team along.</p></li>
-      </ol>
-      <div class="mf-ctas"><a class="mf-btn mf-btn-ghost" href="https://calendly.com/jason-mosley-mosleyfoundry/coaching-call" target="_blank" rel="noopener">Talk about the series <span class="mf-arrow" aria-hidden="true">&rarr;</span></a></div>
     </div>
   </section>
 
-  <section class="mf-band" id="mf-ai">
-    <div class="mf-wrap mf-ai">
-      <div>
-        <p class="mf-eyebrow">AI adoption</p>
-        <h2 class="mf-h2">The tools are ready. Are your leaders?</h2>
-        <p class="mf-lede">Your company bought the tools. Most of your people still aren't using them. That's a leadership and accountability problem, and it's fixable.</p>
-        <div class="mf-tools" aria-label="Tools">
-          <span class="mf-chip">Microsoft Copilot Studio</span><span class="mf-chip">Claude</span><span class="mf-chip">Claude Code</span><span class="mf-chip">Gemini</span><span class="mf-chip">NotebookLM</span><span class="mf-chip">Notion</span>
-        </div>
-      </div>
-      <ol class="mf-steps">
-        <li class="mf-step"><span class="mf-step-icon">01</span><div><h3>Show them how</h3><p>Hands-on sessions on everyday uses: emails, schedules, reports, meeting notes, and planning.</p></div></li>
-        <li class="mf-step"><span class="mf-step-icon">02</span><div><h3>Equip the managers</h3><p>Give them what they need to lead their teams through the change.</p></div></li>
-        <li class="mf-step"><span class="mf-step-icon">03</span><div><h3>Build what fits</h3><p>Simple AI assistants for your team's real work, like follow-ups, status updates, and tracking.</p></div></li>
-        <li class="mf-step"><span class="mf-step-icon">04</span><div><h3>Track adoption</h3><p>Clear owners and regular follow-up, so use keeps growing after launch day.</p></div></li>
-      </ol>
+  <section class="mf-band mf-ruled" id="mf-processiq">
+    <div class="mf-wrap mf-aside">
+      <p>I also build tools. <b>ProcessIQ</b> maps a process, finds the waste, and shows what to automate.</p>
+      <a class="mf-link" href="/processiq">See how ProcessIQ works</a>
     </div>
   </section>
 
-  <section class="mf-strip mf-light" id="mf-processiq">
-    <div class="mf-wrap">
+  <section class="mf-band mf-stone" id="mf-check">
+    <div class="mf-wrap mf-split mf-split-even">
       <div>
-        <p class="mf-eyebrow">What I build</p>
-        <p class="mf-strip-text">I also build tools. <b>ProcessIQ</b> maps a process, finds the waste, and shows what to automate.</p>
-      </div>
-      <a class="mf-btn mf-btn-ghost" href="/processiq">See how it works <span class="mf-arrow" aria-hidden="true">&rarr;</span></a>
-    </div>
-  </section>
-
-  <section class="mf-band mf-iron2" id="mf-check">
-    <div class="mf-wrap mf-quiz">
-      <div>
-        <p class="mf-eyebrow">The gut check</p>
         <h2 class="mf-h2">Where should your team start?</h2>
         <p class="mf-lede">Five quick questions. Pick the answer that sounds most like the last month, and you'll see where to start.</p>
       </div>
@@ -393,78 +303,72 @@
     </div>
   </section>
 
-  <section class="mf-band mf-light">
+  <section class="mf-band">
     <div class="mf-wrap">
-      <p class="mf-eyebrow">How it works</p>
       <h2 class="mf-h2">Heat. Hammer. Temper.</h2>
       <p class="mf-lede">Every engagement follows the same three steps.</p>
-      <div class="mf-process">
-        <div class="mf-proc"><span class="mf-proc-tag">Step 1 &middot; Heat</span><h3>Diagnose</h3><p>A 30-minute call about what's broken, why it's happening, and who owns it. No pitch, no deck.</p></div>
-        <div class="mf-proc"><span class="mf-proc-tag">Step 2 &middot; Hammer</span><h3>Build the skill</h3><p>Sessions shaped to your team, with assessments like EQ-i 2.0 and CCL 360 where they help. People practice in the room on their own work.</p></div>
-        <div class="mf-proc"><span class="mf-proc-tag">Step 3 &middot; Temper</span><h3>Follow through</h3><p>Named owners, follow-up, and coaching after the sessions end, so the new habits are still in place next quarter.</p></div>
+      <div class="mf-three">
+        <div><span class="mf-tag">Heat</span><h3>Diagnose</h3><p>A 30-minute call about what's broken, why it's happening, and who owns it. No pitch, no deck.</p></div>
+        <div><span class="mf-tag">Hammer</span><h3>Build the skill</h3><p>Sessions shaped to your team, with assessments like EQ-i 2.0 and CCL 360 where they help. People practice in the room on their own work.</p></div>
+        <div><span class="mf-tag">Temper</span><h3>Follow through</h3><p>Named owners, follow-up, and coaching after the sessions end, so the new habits are still in place next quarter.</p></div>
       </div>
     </div>
   </section>
 
-  <section class="mf-band" id="mf-words">
+  <section class="mf-band mf-ruled" id="mf-words">
     <div class="mf-wrap">
-      <p class="mf-eyebrow">What leaders say</p>
+      <h2 class="mf-h2">What leaders say</h2>
       <div class="mf-quotes">
-        <figure class="mf-q is-on"><blockquote>Jason has a way of challenging your thinking without telling you what to think. He helps you see where leadership, trust, and accountability intersect.</blockquote><figcaption>NBA Head Coach<span>Executive leadership coaching</span></figcaption></figure>
-        <figure class="mf-q"><blockquote>He doesn't just facilitate a session. He creates an environment where people challenge themselves, have honest conversations, and leave with something they can actually use.</blockquote><figcaption>Manufacturing industry<span>Leadership development program</span></figcaption></figure>
-        <figure class="mf-q"><blockquote>Jason helped us connect enterprise strategy with the realities of operating across 12 hospitals. Successful transformation required leadership alignment, organizational discipline, and the ability to bring people along.</blockquote><figcaption>Healthcare executive<span>Enterprise transformation</span></figcaption></figure>
-        <figure class="mf-q"><blockquote>He helped create a leadership development experience that started with a small pilot and expanded to reach more than 60 leaders. It wasn't training for the sake of training. It was about preparing people to lead.</blockquote><figcaption>Financial services leader<span>Leadership development</span></figcaption></figure>
-        <figure class="mf-q"><blockquote>Jason understands people, but he also understands systems. That's a powerful combination. His strength is turning organizational complexity into clarity and action.</blockquote><figcaption>Healthcare leader<span>Organizational effectiveness</span></figcaption></figure>
-        <figure class="mf-q"><blockquote>Jason doesn't stop at recommendations. He built the tools and automations that fixed problems we'd worked around for years. Our team got hours back every week, and the savings paid for the work many times over.</blockquote><figcaption>Financial institution<span>Process automation</span></figcaption></figure>
-        <figure class="mf-q"><blockquote>Jason doesn't let teams hide behind buzzwords or complicated presentations. He gets straight to the work. What's broken? Why is it happening? Who owns the solution?</blockquote><figcaption>Manufacturing leader<span>Operational excellence</span></figcaption></figure>
-        <figure class="mf-q"><blockquote>Some facilitators know the material. Others know how to connect with people. Jason does both. His approach makes leadership development feel relevant rather than academic.</blockquote><figcaption>Financial services<span>Talent development</span></figcaption></figure>
-        <figure class="mf-q"><blockquote>His sessions are engaging, practical, and sometimes uncomfortable in exactly the right way. You leave knowing what you need to do next.</blockquote><figcaption>Entrepreneur development<span>Business coaching</span></figcaption></figure>
-        <figure class="mf-q"><blockquote>He's confident without being rigid, challenging without being intimidating, and entertaining without losing the substance.</blockquote><figcaption>Leadership development partner<span>Enterprise facilitation</span></figcaption></figure>
+        <figure class="mf-q is-on"><blockquote>&ldquo;Jason has a way of challenging your thinking without telling you what to think. He helps you see where leadership, trust, and accountability intersect.&rdquo;</blockquote><figcaption>NBA Head Coach<span>Executive leadership coaching</span></figcaption></figure>
+        <figure class="mf-q"><blockquote>&ldquo;He doesn't just facilitate a session. He creates an environment where people challenge themselves, have honest conversations, and leave with something they can actually use.&rdquo;</blockquote><figcaption>Manufacturing industry<span>Leadership development program</span></figcaption></figure>
+        <figure class="mf-q"><blockquote>&ldquo;Jason helped us connect enterprise strategy with the realities of operating across 12 hospitals. Successful transformation required leadership alignment, organizational discipline, and the ability to bring people along.&rdquo;</blockquote><figcaption>Healthcare executive<span>Enterprise transformation</span></figcaption></figure>
+        <figure class="mf-q"><blockquote>&ldquo;He helped create a leadership development experience that started with a small pilot and expanded to reach more than 60 leaders. It wasn't training for the sake of training. It was about preparing people to lead.&rdquo;</blockquote><figcaption>Financial services leader<span>Leadership development</span></figcaption></figure>
+        <figure class="mf-q"><blockquote>&ldquo;Jason understands people, but he also understands systems. That's a powerful combination. His strength is turning organizational complexity into clarity and action.&rdquo;</blockquote><figcaption>Healthcare leader<span>Organizational effectiveness</span></figcaption></figure>
+        <figure class="mf-q"><blockquote>&ldquo;Jason doesn't stop at recommendations. He built the tools and automations that fixed problems we'd worked around for years. Our team got hours back every week, and the savings paid for the work many times over.&rdquo;</blockquote><figcaption>Financial institution<span>Process automation</span></figcaption></figure>
+        <figure class="mf-q"><blockquote>&ldquo;Jason doesn't let teams hide behind buzzwords or complicated presentations. He gets straight to the work. What's broken? Why is it happening? Who owns the solution?&rdquo;</blockquote><figcaption>Manufacturing leader<span>Operational excellence</span></figcaption></figure>
+        <figure class="mf-q"><blockquote>&ldquo;Some facilitators know the material. Others know how to connect with people. Jason does both. His approach makes leadership development feel relevant rather than academic.&rdquo;</blockquote><figcaption>Financial services<span>Talent development</span></figcaption></figure>
+        <figure class="mf-q"><blockquote>&ldquo;His sessions are engaging, practical, and sometimes uncomfortable in exactly the right way. You leave knowing what you need to do next.&rdquo;</blockquote><figcaption>Entrepreneur development<span>Business coaching</span></figcaption></figure>
+        <figure class="mf-q"><blockquote>&ldquo;He's confident without being rigid, challenging without being intimidating, and entertaining without losing the substance.&rdquo;</blockquote><figcaption>Leadership development partner<span>Enterprise facilitation</span></figcaption></figure>
       </div>
       <div class="mf-qnav">
         <button class="mf-arrowbtn" type="button" data-dir="-1" aria-label="Previous testimonial">&larr;</button>
         <button class="mf-arrowbtn" type="button" data-dir="1" aria-label="Next testimonial">&rarr;</button>
-        <span class="mf-count">01 / 10</span>
-        <div class="mf-dots"></div>
+        <span class="mf-count">1 of 10</span>
       </div>
     </div>
   </section>
 
-  <section class="mf-band mf-light" id="mf-about">
-    <div class="mf-wrap mf-about">
-      <div class="mf-about-copy">
-        <p class="mf-eyebrow">About</p>
+  <section class="mf-band mf-stone" id="mf-about">
+    <div class="mf-wrap mf-split mf-about">
+      <div>
         <h2 class="mf-h2">I'm Jason Mosley.</h2>
         <p>In second grade I taught my classmates cursive, because I'd already learned it at my last school. I got in trouble for it. It wasn't in the lesson plan yet.</p>
-        <p class="mf-big">They needed it. I had it. So I gave it.</p>
+        <p class="mf-says">They needed it. I had it. So I gave it.</p>
         <p>I've been doing that my whole life, teaching people a skill before the system says they're ready for it.</p>
         <p>For more than fifteen years I've helped leaders build the skills their promotions assumed they already had. I've led a multidisciplinary team through a full cloud migration while running the people side of the same change, so I teach what I've had to make work myself. Now I work with supervisors, project leads, and managers, and I stay in the room while they use those skills on real work.</p>
         <p>My style is structured and direct, with plenty of humor. You'll practice in the room and leave with something you can use right away.</p>
       </div>
       <dl class="mf-facts">
         <div class="mf-fact"><dt>Mosley Foundry</dt><dd>Mosley Foundry develops leaders and builds the systems that make their changes last.</dd></div>
-        <div class="mf-fact"><dt>Credentials</dt><dd>
-          <div class="mf-creds"><span class="mf-chip">CCMP</span><span class="mf-chip">Microsoft AI Transformation Leader</span><span class="mf-chip">Lean Six Sigma Green Belt</span><span class="mf-chip">EQ-i 2.0</span></div>
-        </dd></div>
+        <div class="mf-fact"><dt>Credentials</dt><dd>Certified Change Management Professional (CCMP), Microsoft AI Transformation Leader, Lean Six Sigma Green Belt, and EQ-i 2.0 certified.</dd></div>
         <div class="mf-fact"><dt>Author</dt><dd><em>Both Hands on the Wheel</em>, the book behind my coaching program and app, plus two more books on leadership and change. Next up: <em>The Michigan Left: Leading Change From the Driver's Seat</em>.</dd></div>
         <div class="mf-fact"><dt>Off the clock</dt><dd>Former athlete and Taekwondo black belt. Discipline and repetition show up in how I coach.</dd></div>
       </dl>
     </div>
   </section>
 
-  <section class="mf-band mf-final" id="mf-contact">
+  <section class="mf-band mf-close" id="mf-contact">
     <div class="mf-wrap">
-      <p class="mf-eyebrow">Start here</p>
       <h2 class="mf-h2">The first call is a diagnostic. No pitch, no deck.</h2>
       <p class="mf-lede">Thirty minutes on what's going on with your team. You'll leave with a clearer picture, whether we work together or not.</p>
-      <div class="mf-ctas"><a class="mf-btn mf-btn-hot" href="https://calendly.com/jason-mosley-mosleyfoundry/coaching-call" target="_blank" rel="noopener">Schedule a call <span class="mf-arrow" aria-hidden="true">&rarr;</span></a></div>
-      <p class="mf-email">Prefer to write? <a href="/contact">Send a message</a> or email <a href="mailto:jason.mosley@mosleyfoundry.com">jason.mosley@mosleyfoundry.com</a></p>
+      <div class="mf-ctas"><a class="mf-btn" href="https://calendly.com/jason-mosley-mosleyfoundry/coaching-call" target="_blank" rel="noopener">Schedule a call</a></div>
+      <p class="mf-small">Prefer to write? <a href="/contact">Send a message</a> or email <a href="mailto:jason.mosley@mosleyfoundry.com">jason.mosley@mosleyfoundry.com</a></p>
     </div>
   </section>
 
   <footer class="mf-foot">
     <div class="mf-wrap">
-      <div class="mf-foot-brand"><p class="mf-foot-line">Mosley Foundry develops leaders and builds the systems that make their changes last.</p><span>&copy; <span class="mf-year">2026</span> Mosley Foundry &middot; Chicago, IL</span></div>
+      <div><p class="mf-foot-line">Mosley Foundry develops leaders and builds the systems that make their changes last.</p><span>&copy; <span class="mf-year">2026</span> Mosley Foundry, Chicago, IL</span></div>
       <nav aria-label="Footer">
         <a href="https://www.linkedin.com/in/jedwardmosley" target="_blank" rel="noopener">LinkedIn</a>
         <a href="https://calendly.com/jason-mosley-mosleyfoundry/coaching-call" target="_blank" rel="noopener">Schedule a call</a>
@@ -474,74 +378,53 @@
     </div>
   </footer>
 </div>
-
 <script>
 (function () {
   var root = document.getElementById('mf');
   if (!root) return;
   var CAL = 'https://calendly.com/jason-mosley-mosleyfoundry/coaching-call';
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var y = root.querySelector('.mf-year'); if (y) y.textContent = new Date().getFullYear();
+  root.querySelectorAll('.mf-year').forEach(function (y) { y.textContent = new Date().getFullYear(); });
 
-  /* Smooth in-page links that stay inside the block */
-  root.addEventListener('click', function (e) {
-    var a = e.target.closest('a[href^="#mf-"]');
+  /* In-page links scroll below the sticky menu */
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('#mf a[href^="#mf-"]');
     if (!a) return;
     var t = document.getElementById(a.getAttribute('href').slice(1));
     if (!t) return;
     e.preventDefault();
-    var navH = root.querySelector('.mf-nav').offsetHeight;
+    var nav = root.querySelector('.mf-nav');
+    var navH = nav ? nav.offsetHeight : 0;
     window.scrollTo({ top: t.getBoundingClientRect().top + window.pageYOffset - navH + 1, behavior: reduce ? 'auto' : 'smooth' });
   });
 
-  /* Sparks rising from the forge */
-  var cv = root.querySelector('.mf-sparks');
-  if (cv && cv.getContext && !reduce) {
-    var ctx = cv.getContext('2d'), sp = [], W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 2), running = true;
-    var size = function () { W = cv.offsetWidth; H = cv.offsetHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); };
-    var spawn = function () { return { x: Math.random() * W, y: H + 10, vx: (Math.random() - .5) * .5, vy: -(.6 + Math.random() * 1.6), life: 0, max: 140 + Math.random() * 220, r: .8 + Math.random() * 1.8 }; };
-    size(); window.addEventListener('resize', size);
-    for (var i = 0; i < 60; i++) { var s = spawn(); s.y = Math.random() * H; s.life = Math.random() * s.max; sp.push(s); }
-    if ('IntersectionObserver' in window) new IntersectionObserver(function (en) { running = en[0].isIntersecting; if (running) requestAnimationFrame(tick); }).observe(cv);
-    var tick = function () {
-      if (!running) return;
-      ctx.clearRect(0, 0, W, H);
-      for (var i = 0; i < sp.length; i++) {
-        var p = sp[i]; p.life++; p.x += p.vx + Math.sin((p.life + i) / 30) * .25; p.y += p.vy;
-        var k = 1 - p.life / p.max;
-        if (k <= 0 || p.y < -10) { sp[i] = spawn(); continue; }
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(' + (242) + ',' + Math.round(120 + 60 * k) + ',' + Math.round(40 + 20 * k) + ',' + (k * .85).toFixed(3) + ')';
-        ctx.shadowColor = 'rgba(242,165,65,.8)'; ctx.shadowBlur = 8; ctx.fill();
-      }
-      requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-  }
-
-  /* Count-up numbers (they rest at their final values until seen) */
+  /* Count-up numbers: they rest at their final values and count up once when first seen */
   if ('IntersectionObserver' in window && !reduce) {
-    var io = new IntersectionObserver(function (en) {
-      en.forEach(function (e) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
         if (!e.isIntersecting) return;
         io.unobserve(e.target);
         var el = e.target, end = +el.dataset.count, pre = el.dataset.prefix || '', suf = el.dataset.suffix || '', t0 = null;
-        var step = function (ts) { if (!t0) t0 = ts; var k = Math.min((ts - t0) / 1400, 1); k = 1 - Math.pow(1 - k, 3); el.textContent = pre + Math.round(end * k) + suf; if (k < 1) requestAnimationFrame(step); };
+        var step = function (ts) {
+          if (!t0) t0 = ts;
+          var k = Math.min((ts - t0) / 1600, 1); k = 1 - Math.pow(1 - k, 3);
+          el.textContent = pre + Math.round(end * k) + suf;
+          if (k < 1) requestAnimationFrame(step);
+        };
         requestAnimationFrame(step);
       });
-    }, { threshold: .6 });
-    root.querySelectorAll('[data-count]').forEach(function (el) { io.observe(el); });
+    }, { threshold: .8 });
+    document.querySelectorAll('#mf [data-count]').forEach(function (el) { io.observe(el); });
   }
 
   /* Testimonials */
-  var qs = root.querySelectorAll('.mf-q'), cur = 0, cnt = root.querySelector('.mf-count'), dots = root.querySelector('.mf-dots');
-  var pad = function (n) { return (n < 10 ? '0' : '') + n; };
-  qs.forEach(function (_, i) { var b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label', 'Testimonial ' + (i + 1)); b.addEventListener('click', function () { show(i); }); dots.appendChild(b); });
+  var qs = root.querySelectorAll('.mf-q');
+  if (!qs.length) return;
+  var cur = 0, cnt = root.querySelector('.mf-count');
   var show = function (i) {
     cur = (i + qs.length) % qs.length;
     qs.forEach(function (q, j) { q.classList.toggle('is-on', j === cur); });
-    dots.querySelectorAll('button').forEach(function (d, j) { d.classList.toggle('is-on', j === cur); });
-    cnt.textContent = pad(cur + 1) + ' / ' + pad(qs.length);
+    cnt.textContent = (cur + 1) + ' of ' + qs.length;
   };
   root.querySelectorAll('.mf-arrowbtn').forEach(function (b) { b.addEventListener('click', function () { show(cur + (+b.dataset.dir)); }); });
   show(0);
@@ -555,14 +438,16 @@
     { q: 'What would help most next month?', a: [['Clear owners and deadlines', 'AC'], ['Knowing how I come across', 'KY'], ['Getting people to use the new tools', 'AI'], ['Buy-in on a change', 'CH']] }
   ];
   var R = {
-    LO: ['Leading Others', '01', 'You’re still carrying work your team should own. The next step is setting clear expectations and delegating with confidence, so you can multiply the work instead of doing it.'],
-    KY: ['Knowing Yourself', '02', 'How you react in tense moments is shaping what your team feels. An EQ-i 2.0 assessment shows you the pattern, and the session helps you choose a different response.'],
-    HC: ['Hard Conversations', '03', 'Issues are waiting too long to get said. The fix is raising them while they’re small, and knowing when a situation calls for coaching, performance management, or escalation.'],
-    AC: ['Accountability', '04', 'Commitments don’t have clear owners yet. Named owners and real deadlines will build follow-through that happens when you’re not checking.'],
-    CH: ['Leading Change', '05', 'People are going through the motions. The work is sorting what’s yours to decide and moving the team from compliance to buy-in.'],
-    AI: ['Practical AI', '06', 'The tools are there, but the habits aren’t. Hands-on practice with everyday tasks, and managers equipped to lead the change, will get usage growing.']
+    LO: ['Leading Others', '1', 'You’re still carrying work your team should own. The next step is setting clear expectations and delegating with confidence, so you can multiply the work instead of doing it.'],
+    KY: ['Knowing Yourself as a Leader', '2', 'How you react in tense moments is shaping what your team feels. An EQ-i 2.0 assessment shows you the pattern, and the session helps you choose a different response.'],
+    HC: ['Hard Conversations', '3', 'Issues are waiting too long to get said. The fix is raising them while they’re small, and knowing when a situation calls for coaching, performance management, or escalation.'],
+    AC: ['Driving Accountability', '4', 'Commitments don’t have clear owners yet. Named owners and real deadlines will build follow-through that happens when you’re not checking.'],
+    CH: ['Leading Through Change', '5', 'People are going through the motions. The work is sorting what’s yours to decide and moving the team from compliance to buy-in.'],
+    AI: ['Practical AI for Leaders', '6', 'The tools are there, but the habits aren’t. Hands-on practice with everyday tasks, and managers equipped to lead the change, will get usage growing.']
   };
-  var stage = root.querySelector('.mf-qstage'), bar = root.querySelector('.mf-qbar i'), n = 0, tally = {};
+  var stage = root.querySelector('.mf-qstage'), bar = root.querySelector('.mf-qbar i');
+  if (!stage) return;
+  var n = 0, tally = {};
   var esc = function (s) { return s.replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   var renderQ = function () {
     var it = Q[n];
@@ -575,9 +460,8 @@
     var best = 'AC', bs = -1;
     ['AC', 'HC', 'LO', 'CH', 'AI', 'KY'].forEach(function (k) { if ((tally[k] || 0) > bs) { bs = tally[k] || 0; best = k; } });
     var r = R[best];
-    stage.innerHTML = '<div class="mf-result"><p class="mf-qmeta">Start with Session ' + r[1] + '</p><h3>' + r[0] + '</h3><p>' + r[2] + '</p>' +
-      '<div class="mf-ctas"><a class="mf-btn mf-btn-hot" href="' + CAL + '" target="_blank" rel="noopener">Talk it through <span class="mf-arrow" aria-hidden="true">&rarr;</span></a></div>' +
-      '<p style="margin-top:18px"><button type="button" class="mf-reset">Take it again</button></p></div>';
+    stage.innerHTML = '<div class="mf-result"><p class="mf-qmeta">Start with session ' + r[1] + '</p><h3>' + r[0] + '</h3><p>' + r[2] + '</p>' +
+      '<div class="mf-ctas"><a class="mf-btn" href="' + CAL + '" target="_blank" rel="noopener">Talk it through</a><button type="button" class="mf-reset">Take it again</button></div></div>';
   };
   stage.addEventListener('click', function (e) {
     if (e.target.closest('.mf-reset')) { n = 0; tally = {}; renderQ(); return; }
