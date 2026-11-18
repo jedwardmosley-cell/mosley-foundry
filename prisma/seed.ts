@@ -68,6 +68,8 @@ async function main() {
       forgeStatement: "I am a manager my team trusts with bad news. I care how my people are doing as much as what they get done. I am still learning to lead, and I am fine saying so. On hard days I am the calm one in the room.",
     },
   });
+  // Her seat, how big a turn, and My statement, so the Driver's Seat is done.
+  await db.identityProfile.create({ data: { userId: dana.id, role: "manager", level: "ROLE", becoming: "I am a manager my team trusts with bad news. I care how my people are doing as much as what they get done. I am still learning to lead, and I am fine saying so. On hard days I am the calm one in the room.", versionStartedAt: day(-20) } });
   await db.assessment.create({ data: { userId: dana.id, instrument: "FORGE_PERSONAL", f: 4, o: 3, r: 4, g: 3, e: 2, revisedE: 2, revisedO: 3, completedAt: day(-20), reflections: JSON.stringify({ E: "When a peer questions my numbers in front of my director, I get sharp and defend instead of listen." }) } });
   await db.developmentGoal.createMany({ data: [
     { userId: dana.id, pillar: "E", isPriority: true, whereNow: "Sharp and defensive when challenged in meetings", whereWant: "Curious first, answer second", oneMove: "Pause and ask one question before I respond to a challenge" },
@@ -90,7 +92,7 @@ async function main() {
 
   const danaStart = await db.assessment.findFirstOrThrow({ where: { userId: dana.id } });
   const season = await db.season.create({ data: { userId: dana.id, startAssessmentId: danaStart.id, startStatement: "I am a manager my team trusts with bad news.", startedAt: day(-9) } });
-  const cycle = await db.developmentCycle.create({ data: { userId: dana.id, seasonId: season.id, seasonMonth: 1, template: "NIRS_30", pillar: "E", focus: "Pausing before I answer when a decision gets challenged", startDate: (() => { const d = day(-9); d.setHours(0, 0, 0, 0); return d; })(), weekNotes: JSON.stringify({ 1: "It shows up most with peers in front of my director. My jaw tightens first." }), weekStatus: JSON.stringify({ 1: "DONE" }) } });
+  const cycle = await db.developmentCycle.create({ data: { userId: dana.id, seasonId: season.id, seasonMonth: 1, template: "NIRS_30", pillar: "E", focus: "Pausing before I answer when a decision gets challenged", startDate: (() => { const d = day(-9); d.setHours(0, 0, 0, 0); return d; })(), role: "manager", situation: "When a peer questions my numbers in front of my director", feeling: "Heat in my chest, my jaw tightens", oldResponse: "I defend right away and get sharp", newResponse: "Pause, take one breath, and ask one question first", gap: "Needing to look like I already have the answer", plan: "When a peer questions my numbers in front of my director and I feel the heat in my chest, I will pause, take one breath, and ask one question before I answer.", partnerId: r1.id, setupDoneAt: day(-9), sharedLog: JSON.stringify([{ at: day(-9).toISOString(), to: r1.id, kind: "plan" }]), weekNotes: JSON.stringify({ 1: "It shows up most with peers in front of my director. My jaw tightens first." }), weekStatus: JSON.stringify({ 1: "DONE" }) } });
   const pattern = ["DONE", "DONE", "PARTIAL", "DONE", "NOT_YET", "DONE", "PARTIAL", "DONE", "DONE"];
   for (let i = 0; i < pattern.length; i++) {
     await db.dailyCheckIn.create({ data: {

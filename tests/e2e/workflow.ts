@@ -818,6 +818,12 @@ const submitAndWait = async (page: Page, selector: string) => {
   });
 
   await check("9c2. still open says why; saving without a seat says so; the 30 days page leads into week 1 setup", async () => {
+    // the demo Dana is fully set up; this check needs her before the kickoff is done, then puts her back
+    const danaId = (await db.user.findUniqueOrThrow({ where: { email: "dana@demo.bothhands.app" } })).id;
+    const savedId = await db.identityProfile.findUnique({ where: { userId: danaId } });
+    const danaCycle = await db.developmentCycle.findFirstOrThrow({ where: { userId: danaId, status: "ACTIVE" } });
+    await db.identityProfile.deleteMany({ where: { userId: danaId } });
+    await db.developmentCycle.update({ where: { id: danaCycle.id }, data: { setupDoneAt: null, situation: "", feeling: "", oldResponse: "", newResponse: "", gap: "", plan: "" } });
     const dc = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const dp: Page = await dc.newPage();
     await login(dp, "dana@demo.bothhands.app");
@@ -835,6 +841,8 @@ const submitAndWait = async (page: Page, selector: string) => {
     await dp.goto(`${BASE}/cycle`);
     await Promise.all([dp.waitForURL(/\/cycle\/setup\?step=1$/), dp.click('a:has-text("Start your week 1 setup")')]);
     await dc.close();
+    if (savedId) await db.identityProfile.create({ data: savedId });
+    await db.developmentCycle.update({ where: { id: danaCycle.id }, data: { setupDoneAt: danaCycle.setupDoneAt, situation: danaCycle.situation, feeling: danaCycle.feeling, oldResponse: danaCycle.oldResponse, newResponse: danaCycle.newResponse, gap: danaCycle.gap, plan: danaCycle.plan } });
   });
 
   await check("9d. Who I am sharing is the client's choice; the coach sees nothing until it is on", async () => {
