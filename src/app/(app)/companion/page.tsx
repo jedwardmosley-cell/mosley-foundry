@@ -28,13 +28,14 @@ export default async function CompanionHome() {
         Grounded in Both Hands on the Wheel and your own recorded goals. It cites where its program content comes from, keeps what you recorded separate from its suggestions, and points you back to the people in your corner. It cannot see your private journal. It is not a therapist.
       </PageHeader>
       {/* Set the Tone, one tap from the round + button: the moment self-talk turns, this is where it gets read. */}
-      <Link href="/tone" className="card mb-5 flex items-center gap-4 transition hover:-translate-y-0.5">
-        <span className="flex-1">
-          <span className="block text-[15px] font-medium text-heading">Set the Tone</span>
-          <span className="block text-sm text-ink-soft">Rewrite what you just told yourself, or work out how to say it to someone else.</span>
-        </span>
-        <span aria-hidden className="text-ink-mute">›</span>
-      </Link>
+      <section className="card mb-5">
+        <h2 className="h3">Set the Tone</h2>
+        <p className="text-sm muted mt-1">Rewrite what you just told yourself, or work out how to say it to someone else.</p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <Link href="/tone" className="btn-primary text-center">With myself</Link>
+          <Link href="/tone?mode=others" className="btn-primary text-center">With someone else</Link>
+        </div>
+      </section>
       {!aiAvailable() && <Card className="mb-5"><p className="text-sm">The companion is not configured on this server. An administrator needs to set <code>ANTHROPIC_API_KEY</code>.</p></Card>}
       {profile?.aiEnabled === false && <Card className="mb-5"><p className="text-sm">You turned the companion off. <Link className="btn-link" href="/settings">Settings</Link></p></Card>}
       <div className="grid gap-4 sm:grid-cols-3">

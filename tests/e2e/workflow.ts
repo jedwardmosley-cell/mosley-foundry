@@ -485,7 +485,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.ok((await page.locator("section:has(h2:has-text('Three-day language audit'))").innerText()).includes("1 time"));
     // one tap from the round + button
     await page.goto(`${BASE}/companion`);
-    await page.waitForSelector('main a[href="/tone"]:has-text("Set the Tone")');
+    await page.waitForSelector('main a[href="/tone"]:has-text("With myself")');
   });
 
   await check("1b/7d. sign out, sign back in, saved progress and reflection retrieved", async () => {
