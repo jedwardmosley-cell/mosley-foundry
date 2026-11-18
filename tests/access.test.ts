@@ -113,6 +113,8 @@ test("an admin who also coaches gets coach access only: assigned people, granted
 });
 
 test("identity statements and performance identities never appear in the coach view", async () => {
+  const saved = await db.identityProfile.findUnique({ where: { userId: dana.id } });
+  await db.identityProfile.deleteMany({ where: { userId: dana.id } });
   await db.identityProfile.create({ data: { userId: dana.id, level: "REINVENT", becoming: "IDENTITY-SECRET-STATEMENT", behavior: "IDENTITY-SECRET-BEHAVIOR", personaName: "IDENTITY-SECRET-PERSONA", personaCue: "IDENTITY-SECRET-CUE" } });
   try {
     const today = await db.dailyCheckIn.findFirstOrThrow({ where: { userId: dana.id, shared: true } });
@@ -124,6 +126,7 @@ test("identity statements and performance identities never appear in the coach v
     assert.ok(!r.includes("IDENTITY-SECRET"));
   } finally {
     await db.identityProfile.delete({ where: { userId: dana.id } });
+    if (saved) await db.identityProfile.create({ data: saved });
   }
 });
 
