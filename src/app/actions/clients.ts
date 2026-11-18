@@ -59,6 +59,7 @@ export async function removeClient(fd: FormData) {
   const n = await db.coachAssignment.updateMany({ where: { coachId: coach.id, participantId }, data: { active: false } });
   if (!n.count) throw new Error("Not found");
   await db.shareGrant.deleteMany({ where: { ownerId: participantId, granteeId: coach.id } });
+  await db.coachBrief.deleteMany({ where: { coachId: coach.id, participantId } });
   await audit(coach, "coach.remove_client", participantId);
   revalidatePath("/coach");
   redirect("/coach");

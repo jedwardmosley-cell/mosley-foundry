@@ -4,8 +4,11 @@ import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { getCoachView, getCoachWork, ForbiddenError, SHARE_SCOPES, type ShareScope } from "@/lib/access";
 import { attentionFlags } from "@/lib/coachSummary";
-import { assignExercise, scheduleSession, saveSessionNotes, recordEqiInterpretation } from "@/app/actions/coach";
+import { assignExercise, scheduleSession, saveSessionNotes, recordEqiInterpretation, prepareSessionBrief } from "@/app/actions/coach";
+import { latestBrief } from "@/lib/coachBrief";
+import { aiAvailable } from "@/lib/ai";
 import { getContent } from "@/content";
+import { exerciseMenu } from "@/lib/exercises";
 import { cycleWeeks, cyclePosition, practiceSummary } from "@/lib/cycle";
 import { scoresFrom } from "@/lib/forge";
 import { RELATIONSHIP_ROLES, SEGMENTS, CHECKIN_STATUS, DAY30_DECISIONS } from "@/content/program";
@@ -22,9 +25,10 @@ function NotShared({ scope }: { scope: ShareScope }) {
   return <p className="text-sm text-ink-mute">Not shared: {SHARE_SCOPES[scope].toLowerCase()}.</p>;
 }
 
-export default async function CoachParticipant({ params }: { params: Promise<{ participantId: string }> }) {
+export default async function CoachParticipant({ params, searchParams }: { params: Promise<{ participantId: string }>; searchParams: Promise<{ brief?: string }> }) {
   const coach = await requireUser("COACH");
   const { participantId } = await params;
+  const sp = await searchParams;
   let v, work;
   try {
     v = await getCoachView(coach, participantId);
@@ -45,19 +49,78 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
   const sharedReflections = v.practice.filter((p) => p.reflection || p.note);
 
   // Exercise menu: workbook and book items by stable reference.
-  const menu = [
-    ...pack.edsLessons.map((e, i) => ({ ref: `ed:${i}`, title: `Lessons from the road: ${e.title}`, text: [e.setup, ...e.prompts].filter(Boolean).join("\n\n") })),
-    ...pack.jaysJourney.map((j, i) => ({ ref: `jay:${i}`, title: `Questions for the road: ${j.title}`, text: [j.setup, ...j.prompts].filter(Boolean).join("\n\n") })),
-    ...pack.chapters.filter((c) => c.roadTest.length).map((c) => ({ ref: `chapter:${c.number}:roadTest`, title: `Road Test: ${c.title}`, text: c.roadTest.join("\n\n") })),
-    ...SEGMENTS.map((x) => ({ ref: `segment:${x.key}`, title: `Segment ${x.key} practice: ${x.title}`, text: x.practice.text })),
-    ...IDENTITY_EXERCISES.map((x, i) => ({ ref: `identity:${i}`, title: `Identity: ${x.title}`, text: x.text })),
-  ];
+  const menu = exerciseMenu(pack);
+  const brief = await latestBrief(coach.id, participantId, v.scopes);
+  const first = v.participant.name.split(" (")[0].split(" ")[0];
+  const BRIEF_NOTE: Record<string, string> = {
+    ai_off: "The AI isn't set up for this app yet, so there's no brief.",
+    client_ai_off: `${first} has turned off AI in their own settings, so no brief is made for them. Their choice stands.`,
+    nothing_shared: `${first} hasn't shared anything with you yet, so there's nothing to prepare from.`,
+    failed: "The brief didn't come through. Try again in a minute.",
+  };
 
   return (
     <>
       <PageHeader eyebrow="Participant summary" title={v.participant.name}>
         Shared with you: {v.scopes.length ? v.scopes.map((x) => SHARE_SCOPES[x as ShareScope].split(" (")[0].split(",")[0]).join(", ") : "nothing yet"}.
       </PageHeader>
+
+      <Card id="prep" className="mb-6 scroll-mt-24">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="h2">Session prep</h2>
+            <p className="mt-1 text-[15px] text-ink-soft">A one-page brief before you meet: what happened since last time, patterns worth raising, three questions and an exercise to consider. Built only from what {first} shares with you.</p>
+          </div>
+          {aiAvailable() && (
+            <form action={prepareSessionBrief}>
+              <input type="hidden" name="participantId" value={participantId} />
+              <Submit className={brief ? "btn-quiet" : "btn-primary"}>{brief ? "Refresh the brief" : "Prepare my brief"}</Submit>
+            </form>
+          )}
+        </div>
+        {sp.brief && sp.brief !== "new" && BRIEF_NOTE[sp.brief] && <p role="status" className="notice mt-3">{BRIEF_NOTE[sp.brief]}</p>}
+        {!aiAvailable() && !sp.brief && !brief && <p className="mt-3 text-sm text-ink-mute">{BRIEF_NOTE.ai_off}</p>}
+        {brief && (
+          <div className="mt-4 space-y-5">
+            <p className="text-xs text-ink-mute">Draft from AI, {fmt(brief.createdAt, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}. Built from: {brief.scopes.length ? brief.scopes.map((x) => SHARE_SCOPES[x as ShareScope]?.split(" (")[0].split(",")[0].split(":")[0] ?? x).join(", ") : "your own session notes"}. Check it against what you know before you use it.</p>
+            {brief.content.since.length > 0 && (
+              <section>
+                <p className="section-label">Since last time</p>
+                <ul className="mt-1.5 list-disc pl-5 space-y-1 text-[15px]">{brief.content.since.map((x) => <li key={x}>{x}</li>)}</ul>
+              </section>
+            )}
+            {brief.content.patterns.length > 0 && (
+              <section>
+                <p className="section-label">Patterns worth raising</p>
+                <ul className="mt-1.5 list-disc pl-5 space-y-1 text-[15px]">{brief.content.patterns.map((x) => <li key={x}>{x}</li>)}</ul>
+              </section>
+            )}
+            {brief.content.questions.length > 0 && (
+              <section className="border-l-4 border-lane pl-4">
+                <p className="section-label">Three questions to ask</p>
+                <ol className="mt-1.5 list-decimal pl-5 space-y-1.5 font-serif text-[18px] leading-snug text-heading">{brief.content.questions.map((x) => <li key={x}>{x}</li>)}</ol>
+              </section>
+            )}
+            {brief.content.exercise && (
+              <section>
+                <p className="section-label">An exercise to consider</p>
+                <p className="mt-1.5 text-[15px]"><span className="font-medium text-heading">{brief.content.exercise.title}.</span> {brief.content.exercise.why}</p>
+                <form action={assignExercise} className="mt-2">
+                  <input type="hidden" name="participantId" value={participantId} />
+                  <input type="hidden" name="exerciseRef" value={brief.content.exercise.ref} />
+                  <Submit className="btn-quiet !py-1.5 text-sm">Assign this exercise</Submit>
+                </form>
+              </section>
+            )}
+            {brief.content.careful && (
+              <section>
+                <p className="section-label">Handle with care</p>
+                <p className="mt-1.5 text-[15px]">{brief.content.careful}</p>
+              </section>
+            )}
+          </div>
+        )}
+      </Card>
 
       <div className="grid gap-5 md:grid-cols-2">
         <Card>

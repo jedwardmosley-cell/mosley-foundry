@@ -72,6 +72,8 @@ model User {
   exercisesGiven                AssignedExercise[]   @relation("ExerciseCoach")
   coachingSessionsAsCoach       CoachingSession[]    @relation("SessionCoach")
   coachingSessionsAsParticipant CoachingSession[]    @relation("SessionParticipant")
+  coachBriefsAsCoach            CoachBrief[]         @relation("BriefCoach")
+  coachBriefsAsParticipant      CoachBrief[]         @relation("BriefParticipant")
   auditEvents                   AuditEvent[]         @relation("AuditActor")
   feedback                      Feedback[]
 }
@@ -587,4 +589,19 @@ model PasswordResetToken {
   createdAt DateTime  @default(now())
 
   @@index([userId, createdAt])
+}
+
+/// Session prep: an AI brief a coach asks for before a session. Built only from what the client shares with that
+/// coach (the scopes are stored, and a brief is hidden once any of them is turned off). A draft, never shown as fact.
+model CoachBrief {
+  id            String   @id @default(cuid())
+  coachId       String
+  coach         User     @relation("BriefCoach", fields: [coachId], references: [id], onDelete: Cascade)
+  participantId String
+  participant   User     @relation("BriefParticipant", fields: [participantId], references: [id], onDelete: Cascade)
+  scopes        String   @default("") // comma-separated share scopes the brief was built from
+  content       String // JSON: { since, patterns, questions, exercise, careful }
+  createdAt     DateTime @default(now())
+
+  @@index([coachId, participantId, createdAt])
 }

@@ -613,3 +613,67 @@ export function parseConversationReading(raw: string): ConversationReading | nul
     return null;
   }
 }
+
+export type CoachBriefContent = {
+  /** What happened since the last session, from what the client shares. */
+  since: string[];
+  /** Patterns worth raising. */
+  patterns: string[];
+  /** Three questions to ask. */
+  questions: string[];
+  /** One program exercise to consider, by its stable reference. */
+  exercise: { ref: string; title: string; why: string } | null;
+  /** One thing to be careful with in the room. "" when nothing stands out. */
+  careful: string;
+};
+
+/**
+ * Session prep for a coach: a short brief built only from what the client shares with that coach (the context is
+ * assembled from the coach view, which already applies the client's sharing choices). A draft for the coach to check,
+ * never a verdict on the client. Saves nothing.
+ */
+export async function coachBriefAI(context: string, query: string, menu: { ref: string; title: string }[]): Promise<CoachBriefContent | null> {
+  const sources = await retrieve(query, 4);
+  const raw = await askTone([
+    "You help a coach prepare for a one-on-one coaching session inside Both Hands on the Wheel, a personal leadership app by Jason Mosley built on his book.",
+    "The program: FORGE is the client's identity (five rules: Future Focused, Observant, Resilient, Growth Oriented, Emotionally Anchored), and Discipline by Design is the system that builds it into their week (routines, planning time, people). Clients work on one or two focuses, each for 30 days, with a daily check-in and a weekly look back called the Mirrors.",
+    "You see only what this client chose to share with their coach. Some areas may be missing: never guess at them, never say what they might contain, and never treat a missing area as a problem.",
+    "Write for the coach, in plain words, about the client by first name. Ground every point in something in the shared data. Describe what the data shows, not what the client is like: no diagnoses, no labels, no claims about personality, and nothing presented as certain that the data does not show.",
+    "FORGE scores are self-ratings. Do not compare them to EQ-i scores or treat them as a validated measure.",
+    "Return:",
+    "- since: two to four short points on what happened since the last session (or recently, if there was none): practice, the Mirrors, commitments from last time, exercises.",
+    "- patterns: one to three patterns worth raising, each one sentence, each tied to what the data shows.",
+    "- questions: exactly three open questions the coach could ask, in the coach's voice, short. At least one should connect their practice back to who they said they are.",
+    `- exercise: one exercise from this list that fits right now, by its ref, with why in one sentence; or null if none clearly fits. THE LIST: ${menu.map((m) => `${m.ref} = ${m.title}`).join("; ")}`,
+    "- careful: one sentence on something to handle with care in the room, or \"\" if nothing stands out.",
+    "Rules: this is coaching, not therapy. If the shared data suggests risk to the client or others, set careful to say the coach should check in on wellbeing first and point to professional support, and keep the rest brief.",
+    'Return only JSON, with no other text: {"since": [""], "patterns": [""], "questions": ["", "", ""], "exercise": {"ref": "", "why": ""}, "careful": ""}',
+    HOUSE_STYLE,
+    "",
+    "PROGRAM GUIDANCE:",
+    sources.map((x) => `${x.ref}: ${x.text}`).join("\n\n") || "(none)",
+  ], `WHAT THIS CLIENT SHARES WITH THEIR COACH:\n${context}`);
+  if (!raw) return null;
+  const b = parseCoachBrief(raw);
+  if (b?.exercise) {
+    const m = menu.find((x) => x.ref === b.exercise!.ref);
+    b.exercise = m ? { ...b.exercise, title: m.title } : null;
+  }
+  return b;
+}
+
+/** Reads the session prep JSON, keeping only well-formed parts. Exported for tests. */
+export function parseCoachBrief(raw: string): CoachBriefContent | null {
+  const m = raw.match(/\{[\s\S]*\}/);
+  if (!m) return null;
+  try {
+    const j = JSON.parse(m[0]);
+    const str = (v: unknown, max = 500) => plainPunctuation(String(v ?? "")).trim().slice(0, max);
+    const list = (v: unknown, n: number) => (Array.isArray(v) ? v : []).map((x) => str(x, 400)).filter(Boolean).slice(0, n);
+    const ex = j.exercise && typeof j.exercise === "object" && str(j.exercise.ref) ? { ref: str(j.exercise.ref, 60), title: "", why: str(j.exercise.why, 300) } : null;
+    const b = { since: list(j.since, 4), patterns: list(j.patterns, 3), questions: list(j.questions, 3), exercise: ex, careful: str(j.careful, 400) };
+    return b.since.length || b.patterns.length || b.questions.length ? b : null;
+  } catch {
+    return null;
+  }
+}

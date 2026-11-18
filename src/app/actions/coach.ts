@@ -1,6 +1,7 @@
 "use server";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { audit, isActiveCoachOf, grantedScopes } from "@/lib/access";
@@ -56,4 +57,15 @@ export async function recordEqiInterpretation(fd: FormData) {
   });
   await audit(c, "coach.eqi_interpretation", d.participantId);
   revalidatePath(`/coach/${d.participantId}`);
+}
+
+/** Session prep: build a fresh AI brief from what the client shares with this coach. */
+export async function prepareSessionBrief(fd: FormData) {
+  const d = parse(z.object({ participantId: z.string() }), fd);
+  const c = await coachFor(d.participantId);
+  const { prepareBrief } = await import("@/lib/coachBrief");
+  const r = await prepareBrief(c, d.participantId);
+  await audit(c, "coach.session_brief", d.participantId, r.ok ? "ok" : r.reason);
+  revalidatePath(`/coach/${d.participantId}`);
+  redirect(`/coach/${d.participantId}?brief=${r.ok ? "new" : r.reason}#prep`);
 }
