@@ -74,6 +74,7 @@ model User {
   coachingSessionsAsParticipant CoachingSession[]    @relation("SessionParticipant")
   coachBriefsAsCoach            CoachBrief[]         @relation("BriefCoach")
   coachBriefsAsParticipant      CoachBrief[]         @relation("BriefParticipant")
+  coachDrafts                   CoachDraft[]         @relation("DraftCoach")
   auditEvents                   AuditEvent[]         @relation("AuditActor")
   feedback                      Feedback[]
 }
@@ -604,4 +605,17 @@ model CoachBrief {
   createdAt     DateTime @default(now())
 
   @@index([coachId, participantId, createdAt])
+}
+
+/// The coach assistant: what the coach asked for in plain words, and the actions the AI proposed. Nothing is done
+/// until the coach approves; each action is checked again against the coach's own clients when they do.
+model CoachDraft {
+  id          String   @id @default(cuid())
+  coachId     String
+  coach       User     @relation("DraftCoach", fields: [coachId], references: [id], onDelete: Cascade)
+  instruction String
+  actions     String // JSON: { actions: [...], unclear: [...] }
+  createdAt   DateTime @default(now())
+
+  @@index([coachId, createdAt])
 }

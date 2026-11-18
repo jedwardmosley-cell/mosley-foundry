@@ -79,3 +79,21 @@ test("the brief's JSON is read safely", () => {
   assert.equal(parseCoachBrief("no json"), null);
   assert.equal(parseCoachBrief('{"since": [], "patterns": [], "questions": []}'), null, "an empty brief is no brief");
 });
+
+test("the assistant matches a name to exactly one client, or none", async () => {
+  const { resolveClient } = await import("../src/lib/coachAssistant");
+  const clients = [{ id: "1", name: "Bob Hart" }, { id: "2", name: "Paul Ito" }, { id: "3", name: "Paula Ito" }];
+  assert.equal(resolveClient("Bob", clients)?.id, "1");
+  assert.equal(resolveClient("paul ito", clients)?.id, "2");
+  assert.equal(resolveClient("Ito", clients), null, "two Itos: no guess");
+  assert.equal(resolveClient("Sam", clients), null);
+});
+
+test("the assistant's plan is read safely", async () => {
+  const { parseCoachPlan } = await import("../src/lib/ai");
+  const p = parseCoachPlan('{"actions": [{"type": "assign_exercise", "client": "Bob", "exerciseRef": "ed:1", "title": "", "instructions": "", "dueOn": "2030-01-04"}, {"type": "schedule_session", "client": "Paul", "when": "Tuesday 10am", "agenda": ""}, {"type": "delete_everything", "client": "Bob"}], "unclear": ["no time for Paul"]}');
+  assert.ok(p);
+  assert.equal(p!.actions.length, 1, "a session without a real time is dropped, and unknown action types are ignored");
+  assert.equal(p!.actions[0].type, "assign_exercise");
+  assert.deepEqual(p!.unclear, ["no time for Paul"]);
+});

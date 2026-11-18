@@ -677,3 +677,51 @@ export function parseCoachBrief(raw: string): CoachBriefContent | null {
     return null;
   }
 }
+
+export type ProposedAction =
+  | { type: "assign_exercise"; client: string; exerciseRef: string; title: string; instructions: string; dueOn: string }
+  | { type: "schedule_session"; client: string; when: string; agenda: string };
+
+/**
+ * The coach assistant: turns a coach's plain-words instruction into proposed actions on their own clients.
+ * Sees only the coach's client names and the program's exercise titles, never client data. Proposes; never acts.
+ */
+export async function planCoachActionsAI(instruction: string, clients: string[], menu: { ref: string; title: string }[], today: string): Promise<{ actions: ProposedAction[]; unclear: string[] } | null> {
+  const raw = await askTone([
+    "You are the coach assistant inside Both Hands on the Wheel, a coaching app by Jason Mosley. A coach tells you, in plain words, what to do for their clients. Turn it into a list of actions for the coach to approve. You never act yourself.",
+    "You can propose two kinds of action:",
+    "- assign_exercise: give one client an exercise. Use a program exercise by its ref when the coach names one or clearly means one (match by title, chapter or topic). Otherwise use exerciseRef \"custom\" with a short title and the instructions in the coach's own words, tidied but not padded. dueOn is a date as YYYY-MM-DD, or \"\" if none was given.",
+    "- schedule_session: book a coaching session with one client. when is YYYY-MM-DDTHH:mm in 24-hour time. agenda in a few words, or \"\".",
+    `Today is ${today}. Work out dates like "Friday" or "next Tuesday" from today. If no time is given for a session, leave that action out and say so in unclear.`,
+    "One action per client per thing: \"assign Bob and Paul X\" is two actions. Use the client's name exactly as it appears in the list. If a name matches no one in the list, or matches more than one, leave it out and say so in unclear.",
+    "unclear: short plain notes on anything you could not turn into an action, or a guess the coach should check. [] if none.",
+    `THE COACH'S CLIENTS: ${clients.join("; ") || "(none)"}`,
+    `PROGRAM EXERCISES: ${menu.map((m) => `${m.ref} = ${m.title}`).join("; ")}`,
+    'Return only JSON, with no other text: {"actions": [{"type": "assign_exercise", "client": "", "exerciseRef": "", "title": "", "instructions": "", "dueOn": ""}, {"type": "schedule_session", "client": "", "when": "", "agenda": ""}], "unclear": [""]}',
+    HOUSE_STYLE,
+  ], instruction.trim());
+  return raw ? parseCoachPlan(raw) : null;
+}
+
+/** Reads the coach assistant's JSON, keeping only well-formed actions. Exported for tests. */
+export function parseCoachPlan(raw: string): { actions: ProposedAction[]; unclear: string[] } | null {
+  const m = raw.match(/\{[\s\S]*\}/);
+  if (!m) return null;
+  try {
+    const j = JSON.parse(m[0]);
+    const str = (v: unknown, max = 300) => plainPunctuation(String(v ?? "")).trim().slice(0, max);
+    const actions: ProposedAction[] = [];
+    for (const a of Array.isArray(j.actions) ? j.actions.slice(0, 30) : []) {
+      if (a?.type === "assign_exercise" && str(a.client) && (str(a.exerciseRef) || str(a.title))) {
+        const due = str(a.dueOn, 10);
+        actions.push({ type: "assign_exercise", client: str(a.client, 120), exerciseRef: str(a.exerciseRef, 60) || "custom", title: str(a.title, 200), instructions: str(a.instructions, 6000), dueOn: /^\d{4}-\d{2}-\d{2}$/.test(due) ? due : "" });
+      } else if (a?.type === "schedule_session" && str(a.client) && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(str(a.when, 16))) {
+        actions.push({ type: "schedule_session", client: str(a.client, 120), when: str(a.when, 16), agenda: str(a.agenda, 3000) });
+      }
+    }
+    const unclear = (Array.isArray(j.unclear) ? j.unclear : []).map((x: unknown) => str(x)).filter(Boolean).slice(0, 10);
+    return { actions, unclear };
+  } catch {
+    return null;
+  }
+}

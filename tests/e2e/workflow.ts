@@ -1084,6 +1084,43 @@ const submitAndWait = async (page: Page, selector: string) => {
     await ac.close();
   });
 
+  await check("11c. coach assistant: a planned action happens only once the coach approves it, and only what they tick", async () => {
+    const coachU = await db.user.findUniqueOrThrow({ where: { email: "coach@demo.bothhands.app" } });
+    const danaU = await db.user.findUniqueOrThrow({ where: { email: "dana@demo.bothhands.app" } });
+    const priyaU = await db.user.findUniqueOrThrow({ where: { email: "priya@demo.bothhands.app" } });
+    // A plan as the AI would propose it (the AI itself isn't called in tests)
+    const plan = { actions: [
+      { type: "assign_exercise", client: "Dana", participantId: danaU.id, clientName: "Dana Reyes", exerciseRef: "custom", title: "E2E-ASSIST: three pauses", instructions: "Pause three times this week.", dueOn: "2030-01-04" },
+      { type: "assign_exercise", client: "Priya", participantId: priyaU.id, clientName: "Priya Natarajan", exerciseRef: "custom", title: "E2E-ASSIST-SKIPPED", instructions: "", dueOn: "" },
+      { type: "schedule_session", client: "Dana", participantId: danaU.id, clientName: "Dana Reyes", when: "2030-01-08T10:00", agenda: "E2E-ASSIST: the director" },
+    ], unclear: ["No single client matches \"Bob\", so that one is left out."] };
+    const draft = await db.coachDraft.create({ data: { coachId: coachU.id, instruction: "E2E instruction", actions: JSON.stringify(plan) } });
+    const cc = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const cp: Page = await cc.newPage();
+    await login(cp, "coach@demo.bothhands.app");
+    await cp.goto(`${BASE}/coach?draft=${draft.id}`);
+    await cp.waitForSelector("text=Here's what I'll do");
+    await cp.waitForSelector('text=No single client matches "Bob"');
+    // nothing exists before approval
+    assert.equal(await db.assignedExercise.count({ where: { title: { startsWith: "E2E-ASSIST" } } }), 0, "nothing before approval");
+    await cp.locator('input[name="do_1"]').uncheck();
+    await Promise.all([cp.waitForURL(/done=2/), cp.click('button:has-text("Do these")')]);
+    await cp.waitForSelector("text=Done: 2 actions.");
+    const ex = await db.assignedExercise.findFirstOrThrow({ where: { title: "E2E-ASSIST: three pauses" } });
+    assert.equal(ex.participantId, danaU.id);
+    assert.equal(ex.coachId, coachU.id);
+    assert.equal(await db.assignedExercise.count({ where: { title: "E2E-ASSIST-SKIPPED" } }), 0, "unticked means not done");
+    assert.equal(await db.coachingSession.count({ where: { participantId: danaU.id, agenda: "E2E-ASSIST: the director" } }), 1);
+    assert.equal(await db.coachDraft.count({ where: { id: draft.id } }), 0, "the draft is gone once done");
+    // a draft for a client who isn't theirs does nothing
+    const marcusU = await db.user.findUniqueOrThrow({ where: { email: "lena@demo.bothhands.app" } });
+    const bad = await db.coachDraft.create({ data: { coachId: coachU.id, instruction: "E2E", actions: JSON.stringify({ actions: [{ type: "assign_exercise", client: "Lena", participantId: marcusU.id, clientName: "Lena", exerciseRef: "custom", title: "E2E-ASSIST-NOT-MINE", instructions: "", dueOn: "" }], unclear: [] }) } });
+    await cp.goto(`${BASE}/coach?draft=${bad.id}`);
+    await Promise.all([cp.waitForURL(/done=0/), cp.click('button:has-text("Do these")')]);
+    assert.equal(await db.assignedExercise.count({ where: { title: "E2E-ASSIST-NOT-MINE" } }), 0, "never for someone who isn't their client");
+    await cc.close();
+  });
+
   await check("desktop layout renders", async () => {
     await logout(page);
     const desk = await browser.newPage({ viewport: { width: 1280, height: 900 } });
