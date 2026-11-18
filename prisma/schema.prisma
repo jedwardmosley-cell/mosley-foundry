@@ -72,6 +72,10 @@ model User {
   exercisesGiven                AssignedExercise[]   @relation("ExerciseCoach")
   coachingSessionsAsCoach       CoachingSession[]    @relation("SessionCoach")
   coachingSessionsAsParticipant CoachingSession[]    @relation("SessionParticipant")
+  coachBriefsAsCoach            CoachBrief[]         @relation("BriefCoach")
+  coachBriefsAsParticipant      CoachBrief[]         @relation("BriefParticipant")
+  coachDrafts                   CoachDraft[]         @relation("DraftCoach")
+  cohortBriefs                  CohortBrief[]        @relation("CohortBriefCoach")
   auditEvents                   AuditEvent[]         @relation("AuditActor")
   feedback                      Feedback[]
 }
@@ -436,6 +440,7 @@ model Cohort {
   createdAt      DateTime          @default(now())
   members        CohortMember[]
   sessions       TrainingSession[]
+  briefs         CohortBrief[]
 }
 
 model CohortMember {
@@ -587,4 +592,49 @@ model PasswordResetToken {
   createdAt DateTime  @default(now())
 
   @@index([userId, createdAt])
+}
+
+/// Session prep: an AI brief a coach asks for before a session. Built only from what the client shares with that
+/// coach (the scopes are stored, and a brief is hidden once any of them is turned off). A draft, never shown as fact.
+model CoachBrief {
+  id            String   @id @default(cuid())
+  coachId       String
+  coach         User     @relation("BriefCoach", fields: [coachId], references: [id], onDelete: Cascade)
+  participantId String
+  participant   User     @relation("BriefParticipant", fields: [participantId], references: [id], onDelete: Cascade)
+  scopes        String   @default("") // comma-separated share scopes the brief was built from
+  content       String // JSON: { since, patterns, questions, exercise, careful }
+  createdAt     DateTime @default(now())
+
+  @@index([coachId, participantId, createdAt])
+}
+
+/// The coach assistant: what the coach asked for in plain words, and the actions the AI proposed. Nothing is done
+/// until the coach approves; each action is checked again against the coach's own clients when they do.
+model CoachDraft {
+  id            String   @id @default(cuid())
+  coachId       String
+  coach         User     @relation("DraftCoach", fields: [coachId], references: [id], onDelete: Cascade)
+  kind          String   @default("ACTIONS") // enum: ACTIONS (the assistant) | WRAPUP (after-session wrap-up)
+  participantId String   @default("") // WRAPUP: the client the session was with
+  instruction   String
+  actions       String // JSON. ACTIONS: { actions, unclear }. WRAPUP: { sessionId, notes, commitments, followUp, exercise }
+  createdAt     DateTime @default(now())
+
+  @@index([coachId, createdAt])
+}
+
+/// Cohort session prep for a facilitator. Built from group totals only, and only for groups at or above the
+/// reporting minimum. Never holds anything about one person.
+model CohortBrief {
+  id         String   @id @default(cuid())
+  coachId    String
+  coach      User     @relation("CohortBriefCoach", fields: [coachId], references: [id], onDelete: Cascade)
+  cohortId   String
+  cohort     Cohort   @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  segmentKey String   @default("")
+  content    String // JSON: { working, stuck, plan, questions }
+  createdAt  DateTime @default(now())
+
+  @@index([coachId, cohortId, createdAt])
 }
