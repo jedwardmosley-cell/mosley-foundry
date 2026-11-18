@@ -47,10 +47,10 @@ export function findClosedDoors(text: string): DoorHit[] {
 }
 
 /** How often each closed-door phrase came up, most often first. For the three-day audit and the weekly look back. */
-export function tally(hits: DoorHit[]): { label: string; count: number }[] {
-  const m = new Map<string, number>();
-  for (const h of hits) m.set(h.label, (m.get(h.label) ?? 0) + 1);
-  return [...m.entries()].map(([label, count]) => ({ label, count })).sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+export function tally(hits: DoorHit[]): { label: string; count: number; instead: string }[] {
+  const m = new Map<string, { count: number; instead: string }>();
+  for (const h of hits) m.set(h.label, { count: (m.get(h.label)?.count ?? 0) + 1, instead: h.instead });
+  return [...m.entries()].map(([label, v]) => ({ label, ...v })).sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
 }
 
 /** Words that may mean someone is in real distress. The app stops coaching and points to support. */
@@ -77,4 +77,17 @@ export function bookQuestions(chapters: { title: string; refuel: string[]; refle
   const c = chapters.find((x) => /center console/i.test(x.title));
   if (!c) return [];
   return [...c.reflect, ...c.refuel].filter((t) => t.trim().endsWith("?") && /self-talk|tone|language|temperature|believe|voice/i.test(t));
+}
+
+/**
+ * One of the Center Console chapter's own exercises, in the book's words, from the licensed content at runtime:
+ * the three-day language audit, the chain, or the catalog of lines and the three Cs. Empty without the licensed pack.
+ */
+export function consoleExercise(chapters: { title: string; roadTest: string[] }[], kind: "audit" | "chain" | "catalog"): string[] {
+  const c = chapters.find((x) => /center console/i.test(x.title));
+  if (!c) return [];
+  const i = c.roadTest.findIndex((t) => (kind === "audit" ? /three days/i : kind === "chain" ? /\bchain\b/i : /catalog/i).test(t));
+  if (i < 0) return [];
+  // The catalog comes with the three lines that follow it, one for each C.
+  return kind === "catalog" ? c.roadTest.slice(i, i + 4).filter((t, n) => n === 0 || /^(claim|confirm|condemn)\b/i.test(t)) : [c.roadTest[i]];
 }

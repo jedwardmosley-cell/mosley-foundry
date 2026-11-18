@@ -32,7 +32,7 @@ test("open-door language is left alone", () => {
 
 test("the audit counts each phrase, most often first", () => {
   const t = tally(findClosedDoors("I can't. I can't. There's no way. Why bother."));
-  assert.deepEqual(t[0], { label: "I can't", count: 2 });
+  assert.deepEqual(t[0], { label: "I can't", count: 2, instead: "I'll try." });
   assert.equal(t.length, 3);
 });
 

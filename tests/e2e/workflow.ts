@@ -451,7 +451,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     // counting check-ins too is the client's choice, off until they turn it on
     assert.equal((await db.profile.findFirstOrThrow({ where: { user: { email } } })).toneReadsWriting, false);
     await Promise.all([page.waitForLoadState("networkidle"), page.click('button:has-text("Also count my check-ins and look backs")')]);
-    await page.waitForSelector("text=Also counting your check-in notes");
+    await page.waitForSelector("text=Also counting your daily check-in notes");
     // distress stops the coaching and points to support
     await page.fill('textarea[name="said"]', "E2E-TONE: some days I want to die");
     await Promise.all([page.waitForURL(/care=1/), page.click('button:has-text("Rewrite it")')]);

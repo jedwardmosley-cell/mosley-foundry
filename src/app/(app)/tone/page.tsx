@@ -3,7 +3,7 @@ import { NAMES } from "@/content/names";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { fmt, addDays, ymd } from "@/lib/dates";
-import { findClosedDoors, tally, bookQuestions, type DoorHit } from "@/lib/tone";
+import { consoleExercise, findClosedDoors, tally, bookQuestions, type DoorHit } from "@/lib/tone";
 import { getContent } from "@/content";
 import { aiAvailable, type ToneReading, type ConversationReading } from "@/lib/ai";
 import { readSelfTalk, prepConversation, practiceConversation, keepToneLine, removeToneLine, deleteToneEntry, setToneReadsWriting } from "@/app/actions/tone";
@@ -16,10 +16,18 @@ import type { PillarKey } from "@/content/types";
 export const metadata = { title: "Set the Tone" };
 
 const THREE_CS = {
-  CLAIM: { name: "Claim", line: "A victory, a milestone or an outcome I'm going after" },
-  CONFIRM: { name: "Confirm", line: "A belief about what I'm capable of" },
-  CONDEMN: { name: "Condemn", line: "The negativity or the roadblock that would stop me" },
+  CLAIM: { name: "Claim", line: "A victory, a milestone or an outcome I'm going after", example: "I'm leading the team that hits this quarter's number." },
+  CONFIRM: { name: "Confirm", line: "A belief about what I'm capable of", example: "I stay calm when a decision gets challenged." },
+  CONDEMN: { name: "Condemn", line: "The negativity or the roadblock that would stop me", example: "Old doubts don't get a vote on today." },
 } as const;
+
+/** The book's own words for an exercise, folded under a tap. Read from the licensed content at runtime. */
+const InTheBook = ({ lines }: { lines: string[] }) => lines.length ? (
+  <details className="mt-3">
+    <summary className="cursor-pointer text-sm text-link">In the book</summary>
+    <div className="mt-2 border-l-4 border-lane pl-4 space-y-1.5 text-[15px] text-ink">{lines.map((t) => <p key={t}>{t}</p>)}</div>
+  </details>
+) : null;
 type C = keyof typeof THREE_CS;
 
 const Label = ({ children, gold = false }: { children: React.ReactNode; gold?: boolean }) => (
@@ -198,12 +206,23 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
           {self && (self.chain.thought || self.chain.stepIn) && (
             <Card>
               <h2 className="h3">The chain</h2>
-              <ol className="mt-3 grid gap-2 sm:grid-cols-4">
-                {([["How I think about it", self.chain.thought], ["How I talk about it", self.chain.words], ["How I feel", self.chain.feeling], ["What I do", self.chain.action]] as const).filter(([, v]) => v).map(([k, v]) => (
-                  <li key={k} className="rounded-2xl bg-ink/[0.04] px-3 py-2.5"><p className="text-xs text-ink-mute">{k}</p><p className="mt-0.5 text-[15px]">{v}</p></li>
+              <p className="mt-1 text-[15px] text-ink-soft">Words don&apos;t stay words. How you think about something shapes how you talk about it. How you talk about it shapes how you feel. How you feel shows up in what you do. Here is that chain for what you wrote, link by link, so you can see where to step in.</p>
+              <ol className="mt-3 space-y-1.5">
+                {([["How I think about it", self.chain.thought], ["So I talk about it like this", self.chain.words], ["So I feel", self.chain.feeling], ["So I do this", self.chain.action]] as const).filter(([, v]) => v).map(([k, v], i) => (
+                  <li key={k} className="flex gap-3 rounded-2xl bg-ink/[0.04] px-3 py-2.5">
+                    <span aria-hidden className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-navy text-[12px] font-bold text-white">{i + 1}</span>
+                    <span><span className="block text-xs text-ink-mute">{k}</span><span className="block mt-0.5 text-[15px]">{v}</span></span>
+                  </li>
                 ))}
               </ol>
-              {self.chain.stepIn && <p className="mt-3 text-[15px]"><span className="font-medium text-heading">Where to cut it off: </span>{self.chain.stepIn}</p>}
+              {self.chain.stepIn && (
+                <div className="mt-3 border-l-4 border-lane pl-4">
+                  <p className="text-sm font-bold text-heading">Where to step in</p>
+                  <p className="mt-0.5 text-[15px]">{self.chain.stepIn}</p>
+                  <p className="mt-1 text-sm text-ink-soft">Change one link and the ones after it change too. The earlier you step in, the less you have to fight later.</p>
+                </div>
+              )}
+              <InTheBook lines={consoleExercise(pack.chapters, "chain")} />
             </Card>
           )}
 
@@ -295,16 +314,22 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
       {mode === "SELF" && (<>
       <section className="mt-10">
         <h2 className="h2">The last three days</h2>
-        <p className="mt-1 text-sm text-ink-soft">Limited language in what you told yourself, counted. A pattern to notice, not a score.</p>
+        <p className="mt-1 text-[15px] text-ink-soft">A three-day check on your language. Each time you write under With myself, phrases that shut a door before you&apos;ve tried, like &ldquo;I can&apos;t&rdquo;, &ldquo;I don&apos;t know&rdquo; or &ldquo;that&apos;s just how I am&rdquo;, are counted here. One slip is noise. The same phrase three times is a pattern, and that&apos;s the one to replace first. This is something to notice, not a score.</p>
+        <InTheBook lines={consoleExercise(pack.chapters, "audit")} />
         <Card className="mt-3">
           {audit.length ? (
-            <ul className="space-y-1.5">
-              {audit.map((a) => <li key={a.label} className="flex justify-between text-[15px]"><span>&ldquo;{a.label}&rdquo;</span><span className="text-ink-soft">{a.count} {a.count === 1 ? "time" : "times"}</span></li>)}
+            <ul className="divide-y divide-line/60">
+              {audit.map((a) => (
+                <li key={a.label} className="py-2 first:pt-0">
+                  <p className="flex justify-between gap-3 text-[15px]"><span className="font-medium text-heading">&ldquo;{a.label}&rdquo;</span><span className="shrink-0 text-ink-soft">{a.count} {a.count === 1 ? "time" : "times"}</span></p>
+                  <p className="mt-0.5 text-sm text-ink-soft">Say instead: <span className="text-ink">{a.instead}</span></p>
+                </li>
+              ))}
             </ul>
-          ) : <p className="text-[15px] text-ink-soft">{recent.length || profile?.toneReadsWriting ? "None found in the last three days." : "Nothing written here in the last three days."}</p>}
+          ) : <p className="text-[15px] text-ink-soft">{recent.length || profile?.toneReadsWriting ? "None found in the last three days. Keep writing what you tell yourself, and anything that shuts a door will show up here with a better way to say it." : "Nothing written here in the last three days. Write what you told yourself at the top of this page, and anything that shuts a door will show up here with a better way to say it."}</p>}
           <form action={setToneReadsWriting} className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-3">
             <input type="hidden" name="on" value={profile?.toneReadsWriting ? "false" : "true"} />
-            <span className="text-sm text-ink-soft">{profile?.toneReadsWriting ? "Also counting your check-in notes and weekly look backs." : "Only what you write here is counted."}</span>
+            <span className="text-sm text-ink-soft">{profile?.toneReadsWriting ? "Also counting your daily check-in notes and the Mirrors. Nothing is shared, it only adds to this count." : "Only what you write here is counted. You can also count your daily check-in notes and the Mirrors. Nothing is shared."}</span>
             <Submit className="btn-quiet !py-1.5 text-sm">{profile?.toneReadsWriting ? "Count only what I write here" : "Also count my check-ins and look backs"}</Submit>
           </form>
         </Card>
@@ -312,7 +337,9 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
 
       <section id="keep" className="mt-10 scroll-mt-24">
         <h2 className="h2">My lines</h2>
-        <p className="mt-1 text-sm text-ink-soft">Lines with power, in your own words. A good one does one of three things: claim, confirm or condemn.</p>
+        <p className="mt-1 text-[15px] text-ink-soft">Your own collection of lines worth keeping: something you read, something someone said to you, or a rewrite from above that landed. Read them before a moment that matters, so your words are already set when you get there.</p>
+        <p className="mt-2 text-[15px] text-ink-soft">To decide if a line is worth keeping, test it against the three Cs. A good line does at least one of them:</p>
+        <InTheBook lines={consoleExercise(pack.chapters, "catalog")} />
         {sp.kept && <p role="status" className="notice mt-3">Kept.</p>}
         <div className="mt-3 space-y-3">
           {(Object.keys(THREE_CS) as C[]).map((k) => {
@@ -320,6 +347,7 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
             return (
               <Card key={k}>
                 <p className="text-sm"><span className="font-medium text-heading">{THREE_CS[k].name}.</span> <span className="text-ink-soft">{THREE_CS[k].line}</span></p>
+                {mine.length === 0 && <p className="mt-1.5 text-sm text-ink-mute">For example: <span className="italic">&ldquo;{THREE_CS[k].example}&rdquo;</span> Nothing kept here yet.</p>}
                 {mine.length > 0 && (
                   <ul className="mt-2 divide-y divide-line/60">
                     {mine.map((l) => (
