@@ -331,6 +331,8 @@ export async function logCheckIn(fd: FormData) {
   });
   revalidatePath("/dashboard");
   revalidatePath("/cycle");
+  // Back to Today with today's dash filling in on the center line.
+  redirect("/dashboard?checked=1");
 }
 
 export async function saveWeek(fd: FormData) {

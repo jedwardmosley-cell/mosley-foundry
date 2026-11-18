@@ -7,7 +7,7 @@ export type MapKind = "routine" | "guide" | "partner" | "group" | "develop" | "l
 export type MapNode = { id: string; label: string; kind: MapKind; href: string; overdue?: boolean };
 
 const COLOR: Record<MapKind, string> = {
-  routine: "rgb(var(--navy))",
+  routine: "rgb(var(--navy))",  // sign green: what I do
   learning: "rgb(var(--violet))",
   guide: "rgb(var(--sage))",
   partner: "rgb(var(--clay))",
@@ -36,7 +36,9 @@ export function SystemMap({ name, nodes }: { name: string; nodes: MapNode[] }) {
     const k = list.length;
     const spread = Math.min(72, 24 * Math.max(k - 1, 0));
     return list.map((node, i) => {
-      const deg = sec.at - spread / 2 + (k > 1 ? (spread * i) / (k - 1) : 0);
+      // The center line runs top to bottom, so the top and bottom sections sit a little to one side of it.
+      const offRoad = Math.abs(Math.sin(rad(sec.at))) > 0.9 ? 14 : 0;
+      const deg = sec.at + offRoad - spread / 2 + (k > 1 ? (spread * i) / (k - 1) : 0);
       const r = R;
       return { ...node, deg, x: cx + r * Math.cos(rad(deg)), y: cy + r * Math.sin(rad(deg)) };
     });
@@ -44,28 +46,29 @@ export function SystemMap({ name, nodes }: { name: string; nodes: MapNode[] }) {
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="mx-auto w-full max-w-[440px] h-auto" role="img" aria-label={`My Design: ${nodes.length} ${nodes.length === 1 ? "thing" : "things"} around you`}>
       <circle cx={cx} cy={cy} r={R} fill="none" stroke="rgb(var(--line))" strokeDasharray="3 5" />
-      {/* The quadrant: four sections laid over the circle. */}
-      {[45, 135, 225, 315].map((d) => (
-        <line key={d} x1={cx + 44 * Math.cos(rad(d))} y1={cy + 44 * Math.sin(rad(d))} x2={cx + (R + 34) * Math.cos(rad(d))} y2={cy + (R + 34) * Math.sin(rad(d))} stroke="rgb(var(--line))" strokeWidth={1} />
-      ))}
+      {/* The road through the middle: the center line runs from who guides you to who you develop, crossed by who walks with you and what you do. */}
+      <line x1={cx} y1={28} x2={cx} y2={H - 26} stroke="rgb(var(--lane))" strokeWidth={4} strokeDasharray="14 9" />
+      <line x1={36} y1={cy} x2={W - 36} y2={cy} stroke="rgb(var(--line))" strokeWidth={1.5} />
       {placed.map((p) => (
-        <line key={`l${p.id}`} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke={p.overdue ? "rgb(var(--alert))" : "rgb(var(--ink-mute) / 0.45)"} strokeWidth={1.25} strokeDasharray={p.overdue ? "4 4" : undefined} />
+        <line key={`l${p.id}`} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke={p.overdue ? "rgb(var(--alert))" : "rgb(var(--ink-mute) / 0.45)"} strokeWidth={p.overdue ? 2 : 1.25} strokeDasharray={p.overdue ? "4 4" : undefined} />
       ))}
-      <circle cx={cx} cy={cy} r={34} fill="rgb(var(--navy))" />
-      <text x={cx} y={cy + 5} textAnchor="middle" fontSize="14" fill="#fff" fontFamily="Georgia, serif">{name.split(" ")[0].slice(0, 12)}</text>
+      <circle cx={cx} cy={cy} r={34} fill="rgb(var(--ink))" />
+      <text x={cx} y={cy + 5} textAnchor="middle" fontSize="14" fontWeight={800} fill="rgb(var(--paper))">{name.split(" ")[0].slice(0, 12)}</text>
       {placed.map((p) => {
         const up = Math.sin(rad(p.deg)) < -0.3;
         return (
           <a key={p.id} href={p.href} aria-label={`${p.label}, ${KIND_NAME[p.kind]}`}>
             {p.id.startsWith("more-") ? <circle cx={p.x} cy={p.y} r={8} fill="rgb(var(--card))" stroke={COLOR[p.kind]} strokeWidth={2} /> : <circle cx={p.x} cy={p.y} r={8} fill={COLOR[p.kind]} />}
-            <text x={p.x} y={up ? p.y - 14 : p.y + 22} textAnchor="middle" fontSize="11" fill="rgb(var(--ink))">{p.label.length > 18 ? p.label.slice(0, 17) + "…" : p.label}</text>
+            <text x={p.x} y={up ? p.y - 14 : p.y + 22} textAnchor="middle" fontSize="12" fontWeight={600} fill="rgb(var(--ink))">{p.label.length > 18 ? p.label.slice(0, 17) + "…" : p.label}</text>
           </a>
         );
       })}
-      <text x={cx} y={16} textAnchor="middle" fontSize="10" letterSpacing="1.5" fill="rgb(var(--ink-mute))">WHO GUIDES ME</text>
-      <text x={cx} y={H - 6} textAnchor="middle" fontSize="10" letterSpacing="1.5" fill="rgb(var(--ink-mute))">WHO I DEVELOP</text>
-      <text transform={`translate(${W - 8} ${cy}) rotate(90)`} textAnchor="middle" fontSize="10" letterSpacing="1.5" fill="rgb(var(--ink-mute))">WHO WALKS WITH ME</text>
-      <text transform={`translate(10 ${cy}) rotate(-90)`} textAnchor="middle" fontSize="10" letterSpacing="1.5" fill="rgb(var(--ink-mute))">WHAT I DO</text>
+      <g fontSize="12" fontWeight={700} fill="rgb(var(--ink-mute))">
+        <text x={cx} y={16} textAnchor="middle">Who guides me</text>
+        <text x={cx} y={H - 8} textAnchor="middle">Who I develop</text>
+        <text transform={`translate(${W - 24} ${cy}) rotate(90)`} textAnchor="middle">Who walks with me</text>
+        <text transform={`translate(24 ${cy}) rotate(-90)`} textAnchor="middle">What I do</text>
+      </g>
       {nodes.length === 0 && <text x={cx} y={cy + 66} textAnchor="middle" fontSize="12" fill="rgb(var(--ink-mute))">Add a routine or a person and it shows up here.</text>}
     </svg>
   );

@@ -31,17 +31,17 @@ export function JourneyBar({ steps, done, current, cycle, identityMissing = [], 
     // The kickoff comes first: no "Check in today" until all four steps are done.
     const needs = next.key === "identity" ? identityMissing : next.key === "road" ? roadMissing : [];
     line = next.key === "road"
-      ? <><span className="font-medium text-heading">Build your system first</span> · <Link href={`/start?step=${n}`} className="btn-link">Still needed: {needs.join(", ")}</Link></>
-      : <><span className="font-medium text-heading">Build your system first</span> · Step {n} of 4 · <Link href={`/start?step=${n}`} className="btn-link">{next.next}</Link>{needs.length > 0 && <span className="text-ink-mute"> (still needs {needs.join(", ")})</span>}</>;
+      ? <><span className="font-bold text-heading">Build your system first.</span> <Link href={`/start?step=${n}`} className="btn-link">Still needed: {needs.join(", ")}</Link></>
+      : <><span className="font-bold text-heading">Build your system first.</span> Step {n} of 4: <Link href={`/start?step=${n}`} className="btn-link">{next.next}</Link>{needs.length > 0 && <span className="text-ink-mute"> (still needs {needs.join(", ")})</span>}</>;
   } else if (cycle && (path === "/dashboard" || path === "/cycle")) {
     line = open && !cycle.finished ? <span className="text-ink-mute">Still open: <Link href={open.href} className="btn-link">{open.label}</Link>{open.key === "identity" && identityMissing.length > 0 && <> ({identityMissing.join(", ")})</>}</span> : null;
   } else if (cycle) {
     line = cycle.finished
       ? <Link href="/cycle" className="btn-link">Your 30 days are up. Open your day 30 review</Link>
-      : <Link href="/dashboard" className="hover:text-link">Day {cycle.day} of 30{cycle.seasonMonth ? ` · Month ${cycle.seasonMonth} of 3` : ""} · Week {cycle.week}{cycle.phase ? `, ${cycle.phase}` : ""} · <span className="btn-link">Check in today</span></Link>;
-    if (open && !cycle.finished) line = <>{line}<span className="hidden sm:inline text-ink-mute"> · </span><span className="block sm:inline mt-1 sm:mt-0 text-ink-mute">Still open: <Link href={open.href} className="btn-link">{open.label}</Link>{open.key === "identity" && identityMissing.length > 0 && <> ({identityMissing.join(", ")})</>}</span></>;
+      : <Link href="/dashboard" className="hover:text-link">Day {cycle.day} of 30, week {cycle.week}{cycle.seasonMonth ? `, month ${cycle.seasonMonth} of 3` : ""}. <span className="btn-link">Check in today</span></Link>;
+    if (open && !cycle.finished) line = <>{line}<span className="hidden sm:inline"> </span><span className="block sm:inline mt-1 sm:mt-0 text-ink-mute">Still open: <Link href={open.href} className="btn-link">{open.label}</Link>{open.key === "identity" && identityMissing.length > 0 && <> ({identityMissing.join(", ")})</>}</span></>;
   } else if (next) {
-    line = <>Step {n} of 4 · <Link href={`/start?step=${n}`} className="btn-link">{next.next}</Link></>;
+    line = <>Step {n} of 4: <Link href={`/start?step=${n}`} className="btn-link">{next.next}</Link></>;
   }
 
   // On Today during the 30 days, the bar is one thin strip; the big card says the rest.
@@ -65,7 +65,7 @@ export function JourneyBar({ steps, done, current, cycle, identityMissing = [], 
 
   return (
     <nav aria-label="Your journey" className="mb-8">
-      <div aria-hidden className="grid grid-cols-4 gap-1.5 mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">
+      <div aria-hidden className="grid grid-cols-4 gap-1.5 mb-2 text-[13px] font-bold text-gold">
         <span className="col-span-2">FORGE</span>
         <span className="col-span-2">Discipline by Design</span>
       </div>

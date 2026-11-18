@@ -43,7 +43,7 @@ export function Shell({ user, children, journey }: { user: CurrentUser; children
         <nav className="mt-8 flex-1 space-y-0.5 overflow-y-auto" aria-label="Main">
           {(nav as NavItem[]).filter((n) => n.desktop !== false).map((n, i, all) => (
             <div key={n.href + n.label}>
-              {n.group && n.group !== all[i - 1]?.group && <p className={`mt-6 mb-1.5 px-3 text-[10.5px] font-semibold uppercase tracking-[0.16em] ${n.group === "Support" ? "text-ink-mute" : "text-gold"}`}>{n.group}</p>}
+              {n.group && n.group !== all[i - 1]?.group && <p className={`mt-6 mb-1.5 px-3 text-[10.5px] font-bold ${n.group === "Support" ? "text-ink-mute" : "text-gold"}`}>{n.group}</p>}
               <NavLink href={n.href} variant="side">{n.label}</NavLink>
             </div>
           ))}
@@ -86,8 +86,8 @@ function Brand({ compact = false }: { compact?: boolean }) {
     <Link href="/" className="flex items-center gap-2.5">
       <BrandMark size={compact ? 26 : 30} className="text-heading shrink-0" />
       <span>
-        <span className="block font-serif text-heading text-[19px] leading-none tracking-[-0.01em]">Both Hands on the Wheel</span>
-        {!compact && <span className="block mt-1.5 text-[11px] tracking-[0.14em] uppercase text-ink-mute">Mosley Foundry</span>}
+        <span className="block font-sans font-extrabold text-heading text-[18px] leading-none tracking-[-0.01em]">Both Hands on the Wheel</span>
+        {!compact && <span className="block mt-1.5 text-[13px] text-ink-mute">Mosley Foundry</span>}
       </span>
     </Link>
   );

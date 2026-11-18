@@ -312,7 +312,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     // check in on each focus: the second one's status shares the day's row
     await page.goto(`${BASE}/dashboard`);
     // one check-in for the day: both focuses with equal weight, the identity question once, one save
-    await page.waitForSelector("text=My two focuses");
+    await page.waitForSelector('input[name="status2"]', { state: "attached" });
     assert.equal(await page.locator('form:has(input[name="status2"]) button[type="submit"]').count(), 1, "one save for the day");
     assert.equal(await page.locator('input[name="identityActed"][value="YES"]').count(), 1, "the identity question is asked once");
     assert.ok(await page.locator('input[name="status"][value="DONE"]').isChecked(), "focus 1's answer from earlier is kept");
@@ -377,7 +377,7 @@ const submitAndWait = async (page: Page, selector: string) => {
   await check("7e. Who I am: three equal kinds, one statement on Today, behavior on My road, history kept", async () => {
     const me = await db.user.findUniqueOrThrow({ where: { email } });
     await page.goto(`${BASE}/dashboard`);
-    await page.waitForSelector(`main a:has-text("Who's behind the wheel · as a manager") >> text=I am a leader my team trusts with bad news.`);
+    await page.waitForSelector(`main a:has-text("Who's behind the wheel, as a manager") >> text=I am a leader my team trusts with bad news.`);
     await page.goto(`${BASE}/identity`);
     assert.ok(!(await page.content()).includes("Identity shift"), "one activity, one name");
     for (const name of ["Core alignment", "Role transition", "Reinvention"]) await page.locator("label", { hasText: name }).click();
@@ -431,7 +431,7 @@ const submitAndWait = async (page: Page, selector: string) => {
   await check("7g. Set the Tone: with myself and with someone else; limited language counted; lines kept; private", async () => {
     await page.goto(`${BASE}/tone`);
     // the book's own self-talk questions, when the licensed content is installed
-    if (fs.existsSync("src/content/licensed/pack.json")) await page.waitForSelector('section[aria-label="From the book"] >> text=self-talk');
+    if (fs.existsSync("src/content/licensed/pack.json")) await page.waitForSelector('section[aria-label="From the book"] p.font-serif');
     await page.fill('textarea[name="said"]', "E2E-TONE: I can't run this meeting. That's just how I am.");
     await Promise.all([page.waitForURL(/\/tone\?entry=/), page.click('button:has-text("Rewrite it")')]);
     await page.waitForSelector('h2:text-is("Limited language")');
@@ -805,7 +805,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await dp.goto(`${BASE}/dashboard`);
     const box = dp.locator("section", { hasText: "From your coach" });
     await box.waitFor();
-    assert.ok((await box.innerText()).includes("Session with Avery Lin"));
+    assert.ok((await box.innerText()).includes("session with Avery Lin"));
     assert.ok((await box.innerText()).includes("Agreed"));
     assert.ok((await box.innerText()).includes("Due"), "the exercise shows with its due date");
     await box.screenshot({ path: `${shots}/09c-from-coach.png` });

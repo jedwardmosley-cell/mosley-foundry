@@ -47,7 +47,7 @@ export default async function FocusPage() {
           return (
             <Link key={f.id} href={f.setupDoneAt ? `/cycle?id=${f.id}` : "/cycle/setup?step=1"} className="card block !p-5 sm:!p-6 transition hover:-translate-y-0.5">
               <div className="flex items-center justify-between gap-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gold">Focus {i + 1}{f.source && f.source in FOCUS_SOURCES ? ` · ${FOCUS_SOURCES[f.source as FocusSource]}` : ""}</p>
+                <p className="text-[13px] font-bold text-gold">Focus {i + 1}{f.source && f.source in FOCUS_SOURCES ? ` · ${FOCUS_SOURCES[f.source as FocusSource]}` : ""}</p>
                 <span className="chip">{pos.finished ? "Day 30" : `Day ${pos.day} of 30`}</span>
               </div>
               <p className="mt-2 flex items-start gap-2.5 text-[18px] font-medium leading-snug text-heading">

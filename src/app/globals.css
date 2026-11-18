@@ -3,38 +3,44 @@
 @tailwind utilities;
 
 /*
- * Design system. Warm paper, soft layered surfaces, a real serif for what matters (Fraunces)
- * and a clean sans for everything else (Inter). Borders are rare: depth comes from tone and shadow.
+ * Design system: the open road. Cool concrete ground, asphalt text, highway-sign green for actions and
+ * one center-line yellow for progress (a shape, never text). Overpass (Highway Gothic lineage) is the app's
+ * voice; Newsreader, a book face, carries the client's own words and the book's.
+ * Token names are kept from the first design so every screen follows: --navy is now the action green,
+ * --gold the green used for small labels, and --fblue the Future Focused rule.
  */
 :root {
   color-scheme: light dark;
-  --paper: 245 241 234;  --card: 255 253 249;  --surface: 255 255 255;  --line: 230 223 211;
-  --ink: 28 34 45;  --ink-soft: 78 86 100;  --ink-mute: 128 134 146;
-  --navy: 30 47 74;  --navy-deep: 18 29 50;  --heading: 19 31 53;  --link: 37 62 101;
-  --brass: 167 123 59;  --brass-soft: 241 230 210;
-  /* Brand gold, from the Mosley Foundry wordmark. Brass stays the Reason Rooted pillar color. */
-  --gold: 176 96 12;  --gold-soft: 249 234 212;  --gold-hi: 224 146 42;  --gold-lo: 163 84 9;
-  --sage: 94 122 100;  --sage-soft: 227 235 227;
-  --clay: 168 92 69;  --clay-soft: 243 226 219;
-  --violet: 107 106 143;  --alert: 180 35 24;  --alert-soft: 254 228 226;
-  --glow-a: 224 146 42;  --glow-b: 30 47 74;
-  --shadow: 28 34 45;
-  --font-serif: "Fraunces Variable", "Iowan Old Style", Palatino, Georgia, serif;
-  --font-sans: "Inter Variable", ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paper: 238 240 236;  --card: 255 255 255;  --surface: 255 255 255;  --line: 213 218 213;
+  --ink: 29 35 41;  --ink-soft: 78 88 96;  --ink-mute: 108 118 125;
+  --navy: 14 90 68;  --navy-deep: 9 64 48;  --heading: 22 28 33;  --link: 14 90 68;
+  --lane: 229 178 0;
+  --fblue: 43 90 155;
+  --brass: 176 122 30;  --brass-soft: 243 233 210;
+  --gold: 14 90 68;  --gold-soft: 220 236 228;  --gold-hi: 46 140 105;  --gold-lo: 9 64 48;
+  --sage: 46 125 116;  --sage-soft: 222 237 234;
+  --clay: 180 82 63;  --clay-soft: 245 225 220;
+  --violet: 106 92 154;  --alert: 168 50 43;  --alert-soft: 248 226 223;
+  --glow-a: 238 240 236;  --glow-b: 29 35 41;
+  --shadow: 29 35 41;
+  --font-serif: "Newsreader Variable", "Iowan Old Style", Georgia, serif;
+  --font-sans: "Overpass Variable", "Helvetica Neue", Arial, sans-serif;
 }
 
-/* Dark: the same palette, deepened. Follows the phone or computer setting. */
+/* Dark: a night drive. Asphalt ground, headlight-white text, the same yellow line. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: 12 15 21;  --card: 20 25 34;  --surface: 26 32 43;  --line: 40 48 62;
-    --ink: 236 231 222;  --ink-soft: 180 186 198;  --ink-mute: 132 141 156;
-    --navy: 58 90 136;  --navy-deep: 27 42 66;  --heading: 243 238 229;  --link: 176 198 230;
-    --brass: 214 172 104;  --brass-soft: 52 42 27;
-    --gold: 236 164 70;  --gold-soft: 58 38 14;  --gold-hi: 248 204 120;  --gold-lo: 214 128 30;
-    --sage: 141 180 151;  --sage-soft: 30 44 36;
-    --clay: 226 145 122;  --clay-soft: 58 35 29;
-    --violet: 160 158 205;  --alert: 249 112 102;  --alert-soft: 58 28 26;
-    --glow-a: 214 172 104;  --glow-b: 70 110 170;
+    --paper: 17 22 27;  --card: 26 33 40;  --surface: 32 40 48;  --line: 44 53 61;
+    --ink: 232 236 234;  --ink-soft: 176 186 190;  --ink-mute: 136 147 153;
+    --navy: 38 128 96;  --navy-deep: 26 98 73;  --heading: 240 243 241;  --link: 120 204 168;
+    --lane: 242 194 48;
+    --fblue: 112 156 220;
+    --brass: 214 168 80;  --brass-soft: 52 42 22;
+    --gold: 120 204 168;  --gold-soft: 22 46 38;  --gold-hi: 150 220 188;  --gold-lo: 70 169 130;
+    --sage: 98 184 170;  --sage-soft: 24 44 41;
+    --clay: 228 132 110;  --clay-soft: 58 34 29;
+    --violet: 164 152 220;  --alert: 236 112 102;  --alert-soft: 60 28 26;
+    --glow-a: 17 22 27;  --glow-b: 232 236 234;
     --shadow: 0 0 0;
   }
 }
@@ -42,14 +48,9 @@
 html { -webkit-text-size-adjust: 100%; }
 body {
   @apply bg-paper text-ink font-sans antialiased;
-  font-feature-settings: "cv11", "ss01", "ss03";
-  background-image:
-    radial-gradient(90% 50% at 15% -10%, rgb(var(--glow-a) / 0.10), transparent 70%),
-    radial-gradient(70% 45% at 100% 0%, rgb(var(--glow-b) / 0.08), transparent 70%);
-  background-attachment: fixed;
 }
-::selection { background: rgb(var(--gold) / 0.22); }
-.font-serif { font-variation-settings: "SOFT" 50, "WONK" 0; }
+::selection { background: rgb(var(--lane) / 0.35); }
+.font-serif { font-optical-sizing: auto; line-height: 1.35; }
 
 /* Disclosure: a small chevron instead of the browser's triangle. */
 summary { list-style: none; }
@@ -62,83 +63,65 @@ summary:not(.list-none)::before {
 details[open] > summary:not(.list-none)::before { transform: rotate(45deg) translate(-0.1em, -0.1em); }
 summary { -webkit-tap-highlight-color: transparent; }
 
+/* One moment of motion in the whole app: today's dash on the center line fills in after a check-in is saved. */
+/* Motion that answers a tap (opening the statement) is fine. */
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
-.reveal { animation: fade 0.45s ease both; }
-@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: no-preference) { .reveal { animation: fade 0.35s ease both; } }
+@keyframes lane-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 @media (prefers-reduced-motion: no-preference) {
-  .rise > * { animation: rise 0.42s cubic-bezier(.2,.7,.2,1) both; }
-  .rise > *:nth-child(2) { animation-delay: 40ms; }
-  .rise > *:nth-child(3) { animation-delay: 80ms; }
-  .rise > *:nth-child(4) { animation-delay: 120ms; }
-  .rise > *:nth-child(n+5) { animation-delay: 160ms; }
+  .lane-fill { transform-origin: left center; animation: lane-fill 0.7s cubic-bezier(.2,.7,.2,1) 0.15s both; }
 }
 
 @layer components {
-  .card {
-    @apply rounded-[24px] p-5 sm:p-7 bg-card;
-    border: 1px solid rgb(var(--line) / 0.45);
-    box-shadow: 0 1px 2px rgb(var(--shadow) / 0.04), 0 12px 32px -18px rgb(var(--shadow) / 0.16);
-  }
-  .section-label { @apply text-[11px] uppercase tracking-[0.16em] font-semibold text-ink-mute; }
-  .eyebrow { @apply text-[11px] uppercase tracking-[0.16em] text-ink-mute font-semibold; }
-  .h1 { @apply font-serif text-[34px] sm:text-[44px] leading-[1.04] text-heading tracking-[-0.02em]; font-weight: 420; }
-  .h2 { @apply font-serif text-[22px] sm:text-[26px] leading-snug text-heading tracking-[-0.01em]; }
-  .h3 { @apply font-semibold text-heading text-[15px] tracking-[-0.005em]; }
+  /* Cards are for things you act on. Flat, a hairline edge, corners a little rounder than a sign. */
+  .card { @apply rounded-2xl p-5 sm:p-7 bg-card; border: 1px solid rgb(var(--line)); }
+  /* Labels in sentence case, and only where they tell you something. */
+  .section-label { @apply text-[13px] font-bold text-ink-mute; }
+  .eyebrow { @apply text-[13px] font-bold text-ink-mute; }
+  .h1 { @apply font-sans text-[34px] sm:text-[44px] leading-[1.02] text-heading tracking-[-0.02em] font-extrabold; }
+  .h2 { @apply font-sans text-[22px] sm:text-[26px] leading-tight text-heading tracking-[-0.01em] font-extrabold; }
+  .h3 { @apply font-bold text-heading text-[16px]; }
   .muted { @apply text-ink-soft; }
-  .label { @apply block text-[15px] font-semibold text-heading mb-2 tracking-[-0.005em]; }
-  /* The logo's gold as a gradient, for numerals and quote marks. */
-  .gold-text { background: linear-gradient(180deg, rgb(var(--gold-hi)), rgb(var(--gold)) 55%, rgb(var(--gold-lo))); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  /* A step inside a page: a gold numeral and a title. */
-  .step-n { @apply mr-2.5 font-serif font-normal gold-text; }
-  .section-title { @apply block font-serif text-[23px] sm:text-[26px] leading-tight text-heading tracking-[-0.015em] mb-4; font-weight: 420; }
+  .label { @apply block text-[15px] font-bold text-heading mb-2; }
+  /* Kept for numerals and quote marks: plain green now, no gradient. */
+  .gold-text { color: rgb(var(--gold)); }
+  .step-n { @apply mr-2.5 font-extrabold text-gold; }
+  .section-title { @apply block font-sans text-[23px] sm:text-[26px] leading-tight text-heading tracking-[-0.015em] mb-4 font-extrabold; }
   .input {
-    @apply w-full rounded-2xl bg-field px-4 py-3 text-[15px] text-ink placeholder:text-ink-mute/80 transition;
+    @apply w-full rounded-[10px] bg-field px-4 py-3 text-[15px] text-ink placeholder:text-ink-mute/80 transition;
     border: 1px solid transparent;
   }
   .input:hover { border-color: rgb(var(--line)); }
-  .input:focus { @apply outline-none bg-surface; border-color: rgb(var(--navy) / 0.45); box-shadow: 0 0 0 4px rgb(var(--navy) / 0.10); }
+  .input:focus { @apply outline-none bg-surface; border-color: rgb(var(--navy) / 0.6); box-shadow: 0 0 0 3px rgb(var(--lane) / 0.45); }
   .textarea { @apply input min-h-[96px] leading-relaxed; }
   /* iPhone zooms the page in when you type into a box with text under 16px, and it stays zoomed. Phones get 16px. */
   @media (max-width: 639px) { input, textarea, select { font-size: 16px !important; } }
-  .btn { @apply inline-flex items-center justify-center gap-2 text-center rounded-full px-5 py-3 text-[15px] font-medium transition focus:outline-none focus-visible:ring-4 focus-visible:ring-navy/20 disabled:opacity-50 active:scale-[0.98]; }
-  .btn-primary {
-    @apply btn text-white;
-    background: linear-gradient(180deg, rgb(var(--navy) / 0.92), rgb(var(--navy-deep)));
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.14), 0 8px 20px -10px rgb(var(--navy-deep) / 0.7);
-  }
-  .btn-primary:hover { filter: brightness(1.08); }
-  .btn-quiet { @apply btn bg-ink/[0.06] text-heading hover:bg-ink/[0.10]; }
-  .btn-link { @apply text-link font-medium decoration-transparent underline underline-offset-4 transition-colors hover:decoration-link/60; }
-  .chip { @apply inline-flex items-center rounded-full bg-ink/[0.06] px-2.5 py-1 text-xs font-medium text-ink-soft; }
-  .pick { @apply rounded-full bg-field px-3.5 py-2 text-[13px] text-ink-soft text-left transition hover:bg-navy/10 hover:text-heading active:scale-[0.98]; }
-  .quote { @apply font-serif italic text-ink-soft border-l-2 border-gold/40 pl-4; }
+  /* Buttons are cut like road signs: small corners, bold type, one solid color. */
+  .btn { @apply inline-flex items-center justify-center gap-2 text-center rounded-[10px] px-5 py-3 text-[15px] font-bold transition focus:outline-none focus-visible:ring-4 focus-visible:ring-lane/60 disabled:opacity-50 active:translate-y-px; }
+  .btn-primary { @apply btn text-white bg-navy hover:bg-navy-deep; }
+  .btn-quiet { @apply btn bg-ink/[0.07] text-heading hover:bg-ink/[0.11]; }
+  .btn-link { @apply text-link font-bold decoration-transparent underline underline-offset-4 transition-colors hover:decoration-link/60; }
+  .chip { @apply inline-flex items-center rounded-md bg-ink/[0.07] px-2 py-0.5 text-xs font-bold text-ink-soft; }
+  .pick { @apply rounded-lg bg-field px-3.5 py-2 text-[14px] text-ink-soft text-left transition hover:bg-navy/10 hover:text-heading; }
+  .quote { @apply font-serif text-ink-soft border-l-4 border-lane pl-4; }
   .source { @apply text-xs text-ink-mute; }
-  /* The soft, glowing hero: light comes from the brand colors instead of hard borders. */
-  .glow {
-    background:
-      radial-gradient(120% 70% at 0% 0%, rgb(var(--glow-a) / 0.18), transparent 60%),
-      radial-gradient(110% 80% at 100% 0%, rgb(var(--glow-b) / 0.16), transparent 62%),
-      rgb(var(--card));
-    border: 1px solid rgb(var(--line) / 0.45);
-    box-shadow: 0 1px 2px rgb(var(--shadow) / 0.04), 0 24px 48px -28px rgb(var(--glow-b) / 0.45);
-  }
-  .tile {
-    @apply rounded-[22px] p-4 bg-card;
-    border: 1px solid rgb(var(--line) / 0.45);
-    box-shadow: 0 1px 2px rgb(var(--shadow) / 0.04), 0 10px 28px -20px rgb(var(--shadow) / 0.22);
-  }
-  /* A segmented control: equal choices in one soft track. */
-  .seg { @apply grid gap-1 rounded-2xl bg-field p-1; }
-  .seg-opt { @apply block rounded-xl py-3 text-center text-[15px] font-medium text-ink-soft transition; }
+  /* What used to glow is now a plain surface: the hero sits on the ground, the center line carries it. */
+  .glow { background: rgb(var(--card)); border: 1px solid rgb(var(--line)); }
+  .tile { @apply rounded-2xl p-4 bg-card; border: 1px solid rgb(var(--line)); }
+  /* A segmented control: equal choices in one track. */
+  .seg { @apply grid gap-1 rounded-xl bg-field p-1; }
+  .seg-opt { @apply block rounded-lg py-3 text-center text-[15px] font-bold text-ink-soft transition; }
   /* A field with fixed words in front, like "This is about me as". */
-  .inputbox { @apply flex rounded-2xl bg-field transition; border: 1px solid transparent; }
+  .inputbox { @apply flex rounded-[10px] bg-field transition; border: 1px solid transparent; }
   .inputbox:hover { border-color: rgb(var(--line)); }
-  .inputbox:focus-within { @apply bg-surface; border-color: rgb(var(--navy) / 0.45); box-shadow: 0 0 0 4px rgb(var(--navy) / 0.10); }
-  /* A choice card. Selected: lifted onto a white surface with a navy ring. */
-  .option { @apply block rounded-2xl bg-field p-4 transition; border: 1px solid transparent; }
+  .inputbox:focus-within { @apply bg-surface; border-color: rgb(var(--navy) / 0.6); box-shadow: 0 0 0 3px rgb(var(--lane) / 0.45); }
+  /* A choice card. Selected: white surface with a green edge. */
+  .option { @apply block rounded-xl bg-field p-4 transition; border: 1px solid transparent; }
   .option:hover { border-color: rgb(var(--line)); }
-  .peer:checked ~ .option, .option:has(:checked) { @apply bg-surface; border-color: rgb(var(--navy) / 0.55); box-shadow: 0 0 0 3px rgb(var(--navy) / 0.10), 0 8px 20px -14px rgb(var(--shadow) / 0.35); }
-  .peer:focus-visible ~ .option { box-shadow: 0 0 0 4px rgb(var(--navy) / 0.25); }
-  .notice { @apply rounded-2xl bg-sage-soft px-4 py-3 text-sm text-ink; }
-  .draft { @apply inline-flex items-center rounded-full bg-gold-soft text-gold px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em]; }
+  .peer:checked ~ .option, .option:has(:checked) { @apply bg-surface; border-color: rgb(var(--navy)); box-shadow: inset 0 0 0 1px rgb(var(--navy)); }
+  .peer:focus-visible ~ .option { box-shadow: 0 0 0 3px rgb(var(--lane) / 0.6); }
+  .notice { @apply rounded-xl bg-sage-soft px-4 py-3 text-sm text-ink; }
+  .draft { @apply inline-flex items-center rounded-md bg-gold-soft text-gold px-2 py-0.5 text-[11px] font-bold; }
+  /* The center line: the app's one bold device. A dashed yellow lane marking. */
+  .centerline { height: 6px; border-radius: 2px; background: repeating-linear-gradient(90deg, rgb(var(--lane)) 0 28px, transparent 28px 44px); }
 }

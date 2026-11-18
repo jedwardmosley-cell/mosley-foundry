@@ -19,7 +19,7 @@ function table(block: string, key: string) {
   return (
     <div key={key} className="overflow-x-auto">
       <table className="w-full text-left text-[15px]">
-        <thead><tr>{head.map((h, i) => <th key={i} className="pb-2 pr-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-mute">{h}</th>)}</tr></thead>
+        <thead><tr>{head.map((h, i) => <th key={i} className="pb-2 pr-4 text-[13px] font-bold text-ink-mute">{h}</th>)}</tr></thead>
         <tbody>{body.map((r, ri) => <tr key={ri} className="border-t border-line/70">{r.map((c, ci) => <td key={ci} className={`py-2.5 pr-4 align-top ${ci === 0 ? "font-medium text-heading" : ""}`}>{inline(c, `${key}-${ri}-${ci}`)}</td>)}</tr>)}</tbody>
       </table>
     </div>

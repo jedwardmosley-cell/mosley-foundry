@@ -69,22 +69,22 @@ export default async function MyRoadPage({ searchParams }: { searchParams: Promi
   return (
     <>
       <PageHeader eyebrow="Discipline by Design" title="My Design">The system that makes it hard to fail: your routines, your people, your groups and programs, the people you develop. It stays, and it grows.</PageHeader>
-      <div className="card mb-8 !px-3 !py-5 sm:!p-6"><SystemMap name={u.name} nodes={mapNodes} /></div>
+      <div className="mb-8"><SystemMap name={u.name} nodes={mapNodes} /></div>
       <FromBook label="From the book">
         {d.intro[0] ? <><p>{d.intro.find((t) => t.startsWith("It's the deliberate construction"))}</p><p className="mt-2">{d.intro.find((t) => t.startsWith("The question isn't"))}</p></> : "The deliberate construction of the routines, relationships, environments, and accountability structures that support sustained development."}
       </FromBook>
 
       {/* The design is built around the whole identity, all five rules, not only the current focus. */}
-      <section className="mb-10 overflow-hidden rounded-[24px] shadow-[0_24px_48px_-28px_rgb(var(--navy-deep)/0.8)]">
+      <section className="mb-10 overflow-hidden rounded-2xl border border-line">
         {(identity?.becoming || profile?.forgeStatement) ? (
-          <Link href="/identity" className="block bg-[linear-gradient(150deg,rgb(var(--navy)),rgb(var(--navy-deep)))] px-5 py-6 sm:px-7 text-white transition hover:brightness-110">
-            <p className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.16em] text-[#F8CC78]">Built around who I am{identity?.role ? ` · as ${withArticle(identity.role)}` : ""}<Icon name="arrow" className="h-4 w-4 text-white/50" /></p>
-            <p className="mt-3 font-serif text-[20px] sm:text-[22px] leading-[1.3] tracking-[-0.01em] line-clamp-6"><span aria-hidden className="mr-1 text-[#F8CC78]">&ldquo;</span>{profile?.forgeStatement || identity?.becoming}</p>
+          <Link href="/identity" className="block bg-ink px-5 py-6 sm:px-7 text-paper transition hover:bg-ink/90">
+            <p className="flex items-center justify-between text-[13px] font-bold text-paper/70">Built around who I am{identity?.role ? `, as ${withArticle(identity.role)}` : ""}<Icon name="arrow" className="h-4 w-4 text-paper/50" /></p>
+            <p className="mt-3 font-serif text-[20px] sm:text-[22px] leading-[1.3] tracking-[-0.01em] line-clamp-6"><span aria-hidden className="mr-1 text-lane">&ldquo;</span>{profile?.forgeStatement || identity?.becoming}</p>
           </Link>
         ) : (
-          <Link href="/identity" className="block bg-[linear-gradient(150deg,rgb(var(--navy)),rgb(var(--navy-deep)))] px-5 py-6 sm:px-7 text-white">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#F8CC78]">Built around who I am</p>
-            <p className="mt-2 text-[15px] text-white/80">Claim who you are first. Your design is built around it.</p>
+          <Link href="/identity" className="block bg-ink px-5 py-6 sm:px-7 text-paper">
+            <p className="text-[13px] font-bold text-paper/70">Built around who I am</p>
+            <p className="mt-2 text-[15px] text-paper/80">Claim who you are first. Your design is built around it.</p>
           </Link>
         )}
         <div className="bg-card px-5 py-5 sm:px-7 sm:py-6">
@@ -93,14 +93,14 @@ export default async function MyRoadPage({ searchParams }: { searchParams: Promi
           {focuses.length > 0 && (
             <p className="mt-3 text-sm text-ink-soft">
               Your focus right now is one part of it:{" "}
-              {focuses.map((f, i) => <span key={f.id}>{i > 0 && " · "}<Link href={`/cycle?id=${f.id}`} className="btn-link">{focusTitle(f)}</Link></span>)}
+              {focuses.map((f, i) => <span key={f.id}>{i > 0 && ", "}<Link href={`/cycle?id=${f.id}`} className="btn-link">{focusTitle(f)}</Link></span>)}
             </p>
           )}
         </div>
       </section>
 
       {d.whosChecking.length > 0 && (
-        <figure className="mb-10 border-l-2 border-gold/60 pl-5">
+        <figure className="mb-10 border-l-4 border-lane pl-5">
           <blockquote className="font-serif text-[21px] sm:text-[24px] leading-[1.3] tracking-[-0.01em] text-heading">{d.whosChecking[0]}</blockquote>
           <FromBook label="So who's checking?" className="mt-3 !mb-0">{d.whosChecking[2]}</FromBook>
         </figure>
@@ -130,7 +130,7 @@ export default async function MyRoadPage({ searchParams }: { searchParams: Promi
                     <li key={c.id} className="py-3 flex items-start justify-between gap-3">
                       <div>
                         <p className="text-[15px]">{c.title}</p>
-                        <p className="text-sm muted">{CADENCES[c.cadence as keyof typeof CADENCES]}{c.when ? ` · ${c.when}` : ""}{c.detail ? ` · ${c.detail}` : ""}</p>
+                        <p className="text-sm muted">{CADENCES[c.cadence as keyof typeof CADENCES]}{c.when ? `, ${c.when}` : ""}{c.detail ? `. ${c.detail}` : ""}</p>
                         <ScheduleEdit c={c} />
                       </div>
                       <form action={removeCommitment}><input type="hidden" name="id" value={c.id} /><button className="text-[13px] text-ink-mute hover:text-alert" aria-label={`Remove ${c.title}`}>Remove</button></form>
