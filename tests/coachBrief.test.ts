@@ -97,3 +97,52 @@ test("the assistant's plan is read safely", async () => {
   assert.equal(p!.actions[0].type, "assign_exercise");
   assert.deepEqual(p!.unclear, ["no time for Paul"]);
 });
+
+test("cohort prep sees group totals only: no names, nothing anyone wrote", async () => {
+  const { cohortPulse } = await import("../src/lib/reports");
+  const c = await db.cohort.findFirstOrThrow({ where: { isDemo: true }, include: { members: { include: { user: true } } } });
+  const p = await cohortPulse(c.id);
+  assert.equal(p.small, false);
+  assert.match(p.text, /Daily check-ins, last 14 days: \d+ of \d+ people/);
+  for (const m of c.members) assert.ok(!p.text.includes(m.user.name.split(" (")[0]), `no name: ${m.user.name}`);
+  assert.ok(!p.text.includes("Marco") && !p.text.includes("exhausted") && !p.text.includes("PRIVATE"), "no written text");
+});
+
+test("a small group gets no totals at all", async () => {
+  const { cohortPulse } = await import("../src/lib/reports");
+  const c = await db.cohort.findFirstOrThrow({ where: { isDemo: true }, include: { members: { where: { role: "PARTICIPANT" } } } });
+  const keep = c.members.slice(0, 3).map((m) => m.id);
+  const removed = c.members.filter((m) => !keep.includes(m.id));
+  await db.cohortMember.deleteMany({ where: { id: { in: removed.map((m) => m.id) } } });
+  try {
+    const p = await cohortPulse(c.id);
+    assert.equal(p.small, true);
+    assert.ok(!p.text.includes("check-ins"), "nothing about practice");
+  } finally {
+    await db.cohortMember.createMany({ data: removed.map(({ id, cohortId, userId, role }) => ({ id, cohortId, userId, role })) });
+  }
+});
+
+test("who needs me ranks by what needs attention, with plain reasons", async () => {
+  const { needsMe } = await import("../src/lib/coachSummary");
+  const v = await getCoachView(coach, dana.id);
+  const quiet = needsMe(v, [], [{ title: "Old one", status: "ASSIGNED", dueOn: new Date(Date.now() - 864e5) }]);
+  assert.ok(quiet.reasons.includes("Exercise overdue: Old one"));
+  assert.ok(quiet.reasons.includes("No session booked yet"));
+  const booked = needsMe(v, [{ scheduledAt: new Date(Date.now() + 2 * 864e5) }, { scheduledAt: new Date(Date.now() - 5 * 864e5) }], []);
+  assert.ok(!booked.reasons.some((r) => r.startsWith("No session")));
+  assert.ok(quiet.weight > booked.weight);
+  const m = needsMe(await getCoachView(coach, marcus.id), [], []);
+  assert.ok(m.reasons.includes("Marcus hasn't shared anything with you yet"));
+});
+
+test("wrap-up and cohort prep JSON are read safely", async () => {
+  const { parseWrapUp, parseCohortPrep } = await import("../src/lib/ai");
+  const w = parseWrapUp('{"notes": "n", "commitments": "Ask one question first on Thursday", "followUp": "Thanks", "exercise": null}');
+  assert.equal(w?.commitments, "Ask one question first on Thursday");
+  assert.equal(parseWrapUp('{"notes": "", "commitments": "", "followUp": ""}'), null);
+  const c = parseCohortPrep('{"working": ["a"], "stuck": [], "plan": [{"minutes": "15", "part": "Open", "detail": "x"}, {"minutes": 9999, "part": "Long", "detail": ""}, {"part": ""}], "questions": ["q1"]}');
+  assert.equal(c?.plan.length, 2);
+  assert.equal(c?.plan[0].minutes, 15);
+  assert.equal(c?.plan[1].minutes, 240, "minutes are kept sane");
+});

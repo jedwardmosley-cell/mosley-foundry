@@ -120,3 +120,62 @@ export async function cancelCoachDraft(fd: FormData) {
   await db.coachDraft.deleteMany({ where: { id: draftId, coachId: c.id } });
   redirect("/coach#assistant");
 }
+
+/** After-session wrap-up, step 1: draft from the coach's rough notes. Nothing is saved to the session yet. */
+export async function draftSessionWrapUp(fd: FormData) {
+  const d = parse(z.object({ participantId: z.string(), rough: z.string().trim().min(3).max(8000) }), fd);
+  const c = await coachFor(d.participantId);
+  const { draftWrapUp } = await import("@/lib/coachBrief");
+  const r = await draftWrapUp(c, d.participantId, d.rough);
+  await audit(c, "coach.wrapup_draft", d.participantId, r.ok ? "ok" : r.reason);
+  redirect(r.ok ? `/coach/${d.participantId}?wrap=${r.draftId}#wrapup` : `/coach/${d.participantId}?wrapnote=${r.reason}#wrapup`);
+}
+
+/**
+ * After-session wrap-up, step 2: save what the coach kept. Notes stay private to the coach; commitments are what the
+ * client sees. With no past session on record, one is added for today so the notes have a home.
+ */
+export async function saveSessionWrapUp(fd: FormData) {
+  const d = parse(z.object({ participantId: z.string(), draftId: z.string(), coachNotes: text(8000), commitments: text(4000), assign: z.string().optional() }), fd);
+  const c = await coachFor(d.participantId);
+  const { getWrapUp } = await import("@/lib/coachBrief");
+  const w = await getWrapUp(c.id, d.participantId, d.draftId);
+  if (!w) redirect(`/coach/${d.participantId}#wrapup`);
+  const existing = w.draft.sessionId ? await db.coachingSession.findFirst({ where: { id: w.draft.sessionId, coachId: c.id, participantId: d.participantId } }) : null;
+  if (existing) {
+    const notes = existing.coachNotes ? `${existing.coachNotes}\n\n${d.coachNotes}` : d.coachNotes;
+    await db.coachingSession.update({ where: { id: existing.id }, data: { coachNotes: notes, commitments: d.commitments || existing.commitments } });
+  } else {
+    await db.coachingSession.create({ data: { coachId: c.id, participantId: d.participantId, scheduledAt: new Date(), coachNotes: d.coachNotes, commitments: d.commitments } });
+  }
+  if (d.assign === "on" && w.draft.exercise) await assignFor(c, { participantId: d.participantId, exerciseRef: w.draft.exercise.ref, title: "", instructions: "" });
+  await db.coachDraft.deleteMany({ where: { id: d.draftId, coachId: c.id } });
+  await audit(c, "coach.wrapup_saved", d.participantId);
+  revalidatePath(`/coach/${d.participantId}`);
+  redirect(`/coach/${d.participantId}?wrapped=1#wrapup`);
+}
+
+export async function discardSessionWrapUp(fd: FormData) {
+  const d = parse(z.object({ participantId: z.string(), draftId: z.string() }), fd);
+  const c = await coachFor(d.participantId);
+  await db.coachDraft.deleteMany({ where: { id: d.draftId, coachId: c.id } });
+  redirect(`/coach/${d.participantId}#wrapup`);
+}
+
+/** Cohort session prep: only a facilitator of that cohort, and only from group totals. */
+export async function prepareCohortSession(fd: FormData) {
+  const c = await requireUser("COACH");
+  const d = parse(z.object({ cohortId: z.string(), minutes: z.coerce.number().int().min(30).max(480).default(120) }), fd);
+  const isFacilitator = await db.cohortMember.findFirst({ where: { cohortId: d.cohortId, userId: c.id, role: "FACILITATOR" } });
+  if (!isFacilitator) throw new Error("You don't facilitate this cohort.");
+  const { aiAvailable, cohortPrepAI } = await import("@/lib/ai");
+  if (!aiAvailable()) redirect(`/coach/cohorts?prepnote=ai_off#cohort-${d.cohortId}`);
+  const { cohortPulse } = await import("@/lib/reports");
+  const pulse = await cohortPulse(d.cohortId);
+  const prep = await cohortPrepAI(pulse.text, d.minutes);
+  await audit(c, "coach.cohort_prep", undefined, `${d.cohortId}:${prep ? "ok" : "failed"}`);
+  if (!prep) redirect(`/coach/cohorts?prepnote=failed#cohort-${d.cohortId}`);
+  await db.cohortBrief.create({ data: { coachId: c.id, cohortId: d.cohortId, segmentKey: pulse.segmentKey, content: JSON.stringify({ ...prep, small: pulse.small, minutes: d.minutes }) } });
+  revalidatePath("/coach/cohorts");
+  redirect(`/coach/cohorts#cohort-${d.cohortId}`);
+}

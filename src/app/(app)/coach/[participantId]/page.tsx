@@ -4,8 +4,9 @@ import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { getCoachView, getCoachWork, ForbiddenError, SHARE_SCOPES, type ShareScope } from "@/lib/access";
 import { attentionFlags } from "@/lib/coachSummary";
-import { assignExercise, scheduleSession, saveSessionNotes, recordEqiInterpretation, prepareSessionBrief } from "@/app/actions/coach";
-import { latestBrief } from "@/lib/coachBrief";
+import { assignExercise, scheduleSession, saveSessionNotes, recordEqiInterpretation, prepareSessionBrief, draftSessionWrapUp, saveSessionWrapUp, discardSessionWrapUp } from "@/app/actions/coach";
+import { CopyText } from "@/components/CopyText";
+import { latestBrief, getWrapUp } from "@/lib/coachBrief";
 import { aiAvailable } from "@/lib/ai";
 import { getContent } from "@/content";
 import { exerciseMenu } from "@/lib/exercises";
@@ -25,7 +26,7 @@ function NotShared({ scope }: { scope: ShareScope }) {
   return <p className="text-sm text-ink-mute">Not shared: {SHARE_SCOPES[scope].toLowerCase()}.</p>;
 }
 
-export default async function CoachParticipant({ params, searchParams }: { params: Promise<{ participantId: string }>; searchParams: Promise<{ brief?: string }> }) {
+export default async function CoachParticipant({ params, searchParams }: { params: Promise<{ participantId: string }>; searchParams: Promise<{ brief?: string; wrap?: string; wrapnote?: string; wrapped?: string }> }) {
   const coach = await requireUser("COACH");
   const { participantId } = await params;
   const sp = await searchParams;
@@ -51,6 +52,8 @@ export default async function CoachParticipant({ params, searchParams }: { param
   // Exercise menu: workbook and book items by stable reference.
   const menu = exerciseMenu(pack);
   const brief = await latestBrief(coach.id, participantId, v.scopes);
+  const wrap = sp.wrap ? await getWrapUp(coach.id, participantId, sp.wrap) : null;
+  const lastSession = work.sessions.find((x) => x.scheduledAt <= new Date());
   const first = v.participant.name.split(" (")[0].split(" ")[0];
   const BRIEF_NOTE: Record<string, string> = {
     ai_off: "The AI isn't set up for this app yet, so there's no brief.",
@@ -119,6 +122,47 @@ export default async function CoachParticipant({ params, searchParams }: { param
               </section>
             )}
           </div>
+        )}
+      </Card>
+
+      <Card id="wrapup" className="mb-6 scroll-mt-24">
+        <h2 className="h2">After-session wrap-up</h2>
+        <p className="mt-1 text-[15px] text-ink-soft">Right after you meet, put down your rough notes. The AI drafts your private notes, the commitments {first} will see, a follow-up message and the next exercise. You edit it before anything is saved.</p>
+        {sp.wrapped && <p role="status" className="notice mt-3">Saved to the session. {first} now sees the commitments on their Dashboard.</p>}
+        {sp.wrapnote && <p role="status" className="notice mt-3">{sp.wrapnote === "ai_off" ? BRIEF_NOTE.ai_off : BRIEF_NOTE.failed}</p>}
+        {!wrap && (aiAvailable() ? (
+          <form action={draftSessionWrapUp} className="mt-3 space-y-3">
+            <input type="hidden" name="participantId" value={participantId} />
+            <p className="text-sm text-ink-mute">{lastSession ? `For your session on ${fmt(lastSession.scheduledAt, { weekday: "long", month: "short", day: "numeric" })}.` : "No past session on record, so saving will add one for today."}</p>
+            <textarea name="rough" required maxLength={8000} rows={4} className="textarea" aria-label="Rough notes from the session" placeholder="Talked about the director meeting. Pause works with peers, not with him yet. She'll try one question before answering on Thursday. Book Reggie by Friday. Next time: how Thursday went." />
+            <Submit className="btn-primary">Draft the wrap-up</Submit>
+          </form>
+        ) : <p className="mt-3 text-sm text-ink-mute">{BRIEF_NOTE.ai_off}</p>)}
+        {wrap && (
+          <form action={saveSessionWrapUp} className="mt-4 space-y-4">
+            <input type="hidden" name="participantId" value={participantId} />
+            <input type="hidden" name="draftId" value={wrap.id} />
+            <p className="text-xs text-ink-mute">Draft from AI{wrap.draft.sessionAt ? `, for your session on ${fmt(new Date(wrap.draft.sessionAt), { month: "short", day: "numeric" })}` : ", saved as a session today"}. Check every line before you save.</p>
+            <Field label="Your notes" hint="Private to you."><textarea name="coachNotes" defaultValue={wrap.draft.notes} rows={7} className="textarea" /></Field>
+            <Field label={`Commitments ${first} will see`} hint="Shown on their Dashboard. Leave empty if nothing was agreed."><textarea name="commitments" defaultValue={wrap.draft.commitments} rows={5} className="textarea" /></Field>
+            {wrap.draft.followUp && (
+              <div>
+                <p className="label">Follow-up message</p>
+                <p className="mt-1 rounded-2xl bg-ink/[0.04] px-4 py-3 text-[15px] whitespace-pre-line">{wrap.draft.followUp}</p>
+                <div className="mt-2"><CopyText text={wrap.draft.followUp} label="Send it by text or email" /></div>
+              </div>
+            )}
+            {wrap.draft.exercise && (
+              <label className="flex items-start gap-3 rounded-2xl bg-ink/[0.04] p-3">
+                <input type="checkbox" name="assign" className="mt-1 h-4 w-4 accent-navy" />
+                <span className="text-[15px]">Also assign <span className="font-medium text-heading">{wrap.draft.exercise.title}</span>. <span className="text-ink-soft">{wrap.draft.exercise.why}</span></span>
+              </label>
+            )}
+            <div className="flex flex-wrap gap-3">
+              <Submit className="btn-primary">Save to the session</Submit>
+              <Submit formAction={discardSessionWrapUp} className="btn-quiet">Discard</Submit>
+            </div>
+          </form>
         )}
       </Card>
 

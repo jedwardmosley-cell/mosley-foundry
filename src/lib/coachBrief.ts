@@ -126,3 +126,40 @@ export async function latestBrief(coachId: string, participantId: string, scopes
     return null;
   }
 }
+
+export type WrapUpDraft = { sessionId: string; sessionAt: string; notes: string; commitments: string; followUp: string; exercise: { ref: string; title: string; why: string } | null };
+export type WrapUpResult = { ok: true; draftId: string } | { ok: false; reason: "ai_off" | "failed" };
+
+/**
+ * After-session wrap-up: drafts tidy notes, commitments, a follow-up and the next exercise from the coach's rough notes,
+ * for the most recent session that has already happened. Client data goes in only if the client allows AI.
+ */
+export async function draftWrapUp(coach: CurrentUser, participantId: string, roughNotes: string): Promise<WrapUpResult> {
+  if (!aiAvailable()) return { ok: false, reason: "ai_off" };
+  const v = await getCoachView(coach, participantId);
+  const work = await getCoachWork(coach, participantId);
+  const [profile, idRow, { pack }] = await Promise.all([
+    db.profile.findUnique({ where: { userId: participantId }, select: { aiEnabled: true } }),
+    db.identityProfile.findUnique({ where: { userId: participantId }, select: { aiUse: true } }),
+    getContent(),
+  ]);
+  const context = profile?.aiEnabled === false ? "" : briefContext(v, work, pack, idRow?.aiUse !== false);
+  const menu = exerciseMenu(pack);
+  const first = v.participant.name.split(" (")[0].split(" ")[0];
+  const w = await (await import("./ai")).wrapUpAI(roughNotes, first, context, menu.map(({ ref, title }) => ({ ref, title })));
+  if (!w) return { ok: false, reason: "failed" };
+  const last = work.sessions.find((s) => s.scheduledAt <= new Date());
+  const draft: WrapUpDraft = { sessionId: last?.id ?? "", sessionAt: last?.scheduledAt.toISOString() ?? "", ...w };
+  const d = await db.coachDraft.create({ data: { coachId: coach.id, kind: "WRAPUP", participantId, instruction: roughNotes.trim().slice(0, 8000), actions: JSON.stringify(draft) } });
+  return { ok: true, draftId: d.id };
+}
+
+export async function getWrapUp(coachId: string, participantId: string, id: string): Promise<{ id: string; draft: WrapUpDraft } | null> {
+  const d = await db.coachDraft.findFirst({ where: { id, coachId, participantId, kind: "WRAPUP" } });
+  if (!d) return null;
+  try {
+    return { id: d.id, draft: JSON.parse(d.actions) as WrapUpDraft };
+  } catch {
+    return null;
+  }
+}

@@ -55,7 +55,7 @@ export async function planForCoach(coach: CurrentUser, instruction: string): Pro
 }
 
 export async function getDraft(coachId: string, id: string): Promise<{ id: string; instruction: string; plan: DraftPlan } | null> {
-  const d = await db.coachDraft.findFirst({ where: { id, coachId } });
+  const d = await db.coachDraft.findFirst({ where: { id, coachId, kind: "ACTIONS" } });
   if (!d) return null;
   try {
     return { id: d.id, instruction: d.instruction, plan: JSON.parse(d.actions) as DraftPlan };

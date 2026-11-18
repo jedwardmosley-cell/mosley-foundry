@@ -75,6 +75,7 @@ model User {
   coachBriefsAsCoach            CoachBrief[]         @relation("BriefCoach")
   coachBriefsAsParticipant      CoachBrief[]         @relation("BriefParticipant")
   coachDrafts                   CoachDraft[]         @relation("DraftCoach")
+  cohortBriefs                  CohortBrief[]        @relation("CohortBriefCoach")
   auditEvents                   AuditEvent[]         @relation("AuditActor")
   feedback                      Feedback[]
 }
@@ -439,6 +440,7 @@ model Cohort {
   createdAt      DateTime          @default(now())
   members        CohortMember[]
   sessions       TrainingSession[]
+  briefs         CohortBrief[]
 }
 
 model CohortMember {
@@ -610,12 +612,29 @@ model CoachBrief {
 /// The coach assistant: what the coach asked for in plain words, and the actions the AI proposed. Nothing is done
 /// until the coach approves; each action is checked again against the coach's own clients when they do.
 model CoachDraft {
-  id          String   @id @default(cuid())
-  coachId     String
-  coach       User     @relation("DraftCoach", fields: [coachId], references: [id], onDelete: Cascade)
-  instruction String
-  actions     String // JSON: { actions: [...], unclear: [...] }
-  createdAt   DateTime @default(now())
+  id            String   @id @default(cuid())
+  coachId       String
+  coach         User     @relation("DraftCoach", fields: [coachId], references: [id], onDelete: Cascade)
+  kind          String   @default("ACTIONS") // enum: ACTIONS (the assistant) | WRAPUP (after-session wrap-up)
+  participantId String   @default("") // WRAPUP: the client the session was with
+  instruction   String
+  actions       String // JSON. ACTIONS: { actions, unclear }. WRAPUP: { sessionId, notes, commitments, followUp, exercise }
+  createdAt     DateTime @default(now())
 
   @@index([coachId, createdAt])
+}
+
+/// Cohort session prep for a facilitator. Built from group totals only, and only for groups at or above the
+/// reporting minimum. Never holds anything about one person.
+model CohortBrief {
+  id         String   @id @default(cuid())
+  coachId    String
+  coach      User     @relation("CohortBriefCoach", fields: [coachId], references: [id], onDelete: Cascade)
+  cohortId   String
+  cohort     Cohort   @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  segmentKey String   @default("")
+  content    String // JSON: { working, stuck, plan, questions }
+  createdAt  DateTime @default(now())
+
+  @@index([coachId, cohortId, createdAt])
 }

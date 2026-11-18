@@ -725,3 +725,106 @@ export function parseCoachPlan(raw: string): { actions: ProposedAction[]; unclea
     return null;
   }
 }
+
+export type WrapUp = {
+  /** The coach's private notes, tidied from what they wrote. */
+  notes: string;
+  /** What the client agreed to, as the client will read it. */
+  commitments: string;
+  /** A short follow-up message from the coach to the client. */
+  followUp: string;
+  exercise: { ref: string; title: string; why: string } | null;
+};
+
+/**
+ * After-session wrap-up: the coach's rough notes become tidy private notes, the commitments the client will see,
+ * a follow-up message and the next exercise. The context is what the client shares with the coach. A draft only.
+ */
+export async function wrapUpAI(roughNotes: string, firstName: string, context: string, menu: { ref: string; title: string }[]): Promise<WrapUp | null> {
+  const raw = await askTone([
+    "You help a coach wrap up a one-on-one coaching session inside Both Hands on the Wheel, a personal leadership app by Jason Mosley built on his book (FORGE for identity, Discipline by Design for the system that builds it into the week).",
+    "The coach wrote rough notes right after the session. Turn them into a draft the coach will check and edit. Use only what is in the notes and the shared context. Never invent what was said or agreed.",
+    `The client's first name is ${firstName}.`,
+    "Return:",
+    "- notes: the coach's private notes, tidied. Keep every fact from the rough notes. Short lines, no padding. Only the coach sees these.",
+    `- commitments: what ${firstName} agreed to do, as ${firstName} will read it on their own screen. One per line, starting with a verb, specific, with a when if the notes give one. Only what the notes show was agreed. "" if nothing was agreed.`,
+    `- followUp: a short message from the coach to ${firstName}, three to five sentences, warm and direct, in the coach's voice: thank them, name the one thing that mattered most, restate the commitments plainly, and say when you'll next talk if the notes say. No sign-off name.`,
+    `- exercise: one program exercise that fits what was agreed, by its ref, with why in one sentence; or null. THE LIST: ${menu.map((m) => `${m.ref} = ${m.title}`).join("; ")}`,
+    'Return only JSON, with no other text: {"notes": "", "commitments": "", "followUp": "", "exercise": {"ref": "", "why": ""}}',
+    HOUSE_STYLE,
+  ], `ROUGH NOTES FROM THE SESSION:\n${roughNotes.trim()}\n\nWHAT ${firstName.toUpperCase()} SHARES WITH THE COACH:\n${context || "(nothing)"}`);
+  if (!raw) return null;
+  const w = parseWrapUp(raw);
+  if (w?.exercise) {
+    const m = menu.find((x) => x.ref === w.exercise!.ref);
+    w.exercise = m ? { ...w.exercise, title: m.title } : null;
+  }
+  return w;
+}
+
+/** Reads the wrap-up JSON. Exported for tests. */
+export function parseWrapUp(raw: string): WrapUp | null {
+  const m = raw.match(/\{[\s\S]*\}/);
+  if (!m) return null;
+  try {
+    const j = JSON.parse(m[0]);
+    const str = (v: unknown, max: number) => plainPunctuation(String(v ?? "")).trim().slice(0, max);
+    const w = { notes: str(j.notes, 8000), commitments: str(j.commitments, 4000), followUp: str(j.followUp, 2000), exercise: j.exercise && str(j.exercise.ref, 60) ? { ref: str(j.exercise.ref, 60), title: "", why: str(j.exercise.why, 300) } : null };
+    return w.notes || w.commitments || w.followUp ? w : null;
+  } catch {
+    return null;
+  }
+}
+
+export type CohortPrep = {
+  /** What the group is working on, from the totals. */
+  working: string[];
+  /** Where the group looks stuck, from the totals. */
+  stuck: string[];
+  /** A plan for the session, in timed parts. */
+  plan: { minutes: number; part: string; detail: string }[];
+  /** Three questions for the room. */
+  questions: string[];
+};
+
+/**
+ * Cohort session prep for a facilitator, from group totals only (see cohortPulse). Never about one person.
+ * A draft plan for the facilitator to adapt.
+ */
+export async function cohortPrepAI(pulse: string, minutes: number): Promise<CohortPrep | null> {
+  const sources = await retrieve(pulse.slice(0, 400), 4);
+  const raw = await askTone([
+    "You help a facilitator prepare a group session of the Leading Others program inside Both Hands on the Wheel, by Jason Mosley. The program uses FORGE (Future Focused, Observant, Resilient, Growth Oriented, Emotionally Anchored) for identity and Discipline by Design for the system that builds it into the week.",
+    "You get the session's segment content and, for groups big enough, group totals. You never see anything about one person, and you must not write as if you do: talk about the group and its numbers only. Self-ratings are self-ratings, not a validated measure; never compare them to EQ-i.",
+    `Plan a session of about ${minutes} minutes.`,
+    "Return:",
+    "- working: one to three short points on what the group is working on, from the totals. [] if there are no totals.",
+    "- stuck: one to three short points on where the group may be stuck, each tied to a number in the totals, said as something to explore rather than a finding. [] if there are no totals.",
+    "- plan: four to six timed parts that add up to the session length: an opening check-in, the segment's teaching, practice in pairs or small groups, a debrief, and commitments for the week. Each part has minutes, a short name and one or two sentences of detail.",
+    "- questions: exactly three questions for the room, open and short.",
+    'Return only JSON, with no other text: {"working": [""], "stuck": [""], "plan": [{"minutes": 10, "part": "", "detail": ""}], "questions": ["", "", ""]}',
+    HOUSE_STYLE,
+    "",
+    "PROGRAM GUIDANCE:",
+    sources.map((x) => `${x.ref}: ${x.text}`).join("\n\n") || "(none)",
+  ], `THE SESSION AND THE GROUP:\n${pulse}`);
+  return raw ? parseCohortPrep(raw) : null;
+}
+
+/** Reads the cohort prep JSON. Exported for tests. */
+export function parseCohortPrep(raw: string): CohortPrep | null {
+  const m = raw.match(/\{[\s\S]*\}/);
+  if (!m) return null;
+  try {
+    const j = JSON.parse(m[0]);
+    const str = (v: unknown, max = 400) => plainPunctuation(String(v ?? "")).trim().slice(0, max);
+    const list = (v: unknown, n: number) => (Array.isArray(v) ? v : []).map((x) => str(x)).filter(Boolean).slice(0, n);
+    const plan = (Array.isArray(j.plan) ? j.plan : []).slice(0, 8)
+      .map((x: { minutes?: unknown; part?: unknown; detail?: unknown }) => ({ minutes: Math.max(1, Math.min(240, Math.round(Number(x?.minutes) || 0))), part: str(x?.part, 80), detail: str(x?.detail, 400) }))
+      .filter((x: { part: string }) => x.part);
+    const c = { working: list(j.working, 3), stuck: list(j.stuck, 3), plan, questions: list(j.questions, 3) };
+    return c.plan.length || c.questions.length ? c : null;
+  } catch {
+    return null;
+  }
+}

@@ -2,7 +2,8 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getCoachView } from "@/lib/access";
-import { attentionFlags } from "@/lib/coachSummary";
+import { attentionFlags, needsMe } from "@/lib/coachSummary";
+import { SHARE_SCOPES } from "@/lib/access";
 import { practiceSummary, cyclePosition } from "@/lib/cycle";
 import { SEASON_LENGTH } from "@/content/program";
 import { getContent } from "@/content";
@@ -30,6 +31,16 @@ export default async function CoachHome({ searchParams }: { searchParams: Promis
   const { pack } = await getContent();
   const assignments = await db.coachAssignment.findMany({ where: { coachId: coach.id, active: true }, include: { participant: { select: { id: true, name: true } } } });
   const views = await Promise.all(assignments.map((a) => getCoachView(coach, a.participant.id)));
+  // Who needs me this week: the coach's own sessions and exercises, plus what each client shares.
+  const ids = views.map((v) => v.participant.id);
+  const [allSessions, allExercises] = await Promise.all([
+    db.coachingSession.findMany({ where: { coachId: coach.id, participantId: { in: ids } }, select: { participantId: true, scheduledAt: true } }),
+    db.assignedExercise.findMany({ where: { coachId: coach.id, participantId: { in: ids } }, select: { participantId: true, title: true, status: true, dueOn: true } }),
+  ]);
+  const needs = views
+    .map((v) => ({ v, ...needsMe(v, allSessions.filter((x) => x.participantId === v.participant.id), allExercises.filter((x) => x.participantId === v.participant.id)) }))
+    .sort((a, b) => b.weight - a.weight);
+  const needing = needs.filter((n) => n.weight > 0);
   const upcoming = await db.coachingSession.findMany({ where: { coachId: coach.id, scheduledAt: { gte: new Date() } }, orderBy: { scheduledAt: "asc" }, take: 5, include: { participant: { select: { name: true } } } });
 
   return (
@@ -38,6 +49,22 @@ export default async function CoachHome({ searchParams }: { searchParams: Promis
         You see only what each client has chosen to share with you. Journals and AI conversations are never visible to you.
       </PageHeader>
 
+      {views.length > 0 && (
+        <Card className="mb-6">
+          <h2 className="h2">Who needs me this week</h2>
+          <p className="mt-1 text-[15px] text-ink-soft">Your clients, most pressing first, with the reasons. From what each one shares with you, plus your own sessions and exercises.</p>
+          {needing.length === 0 && <p className="mt-3 text-[15px]">Everyone is on track this week.</p>}
+          <ol className="mt-3 divide-y divide-line/60">
+            {needing.map(({ v, reasons }) => (
+              <li key={v.participant.id} className="py-2.5">
+                <Link href={`/coach/${v.participant.id}`} className="font-bold text-heading hover:text-link">{v.participant.name.replace(/\s*\(Demo\)$/, "")}</Link>
+                <p className="mt-0.5 text-[15px] text-ink-soft">{reasons.join(". ")}.</p>
+              </li>
+            ))}
+          </ol>
+          {needing.length > 0 && needing.length < views.length && <p className="mt-2 text-sm text-ink-mute">The rest are on track: {needs.filter((n) => n.weight === 0).map((n) => n.v.participant.name.replace(/\s*\(Demo\)$/, "")).join(", ")}.</p>}
+        </Card>
+      )}
       <Card id="assistant" className="mb-6 scroll-mt-24">
         <h2 className="h2">Coach assistant</h2>
         <p className="mt-1 text-[15px] text-ink-soft">Say what you want done for your clients, in plain words. The assistant lays out exactly what it will do, and nothing happens until you approve it. It works only with your own clients and sees their names, never what they share.</p>
@@ -108,7 +135,7 @@ export default async function CoachHome({ searchParams }: { searchParams: Promis
             <Link key={v.participant.id} href={`/coach/${v.participant.id}`} className="card block hover:border-navy/40">
               <div className="flex items-center justify-between gap-3">
                 <h2 className="h3">{v.participant.name}</h2>
-                <span className="text-xs muted">{v.scopes.length} of 8 areas shared</span>
+                <span className="text-xs muted">{v.scopes.length} of {Object.keys(SHARE_SCOPES).length} areas shared</span>
               </div>
               <div className="mt-3 text-[15px] space-y-1.5">
                 <p className="flex items-center gap-2">{pk ? <><PillarMark k={pk} size="sm" /> {pack.pillars.find((p) => p.key === pk)?.name}</> : <span className="muted">Focus not shared</span>}</p>

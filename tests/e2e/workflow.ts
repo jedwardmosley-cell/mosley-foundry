@@ -1047,7 +1047,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await row.locator('button:has-text("Assign")').waitFor({ state: "detached" });
     await page.goto(`${BASE}/coach`);
     await page.waitForSelector("text=Lena Ortiz");
-    await page.waitForSelector("text=0 of 8 areas shared");
+    await page.waitForSelector("text=0 of 10 areas shared");
     const denied = await page.goto(`${BASE}/coach/${dana.id}`);
     assert.equal(denied?.status(), 404, "admin-coach cannot open someone they do not coach");
     const j = await page.goto(`${BASE}/journal`);
@@ -1118,6 +1118,45 @@ const submitAndWait = async (page: Page, selector: string) => {
     await cp.goto(`${BASE}/coach?draft=${bad.id}`);
     await Promise.all([cp.waitForURL(/done=0/), cp.click('button:has-text("Do these")')]);
     assert.equal(await db.assignedExercise.count({ where: { title: "E2E-ASSIST-NOT-MINE" } }), 0, "never for someone who isn't their client");
+    await cc.close();
+  });
+
+  await check("11d. after-session wrap-up saves only what the coach keeps; who needs me and cohort prep show", async () => {
+    const coachU = await db.user.findUniqueOrThrow({ where: { email: "coach@demo.bothhands.app" } });
+    const danaU = await db.user.findUniqueOrThrow({ where: { email: "dana@demo.bothhands.app" } });
+    const last = await db.coachingSession.findFirstOrThrow({ where: { coachId: coachU.id, participantId: danaU.id, scheduledAt: { lte: new Date() } }, orderBy: { scheduledAt: "desc" } });
+    const draft = { sessionId: last.id, sessionAt: last.scheduledAt.toISOString(), notes: "E2E-WRAP notes", commitments: "E2E-WRAP: ask one question first on Thursday", followUp: "E2E-WRAP thanks", exercise: { ref: "identity:0", title: "Identity exercise", why: "fits" } };
+    const d = await db.coachDraft.create({ data: { coachId: coachU.id, kind: "WRAPUP", participantId: danaU.id, instruction: "rough", actions: JSON.stringify(draft) } });
+    const cc = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const cp: Page = await cc.newPage();
+    await login(cp, "coach@demo.bothhands.app");
+    // who needs me this week sits on My clients
+    await cp.goto(`${BASE}/coach`);
+    await cp.waitForSelector("h2:text-is('Who needs me this week')");
+    // the wrap-up draft: nothing saved yet
+    await cp.goto(`${BASE}/coach/${danaU.id}?wrap=${d.id}`);
+    await cp.waitForSelector("text=Follow-up message");
+    assert.ok(!(await db.coachingSession.findUniqueOrThrow({ where: { id: last.id } })).coachNotes.includes("E2E-WRAP"), "nothing before saving");
+    await cp.fill('textarea[name="commitments"]', "E2E-WRAP: ask one question first on Thursday, edited");
+    await Promise.all([cp.waitForURL(/wrapped=1/), cp.click('button:has-text("Save to the session")')]);
+    const saved = await db.coachingSession.findUniqueOrThrow({ where: { id: last.id } });
+    assert.ok(saved.coachNotes.endsWith("E2E-WRAP notes"), "notes added to the session");
+    assert.ok(saved.coachNotes.includes("Coach-private note"), "earlier notes kept");
+    assert.equal(saved.commitments, "E2E-WRAP: ask one question first on Thursday, edited", "the coach's edit wins");
+    assert.equal(await db.assignedExercise.count({ where: { participantId: danaU.id, exerciseRef: "identity:0" } }), 0, "the exercise only if ticked");
+    // the client sees the commitments on their Dashboard
+    const dc = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const dp: Page = await dc.newPage();
+    await login(dp, "dana@demo.bothhands.app");
+    await dp.goto(`${BASE}/dashboard`);
+    assert.ok((await dp.content()).includes("E2E-WRAP: ask one question first on Thursday, edited") || (await dp.locator("text=From your coach").count()) > 0);
+    await dc.close();
+    // cohort prep panel, from a stored plan
+    const cohort = await db.cohort.findFirstOrThrow({ where: { isDemo: true } });
+    await db.cohortBrief.create({ data: { coachId: coachU.id, cohortId: cohort.id, segmentKey: "03", content: JSON.stringify({ working: ["E2E-COHORT working"], stuck: [], plan: [{ minutes: 20, part: "Open", detail: "x" }], questions: ["q?"], small: false, minutes: 120 }) } });
+    await cp.goto(`${BASE}/coach/cohorts`);
+    await cp.waitForSelector("text=E2E-COHORT working");
+    await cp.waitForSelector("text=20 min");
     await cc.close();
   });
 
