@@ -77,14 +77,14 @@ export default async function MyRoadPage({ searchParams }: { searchParams: Promi
       {/* The design is built around the whole identity, all five rules, not only the current focus. */}
       <section className="mb-10 overflow-hidden rounded-2xl border border-line">
         {(identity?.becoming || profile?.forgeStatement) ? (
-          <Link href="/identity" className="block bg-ink px-5 py-6 sm:px-7 text-paper transition hover:bg-ink/90">
-            <p className="flex items-center justify-between text-[13px] font-bold text-paper/70">Built around who I am{identity?.role ? `, as ${withArticle(identity.role)}` : ""}<Icon name="arrow" className="h-4 w-4 text-paper/50" /></p>
+          <Link href="/identity" className="block bg-navy-deep px-5 py-6 sm:px-7 text-white transition hover:bg-navy">
+            <p className="flex items-center justify-between text-[13px] font-bold text-white/70">Built around who I am{identity?.role ? `, as ${withArticle(identity.role)}` : ""}<Icon name="arrow" className="h-4 w-4 text-white/50" /></p>
             <p className="mt-3 font-serif text-[20px] sm:text-[22px] leading-[1.3] tracking-[-0.01em] line-clamp-6"><span aria-hidden className="mr-1 text-lane">&ldquo;</span>{profile?.forgeStatement || identity?.becoming}</p>
           </Link>
         ) : (
-          <Link href="/identity" className="block bg-ink px-5 py-6 sm:px-7 text-paper">
-            <p className="text-[13px] font-bold text-paper/70">Built around who I am</p>
-            <p className="mt-2 text-[15px] text-paper/80">Claim who you are first. Your design is built around it.</p>
+          <Link href="/identity" className="block bg-navy-deep px-5 py-6 sm:px-7 text-white">
+            <p className="text-[13px] font-bold text-white/70">Built around who I am</p>
+            <p className="mt-2 text-[15px] text-white/80">Claim who you are first. Your design is built around it.</p>
           </Link>
         )}
         <div className="bg-card px-5 py-5 sm:px-7 sm:py-6">

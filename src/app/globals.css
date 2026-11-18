@@ -3,44 +3,45 @@
 @tailwind utilities;
 
 /*
- * Design system: the open road. Cool concrete ground, asphalt text, highway-sign green for actions and
- * one center-line yellow for progress (a shape, never text). Overpass (Highway Gothic lineage) is the app's
- * voice; Newsreader, a book face, carries the client's own words and the book's.
- * Token names are kept from the first design so every screen follows: --navy is now the action green,
- * --gold the green used for small labels, and --fblue the Future Focused rule.
+ * Design system. The original colors (warm paper, navy, the Mosley Foundry gold and the five rule colors)
+ * with the open-road setup: Overpass (road-sign lineage) for the app, Newsreader for the client's own words
+ * and the book, flat cards, sentence-case labels, and one center line in gold for progress.
  */
 :root {
   color-scheme: light dark;
-  --paper: 238 240 236;  --card: 255 255 255;  --surface: 255 255 255;  --line: 213 218 213;
-  --ink: 29 35 41;  --ink-soft: 78 88 96;  --ink-mute: 108 118 125;
-  --navy: 14 90 68;  --navy-deep: 9 64 48;  --heading: 22 28 33;  --link: 14 90 68;
-  --lane: 229 178 0;
-  --fblue: 43 90 155;
-  --brass: 176 122 30;  --brass-soft: 243 233 210;
-  --gold: 14 90 68;  --gold-soft: 220 236 228;  --gold-hi: 46 140 105;  --gold-lo: 9 64 48;
-  --sage: 46 125 116;  --sage-soft: 222 237 234;
-  --clay: 180 82 63;  --clay-soft: 245 225 220;
-  --violet: 106 92 154;  --alert: 168 50 43;  --alert-soft: 248 226 223;
-  --glow-a: 238 240 236;  --glow-b: 29 35 41;
-  --shadow: 29 35 41;
+  --paper: 245 241 234;  --card: 255 253 249;  --surface: 255 255 255;  --line: 230 223 211;
+  --ink: 28 34 45;  --ink-soft: 78 86 100;  --ink-mute: 118 124 136;
+  --navy: 30 47 74;  --navy-deep: 18 29 50;  --heading: 19 31 53;  --link: 37 62 101;
+  /* The center line: the logo's gold, as a road marking. A shape, never text. */
+  --lane: 224 146 42;
+  /* The Future Focused rule is navy, as it always was. */
+  --fblue: 30 47 74;
+  --brass: 167 123 59;  --brass-soft: 241 230 210;
+  /* Brand gold, from the Mosley Foundry wordmark. Brass stays the Reason Rooted rule color. */
+  --gold: 176 96 12;  --gold-soft: 249 234 212;  --gold-hi: 224 146 42;  --gold-lo: 163 84 9;
+  --sage: 94 122 100;  --sage-soft: 227 235 227;
+  --clay: 168 92 69;  --clay-soft: 243 226 219;
+  --violet: 107 106 143;  --alert: 180 35 24;  --alert-soft: 254 228 226;
+  --glow-a: 224 146 42;  --glow-b: 30 47 74;
+  --shadow: 28 34 45;
   --font-serif: "Newsreader Variable", "Iowan Old Style", Georgia, serif;
   --font-sans: "Overpass Variable", "Helvetica Neue", Arial, sans-serif;
 }
 
-/* Dark: a night drive. Asphalt ground, headlight-white text, the same yellow line. */
+/* Dark: the same palette, deepened. Follows the phone or computer setting. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: 17 22 27;  --card: 26 33 40;  --surface: 32 40 48;  --line: 44 53 61;
-    --ink: 232 236 234;  --ink-soft: 176 186 190;  --ink-mute: 136 147 153;
-    --navy: 38 128 96;  --navy-deep: 26 98 73;  --heading: 240 243 241;  --link: 120 204 168;
-    --lane: 242 194 48;
-    --fblue: 112 156 220;
-    --brass: 214 168 80;  --brass-soft: 52 42 22;
-    --gold: 120 204 168;  --gold-soft: 22 46 38;  --gold-hi: 150 220 188;  --gold-lo: 70 169 130;
-    --sage: 98 184 170;  --sage-soft: 24 44 41;
-    --clay: 228 132 110;  --clay-soft: 58 34 29;
-    --violet: 164 152 220;  --alert: 236 112 102;  --alert-soft: 60 28 26;
-    --glow-a: 17 22 27;  --glow-b: 232 236 234;
+    --paper: 12 15 21;  --card: 20 25 34;  --surface: 26 32 43;  --line: 40 48 62;
+    --ink: 236 231 222;  --ink-soft: 180 186 198;  --ink-mute: 132 141 156;
+    --navy: 58 90 136;  --navy-deep: 27 42 66;  --heading: 243 238 229;  --link: 176 198 230;
+    --lane: 248 204 120;
+    --fblue: 58 90 136;
+    --brass: 214 172 104;  --brass-soft: 52 42 27;
+    --gold: 236 164 70;  --gold-soft: 58 38 14;  --gold-hi: 248 204 120;  --gold-lo: 214 128 30;
+    --sage: 141 180 151;  --sage-soft: 30 44 36;
+    --clay: 226 145 122;  --clay-soft: 58 35 29;
+    --violet: 160 158 205;  --alert: 249 112 102;  --alert-soft: 58 28 26;
+    --glow-a: 214 172 104;  --glow-b: 70 110 170;
     --shadow: 0 0 0;
   }
 }
