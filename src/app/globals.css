@@ -26,6 +26,7 @@
   --shadow: 28 34 45;
   --font-serif: "Newsreader Variable", "Iowan Old Style", Georgia, serif;
   --font-sans: "Overpass Variable", "Helvetica Neue", Arial, sans-serif;
+  --font-book: "Alegreya", "Iowan Old Style", Georgia, serif;
 }
 
 /* Dark: the same palette, deepened. Follows the phone or computer setting. */

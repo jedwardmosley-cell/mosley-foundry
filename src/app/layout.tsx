@@ -1,6 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import "@fontsource-variable/overpass/index.css";
 import "@fontsource-variable/newsreader/opsz.css";
+// The book's own typeface, for the chapter pages.
+import "@fontsource/alegreya/400.css";
+import "@fontsource/alegreya/400-italic.css";
+import "@fontsource/alegreya/500.css";
 import "./globals.css";
 import { Suspense } from "react";
 import { ScrollTop } from "@/components/ScrollTop";
