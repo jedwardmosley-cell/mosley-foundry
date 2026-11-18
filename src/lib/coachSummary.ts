@@ -14,7 +14,7 @@ export function attentionFlags(v: View) {
     const notYet = recent.filter((p) => p.status === "NOT_YET").length;
     if (v.cycle && v.cycle.status === "ACTIVE" && recent.length === 0) flags.push("No check-ins logged in the last 7 days");
     if (notYet >= 3) flags.push(`${notYet} "not yet" days this week: worth asking what got in the way`);
-    if (v.cycle?.status === "ACTIVE" && cyclePosition(v.cycle.startDate).finished) flags.push("30 days are up and the Day 30 review is not done");
+    if (v.cycle?.status === "ACTIVE" && cyclePosition(v.cycle.startDate).finished) flags.push("30 days are up and Wheel Alignment for day 30 is not done");
   }
   if (s.has("NETWORK")) {
     const overdue = v.relationships.filter((r) => r.nextCheckIn && daysBetween(new Date(), r.nextCheckIn) < 0);

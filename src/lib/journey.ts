@@ -9,10 +9,10 @@ import { getContent } from "@/content";
  * The daily check-in opens once all four are done, so the system is built before the first check-in. The bar shows what is done and what comes next.
  */
 export const JOURNEY_STEPS = [
-  { key: "identity", label: "Who's behind the wheel", next: "Claim who you are", href: "/identity" },
-  { key: "today", label: "Where I am", next: "Rate yourself on the five rules", href: "/assessment" },
-  { key: "drive", label: "My focus", next: "Choose one or two things to work on", href: "/focus" },
-  { key: "road", label: "My Design", next: "Build your system", href: "/road" },
+  { key: "identity", label: "The Driver's Seat", next: "Claim who you are", href: "/identity" },
+  { key: "today", label: "The Rules of the Road", next: "Rate yourself on the five rules", href: "/assessment" },
+  { key: "drive", label: "The Windshield", next: "Choose one or two things to work on", href: "/focus" },
+  { key: "road", label: "The Vehicle Controls", next: "Build your system", href: "/road" },
 ] as const;
 export type JourneyKey = (typeof JOURNEY_STEPS)[number]["key"];
 
@@ -21,13 +21,13 @@ export type Journey = {
   /** The first step not done, or null once all four are. */
   current: JourneyKey | null;
   cycle: { day: number; week: number; phase: string; finished: boolean; seasonMonth: number | null } | null;
-  /** What Who's behind the wheel still needs, in the client's words: "your seat", "how big a turn", "your statement". */
+  /** What the Driver's Seat still needs, in the client's words: "your seat", "how big a turn", "your statement". */
   identityMissing: string[];
-  /** What the system (My Design) still needs: "a daily routine", "a weekly planning time", "an accountability partner". */
+  /** What the system (the Vehicle Controls) still needs: "a daily routine", "a weekly planning time", "an accountability partner". */
   roadMissing: string[];
 };
 
-/** The core of Discipline by Design, built before the first check-in. The other areas of My Design come after. */
+/** The core of Discipline by Design, built before the first check-in. The other areas of the Vehicle Controls come after. */
 export const SYSTEM_PIECES = [
   { key: "daily", label: "A daily routine", missing: "a daily routine" },
   { key: "weekly", label: "A weekly planning time", missing: "a weekly planning time" },
@@ -45,7 +45,7 @@ export async function systemPieces(userId: string): Promise<Record<SystemPiece, 
   return { daily: daily > 0, weekly: weekly > 0, partner: partner > 0 };
 }
 
-/** The three things Who's behind the wheel needs to count as done. */
+/** The three things the Driver's Seat needs to count as done. */
 export function identityGaps(identity: { role: string; level: string; becoming: string } | null, statement: string) {
   return [
     !identity?.role.trim() && "your seat",
@@ -66,7 +66,7 @@ export async function getJourney(userId: string): Promise<Journey> {
     // Who I am is done with a role, a kind of change and a statement. The five help build the statement.
     identity: identityGaps(identity, profile?.forgeStatement ?? "").length === 0,
     today: !!assessment,
-    // My Design is the system: a daily routine, a weekly planning time and an accountability partner.
+    // The Vehicle Controls are the system: a daily routine, a weekly planning time and an accountability partner.
     road: system.daily && system.weekly && system.partner,
     drive: !!cycle?.setupDoneAt,
   };

@@ -13,7 +13,7 @@ type Content = Awaited<ReturnType<typeof getContent>>;
  * The self-assessment, on one page: the deep work of FORGE.
  * Each rule shows the client's own line from their statement and all five levels in full,
  * so they rate themselves against who they said they are, with the real definitions in front of them.
- * Used on Where I am and inside the kickoff. With reviseId, it updates the ratings of that assessment.
+ * Used on the Rules of the Road and inside the kickoff. With reviseId, it updates the ratings of that assessment.
  */
 export function AssessmentForm({ pack, entrepreneur, useEntre, instrument, next, lines = {}, role, defaults, reviseId }: {
   pack: Content["pack"];
@@ -21,7 +21,7 @@ export function AssessmentForm({ pack, entrepreneur, useEntre, instrument, next,
   useEntre: boolean;
   instrument: string;
   next?: string;
-  /** The client's own line for each rule, from Who's behind the wheel. */
+  /** The client's own line for each rule, from the Driver's Seat. */
   lines?: Partial<Record<PillarKey, string>>;
   role?: string;
   /** Current scores, when updating. */

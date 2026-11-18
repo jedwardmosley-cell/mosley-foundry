@@ -25,7 +25,7 @@ export async function developmentSummary(userId: string, name: string) {
   }
   if (d.identity) {
     const lv = { CORE: "Core alignment", ROLE: "Role transition", REINVENT: "Reinvention" }[d.identity.level as "CORE"];
-    L.push("", "## Who's behind the wheel", ...(d.identity.role ? [`**Role:** ${d.identity.role}`] : []), `**Kind of change:** ${lv}`);
+    L.push("", "## The Driver's Seat", ...(d.identity.role ? [`**Role:** ${d.identity.role}`] : []), `**Kind of change:** ${lv}`);
     if (!d.profile?.forgeStatement && d.identity.becoming) L.push("", d.identity.becoming);
     if (d.identity.behavior) L.push("", `**Behavior that shows it:** ${d.identity.behavior}`);
     if (d.identity.personaName) L.push(`**Performance identity:** ${d.identity.personaName}`);
@@ -43,7 +43,7 @@ export async function developmentSummary(userId: string, name: string) {
     for (const g of d.goals) L.push(`- **${pName(g.pillar)}${g.segmentKey ? ` (segment ${g.segmentKey})` : ""}**: now: ${g.whereNow || "-"}; want: ${g.whereWant || "-"}`);
   }
   if (d.commitments.length) {
-    L.push("", "## My Design (Discipline by Design)");
+    L.push("", "## The Vehicle Controls (Discipline by Design)");
     for (const c of d.commitments) L.push(`- ${BLUEPRINT_AREAS.find((a) => a.key === c.area)?.label}: ${c.title}${c.when ? ` (${c.when})` : ""}`);
   }
   if (d.relationships.length) {

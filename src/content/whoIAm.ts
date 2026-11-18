@@ -8,7 +8,7 @@ import type { IdentityLevel } from "./identity";
 export const WHO_I_AM_STATUS: "draft" | "approved" = "draft";
 
 /** The page's name, from the book. The menu, the journey bar and Today all use it. */
-export const WHO_TITLE = "Who's behind the wheel";
+export const WHO_TITLE = "The Driver's Seat";
 export const WHO_INTRO = "This is the FORGE framework, applied to you. Name the seat you're in and how big a turn this is, then work through the five rules of one driver. Together they become My statement, and everything after this page is built on it.";
 export const WHO_HEADINGS = { role: "Which seat are you in?", kind: "How big a turn is this?", forge: "The five rules of one driver", statement: "My statement" };
 

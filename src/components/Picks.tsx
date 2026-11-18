@@ -25,7 +25,7 @@ export function Picks({ list, target, label = "Tap to use one, then edit if you 
           {note && <p className="mt-2 text-xs text-ink-mute">{note}</p>}
           {groups && groups.map((g) => (
             <div key={g.label} className="mt-2.5">
-              <p className="text-[11px] uppercase tracking-[0.1em] text-ink-mute">{g.label}</p>
+              <p className="text-[13px] text-ink-mute">{g.label}</p>
               <div className="mt-1 flex flex-wrap gap-2">
                 {g.options.map((o) => (
                   <button key={o} type="button" onClick={() => fill(o)}

@@ -4,7 +4,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     <div className="min-h-screen flex flex-col">
       <div className="flex-1 grid md:grid-cols-2">
         <section className="hidden md:flex flex-col justify-between bg-navy-deep text-white p-12">
-          <p className="flex items-center gap-3 text-[11px] tracking-[0.18em] uppercase text-white/60"><BrandMark size={34} className="text-white" /> Mosley Foundry</p>
+          <p className="flex items-center gap-3 text-[13px] text-white/60"><BrandMark size={34} className="text-white" /> Mosley Foundry</p>
           <div>
             <h1 className="font-serif text-5xl leading-[1.1]">Both Hands<br />on the Wheel</h1>
             <p className="mt-6 text-lg text-white/80 max-w-sm">Lead yourself. Develop others. Build a life by design.</p>

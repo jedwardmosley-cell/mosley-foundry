@@ -22,7 +22,7 @@ const OPTIONS = [
  * The daily check-in: a few taps, one save for the day. Each focus gets its own answer; the identity question
  * and the detail are asked once, for the day. Works without JavaScript.
  */
-export function CheckInForm({ existing, hasCoach, identityLevel, dark = false, focuses }: { existing: Existing; hasCoach: boolean; identityLevel?: string | null; dark?: boolean; focuses: CheckInFocus[] }) {
+export function CheckInForm({ existing, hasCoach, identityLevel, dark = false, focuses, lines }: { existing: Existing; hasCoach: boolean; identityLevel?: string | null; dark?: boolean; focuses: CheckInFocus[]; lines?: Record<string, React.ReactNode> }) {
   const two = focuses.length > 1;
   const pill = dark
     ? "border border-white/30 bg-surface/5 text-white peer-checked:bg-surface peer-checked:text-heading peer-checked:border-white"
@@ -31,13 +31,14 @@ export function CheckInForm({ existing, hasCoach, identityLevel, dark = false, f
     <form action={logCheckIn} className="space-y-4">
       {focuses.map((f) => (
         <fieldset key={f.slot}>
-          <legend className={two ? "mb-2 flex w-full items-start gap-2.5" : "sr-only"}>
+          <legend className={two ? "mb-3 flex w-full items-start gap-2.5" : "sr-only"}>
             {two ? (
               <>
                 <PillarMark k={f.pillar as PillarKey} size="sm" />
                 <span className="min-w-0 flex-1">
                   <Link href={`/cycle?id=${f.id}`} className="block text-[15px] font-medium leading-snug text-heading hover:text-link">{f.title}</Link>
-                  <span className="block text-xs text-ink-mute">Day {f.day} of 30</span>
+                  <span className="block text-[13px] text-ink-mute">Day {f.day} of 30</span>
+                  {lines?.[f.id] && <span className="mt-2 block">{lines[f.id]}</span>}
                 </span>
               </>
             ) : "Did you practice today?"}

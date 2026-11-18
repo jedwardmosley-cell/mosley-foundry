@@ -21,6 +21,10 @@ export default {
         sage: { DEFAULT: "rgb(var(--sage) / <alpha-value>)", soft: "rgb(var(--sage-soft) / <alpha-value>)" },
         clay: { DEFAULT: "rgb(var(--clay) / <alpha-value>)", soft: "rgb(var(--clay-soft) / <alpha-value>)" },
         violet: "rgb(var(--violet) / <alpha-value>)",
+        // Center-line yellow: progress and "you are here". A shape, never text.
+        lane: "rgb(var(--lane) / <alpha-value>)",
+        // The Future Focused rule's own blue, now that navy means the action color.
+        fblue: "rgb(var(--fblue) / <alpha-value>)",
         // Errors and overdue items. Kept apart from clay, which means Emotionally Anchored.
         alert: { DEFAULT: "rgb(var(--alert) / <alpha-value>)", soft: "rgb(var(--alert-soft) / <alpha-value>)" },
       },

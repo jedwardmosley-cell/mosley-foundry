@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NAMES } from "@/content/names";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getContent } from "@/content";
@@ -49,7 +50,7 @@ export default async function SeasonPage() {
 
   return (
     <>
-      <PageHeader eyebrow="Discipline by Design" title={open ? "My season" : "My last season"}>
+      <PageHeader eyebrow={NAMES.alignment.name} title={open ? "My season" : "My last season"}>
         Started {fmt(season.startedAt, { month: "long", day: "numeric" })}{season.completedAt ? `, closed ${fmt(season.completedAt, { month: "long", day: "numeric" })}` : ""}.
       </PageHeader>
 
@@ -94,7 +95,7 @@ export default async function SeasonPage() {
 
       {(season.startStatement || statementNow) && (
         <Card className="mt-5">
-          <p className="eyebrow">Who's behind the wheel</p>
+          <p className="eyebrow">The Driver's Seat</p>
           {season.startStatement && season.startStatement !== statementNow && <p className="mt-2 text-sm text-ink-mute">At the start: {season.startStatement}</p>}
           <p className="mt-2 font-serif text-lg leading-snug">{statementNow || season.startStatement}</p>
           <p className="mt-2 text-sm text-ink-soft">Is it still true? <Link href="/identity" className="btn-link">Update it</Link> if it has grown.</p>

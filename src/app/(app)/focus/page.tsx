@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NAMES } from "@/content/names";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getContent } from "@/content";
@@ -9,7 +10,7 @@ import { fmt } from "@/lib/dates";
 import type { PillarKey } from "@/content/types";
 import { PageHeader, PillarMark } from "@/components/ui";
 
-export const metadata = { title: "My focus" };
+export const metadata = { title: "The Windshield" };
 
 /**
  * My focus: the one or two development opportunities the client is working on, and nothing else.
@@ -29,7 +30,7 @@ export default async function FocusPage() {
 
   return (
     <>
-      <PageHeader eyebrow="Discipline by Design" title="My focus">
+      <PageHeader eyebrow="Discipline by Design" title={NAMES.windshield.name} plain={NAMES.windshield.plain}>
         One or two things to work on, and that&apos;s it. Each one moves you toward who&apos;s behind the wheel.
       </PageHeader>
 
@@ -47,7 +48,7 @@ export default async function FocusPage() {
           return (
             <Link key={f.id} href={f.setupDoneAt ? `/cycle?id=${f.id}` : "/cycle/setup?step=1"} className="card block !p-5 sm:!p-6 transition hover:-translate-y-0.5">
               <div className="flex items-center justify-between gap-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gold">Focus {i + 1}{f.source && f.source in FOCUS_SOURCES ? ` · ${FOCUS_SOURCES[f.source as FocusSource]}` : ""}</p>
+                <p className="text-[13px] font-bold text-gold">Focus {i + 1}{f.source && f.source in FOCUS_SOURCES ? ` · ${FOCUS_SOURCES[f.source as FocusSource]}` : ""}</p>
                 <span className="chip">{pos.finished ? "Day 30" : `Day ${pos.day} of 30`}</span>
               </div>
               <p className="mt-2 flex items-start gap-2.5 text-[18px] font-medium leading-snug text-heading">

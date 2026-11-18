@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NAMES } from "@/content/names";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { fmt, addDays, ymd } from "@/lib/dates";
@@ -22,7 +23,7 @@ const THREE_CS = {
 type C = keyof typeof THREE_CS;
 
 const Label = ({ children, gold = false }: { children: React.ReactNode; gold?: boolean }) => (
-  <p className={`text-[11px] font-semibold uppercase tracking-[0.16em] ${gold ? "text-gold" : "text-ink-mute"}`}>{children}</p>
+  <p className={`text-[13px] font-bold ${gold ? "text-gold" : "text-ink-mute"}`}>{children}</p>
 );
 
 /**
@@ -73,9 +74,9 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
 
   return (
     <>
-      <PageHeader eyebrow="FORGE" title="Set the Tone">
+      <PageHeader eyebrow="FORGE" title={NAMES.tone.name} plain={NAMES.tone.plain}>
         How you talk to yourself, and to the people around you, sets the tone before anything else happens. Use it when your own words start to limit you, and before a conversation that matters.
-        <span className="mt-3 block rounded-2xl border border-gold/40 px-4 py-3 text-[15px] text-ink">
+        <span className="mt-4 block border-l-4 border-lane pl-4 text-[15px] text-ink">
           <span className="block font-medium text-heading">Your words are instructions.</span>
           They&apos;re more than a way to say what you think. They tell your brain what to believe, and they set the temperature for everyone who hears them. Say &ldquo;I can&apos;t&rdquo; and your mind goes looking for proof that you can&apos;t. It finds it, and your body follows. Blame someone and they defend instead of fix. This is nothing to play with.
         </span>
@@ -126,7 +127,7 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
       </Card>
 
       {mode === "SELF" && todaysQuestion && !current && !sp.care && (
-        <section className="mt-6 border-l-2 border-gold/60 pl-5" aria-label="From the book">
+        <section className="mt-6 border-l-4 border-lane pl-5" aria-label="From the book">
           <Label gold>From the book</Label>
           <p className="mt-2 font-serif text-[20px] leading-snug text-heading">{todaysQuestion}</p>
           {questions.length > 1 && (
@@ -224,8 +225,8 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
           )}
 
           {self?.question && (
-            <section className="border-l-2 border-gold/60 pl-5" aria-label="Sit with this">
-              <Label gold>Sit with this · from the book</Label>
+            <section className="border-l-4 border-lane pl-5" aria-label="Sit with this">
+              <Label gold>Sit with this, from the book</Label>
               <p className="mt-2 font-serif text-[20px] leading-snug text-heading">{self.question}</p>
             </section>
           )}
@@ -357,7 +358,7 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
               return (
                 <li key={e.id} className="py-2.5">
                   <Link href={`/tone?entry=${e.id}`} className="block hover:text-link">
-                    <span className="block text-xs text-ink-mute">{fmt(e.createdAt, { month: "short", day: "numeric" })}{e.mode === "OTHERS" ? ` · With ${e.who || "someone else"}` : n ? ` · ${n} limiting ${n === 1 ? "phrase" : "phrases"}` : ""}</span>
+                    <span className="block text-xs text-ink-mute">{fmt(e.createdAt, { month: "short", day: "numeric" })}{e.mode === "OTHERS" ? `, with ${e.who || "someone else"}` : n ? `, ${n} limiting ${n === 1 ? "phrase" : "phrases"}` : ""}</span>
                     <span className="line-clamp-2 text-[15px]">{e.mode === "OTHERS" ? e.situation : e.text}</span>
                   </Link>
                 </li>

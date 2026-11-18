@@ -11,7 +11,7 @@ export default async function ContentReview() {
   const src = await getForgeSource();
   // The FORGE teaching cards come from forge-source.md, which is uploaded privately at /setup.
   const forgeSet: ReviewSet = {
-    key: "forge", title: "FORGE teaching cards", where: "Who's behind the wheel, What this means, and the full guides", file: "forge-source.md (uploaded at /setup)", draft: src?.draft ?? true,
+    key: "forge", title: "FORGE teaching cards", where: "The Driver's Seat, What this means, and the full guides", file: "forge-source.md (uploaded at /setup)", draft: src?.draft ?? true,
     groups: src
       ? (["F", "O", "R", "G", "E"] as const).filter((k) => src.cards[k]).map((k) => {
           const c = src.cards[k]!;
@@ -20,7 +20,7 @@ export default async function ContentReview() {
       : [{ label: "Not installed", items: ["Upload forge-source.md at /setup to see the cards here."] }],
   };
   const bookSet: ReviewSet = {
-    key: "forgebook", title: "FORGE opening and the book's sources", where: "Who's behind the wheel, the five rules of one driver", file: "forge-source.md (uploaded at /setup)", draft: src?.draft ?? true,
+    key: "forgebook", title: "FORGE opening and the book's sources", where: "The Driver's Seat, the five rules of one driver", file: "forge-source.md (uploaded at /setup)", draft: src?.draft ?? true,
     groups: src ? [
       { label: "Core idea", items: [src.intro.line, src.intro.core] },
       { label: "The forge", items: [src.intro.forge] },
@@ -30,7 +30,7 @@ export default async function ContentReview() {
   };
   const g = src?.guide;
   const guideSet: ReviewSet = {
-    key: "guide", title: g?.title ?? "The FORGE Framework guide", where: "Library, each rule's full guide, and What this means on Who's behind the wheel", file: "forge-source.md (uploaded at /setup)", draft: src?.draft ?? true,
+    key: "guide", title: g?.title ?? "The FORGE Framework guide", where: "Library, each rule's full guide, and What this means on the Driver's Seat", file: "forge-source.md (uploaded at /setup)", draft: src?.draft ?? true,
     groups: g
       ? [...g.intro, ...(["F", "O", "R", "G", "E"] as const).map((k) => g.rules[k]).filter((r) => !!r).map((r) => ({ heading: r!.heading, md: `${r!.md}\n\nIn practice: ${r!.practice}` })), ...g.outro]
           .map((x) => ({ label: x.heading, items: x.md.split(/\n{2,}/).map((p) => p.replace(/\*\*|\*/g, "")) }))

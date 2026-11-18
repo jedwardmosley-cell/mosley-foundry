@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import "@fontsource-variable/fraunces/full.css";
-import "@fontsource-variable/inter/index.css";
+import "@fontsource-variable/overpass/index.css";
+import "@fontsource-variable/newsreader/opsz.css";
 import "./globals.css";
 import { Suspense } from "react";
 import { ScrollTop } from "@/components/ScrollTop";

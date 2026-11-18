@@ -2,11 +2,13 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import type { PillarKey } from "@/content/types";
 
-export function PageHeader({ eyebrow, title, children }: { eyebrow?: string; title: string; children?: ReactNode }) {
+/** `plain` is the one-line, plain-words meaning of a section name from the book, shown under the title. */
+export function PageHeader({ eyebrow, title, plain, children }: { eyebrow?: string; title: string; plain?: string; children?: ReactNode }) {
   return (
     <header className="mb-7 sm:mb-10">
-      {eyebrow && <p className="eyebrow mb-3 !text-gold">{eyebrow}</p>}
+      {eyebrow && <p className="eyebrow mb-2 !text-gold">{eyebrow}</p>}
       <h1 className="h1">{title}</h1>
+      {plain && <p className="mt-1.5 text-[17px] font-semibold text-ink-soft">{plain}</p>}
       {children && <div className="mt-4 muted text-[16px] leading-relaxed max-w-xl">{children}</div>}
     </header>
   );
@@ -17,7 +19,7 @@ export function Card({ children, className = "", id }: { children: ReactNode; cl
 }
 
 const PILLAR_TONE: Record<PillarKey, string> = {
-  F: "bg-navy text-white",
+  F: "bg-fblue text-white",
   O: "bg-sage text-white",
   R: "bg-brass text-white",
   G: "bg-violet text-white",
@@ -26,7 +28,7 @@ const PILLAR_TONE: Record<PillarKey, string> = {
 
 /** Pillar colors, used only for pillar things: marks, practice squares and the 30-day arc. */
 export const PILLAR_FILL: Record<PillarKey, { full: string; part: string; cssVar: string }> = {
-  F: { full: "bg-navy", part: "bg-navy/40", cssVar: "--navy" },
+  F: { full: "bg-fblue", part: "bg-fblue/40", cssVar: "--fblue" },
   O: { full: "bg-sage", part: "bg-sage/40", cssVar: "--sage" },
   R: { full: "bg-brass", part: "bg-brass/40", cssVar: "--brass" },
   G: { full: "bg-violet", part: "bg-violet/40", cssVar: "--violet" },
@@ -36,7 +38,7 @@ export const PILLAR_FILL: Record<PillarKey, { full: string; part: string; cssVar
 export function PillarMark({ k, size = "md" }: { k: PillarKey; size?: "sm" | "md" | "lg" }) {
   const s = size === "sm" ? "h-6 w-6 text-xs" : size === "lg" ? "h-11 w-11 text-lg" : "h-8 w-8 text-sm";
   return (
-    <span aria-hidden className={`inline-flex shrink-0 items-center justify-center rounded-full font-serif font-semibold ${s} ${PILLAR_TONE[k]}`}>
+    <span aria-hidden className={`inline-flex shrink-0 items-center justify-center rounded-full font-sans font-extrabold ${s} ${PILLAR_TONE[k]}`}>
       {k}
     </span>
   );

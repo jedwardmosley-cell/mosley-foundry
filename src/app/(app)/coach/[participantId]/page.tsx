@@ -150,14 +150,14 @@ export default async function CoachParticipant({ params }: { params: Promise<{ p
 
       {s.has("BLUEPRINT") && v.commitments.length > 0 && (
         <Card className="mt-5">
-          <p className="eyebrow">My Design</p>
+          <p className="eyebrow">The Vehicle Controls</p>
           <ul className="mt-3 space-y-1 text-[15px]">{v.commitments.map((c) => <li key={c.id}>{c.title}{c.when ? <span className="muted"> · {c.when}</span> : null}</li>)}</ul>
         </Card>
       )}
 
       {s.has("IDENTITY") && (
         <Card className="mt-5">
-          <p className="eyebrow">Who's behind the wheel</p>
+          <p className="eyebrow">The Driver's Seat</p>
           {v.identity ? (
             <>
               <p className="mt-2 text-sm">{v.identity.role && <span className="font-medium">As {withArticle(v.identity.role)} · </span>}<span className="chip">{LEVELS[v.identity.level as IdentityLevel].name}</span> <span className="text-ink-mute">The client chose this kind of change.</span></p>

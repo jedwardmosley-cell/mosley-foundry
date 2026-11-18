@@ -34,8 +34,8 @@ export default async function CyclePage({ searchParams }: { searchParams: Promis
       <>
         <PageHeader eyebrow="Discipline by Design · 30 days" title={season ? (month ? `Month ${month} of my season` : "My season is done") : "No active cycle"} />
         {season && month && <Empty title={`Start month ${month}`} href="/cycle/new" cta="Start">Pick the rule and the behavior for the next 30 days.</Empty>}
-        {season && !month && <Empty title="Review your season" href="/season" cta="Open the review">Three months are done. Look back, then decide what comes next.</Empty>}
-        {!season && <Empty title="Choose your focus" href="/focus" cta="Open My focus">One or two things to work on, each for 30 days. That's it.</Empty>}
+        {season && !month && <Empty title="Review your season" href="/season" cta="Open Wheel Alignment">Three months are done. Look back, then decide what comes next.</Empty>}
+        {!season && <Empty title="Choose your focus" href="/focus" cta="Open the Windshield">One or two things to work on, each for 30 days. That's it.</Empty>}
         {past.length > 0 && <PastCycles past={past} />}
       </>
     );
@@ -74,7 +74,7 @@ export default async function CyclePage({ searchParams }: { searchParams: Promis
           <p className="mt-2 font-serif text-[20px] leading-snug text-heading">{cycle.plan}</p>
           <p className="mt-3 text-sm text-ink-soft">
             {planPartner ? <>{planPartner.name.split(" ")[0]} checks on me. </> : null}
-            {pos.week >= 2 && !pos.finished ? <>This week&apos;s question is in your <Link href="/reflect" className="btn-link">weekly look back</Link>. </> : null}
+            {pos.week >= 2 && !pos.finished ? <>This week&apos;s question is in <Link href="/reflect" className="btn-link">the Mirrors</Link>. </> : null}
             <Link href="/cycle/setup?step=1" className="btn-link">Change my answers</Link>
           </p>
         </Card>
@@ -136,7 +136,7 @@ export default async function CyclePage({ searchParams }: { searchParams: Promis
           <li>
             {pos.day >= 28 || pos.finished ? (
               <div className="px-5 py-4">
-                <p className="eyebrow">Day 30 · Decide</p>
+                <p className="eyebrow">Wheel Alignment, day 30</p>
                 {decide && <p className="mt-2 text-[15px] leading-relaxed">{decide}</p>}
                 <ReadTheBook kind="deeper" className="mt-2" />
                 {partner && (pos.day >= 30 || pos.finished) && !sentKinds.has("day30") && !skipped && (
@@ -171,7 +171,7 @@ export default async function CyclePage({ searchParams }: { searchParams: Promis
             ) : (
               <details className="px-5 py-3.5">
                 <summary className="cursor-pointer flex items-center justify-between gap-3 text-ink-mute">
-                  <span className="text-[15px]">Day 30 · Decide</span><span className="text-xs">Opens on day 28</span>
+                  <span className="text-[15px]">Wheel Alignment, day 30</span><span className="text-xs">Opens on day 28</span>
                 </summary>
                 {decide && <p className="mt-2 text-sm text-ink-soft">{decide}</p>}
               </details>

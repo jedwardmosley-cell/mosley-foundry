@@ -26,11 +26,11 @@ import { PRACTICE_STARTERS } from "@/content/forgeLines";
 import { PATHWAYS, BLUEPRINT_AREAS, RELATIONSHIP_ROLES, type PathwayKey } from "@/content/program";
 import type { PillarKey } from "@/content/types";
 
-export const metadata = { title: "Kickoff" };
+export const metadata = { title: "Getting in the Driver's Seat" };
 
 const STEP_COPY = [
   { title: WHO_TITLE, intro: "The FORGE framework, applied to you. Three short parts." },
-  { title: "Where I am", intro: "Rate yourself on the five rules as the person you just described. This is the work to sit with." },
+  { title: "The Rules of the Road", intro: "Rate yourself on the five rules as the person you just described. This is the work to sit with." },
   { title: "Choose your focus", intro: "One or two things to work on, and that's it. Five short questions turn each one into a plan for 30 days, and one person finds out." },
   { title: "Build your system", intro: "Discipline by Design is the structure around your focus. Three pieces, one screen each: a daily routine, a weekly planning time and an accountability partner. Your daily check-in opens once they're in place." },
 ];
@@ -51,10 +51,10 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
   if (step === 0) {
     return (
       <>
-        <PageHeader eyebrow="Kickoff" title="You are set up" />
+        <PageHeader eyebrow="Getting in the Driver's Seat" title="You are set up" />
         <Card>
-          <p className="text-[15px]">Your focus is set and your road is in place. Each day, open Today and check in. On Saturday, look back on the week.</p>
-          <Link href="/dashboard" className="btn-primary mt-4 inline-flex">Go to Today</Link>
+          <p className="text-[15px]">Your focus is set and your road is in place. Each day, open the Dashboard and check in. On Saturday, look back on the week.</p>
+          <Link href="/dashboard" className="btn-primary mt-4 inline-flex">Go to the Dashboard</Link>
         </Card>
         <ReadTheBook className="mt-5" />
       </>
@@ -107,7 +107,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
           </li>
         ))}
       </ol>
-      <PageHeader eyebrow={`Kickoff · Step ${step} of 4${step === 1 || (step === 4 && part < 4) ? `, part ${part} of 3` : ""} · ${step <= 2 ? "FORGE" : "Discipline by Design"}`} title={copy.title}>{step === 4 && part === 4 ? "Your system is set up." : step === 4 && (daily.length || weekly.length) ? "Three pieces, one screen each. Your daily check-in opens once they're in place." : copy.intro}</PageHeader>
+      <PageHeader eyebrow={`Getting in the Driver's Seat, step ${step} of 4${step === 1 || (step === 4 && part < 4) ? `, part ${part} of 3` : ""}`} title={copy.title}>{step === 4 && part === 4 ? "Your system is set up." : step === 4 && (daily.length || weekly.length) ? "Three pieces, one screen each. Your daily check-in opens once they're in place." : copy.intro}</PageHeader>
 
       {step === 1 && part === 1 && (
         <Card>
@@ -295,9 +295,9 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
 
           {part === 4 && (
             <Card>
-              <p className="text-[15px]">Your system is in place. Each day, open Today and check in. On Saturday, look back on the week. The rest of My Design (mentors, learning, groups and more) is there when you&apos;re ready.</p>
+              <p className="text-[15px]">Your system is in place. Each day, open the Dashboard and check in. On Saturday, look back on the week. The rest of the Vehicle Controls (mentors, learning, groups and more) is there when you&apos;re ready.</p>
               <div className="mt-4 flex flex-wrap items-center gap-4">
-                <Link href="/dashboard" className="btn-primary inline-flex">Finish and go to Today</Link>
+                <Link href="/dashboard" className="btn-primary inline-flex">Finish and go to the Dashboard</Link>
                 <Link href="/settings" className="text-sm btn-link">Put it on my calendar</Link>
               </div>
             </Card>
@@ -318,7 +318,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
             </form>
           ) : (
             <>
-              <p className="eyebrow">My focus</p>
+              <p className="eyebrow">The Windshield</p>
               <ul className="mt-3 space-y-3">
                 {focuses.map((f) => (
                   <li key={f.id} className="flex items-start gap-3">
@@ -335,7 +335,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
               ) : (
                 <Link href={next} className="btn-primary mt-5 inline-flex">{nextLabel}</Link>
               )}
-              {focuses.length === 1 && <p className="mt-3 text-sm text-ink-mute">One is plenty. You can add a second later, under My focus.</p>}
+              {focuses.length === 1 && <p className="mt-3 text-sm text-ink-mute">One is plenty. You can add a second later, under the Windshield.</p>}
             </>
           )}
         </Card>

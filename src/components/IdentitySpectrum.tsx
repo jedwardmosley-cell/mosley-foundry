@@ -40,7 +40,7 @@ export function IdentitySpectrum({ initial, firstExample, persona }: { initial?:
         <details className="mt-2 text-sm">
           <summary className="cursor-pointer text-link">More about {l.name}</summary>
           <p className="mt-2 text-ink-soft">{l.forWhom}</p>
-          <p className="mt-2 text-xs uppercase tracking-wider text-ink-mute">For example</p>
+          <p className="mt-2 text-xs tracking-wider text-ink-mute">For example</p>
           <ul className="mt-1 space-y-0.5">{examples.map((e) => <li key={e}>{e}</li>)}</ul>
           <p className="mt-2"><span className="text-ink-mute">The work centers on: </span>{l.emphasis}</p>
         </details>

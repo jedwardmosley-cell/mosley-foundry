@@ -47,7 +47,7 @@ export default async function WeekOneSetup({ searchParams }: { searchParams: Pro
   const where = n <= 5 ? `question ${n} of 5` : n === 6 ? "your plan" : "who finds out";
   const bar = kickoff ? (
     <>
-      <ol className="mb-3 grid grid-cols-4 gap-1.5" aria-label="Kickoff steps">
+      <ol className="mb-3 grid grid-cols-4 gap-1.5" aria-label="Setup steps">
         {JOURNEY_STEPS.map((s, i) => <li key={s.key}><span className={`block h-1.5 rounded-full ${i === 2 ? "bg-heading" : journey.done[s.key] ? "bg-navy" : "bg-line"}`} /><span className="sr-only">Step {i + 1}: {s.label}</span></li>)}
       </ol>
       <div className="mb-8 flex items-center justify-between gap-4 text-sm text-ink-mute">
