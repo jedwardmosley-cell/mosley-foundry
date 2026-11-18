@@ -2,6 +2,7 @@ import "server-only";
 import { db } from "./db";
 import { cyclePosition, cycleWeeks } from "./cycle";
 import { getContent } from "@/content";
+import { mondayOf } from "./dates";
 
 /**
  * The client's path through the app, in one order:
@@ -25,6 +26,8 @@ export type Journey = {
   identityMissing: string[];
   /** What the system (the Vehicle Controls) still needs: "a daily routine", "a weekly planning time", "an accountability partner". */
   roadMissing: string[];
+  /** The Mirrors: this week's look back is saved. A weekly habit, not a setup step, so it never gates the check-in. */
+  lookedBack: boolean;
 };
 
 /** The core of Discipline by Design, built before the first check-in. The other areas of the Vehicle Controls come after. */
@@ -55,12 +58,13 @@ export function identityGaps(identity: { role: string; level: string; becoming: 
 }
 
 export async function getJourney(userId: string): Promise<Journey> {
-  const [identity, profile, assessment, system, cycle] = await Promise.all([
+  const [identity, profile, assessment, system, cycle, weekly] = await Promise.all([
     db.identityProfile.findUnique({ where: { userId }, select: { role: true, level: true, becoming: true } }),
     db.profile.findUnique({ where: { userId }, select: { forgeStatement: true, priorityPillar: true } }),
     db.assessment.findFirst({ where: { userId, isSecondOpinion: false }, select: { id: true } }),
     systemPieces(userId),
     db.developmentCycle.findFirst({ where: { userId, status: "ACTIVE" }, orderBy: [{ slot: "asc" }, { startDate: "desc" }], select: { startDate: true, template: true, seasonMonth: true, setupDoneAt: true } }),
+    db.weeklyReflection.findUnique({ where: { userId_weekOf: { userId, weekOf: mondayOf() } }, select: { id: true } }),
   ]);
   const done: Record<JourneyKey, boolean> = {
     // Who I am is done with a role, a kind of change and a statement. The five help build the statement.
@@ -79,5 +83,5 @@ export async function getJourney(userId: string): Promise<Journey> {
   }
   const current = JOURNEY_STEPS.find((s) => !done[s.key])?.key ?? null;
   const roadMissing = SYSTEM_PIECES.filter((p) => !system[p.key]).map((p) => p.missing);
-  return { done, current, cycle: c, identityMissing: identityGaps(identity, profile?.forgeStatement ?? ""), roadMissing };
+  return { done, current, cycle: c, identityMissing: identityGaps(identity, profile?.forgeStatement ?? ""), roadMissing, lookedBack: !!weekly };
 }

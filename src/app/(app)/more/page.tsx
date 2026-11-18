@@ -10,7 +10,7 @@ const GROUPS: [string, [string, string, string][]][] = [
   ]],
   ["Discipline by Design", [
     ["/focus", "3. The Windshield", "One or two things to work on, each with a plan for 30 days. That's it."],
-    ["/road", "4. The Vehicle Controls", "Discipline by Design: the routines and people that build your focus into your week."],
+    ["/road", "4. The Vehicle Controls", "What keeps you on course: your routines, your planning time and your people."],
     ["/season", "Season", "Three rounds of 30 days, about 90 days, and the review at the end."],
     ["/reflect", "The Mirrors", "Look back at your week. Did I do what I said I was going to do?"],
   ]],
