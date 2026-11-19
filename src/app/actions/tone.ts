@@ -113,7 +113,7 @@ export async function keepToneLine(fd: FormData) {
   revalidatePath("/glovebox");
   // Kept from the Glove Box itself: stay there. Kept from a reading in Set the Tone: stay on the reading.
   if (d.back === "glovebox") redirect("/glovebox?kept=1");
-  redirect(`/tone?kept=1${d.entry ? `&entry=${d.entry}` : ""}#keep`);
+  redirect(d.entry ? `/tone?kept=1&entry=${d.entry}#keep-line` : "/tone?kept=1#keep");
 }
 
 export async function removeToneLine(fd: FormData) {
