@@ -970,6 +970,7 @@ const submitAndWait = async (page: Page, selector: string) => {
   await check("10b2. coach adds a client directly; the client signs in; nothing is shared by default", async () => {
     const clientEmail = `client-${Date.now()}@example.test`;
     await page.goto(`${BASE}/coach`);
+    await page.click("#add-client > summary"); // folded once the coach has clients
     await page.fill('input[name="name"]', "Casey Client (E2E)");
     await page.fill('input[name="email"]', clientEmail);
     await page.click('button:has-text("Add client")');
@@ -1038,6 +1039,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await c2.close();
     // adding an existing email again does not create a second account
     await page.goto(`${BASE}/coach`);
+    await page.click("#add-client > summary");
     await page.fill('input[name="name"]', "Casey Again");
     await page.fill('input[name="email"]', clientEmail);
     await page.click('button:has-text("Add client")');
@@ -1199,9 +1201,10 @@ const submitAndWait = async (page: Page, selector: string) => {
     const cc = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const cp: Page = await cc.newPage();
     await login(cp, "coach@demo.bothhands.app");
-    // who needs me this week sits on My clients
+    // My clients is one list, most pressing first, each with its reasons
     await cp.goto(`${BASE}/coach`);
-    await cp.waitForSelector("h2:text-is('Who needs me this week')");
+    await cp.locator("section[aria-label='Your clients'] >> text=Dana Reyes").first().waitFor();
+    assert.ok(!(await cp.locator("section[aria-label='Your clients']").innerText()).includes("(Demo)"), "no (Demo) in names");
     // the wrap-up draft: nothing saved yet
     await cp.goto(`${BASE}/coach/${danaU.id}?wrap=${d.id}`);
     await openParts(cp);

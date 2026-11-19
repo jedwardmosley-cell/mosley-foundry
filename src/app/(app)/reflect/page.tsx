@@ -7,7 +7,7 @@ import { cyclePosition } from "@/lib/cycle";
 import { WEEK_QUESTIONS, REAL_CHOICES, WORKING_CHOICES, GAP_CHOICES, FIRST_GUESS, weekMessage } from "@/content/weekOne";
 import { ShareSend } from "@/components/ShareSend";
 import { mondayOf, fmt } from "@/lib/dates";
-import { PageHeader, ChapterOpening, Card, Field, Privacy, Source } from "@/components/ui";
+import { PageHeader, ChapterOpening, Card, Field, Privacy } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 import { Fold } from "@/components/Fold";
 import Link from "next/link";
@@ -146,7 +146,7 @@ export default async function ReflectPage() {
           )}
           {/* What they said last week this week needs: the line to answer against. */}
           {lastNext && (
-            <div className="border-l-4 border-lane pl-4">
+            <div className="border-l-2 border-ink/20 pl-4">
               <p className="section-label">Last week, you said this week needs</p>
               <p className="mt-1 font-book text-[19px] leading-snug text-heading">{lastNext}</p>
             </div>
@@ -184,7 +184,6 @@ export default async function ReflectPage() {
           {coach && <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="shared" defaultChecked={current?.shared} className="h-4 w-4 accent-navy" /> Share this week&apos;s reflection with my coach</label>}
           <Submit>Save this week</Submit>
         </form>
-        <Source>Questions from the Discipline by Design session, 3-Day Intensive facilitator guide (default set); Both Hands on the Wheel</Source>
       </Card>
       {past.length > 0 && (
         <div className="mt-6 space-y-3">

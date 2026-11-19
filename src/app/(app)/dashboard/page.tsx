@@ -87,10 +87,9 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         </Link>
       )}
 
-      {/* The day, set like a chapter opening: running head, the day, the road ahead, the title, then the check-in. */}
+      {/* The day, set like a chapter opening: the day, the road ahead, the title, then the check-in. */}
       <section aria-label="Today">
-        <p className="text-center text-[12px] text-ink-mute">both hands on the wheel</p>
-        <p className="mt-4 flex items-baseline justify-between gap-3">
+        <p className="flex items-baseline justify-between gap-3">
           <span className="font-book text-[30px] sm:text-[34px] leading-none text-heading">{dayTitle}</span>
           <span className="text-[13px] text-ink-mute">{fmt(new Date(), { weekday: "short", month: "short", day: "numeric" })}</span>
         </p>
@@ -145,7 +144,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         {/* Who's behind the wheel: a quote from the client's own book. */}
         <Link href="/identity" className="group block py-6">
           <p className="flex items-center justify-between font-book italic text-[16px] text-ink-soft">{d.identity?.role ? `In the driver's seat, as ${withArticle(d.identity.role)}` : "The Driver's Seat"}<Icon name="arrow" className="h-4 w-4 text-ink-mute" /></p>
-          <blockquote className="mt-3 border-l-[3px] border-gold pl-4 font-book text-[21px] sm:text-[23px] leading-[1.35] text-heading line-clamp-4 group-hover:text-link">{statement || "Claim who you are."}</blockquote>
+          <blockquote className="mt-3 border-l-2 border-ink/20 pl-4 font-book text-[21px] sm:text-[23px] leading-[1.35] text-heading line-clamp-4 group-hover:text-link">{statement || "Claim who you are."}</blockquote>
           {d.identity?.level === "REINVENT" && d.identity.personaName && <p className="mt-2 pl-[19px] text-xs text-ink-mute">Performance identity: <span className="text-ink">{d.identity.personaName}</span></p>}
         </Link>
 
@@ -191,7 +190,6 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
       </div>
 
       {/* The day, carried at the bottom like a page number. */}
-      {solo && soloPos && <p className="mt-10 text-center text-[13px] text-ink-mute">{soloPos.day} of 30</p>}
     </div>
   );
 }

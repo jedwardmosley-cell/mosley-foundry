@@ -9,12 +9,12 @@ import { signOut } from "@/app/actions/auth";
 // so the tab bar holds what it does not: the Dashboard, People, Coach, Set the Tone and More (in `tabOrder`).
 const PARTICIPANT_NAV: NavItem[] = [
   { href: "/dashboard", label: "The Dashboard", tab: "Dashboard", mobile: true, tabOrder: 1 },
-  { href: "/identity", label: "1. The Driver's Seat", group: "FORGE" },
-  { href: "/assessment", label: "2. The Rules of the Road", group: "FORGE" },
+  { href: "/identity", label: "The Driver's Seat", group: "FORGE" },
+  { href: "/assessment", label: "The Rules of the Road", group: "FORGE" },
   { href: "/tone", label: "Set the Tone", mobile: true, tabOrder: 4, group: "FORGE" },
   { href: "/glovebox", label: "The Glove Box", group: "FORGE" },
-  { href: "/focus", label: "3. The Windshield", group: "Discipline by Design" },
-  { href: "/road", label: "4. The Vehicle Controls", group: "Discipline by Design" },
+  { href: "/focus", label: "The Windshield", group: "Discipline by Design" },
+  { href: "/road", label: "The Vehicle Controls", group: "Discipline by Design" },
   { href: "/reflect", label: "The Mirrors", group: "Discipline by Design" },
   { href: "/network", label: "People", mobile: true, tabOrder: 2, group: "Support" },
   { href: "/coaching", label: "Coaching", tab: "Coach", mobile: true, tabOrder: 3, group: "Support" },
@@ -59,11 +59,11 @@ export function Shell({ user, children, journey }: { user: CurrentUser; children
           <AccountMenu user={user} />
         </header>
         {user.isDemo && (
-          <p className="mx-auto w-fit mt-2 md:mt-4 rounded-full bg-ink/[0.06] px-3 py-1 text-[12px] text-ink-mute">
+          <p className="mx-auto w-fit mt-2 md:mt-4 rounded-full leading-tight bg-ink/[0.06] px-3 py-1 text-[12px] text-ink-mute">
             Demo account. All people and data are fictional.
           </p>
         )}
-        <main className="mx-auto w-full max-w-3xl px-4 sm:px-8 py-5 sm:py-10 pb-28 md:pb-14">{journey}<div className="rise">{children}</div></main>
+        <main className="mx-auto w-full max-w-3xl px-4 sm:px-8 pt-3 sm:pt-10 pb-28 md:pb-14">{journey}<div className="rise">{children}</div></main>
       </div>
 
       {/* Phone: a floating, solid menu bar. Clients also get a round button for Help me with this. */}

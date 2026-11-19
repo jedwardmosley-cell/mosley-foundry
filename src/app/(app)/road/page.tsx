@@ -76,28 +76,21 @@ export default async function MyRoadPage({ searchParams }: { searchParams: Promi
       </FromBook>
 
       {/* The design is built around the whole identity, all five rules, not only the current focus. */}
-      <section className="mb-10 overflow-hidden rounded-2xl border border-line">
-        {(identity?.becoming || profile?.forgeStatement) ? (
-          <Link href="/identity" className="block bg-navy-deep px-5 py-6 sm:px-7 text-white transition hover:bg-navy">
-            <p className="flex items-center justify-between text-[13px] font-bold text-white/70">Built around who I am{identity?.role ? `, as ${withArticle(identity.role)}` : ""}<Icon name="arrow" className="h-4 w-4 text-white/50" /></p>
-            <p className="mt-3 font-serif text-[20px] sm:text-[22px] leading-[1.3] tracking-[-0.01em] line-clamp-6"><span aria-hidden className="mr-1 text-lane">&ldquo;</span>{profile?.forgeStatement || identity?.becoming}</p>
-          </Link>
-        ) : (
-          <Link href="/identity" className="block bg-navy-deep px-5 py-6 sm:px-7 text-white">
-            <p className="text-[13px] font-bold text-white/70">Built around who I am</p>
-            <p className="mt-2 text-[15px] text-white/80">Claim who you are first. Your design is built around it.</p>
-          </Link>
+      <section className="mb-10 border-y border-line/70 py-5" aria-label="Built around who I am">
+        <Link href="/identity" className="group block">
+          <p className="flex items-center justify-between font-book italic text-[16px] text-ink-soft">Built around who I am{identity?.role ? `, as ${withArticle(identity.role)}` : ""}<Icon name="arrow" className="h-4 w-4 text-ink-mute" /></p>
+          {(identity?.becoming || profile?.forgeStatement)
+            ? <p className="mt-2 font-book text-[19px] leading-snug text-heading line-clamp-2 group-hover:text-link">{profile?.forgeStatement || identity?.becoming}</p>
+            : <p className="mt-2 text-[15px] text-ink-soft group-hover:text-link">Claim who you are first. Your design is built around it.</p>}
+        </Link>
+        <div className="mt-4 flex items-center gap-1.5" aria-hidden>{FORGE_LINES.map((l) => <PillarMark key={l.pillar} k={l.pillar} size="sm" />)}</div>
+        <p className="mt-2 text-[15px] text-ink">Your routines, your people and your accountability support the whole of who you are, all five rules, every day. Not just one goal.</p>
+        {focuses.length > 0 && (
+          <p className="mt-2 text-sm text-ink-soft">
+            Your focus right now is one part of it:{" "}
+            {focuses.map((f, i) => <span key={f.id}>{i > 0 && ", "}<Link href={`/cycle?id=${f.id}`} className="btn-link">{focusTitle(f)}</Link></span>)}
+          </p>
         )}
-        <div className="bg-card px-5 py-5 sm:px-7 sm:py-6">
-          <div className="flex items-center gap-1.5" aria-hidden>{FORGE_LINES.map((l) => <PillarMark key={l.pillar} k={l.pillar} size="sm" />)}</div>
-          <p className="mt-3 text-[15px] text-ink">Your routines, your people and your accountability support the whole of who you are, all five rules, every day. Not just one goal.</p>
-          {focuses.length > 0 && (
-            <p className="mt-3 text-sm text-ink-soft">
-              Your focus right now is one part of it:{" "}
-              {focuses.map((f, i) => <span key={f.id}>{i > 0 && ", "}<Link href={`/cycle?id=${f.id}`} className="btn-link">{focusTitle(f)}</Link></span>)}
-            </p>
-          )}
-        </div>
       </section>
 
       {d.whosChecking.length > 0 && (

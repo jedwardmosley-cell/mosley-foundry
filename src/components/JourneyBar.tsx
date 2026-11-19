@@ -44,7 +44,7 @@ export function JourneyBar({ steps, done, current, cycle, identityMissing = [], 
   } else if (cycle) {
     line = cycle.finished
       ? <Link href="/cycle" className="btn-link">Your 30 days are up. Open your day 30 review</Link>
-      : <Link href="/dashboard" className="hover:text-link">Day {cycle.day} of 30, week {cycle.week}{cycle.seasonMonth ? `, month ${cycle.seasonMonth} of 3` : ""}. <span className="btn-link">Check in today</span></Link>;
+      : <Link href="/dashboard" className="hover:text-link">Day {cycle.day} of 30. <span className="btn-link">Check in today</span></Link>;
     if (open && !cycle.finished) line = <>{line}<span className="hidden sm:inline"> </span><span className="block sm:inline mt-1 sm:mt-0 text-ink-mute">Still open: <Link href={open.href} className="btn-link">{open.label}</Link>{open.key === "identity" && identityMissing.length > 0 && <> ({identityMissing.join(", ")})</>}</span></>;
   } else if (next) {
     line = <>Step {n} of 4: <Link href={`/start?step=${n}`} className="btn-link">{next.next}</Link></>;
@@ -57,14 +57,14 @@ export function JourneyBar({ steps, done, current, cycle, identityMissing = [], 
         <ol className="grid flex-1 min-w-[150px] grid-cols-5 gap-1">
           {steps.map((s, i) => (
             <li key={s.key}>
-              <Link href={s.href} className="block py-1.5" title={s.label}>
+              <Link href={s.href} className="block py-3" title={s.label}>
                 <span className={`block h-1 rounded-full ${done[s.key] ? "bg-navy" : s.key === current ? "bg-ink-mute/45" : "bg-ink/[0.08]"}`} />
                 <span className="sr-only">Step {i + 1}: {s.label}{done[s.key] && " (done)"}</span>
               </Link>
             </li>
           ))}
           <li>
-            <Link href={MIRRORS.href} className="block py-1.5" title={`${MIRRORS.label}, this week`}>
+            <Link href={MIRRORS.href} className="block py-3" title={`${MIRRORS.label}, this week`}>
               <span className={`block h-1 rounded-full ${lookedBack ? "bg-navy" : "bg-ink/[0.08]"}`} />
               <span className="sr-only">{MIRRORS.label}{lookedBack ? ", looked back this week" : ", not yet this week"}</span>
             </Link>
@@ -76,8 +76,8 @@ export function JourneyBar({ steps, done, current, cycle, identityMissing = [], 
   }
 
   return (
-    <nav aria-label="Your journey" className="mb-8">
-      <div aria-hidden className="grid grid-cols-5 gap-1.5 mb-2 text-[13px] font-bold text-gold">
+    <nav aria-label="Your journey" className="mb-5 sm:mb-8">
+      <div aria-hidden className="grid grid-cols-5 gap-1.5 mb-1 text-[12px] sm:text-[13px] font-bold text-gold">
         <span className="col-span-2">FORGE</span>
         <span className="col-span-3">Discipline by Design</span>
       </div>
@@ -88,7 +88,7 @@ export function JourneyBar({ steps, done, current, cycle, identityMissing = [], 
           const isHere = s.key === here;
           return (
             <li key={s.key}>
-              <Link href={s.href} aria-current={isHere ? "step" : undefined} className="block group">
+              <Link href={s.href} aria-current={isHere ? "step" : undefined} className="block group min-h-11 pt-2">
                 <span className={`block h-[5px] rounded-full transition ${isDone ? "bg-navy" : isNext ? "bg-ink-mute/45" : "bg-ink/[0.08]"} ${isHere ? "ring-2 ring-navy/15" : ""}`} />
                 <span className={`mt-2 block text-[11px] leading-tight sm:text-xs ${isHere ? "text-heading font-semibold" : isDone || isNext ? "text-ink-soft" : "text-ink-mute"} group-hover:text-link`}>
                   <span className="sr-only">Step {i + 1}: </span>{s.label}{isDone && <span className="sr-only"> (done)</span>}
@@ -98,7 +98,7 @@ export function JourneyBar({ steps, done, current, cycle, identityMissing = [], 
           );
         })}
         <li>
-          <Link href={MIRRORS.href} aria-current={atMirrors ? "page" : undefined} className="block group" title={lookedBack ? "Looked back this week" : "Look back at your week"}>
+          <Link href={MIRRORS.href} aria-current={atMirrors ? "page" : undefined} className="block group min-h-11 pt-2" title={lookedBack ? "Looked back this week" : "Look back at your week"}>
             <span className={`block h-[5px] rounded-full transition ${lookedBack ? "bg-navy" : "bg-ink/[0.08]"} ${atMirrors ? "ring-2 ring-navy/15" : ""}`} />
             <span className={`mt-2 block text-[11px] leading-tight sm:text-xs ${atMirrors ? "text-heading font-semibold" : lookedBack ? "text-ink-soft" : "text-ink-mute"} group-hover:text-link`}>
               {MIRRORS.label}<span className="sr-only">{lookedBack ? ", looked back this week" : ", not yet this week"}</span>
@@ -106,7 +106,7 @@ export function JourneyBar({ steps, done, current, cycle, identityMissing = [], 
           </Link>
         </li>
       </ol>
-      {line && <p className="mt-3 text-[13px] text-ink-soft">{line}</p>}
+      {line && <p className="mt-1.5 text-[13px] text-ink-soft">{line}</p>}
     </nav>
   );
 }
