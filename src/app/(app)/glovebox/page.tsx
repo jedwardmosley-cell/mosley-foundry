@@ -51,21 +51,28 @@ export default async function GloveBoxPage({ searchParams }: { searchParams: Pro
         {THREE_C_KEYS.map((k) => {
           const mine = lines.filter((l) => l.kind === k);
           return (
-            <Card key={k}>
-              <p className="text-[15px]"><span className="font-bold text-heading">{THREE_CS[k].name}.</span> <span className="text-ink-soft">{THREE_CS[k].line}</span></p>
+            // Each C folds on its own. Short lists start open; a long one starts folded, showing its count.
+            <details key={k} id={`c-${k.toLowerCase()}`} open={mine.length > 0 && mine.length <= 3} className="card group">
+              <summary className="flex cursor-pointer items-baseline gap-3">
+                <span className="flex-1">
+                  <span className="font-book text-[21px] text-heading">{THREE_CS[k].name}</span>
+                  <span className="block text-[14px] text-ink-soft">{THREE_CS[k].line}</span>
+                </span>
+                <span className="shrink-0 text-[14px] text-ink-mute">{mine.length === 0 ? "None yet" : `${mine.length} ${mine.length === 1 ? "statement" : "statements"}`}</span>
+              </summary>
               {mine.length === 0
-                ? <p className="mt-1.5 text-sm text-ink-mute">For example: <span className="italic">&ldquo;{THREE_CS[k].example}&rdquo;</span> Nothing kept here yet.</p>
+                ? <p className="mt-2 text-sm text-ink-mute">For example: <span className="italic">&ldquo;{THREE_CS[k].example}&rdquo;</span></p>
                 : (
                   <ul className="mt-2 divide-y divide-line/60">
                     {mine.map((l) => (
                       <li key={l.id} className="flex items-start justify-between gap-3 py-2">
-                        <span className="font-serif text-[17px] leading-snug text-heading">{l.text}</span>
+                        <span className="font-book text-[18px] leading-snug text-heading">{l.text}</span>
                         <form action={removeToneLine}><input type="hidden" name="id" value={l.id} /><button className="text-xs text-ink-mute hover:text-alert" aria-label={`Remove ${l.text}`}>Remove</button></form>
                       </li>
                     ))}
                   </ul>
                 )}
-            </Card>
+            </details>
           );
         })}
         <Card>
