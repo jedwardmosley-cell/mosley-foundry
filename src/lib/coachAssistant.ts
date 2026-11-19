@@ -30,14 +30,16 @@ export function resolveClient(said: string, clients: { id: string; name: string 
 export type PlanResult = { ok: true; draftId: string } | { ok: false; reason: "ai_off" | "no_clients" | "failed" };
 
 /** Asks the AI for a plan and keeps it as a draft for the coach to approve. Nothing is done here. */
-export async function planForCoach(coach: CurrentUser, instruction: string): Promise<PlanResult> {
+export async function planForCoach(coach: CurrentUser, instruction: string, onlyClient?: string): Promise<PlanResult> {
   if (!aiAvailable()) return { ok: false, reason: "ai_off" };
-  const clients = await coachClients(coach.id);
+  // From a client's own page, the assistant works on that client only.
+  const clients = (await coachClients(coach.id)).filter((c) => !onlyClient || c.id === onlyClient);
   if (!clients.length) return { ok: false, reason: "no_clients" };
   const { pack } = await getContent();
   const menu = exerciseMenu(pack);
   const today = new Date().toLocaleDateString("en-CA") + ` (${new Date().toLocaleDateString("en-US", { weekday: "long" })})`;
-  const plan = await planCoachActionsAI(instruction, clients.map((c) => c.name), menu.map(({ ref, title }) => ({ ref, title })), today);
+  const said = onlyClient ? `This is all about ${clients[0].name}. ${instruction}` : instruction;
+  const plan = await planCoachActionsAI(said, clients.map((c) => c.name), menu.map(({ ref, title }) => ({ ref, title })), today);
   if (!plan) return { ok: false, reason: "failed" };
   const unclear = [...plan.unclear];
   const actions: DraftAction[] = [];

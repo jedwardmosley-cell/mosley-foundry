@@ -36,6 +36,8 @@ const login = async (page: Page, email: string, password = "demo-password-1") =>
 };
 /** The Driver's Seat folds the parts already answered. Open each part, the way a person would tap to work on it. */
 const openAll = async (page: Page) => { await page.evaluate(() => document.querySelectorAll("main form > details").forEach((d) => ((d as HTMLDetailsElement).open = true))); };
+/** A coach's client page folds each part. Open them all, the way a coach would tap to look. */
+const openParts = async (page: Page) => { await page.waitForLoadState("networkidle"); await page.evaluate(() => document.querySelectorAll("main details[id]").forEach((d) => ((d as HTMLDetailsElement).open = true))); };
 /** Rate the five rules on the one-page self-assessment: each rule is a section that opens to its five levels. */
 const rate = async (page: Page, scores: Record<string, number>) => {
   for (const [k, v] of Object.entries(scores)) {
@@ -814,6 +816,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await logout(page);
     await login(page, "coach@demo.bothhands.app");
     await page.goto(`${BASE}/coach/${dana.id}`);
+    await openParts(page);
     await page.waitForSelector("text=FORGE reading");
     await page.waitForSelector("text=Self-rated");
     assert.equal(await page.locator("text=/ 25").count(), 0, "the coach sees no total either");
@@ -826,14 +829,42 @@ const submitAndWait = async (page: Page, selector: string) => {
     const assign = page.locator("form", { hasText: "From the program" });
     await assign.locator('select[name="exerciseRef"]').selectOption({ index: 1 });
     await assign.locator('button:has-text("Assign")').click();
-    await page.waitForSelector("text=assigned >> nth=0");
-    const sched = page.locator("form", { has: page.locator('input[name="scheduledAt"]') });
+    await page.waitForSelector("text=Assigned.");
+    await openParts(page);
+    const sched = page.locator("#new-session form");
     const when = new Date(Date.now() + 5 * 864e5); when.setHours(10, 0, 0, 0);
     const pad = (n: number) => String(n).padStart(2, "0");
     await sched.locator('input[name="scheduledAt"]').fill(`${when.getFullYear()}-${pad(when.getMonth() + 1)}-${pad(when.getDate())}T10:00`);
     await sched.locator('textarea[name="agenda"]').fill("E2E agenda: review the pause");
     await sched.locator('button:has-text("Schedule")').click();
     await page.waitForSelector("text=E2E agenda: review the pause");
+    // a session can be changed or cancelled, and an assignment edited or removed
+    {
+      const coachU = await db.user.findUniqueOrThrow({ where: { email: "coach@demo.bothhands.app" } });
+      const s1 = await db.coachingSession.findFirstOrThrow({ where: { coachId: coachU.id, participantId: dana.id, agenda: "E2E agenda: review the pause" } });
+      const li = page.locator("#sessions li", { hasText: "E2E agenda: review the pause" });
+      await li.locator("summary", { hasText: "Change or cancel" }).click();
+      await li.locator('textarea[name="agenda"]').fill("E2E agenda: review the pause, moved");
+      await Promise.all([page.waitForURL(/saved=session/), li.locator('button:has-text("Save changes")').click()]);
+      assert.equal((await db.coachingSession.findUniqueOrThrow({ where: { id: s1.id } })).agenda, "E2E agenda: review the pause, moved");
+      const ex = await db.assignedExercise.findFirstOrThrow({ where: { coachId: coachU.id, participantId: dana.id }, orderBy: { createdAt: "desc" } });
+      await page.goto(`${BASE}/coach/${dana.id}`);
+      await openParts(page);
+      const exLi = page.locator("#assignments li", { hasText: ex.title }).first();
+      await exLi.locator("summary", { hasText: "Edit or remove" }).click();
+      await exLi.locator('input[name="title"]').fill("E2E-EDITED exercise");
+      await Promise.all([page.waitForURL(/saved=exercise/), exLi.locator('button:has-text("Save changes")').click()]);
+      assert.equal((await db.assignedExercise.findUniqueOrThrow({ where: { id: ex.id } })).title, "E2E-EDITED exercise");
+      const tmp = await db.assignedExercise.create({ data: { coachId: coachU.id, participantId: dana.id, exerciseRef: "custom", title: "E2E-DELETE-ME", instructions: "" } });
+      await page.goto(`${BASE}/coach/${dana.id}`);
+      await openParts(page);
+      const delLi = page.locator("#assignments li", { hasText: "E2E-DELETE-ME" });
+      await delLi.locator("summary", { hasText: "Edit or remove" }).click();
+      await Promise.all([page.waitForURL(/saved=removed/), delLi.locator('button:has-text("Remove this assignment")').click()]);
+      assert.equal(await db.assignedExercise.count({ where: { id: tmp.id } }), 0, "removed");
+      await page.goto(`${BASE}/coach/${dana.id}`);
+      await openParts(page);
+    }
     const dc = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const dp: Page = await dc.newPage();
     await login(dp, "dana@demo.bothhands.app");
@@ -892,11 +923,13 @@ const submitAndWait = async (page: Page, selector: string) => {
     await dp.fill('input[name="personaName"]', "E2E-PERSONA");
     await saveThroughReveal(dp, "**/identity?saved=1");
     await page.goto(`${BASE}/coach/${dana.id}`);
+    await openParts(page);
     assert.ok(!(await page.content()).includes("E2E-ROLE"), "the role is not visible before the client shares Who I am");
     await dp.goto(`${BASE}/sharing`);
     await Promise.all([dp.waitForLoadState("networkidle"), dp.click(`button[aria-label^="Share: The Driver's Seat"]`)]);
     await dp.waitForSelector(`button[aria-label^="Stop sharing: The Driver's Seat"]`);
     await page.goto(`${BASE}/coach/${dana.id}`);
+    await openParts(page);
     await page.waitForSelector("text=E2E-ROLE");
     assert.ok(!(await page.content()).includes("E2E-PERSONA"), "persona needs its own tick");
     await dp.goto(`${BASE}/identity`);
@@ -912,6 +945,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal(row.tone, "SUPPORTIVE", "tone override saved independently of the level");
     assert.equal(row.level, "REINVENT");
     await page.goto(`${BASE}/coach/${dana.id}`);
+    await openParts(page);
     await page.waitForSelector("text=E2E-PERSONA");
     await dc.close();
   });
@@ -926,6 +960,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal(r?.status(), 404, "unassigned participant hidden");
     // the 30-day plan and its answers are private until the client shares them
     await page.goto(`${BASE}/coach/${dana.id}`);
+    await openParts(page);
     await page.waitForSelector("text=Not shared: my 30-day plan");
   });
 
@@ -942,7 +977,8 @@ const submitAndWait = async (page: Page, selector: string) => {
     const client = await db.user.findUniqueOrThrow({ where: { email: clientEmail } });
     assert.equal(client.role, "PARTICIPANT");
     await page.goto(`${BASE}/coach/${client.id}`);
-    await page.waitForSelector("text=nothing yet");
+    await openParts(page);
+    await page.waitForSelector("text=Hasn't shared anything with you yet");
     // the client can sign in with the temporary password and lands on onboarding
     const c2 = await browser.newContext();
     const cp: Page = await c2.newPage();
@@ -981,6 +1017,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await cp.waitForSelector("text=Avery Lin");
     // the coach resets the client's password: the client is signed out, told who did it, and must choose a new one
     await page.goto(`${BASE}/coach/${client.id}`);
+    await openParts(page);
     await page.locator("summary", { hasText: "Reset Casey Client" }).click();
     await page.click('button:has-text("Reset password")');
     await page.waitForSelector("text=New temporary password");
@@ -1010,6 +1047,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.waitForSelector("text=belongs to a coach or administrator");
     // remove
     await page.goto(`${BASE}/coach/${client.id}`);
+    await openParts(page);
     await page.locator("summary", { hasText: "Stop coaching" }).click();
     await Promise.all([page.waitForURL(/\/coach$/), page.click('button:has-text("Remove from my clients")')]);
     const gone = await page.goto(`${BASE}/coach/${client.id}`);
@@ -1163,6 +1201,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await cp.waitForSelector("h2:text-is('Who needs me this week')");
     // the wrap-up draft: nothing saved yet
     await cp.goto(`${BASE}/coach/${danaU.id}?wrap=${d.id}`);
+    await openParts(cp);
     await cp.waitForSelector("text=Follow-up message");
     assert.ok(!(await db.coachingSession.findUniqueOrThrow({ where: { id: last.id } })).coachNotes.includes("E2E-WRAP"), "nothing before saving");
     await cp.fill('textarea[name="commitments"]', "E2E-WRAP: ask one question first on Thursday, edited");
