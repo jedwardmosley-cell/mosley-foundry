@@ -1,4 +1,5 @@
 import { Submit } from "./Submit";
+import { TimezoneField } from "./Timezone";
 import { runCoachDraft, cancelCoachDraft } from "@/app/actions/coach";
 import type { getDraft } from "@/lib/coachAssistant";
 
@@ -9,10 +10,11 @@ export function AssistantDraft({ draft, back }: { draft: Draft; back?: string })
   return (
     <form className="mt-4 space-y-3">
       <input type="hidden" name="draftId" value={draft.id} />
+      <TimezoneField />
       {back && <input type="hidden" name="back" value={back} />}
       <p className="text-sm text-ink-mute">You asked: &ldquo;{draft.instruction}&rdquo;</p>
       {draft.plan.actions.length === 0 && <p className="text-[15px]">There&apos;s nothing here to do yet.</p>}
-      {draft.plan.actions.length > 0 && <p className="section-label">Here&apos;s what I&apos;ll do. Untick anything you don&apos;t want, and fix any date.</p>}
+      {draft.plan.actions.length > 0 && <p className="section-label">Here&apos;s what I&apos;ll do. Untick anything you don&apos;t want, and fix any date. Times are your own.</p>}
       <ul className="space-y-2">
         {draft.plan.actions.map((a, i) => (
           <li key={i} className="rounded-2xl bg-ink/[0.04] p-3">

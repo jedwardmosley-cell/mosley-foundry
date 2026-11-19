@@ -42,6 +42,7 @@ model User {
   approvedAt         DateTime?
   approvedBy         String? // name of the administrator who approved, declined, turned off or turned on the account
   createdAt          DateTime      @default(now())
+  timezone           String        @default("") // IANA name from the browser, for coaches and administrators. A client's is on Profile.
 
   sessions                      Session[]
   profile                       Profile?

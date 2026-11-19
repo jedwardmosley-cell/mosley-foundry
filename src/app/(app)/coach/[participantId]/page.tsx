@@ -16,6 +16,9 @@ import { cycleWeeks, cyclePosition, practiceSummary } from "@/lib/cycle";
 import { scoresFrom } from "@/lib/forge";
 import { RELATIONSHIP_ROLES, SEGMENTS, CHECKIN_STATUS, DAY30_DECISIONS } from "@/content/program";
 import { fmt } from "@/lib/dates";
+import { fmtIn, toWallTime, SESSION_TIME } from "@/lib/zone";
+import { zoneOf } from "@/lib/userZone";
+import { TimezoneField } from "@/components/Timezone";
 import type { PillarKey } from "@/content/types";
 import { PILLAR_KEYS } from "@/content/types";
 import { PageHeader, Card, PillarMark, Gauge, Field , PILLAR_FILL } from "@/components/ui";
@@ -32,6 +35,8 @@ export default async function CoachParticipant({ params, searchParams }: { param
   const coach = await requireUser("COACH");
   const { participantId } = await params;
   const sp = await searchParams;
+  // Session times are the coach's own.
+  const zone = await zoneOf(coach);
   let v, work;
   try {
     v = await getCoachView(coach, participantId);
@@ -155,14 +160,14 @@ export default async function CoachParticipant({ params, searchParams }: { param
         )}
       </Part>
 
-      <Part id="wrapup" title="After-session wrap-up" answer={lastSession ? `Last session ${fmt(lastSession.scheduledAt, { month: "short", day: "numeric" })}` : "No past session yet"} open={!!(wrap || sp.wrapped || sp.wrapnote || sp.open === "wrapup")}>
+      <Part id="wrapup" title="After-session wrap-up" answer={lastSession ? `Last session ${fmtIn(lastSession.scheduledAt, zone, { month: "short", day: "numeric" })}` : "No past session yet"} open={!!(wrap || sp.wrapped || sp.wrapnote || sp.open === "wrapup")}>
         <p className="mt-1 text-[15px] text-ink-soft">Right after you meet, put down your rough notes. The AI drafts your private notes, the commitments {first} will see, a follow-up message and the next exercise. You edit it before anything is saved.</p>
         {sp.wrapped && <p role="status" className="notice mt-3">Saved to the session. {first} now sees the commitments on their Dashboard.</p>}
         {sp.wrapnote && <p role="status" className="notice mt-3">{sp.wrapnote === "ai_off" ? BRIEF_NOTE.ai_off : BRIEF_NOTE.failed}</p>}
         {!wrap && (aiAvailable() ? (
           <form action={draftSessionWrapUp} className="mt-3 space-y-3">
             <input type="hidden" name="participantId" value={participantId} />
-            <p className="text-sm text-ink-mute">{lastSession ? `For your session on ${fmt(lastSession.scheduledAt, { weekday: "long", month: "short", day: "numeric" })}.` : "No past session on record, so saving will add one for today."}</p>
+            <p className="text-sm text-ink-mute">{lastSession ? `For your session on ${fmtIn(lastSession.scheduledAt, zone, { weekday: "long", month: "short", day: "numeric" })}.` : "No past session on record, so saving will add one for today."}</p>
             <textarea name="rough" required maxLength={8000} rows={4} className="textarea" aria-label="Rough notes from the session" placeholder="Talked about the director meeting. Pause works with peers, not with him yet. She'll try one question before answering on Thursday. Book Reggie by Friday. Next time: how Thursday went." />
             <Submit className="btn-primary">Draft the wrap-up</Submit>
           </form>
@@ -241,12 +246,12 @@ export default async function CoachParticipant({ params, searchParams }: { param
         </details>
       </Part>
 
-      <Part id="sessions" title="Sessions" answer={nextSession ? `Next: ${fmt(nextSession.scheduledAt, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}` : "None booked"} open={["session", "booked", "notes", "removed-session"].includes(sp.saved ?? "")}>
+      <Part id="sessions" title="Sessions" answer={nextSession ? `Next: ${fmtIn(nextSession.scheduledAt, zone, SESSION_TIME)}` : "None booked"} open={["session", "booked", "notes", "removed-session"].includes(sp.saved ?? "")}>
         {work.sessions.length === 0 && <p className="text-[15px] text-ink-soft">No sessions with {first} yet.</p>}
         <ul className="divide-y divide-line/60">
           {work.sessions.map((ss) => (
             <li key={ss.id} className="py-3">
-              <p className="font-book text-[19px] text-heading">{fmt(ss.scheduledAt, { weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" })}{ss.scheduledAt > new Date() && <span className="ml-2 align-middle text-[12px] font-bold text-gold">Upcoming</span>}</p>
+              <p className="font-book text-[19px] text-heading">{fmtIn(ss.scheduledAt, zone, { weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" })}{ss.scheduledAt > new Date() && <span className="ml-2 align-middle text-[12px] font-bold text-gold">Upcoming</span>}</p>
               {ss.agenda && <p className="mt-0.5 text-sm text-ink-soft">Agenda: {ss.agenda}</p>}
               {ss.participantPrep && <p className="mt-2 rounded-xl bg-ink/[0.04] px-3 py-2 text-[15px]"><span className="text-ink-mute">{first}&apos;s prep note: </span>{ss.participantPrep}</p>}
               <details className="mt-2">
@@ -261,8 +266,8 @@ export default async function CoachParticipant({ params, searchParams }: { param
               <details className="mt-1">
                 <summary className="cursor-pointer text-sm text-link">Change or cancel</summary>
                 <form action={updateSession} className="mt-3 space-y-3">
-                  <input type="hidden" name="id" value={ss.id} /><input type="hidden" name="participantId" value={participantId} />
-                  <Field label="When"><input type="datetime-local" name="scheduledAt" required defaultValue={localInput(ss.scheduledAt)} className="input min-w-0 max-w-full" /></Field>
+                  <input type="hidden" name="id" value={ss.id} /><input type="hidden" name="participantId" value={participantId} /><TimezoneField />
+                  <Field label="When"><input type="datetime-local" name="scheduledAt" required defaultValue={toWallTime(ss.scheduledAt, zone)} className="input min-w-0 max-w-full" /></Field>
                   <Field label="Agenda"><textarea name="agenda" defaultValue={ss.agenda} className="textarea !min-h-[64px]" /></Field>
                   <div className="flex flex-wrap gap-3">
                     <Submit className="btn-primary">Save changes</Submit>
@@ -276,8 +281,8 @@ export default async function CoachParticipant({ params, searchParams }: { param
         <details id="new-session" className="mt-4 border-t border-line/60 pt-4" open={work.sessions.length === 0}>
           <summary className="cursor-pointer font-book text-[19px] text-heading">Book a session</summary>
           <form action={scheduleSession} className="mt-3 space-y-3">
-            <input type="hidden" name="participantId" value={participantId} />
-            <Field label="When"><input type="datetime-local" name="scheduledAt" required className="input" /></Field>
+            <input type="hidden" name="participantId" value={participantId} /><TimezoneField />
+            <Field label="When" hint="Your own time. Your client sees it in theirs."><input type="datetime-local" name="scheduledAt" required className="input" /></Field>
             <Field label="Agenda"><textarea name="agenda" className="textarea !min-h-[64px]" /></Field>
             <Submit className="btn-quiet">Schedule</Submit>
           </form>
@@ -474,12 +479,6 @@ const ASSIST_NOTE: Record<string, string> = {
   failed: "That didn't come through. Try again, or say it a little differently.",
 };
 const EX_STATUS: Record<string, string> = { ASSIGNED: "Not started", DONE: "Done", PARTIAL: "Partly done", NOT_YET: "Not yet" };
-
-/** A date as the value a datetime-local box expects. */
-function localInput(d: Date) {
-  const p = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
-}
 
 /** One part of the client page. Closed, it says what's in it; open, it's where you work. */
 function Part({ id, title, answer, open, children }: { id: string; title: string; answer: string; open: boolean; children: React.ReactNode }) {

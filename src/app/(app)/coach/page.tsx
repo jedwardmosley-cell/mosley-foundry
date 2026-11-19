@@ -7,7 +7,8 @@ import { SHARE_SCOPES } from "@/lib/access";
 import { practiceSummary, cyclePosition } from "@/lib/cycle";
 import { SEASON_LENGTH } from "@/content/program";
 import { getContent } from "@/content";
-import { fmt } from "@/lib/dates";
+import { fmtIn, SESSION_TIME } from "@/lib/zone";
+import { zoneOf } from "@/lib/userZone";
 import { ChapterOpening, Card, PillarMark, Empty } from "@/components/ui";
 import type { PillarKey } from "@/content/types";
 import { AddClientForm } from "@/components/AddClientForm";
@@ -45,6 +46,7 @@ export default async function CoachHome({ searchParams }: { searchParams: Promis
 
   const plain = (name: string) => name.replace(/\s*\((?:demo|Demo)[^)]*\)\s*$/, "").trim();
   const ai = aiAvailable();
+  const zone = await zoneOf(coach);
 
   return (
     <>
@@ -87,7 +89,7 @@ export default async function CoachHome({ searchParams }: { searchParams: Promis
         <Card className="mt-2">
           <p className="section-label">Upcoming sessions</p>
           <ul className="mt-2 divide-y divide-line/60">
-            {upcoming.map((s) => <li key={s.id} className="py-2 flex justify-between gap-3 text-[15px]"><Link href={`/coach/${s.participantId}#sessions`} className="hover:text-link">{plain(s.participant.name)}</Link><span className="text-sm text-ink-mute">{fmt(s.scheduledAt, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</span></li>)}
+            {upcoming.map((s) => <li key={s.id} className="py-2 flex justify-between gap-3 text-[15px]"><Link href={`/coach/${s.participantId}#sessions`} className="hover:text-link">{plain(s.participant.name)}</Link><span className="text-sm text-ink-mute">{fmtIn(s.scheduledAt, zone, SESSION_TIME)}</span></li>)}
           </ul>
         </Card>
       )}

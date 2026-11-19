@@ -7,6 +7,8 @@ import { requireUser } from "@/lib/auth";
 import { audit, isActiveCoachOf, grantedScopes } from "@/lib/access";
 import { parse, text } from "@/lib/validation";
 import { exerciseText } from "@/lib/exercises";
+import { fromWallTime } from "@/lib/zone";
+import { formZone } from "@/lib/userZone";
 
 async function coachFor(participantId: string) {
   const c = await requireUser("COACH");
@@ -37,7 +39,10 @@ async function assignFor(c: Awaited<ReturnType<typeof coachFor>>, d: { participa
 export async function scheduleSession(fd: FormData) {
   const d = parse(z.object({ participantId: z.string(), scheduledAt: z.string().min(10), agenda: text(3000) }), fd);
   const c = await coachFor(d.participantId);
-  await db.coachingSession.create({ data: { coachId: c.id, participantId: d.participantId, scheduledAt: new Date(d.scheduledAt), agenda: d.agenda } });
+  // The coach typed their own local time.
+  const at = fromWallTime(d.scheduledAt, await formZone(c, fd));
+  if (!at) throw new Error("Pick a day and a time.");
+  await db.coachingSession.create({ data: { coachId: c.id, participantId: d.participantId, scheduledAt: at, agenda: d.agenda } });
   revalidatePath(`/coach/${d.participantId}`);
   redirect(`/coach/${d.participantId}?saved=booked#sessions`);
 }
@@ -97,6 +102,7 @@ export async function runCoachDraft(fd: FormData) {
   const { draftId } = parse(z.object({ draftId: z.string() }), fd);
   const { getDraft } = await import("@/lib/coachAssistant");
   const draft = await getDraft(c.id, draftId);
+  const zone = await formZone(c, fd);
   if (!draft) redirect("/coach");
   let done = 0;
   for (const [i, a] of draft.plan.actions.entries()) {
@@ -106,9 +112,9 @@ export async function runCoachDraft(fd: FormData) {
       const due = String(fd.get(`due_${i}`) ?? a.dueOn);
       await assignFor(c, { participantId: a.participantId, exerciseRef: a.exerciseRef, title: a.exerciseRef === "custom" ? String(fd.get(`title_${i}`) ?? a.title).trim().slice(0, 200) : "", instructions: a.exerciseRef === "custom" ? a.instructions : "", dueOn: /^\d{4}-\d{2}-\d{2}$/.test(due) ? due : undefined });
     } else {
-      const when = String(fd.get(`when_${i}`) ?? a.when);
-      if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(when)) continue;
-      await db.coachingSession.create({ data: { coachId: c.id, participantId: a.participantId, scheduledAt: new Date(when), agenda: a.agenda } });
+      const at = fromWallTime(String(fd.get(`when_${i}`) ?? a.when), zone);
+      if (!at) continue;
+      await db.coachingSession.create({ data: { coachId: c.id, participantId: a.participantId, scheduledAt: at, agenda: a.agenda } });
       await audit(c, "coach.schedule_session", a.participantId, "assistant");
     }
     revalidatePath(`/coach/${a.participantId}`);
@@ -214,7 +220,9 @@ export async function deleteExercise(fd: FormData) {
 export async function updateSession(fd: FormData) {
   const d = parse(z.object({ id: z.string(), participantId: z.string(), scheduledAt: z.string().min(10), agenda: text(3000) }), fd);
   const c = await coachFor(d.participantId);
-  await db.coachingSession.updateMany({ where: { id: d.id, coachId: c.id, participantId: d.participantId }, data: { scheduledAt: new Date(d.scheduledAt), agenda: d.agenda } });
+  const at = fromWallTime(d.scheduledAt, await formZone(c, fd));
+  if (!at) throw new Error("Pick a day and a time.");
+  await db.coachingSession.updateMany({ where: { id: d.id, coachId: c.id, participantId: d.participantId }, data: { scheduledAt: at, agenda: d.agenda } });
   await audit(c, "coach.update_session", d.participantId, d.id);
   revalidatePath(`/coach/${d.participantId}`);
   redirect(`/coach/${d.participantId}?saved=session#sessions`);

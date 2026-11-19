@@ -5,6 +5,8 @@ import { requireUser } from "@/lib/auth";
 import { Shell } from "@/components/Shell";
 import { JourneyBar } from "@/components/JourneyBar";
 import { getJourney, JOURNEY_STEPS } from "@/lib/journey";
+import { TimezoneSync } from "@/components/Timezone";
+import { zoneOf } from "@/lib/userZone";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();
@@ -12,6 +14,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (user.mustChangePassword) redirect("/account/password");
   const journey = user.role === "PARTICIPANT" ? await getJourney(user.id) : null;
   // Administrators see new sign-ups at the top of every page until they act on them.
+  // Everyone's browser time zone is kept, so session times and reminders are in their own time.
+  const zone = await zoneOf(user);
   const waiting = user.role === "ADMIN" ? await db.user.count({ where: { status: "PENDING", isDemo: false, OR: [{ orgId: null }, { orgId: user.orgId ?? "__none__" }] } }) : 0;
   return (
     <Shell user={user} journey={waiting > 0 ? (
@@ -21,6 +25,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </Link>
     ) : journey && <JourneyBar steps={JOURNEY_STEPS.map((s) => ({ ...s }))} done={journey.done} current={journey.current} cycle={journey.cycle} identityMissing={journey.identityMissing} roadMissing={journey.roadMissing} lookedBack={journey.lookedBack} />}>
       {children}
+      <TimezoneSync saved={zone} />
     </Shell>
   );
 }
