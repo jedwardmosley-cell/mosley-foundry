@@ -108,6 +108,9 @@ const submitAndWait = async (page: Page, selector: string) => {
     await login(ap, "admin@demo.bothhands.app", "demo-password-1");
     await ap.goto(`${BASE}/admin`);
     await ap.waitForSelector("text=waiting for your approval");
+    // and a banner at the top of every admin page until it's handled
+    await ap.goto(`${BASE}/admin/reports`);
+    await ap.locator("main a[href='/admin/people']", { hasText: /new sign-ups? (is|are) waiting/ }).waitFor();
     await ap.goto(`${BASE}/admin/people`);
     const row = ap.locator("li", { hasText: email });
     await Promise.all([ap.waitForLoadState("networkidle"), row.locator('button:has-text("Approve")').click()]);
@@ -1225,6 +1228,46 @@ const submitAndWait = async (page: Page, selector: string) => {
     await cp.waitForSelector("text=E2E-COHORT working");
     await cp.waitForSelector("text=20 min");
     await cc.close();
+  });
+
+  await check("12. admin deletes an account for good, only with the email typed; sign-in slows down guessing", async () => {
+    const victim = await db.user.create({ data: { email: `e2e-delete-${Date.now()}@example.test`, name: "E2E Delete Me", passwordHash: "x", role: "PARTICIPANT", status: "DECLINED", profile: { create: {} } } });
+    await db.journalEntry.create({ data: { userId: victim.id, body: "E2E-DELETE journal" } });
+    const ac = await browser.newContext();
+    const ap: Page = await ac.newPage();
+    await login(ap, "admin@demo.bothhands.app");
+    await ap.goto(`${BASE}/admin/people`);
+    const row = ap.locator(`#u-${victim.id}`);
+    await row.locator("summary", { hasText: "Delete permanently" }).click();
+    await row.locator('input[name="confirm"]').fill("not-their-email@example.test");
+    await Promise.all([ap.waitForURL(/deleted=mismatch/), row.locator('button:has-text("Delete this account")').click()]);
+    assert.equal(await db.user.count({ where: { id: victim.id } }), 1, "a wrong email deletes nothing");
+    await ap.goto(`${BASE}/admin/people`);
+    const row2 = ap.locator(`#u-${victim.id}`);
+    await row2.locator("summary", { hasText: "Delete permanently" }).click();
+    await row2.locator('input[name="confirm"]').fill(victim.email);
+    await Promise.all([ap.waitForURL(/deleted=1/), row2.locator('button:has-text("Delete this account")').click()]);
+    assert.equal(await db.user.count({ where: { id: victim.id } }), 0, "deleted");
+    assert.equal(await db.journalEntry.count({ where: { userId: victim.id } }), 0, "and everything in it");
+    assert.equal(await ap.locator('#u-' + (await db.user.findUniqueOrThrow({ where: { email: "admin@demo.bothhands.app" } })).id + ' summary:has-text("Delete permanently")').count(), 0, "never your own account");
+    await ac.close();
+    // five wrong passwords in a row, then the sixth try waits even with the right one
+    const lc = await browser.newContext();
+    const lp: Page = await lc.newPage();
+    for (let i = 0; i < 5; i++) {
+      await lp.goto(`${BASE}/login`);
+      await lp.fill('input[name="email"]', "priya@demo.bothhands.app");
+      await lp.fill('input[name="password"]', `wrong-${i}`);
+      await lp.click('button:has-text("Sign in")');
+      await lp.waitForSelector("text=That email and password don't match.");
+    }
+    await lp.goto(`${BASE}/login`);
+    await lp.fill('input[name="email"]', "priya@demo.bothhands.app");
+    await lp.fill('input[name="password"]', "demo-password-1");
+    await lp.click('button:has-text("Sign in")');
+    await lp.waitForSelector("text=Too many tries");
+    await db.loginAttempt.deleteMany({ where: { email: "priya@demo.bothhands.app" } });
+    await lc.close();
   });
 
   await check("desktop layout renders", async () => {
