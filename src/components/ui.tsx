@@ -6,9 +6,9 @@ import type { PillarKey } from "@/content/types";
 export function PageHeader({ eyebrow, title, plain, children }: { eyebrow?: string; title: string; plain?: string; children?: ReactNode }) {
   return (
     <header className="mb-7 sm:mb-10">
-      {eyebrow && <p className="eyebrow mb-2 !text-gold">{eyebrow}</p>}
+      {eyebrow && <p className="eyebrow mb-2">{eyebrow}</p>}
       <h1 className="h1">{title}</h1>
-      {plain && <p className="mt-1.5 text-[17px] font-semibold text-ink-soft">{plain}</p>}
+      {plain && <p className="mt-2 font-book italic text-[19px] text-ink-soft">{plain}</p>}
       {children && <div className="mt-4 muted text-[16px] leading-relaxed max-w-xl">{children}</div>}
     </header>
   );
