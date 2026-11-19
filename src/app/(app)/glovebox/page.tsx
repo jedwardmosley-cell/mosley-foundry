@@ -6,9 +6,10 @@ import { consoleExercise } from "@/lib/tone";
 import { NAMES } from "@/content/names";
 import { THREE_CS, THREE_C_KEYS } from "@/content/threeCs";
 import { keepToneLine, removeToneLine } from "@/app/actions/tone";
-import { PageHeader, Card } from "@/components/ui";
+import { ChapterOpening, Card } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 import { InTheBook } from "@/components/InTheBook";
+import { Fold } from "@/components/Fold";
 
 export const metadata = { title: "The Glove Box" };
 
@@ -29,9 +30,9 @@ export default async function GloveBoxPage({ searchParams }: { searchParams: Pro
 
   return (
     <>
-      <PageHeader eyebrow="Set the Tone" title={NAMES.glovebox.name} plain={NAMES.glovebox.plain}>
-        Lines worth keeping: something you read, something someone said to you, or a rewrite from Set the Tone that landed. Pull one out before a moment that matters, so your words are already set when you get there.
-      </PageHeader>
+      <ChapterOpening image="/chapters/glove-box.jpg" alt="An open glove box: a notebook and pen, a Bible, a map and sunglasses" title={NAMES.glovebox.name} plain={NAMES.glovebox.plain}>
+        <Fold lead="Lines worth keeping: something you read, something someone said to you, or a rewrite from Set the Tone that landed." rest="Pull one out before a moment that matters, so your words are already set when you get there." />
+      </ChapterOpening>
 
       {sp.kept && <p role="status" className="notice mb-5">In your Glove Box.</p>}
 
