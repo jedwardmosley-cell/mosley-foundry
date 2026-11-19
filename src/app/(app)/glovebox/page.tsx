@@ -37,7 +37,7 @@ export default async function GloveBoxPage({ searchParams }: { searchParams: Pro
       {sp.kept && <p role="status" className="notice mb-5">In your Glove Box.</p>}
 
       {today && (
-        <section className="mb-8 border-l-4 border-lane pl-5" aria-label="For today">
+        <section className="mb-8 border-l-2 border-ink/20 pl-5" aria-label="For today">
           <p className="section-label">For today</p>
           <p className="mt-2 font-serif text-[22px] leading-snug text-heading">{today.text}</p>
           <p className="mt-1 text-sm text-ink-mute">{THREE_CS[today.kind as keyof typeof THREE_CS]?.name ?? ""}. Read it out loud once.</p>

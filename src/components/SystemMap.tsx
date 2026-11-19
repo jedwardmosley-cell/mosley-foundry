@@ -59,7 +59,11 @@ export function SystemMap({ name, nodes }: { name: string; nodes: MapNode[] }) {
         return (
           <a key={p.id} href={p.href} aria-label={`${p.label}, ${KIND_NAME[p.kind]}`}>
             {p.id.startsWith("more-") ? <circle cx={p.x} cy={p.y} r={8} fill="rgb(var(--card))" stroke={COLOR[p.kind]} strokeWidth={2} /> : <circle cx={p.x} cy={p.y} r={8} fill={COLOR[p.kind]} />}
-            <text x={p.x} y={up ? p.y - 14 : p.y + 22} textAnchor="middle" fontSize="12" fontWeight={600} fill="rgb(var(--ink))">{p.label.length > 18 ? p.label.slice(0, 17) + "…" : p.label}</text>
+            {(() => {
+              const lines = wrapLabel(p.label);
+              const y0 = up ? p.y - 14 - (lines.length - 1) * 14 : p.y + 22;
+              return <text x={p.x} y={y0} textAnchor="middle" fontSize="12" fontWeight={600} fill="rgb(var(--ink))">{lines.map((l, i) => <tspan key={i} x={p.x} dy={i === 0 ? 0 : 14}>{l}</tspan>)}</text>;
+            })()}
           </a>
         );
       })}
@@ -72,4 +76,16 @@ export function SystemMap({ name, nodes }: { name: string; nodes: MapNode[] }) {
       {nodes.length === 0 && <text x={cx} y={cy + 66} textAnchor="middle" fontSize="12" fill="rgb(var(--ink-mute))">Add a routine or a person and it shows up here.</text>}
     </svg>
   );
+}
+
+/** Two short lines instead of a cut-off label, so "Saturday look back" reads in full. */
+function wrapLabel(label: string, max = 16): string[] {
+  if (label.length <= max) return [label];
+  const words = label.split(/\s+/);
+  let first = "";
+  while (words.length && (first ? first.length + 1 : 0) + words[0].length <= max) first += (first ? " " : "") + words.shift();
+  if (!first) first = words.shift() ?? "";
+  let rest = words.join(" ");
+  if (rest.length > max) rest = rest.slice(0, max - 1).trimEnd() + "…";
+  return rest ? [first, rest] : [first];
 }

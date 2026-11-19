@@ -10,7 +10,7 @@
 :root {
   color-scheme: light dark;
   --paper: 245 241 234;  --card: 255 253 249;  --surface: 255 255 255;  --line: 230 223 211;
-  --ink: 28 34 45;  --ink-soft: 78 86 100;  --ink-mute: 118 124 136;
+  --ink: 28 34 45;  --ink-soft: 78 86 100;  --ink-mute: 95 101 113;
   --navy: 30 47 74;  --navy-deep: 18 29 50;  --heading: 19 31 53;  --link: 37 62 101;
   /* The center line: the logo's gold, as a road marking. A shape, never text. */
   --lane: 224 146 42;
@@ -18,7 +18,7 @@
   --fblue: 30 47 74;
   --brass: 167 123 59;  --brass-soft: 241 230 210;
   /* Brand gold, from the Mosley Foundry wordmark. Brass stays the Reason Rooted rule color. */
-  --gold: 176 96 12;  --gold-soft: 249 234 212;  --gold-hi: 224 146 42;  --gold-lo: 163 84 9;
+  --gold: 155 82 8;  --gold-soft: 249 234 212;  --gold-hi: 224 146 42;  --gold-lo: 163 84 9;
   --sage: 94 122 100;  --sage-soft: 227 235 227;
   --clay: 168 92 69;  --clay-soft: 243 226 219;
   --violet: 107 106 143;  --alert: 180 35 24;  --alert-soft: 254 228 226;
@@ -91,7 +91,7 @@ summary { -webkit-tap-highlight-color: transparent; }
   .step-n { @apply mr-2.5 font-extrabold text-gold; }
   .section-title { @apply block font-book text-[24px] sm:text-[27px] leading-tight text-heading mb-4; }
   .input {
-    @apply w-full rounded-[10px] bg-field px-4 py-3 text-[15px] text-ink placeholder:text-ink-mute/80 transition;
+    @apply w-full rounded-[10px] bg-field px-4 py-3 text-[15px] text-ink placeholder:text-ink-mute transition;
     border: 1px solid transparent;
   }
   .input:hover { border-color: rgb(var(--line)); }

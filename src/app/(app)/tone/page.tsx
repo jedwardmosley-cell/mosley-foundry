@@ -212,7 +212,7 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
                 ))}
               </ol>
               {self.chain.stepIn && (
-                <div className="mt-3 border-l-4 border-lane pl-4">
+                <div className="mt-3 border-l-2 border-ink/20 pl-4">
                   <p className="text-sm font-bold text-heading">Where to step in</p>
                   <p className="mt-0.5 text-[15px]">{self.chain.stepIn}</p>
                   <p className="mt-1 text-sm text-ink-soft">Change one link and the ones after it change too. The earlier you step in, the less you have to fight later.</p>
