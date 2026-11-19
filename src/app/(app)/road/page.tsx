@@ -107,7 +107,7 @@ export default async function MyRoadPage({ searchParams }: { searchParams: Promi
         </figure>
       )}
 
-      <SectionHead title="Routines and reviews" sub="What you do on a schedule, so you don't have to decide each time." />
+      <SectionHead title="My routines" sub="What you do on a schedule, so you don't have to decide each time." />
       <div className="card !p-0 divide-y divide-line/60">
         {BLUEPRINT_AREAS.map((area) => {
           if (area.key === "ACCOUNTABILITY" || PEOPLE_AREAS.includes(area.key)) return null;
