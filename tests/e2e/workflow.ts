@@ -1273,6 +1273,38 @@ const submitAndWait = async (page: Page, selector: string) => {
     await lc.close();
   });
 
+  await check("12b. a coach books in their own time zone; the client sees it in theirs", async () => {
+    const dana = await db.user.findUniqueOrThrow({ where: { email: "dana@demo.bothhands.app" } });
+    const cc = await browser.newContext({ timezoneId: "America/Chicago" });
+    const cp: Page = await cc.newPage();
+    await login(cp, "coach@demo.bothhands.app");
+    await cp.goto(`${BASE}/coach/${dana.id}?open=sessions`);
+    await openParts(cp);
+    await cp.evaluate(() => ((document.querySelector("#new-session") as HTMLDetailsElement).open = true));
+    const sched = cp.locator("#new-session form");
+    await sched.locator('input[name="timezone"]').waitFor({ state: "attached" });
+    await cp.waitForFunction(() => (document.querySelector('#new-session input[name="timezone"]') as HTMLInputElement)?.value === "America/Chicago");
+    await sched.locator('input[name="scheduledAt"]').fill("2030-01-15T10:00");
+    await sched.locator('textarea[name="agenda"]').fill("E2E-TZ agenda");
+    await Promise.all([cp.waitForURL(/saved=booked/), sched.locator('button:has-text("Schedule")').click()]);
+    const s = await db.coachingSession.findFirstOrThrow({ where: { participantId: dana.id, agenda: "E2E-TZ agenda" } });
+    assert.equal(s.scheduledAt.toISOString(), "2030-01-15T16:00:00.000Z", "10:00 in Chicago is 16:00 UTC");
+    await openParts(cp);
+    await cp.locator("#sessions li", { hasText: "E2E-TZ agenda" }).locator("text=10:00 AM CST").first().waitFor();
+    assert.equal((await db.user.findUniqueOrThrow({ where: { id: (await db.user.findUniqueOrThrow({ where: { email: "coach@demo.bothhands.app" } })).id } })).timezone, "America/Chicago", "the coach's zone is kept");
+    await cc.close();
+    // The client, in New York, sees the same session at 11:00 their time.
+    const pc = await browser.newContext({ timezoneId: "America/New_York" });
+    const pp: Page = await pc.newPage();
+    await login(pp, "dana@demo.bothhands.app");
+    await pp.goto(`${BASE}/coaching`);
+    for (let i = 0; i < 20 && (await db.profile.findUniqueOrThrow({ where: { userId: dana.id } })).timezone !== "America/New_York"; i++) await pp.waitForTimeout(250);
+    await pp.reload();
+    await pp.locator("text=11:00 AM EST").first().waitFor();
+    await pc.close();
+    await db.coachingSession.delete({ where: { id: s.id } });
+  });
+
   await check("desktop layout renders", async () => {
     await logout(page);
     const desk = await browser.newPage({ viewport: { width: 1280, height: 900 } });

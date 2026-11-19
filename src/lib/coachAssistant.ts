@@ -4,6 +4,8 @@ import type { CurrentUser } from "./auth";
 import { aiAvailable, planCoachActionsAI, type ProposedAction } from "./ai";
 import { exerciseMenu } from "./exercises";
 import { getContent } from "@/content";
+import { todayIn } from "./zone";
+import { zoneOf } from "./userZone";
 
 /** A proposed action with the client it resolved to. participantId is "" when the name didn't match one client. */
 export type DraftAction = ProposedAction & { participantId: string; clientName: string; exerciseTitle?: string };
@@ -37,7 +39,9 @@ export async function planForCoach(coach: CurrentUser, instruction: string, only
   if (!clients.length) return { ok: false, reason: "no_clients" };
   const { pack } = await getContent();
   const menu = exerciseMenu(pack);
-  const today = new Date().toLocaleDateString("en-CA") + ` (${new Date().toLocaleDateString("en-US", { weekday: "long" })})`;
+  // "Next Tuesday at 10" means the coach's own Tuesday and their own 10:00.
+  const t = todayIn(await zoneOf(coach));
+  const today = `${t.date} (${t.weekday})`;
   const said = onlyClient ? `This is all about ${clients[0].name}. ${instruction}` : instruction;
   const plan = await planCoachActionsAI(said, clients.map((c) => c.name), menu.map(({ ref, title }) => ({ ref, title })), today);
   if (!plan) return { ok: false, reason: "failed" };

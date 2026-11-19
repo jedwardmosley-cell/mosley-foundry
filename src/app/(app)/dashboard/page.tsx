@@ -5,6 +5,7 @@ import { loadParticipant } from "@/lib/participant";
 import { getContent } from "@/content";
 import { cycleWeeks, cyclePosition } from "@/lib/cycle";
 import { fmt, daysBetween, mondayOf } from "@/lib/dates";
+import { fmtIn, SESSION_TIME } from "@/lib/zone";
 import { db } from "@/lib/db";
 import { todayHeadline } from "@/lib/todayHeadline";
 import { getJourney, JOURNEY_STEPS } from "@/lib/journey";
@@ -12,7 +13,6 @@ import { withArticle } from "@/content/whoIAm";
 import type { PillarKey } from "@/content/types";
 import { CheckInForm, type CheckInFocus } from "@/components/CheckInForm";
 import { CenterLine } from "@/components/CenterLine";
-import { TimezoneSync } from "@/components/Timezone";
 import { focusTitle, MAX_FOCUSES } from "@/lib/focus";
 import { Icon, type IconName } from "@/components/Icon";
 
@@ -55,7 +55,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   const thisWeekNeeds = lastWeek?.nextWeek?.trim() ?? "";
   const dueSoon = d.relationships.filter((r) => r.nextCheckIn && daysBetween(new Date(), r.nextCheckIn) <= 2).slice(0, 3);
   const coachItems = [
-    nextSession && { key: "s", href: "/coaching", icon: "clock", kind: "Session", text: `With ${nextSession.coach.name.split(" (")[0]}`, side: fmt(nextSession.scheduledAt, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) },
+    nextSession && { key: "s", href: "/coaching", icon: "clock", kind: "Session", text: `With ${nextSession.coach.name.split(" (")[0]}`, side: fmtIn(nextSession.scheduledAt, d.profile.timezone, SESSION_TIME) },
     ...openExercises.map((x) => ({ key: x.id, href: "/coaching", icon: "pencil", kind: "Exercise", text: x.title, side: x.dueOn ? `Due ${fmt(x.dueOn)}` : "New" })),
     lastCommitments && { key: "c", href: "/coaching", icon: "check", kind: "You agreed", text: lastCommitments.commitments, side: fmt(lastCommitments.scheduledAt) },
   ].filter(Boolean) as { key: string; href: string; icon: IconName; kind: string; text: string; side: string }[];
@@ -74,7 +74,6 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
 
   return (
     <div>
-      <TimezoneSync saved={d.profile.timezone} />
       {setup === "done" && <p role="status" className="notice mb-5">Your focus is set up. Your plan is on its way to the person who finds out.</p>}
       {/* Mid-cycle and not set up yet: an invitation. During the kickoff the page below says it instead. */}
       {!kickoff && notSetUp && !cyclePosition(notSetUp.startDate).finished && (

@@ -2,6 +2,8 @@ import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { respondExercise, saveSessionPrep } from "@/app/actions/participant";
 import { fmt } from "@/lib/dates";
+import { fmtIn } from "@/lib/zone";
+import { zoneOf } from "@/lib/userZone";
 import { PageHeader, Card, Field, Empty } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 
@@ -9,6 +11,7 @@ export const metadata = { title: "Coaching" };
 
 export default async function CoachingPage() {
   const u = await requireUser("PARTICIPANT");
+  const zone = await zoneOf(u); // the client sees session times in their own time
   const [sessions, exercises] = await Promise.all([
     db.coachingSession.findMany({ where: { participantId: u.id }, orderBy: { scheduledAt: "desc" }, include: { coach: { select: { name: true } } } }),
     db.assignedExercise.findMany({ where: { participantId: u.id }, orderBy: { createdAt: "desc" }, include: { coach: { select: { name: true } } } }),
@@ -43,7 +46,7 @@ export default async function CoachingPage() {
       <div className="space-y-4">
         {sessions.map((s) => (
           <Card key={s.id}>
-            <p className="h3">{fmt(s.scheduledAt, { weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" })}, {s.coach.name}</p>
+            <p className="h3">{fmtIn(s.scheduledAt, zone, { weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" })}, {s.coach.name}</p>
             {s.agenda && <p className="mt-2 text-[15px]"><span className="text-ink-mute">Agenda: </span>{s.agenda}</p>}
             {s.commitments && <p className="mt-2 text-[15px]"><span className="text-ink-mute">Agreed commitments: </span>{s.commitments}</p>}
             <form action={saveSessionPrep} className="mt-4 space-y-3">
