@@ -30,6 +30,7 @@ export default {
       },
       fontFamily: {
         serif: ["var(--font-serif)", "Georgia", "serif"],
+        book: ["var(--font-book)", "Georgia", "serif"],
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
       },
     },
