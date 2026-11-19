@@ -14,6 +14,24 @@ export function PageHeader({ eyebrow, title, plain, children }: { eyebrow?: stri
   );
 }
 
+/**
+ * A chapter opening, set like the first page of a chapter in the book: the running head, an optional line above
+ * the photo (a day or a week), the chapter's photograph, the title in capitals, its plain line in italics, then
+ * the intro. No chapter numbers on screen.
+ */
+export function ChapterOpening({ title, plain, image, alt, kicker, children }: { title: string; plain?: string; image: string; alt: string; kicker?: string; children?: ReactNode }) {
+  return (
+    <header className="mb-8 sm:mb-10">
+      <p className="text-center text-[12px] text-ink-mute">both hands on the wheel</p>
+      {kicker && <p className="mt-4 font-book text-[24px] leading-none text-heading">{kicker}</p>}
+      <div className="mt-4 -mx-4 sm:mx-0 aspect-[16/9] bg-ink/10 bg-cover bg-center" style={{ backgroundImage: `url(${image})` }} role="img" aria-label={alt} />
+      <h1 className="mt-5 font-book text-[30px] sm:text-[36px] leading-[1.05] uppercase tracking-[0.01em] text-heading text-balance">{title}</h1>
+      {plain && <p className="mt-2 font-book italic text-[19px] text-ink-soft">{plain}</p>}
+      {children && <div className="mt-4 text-[16px] leading-relaxed text-ink-soft max-w-xl">{children}</div>}
+    </header>
+  );
+}
+
 export function Card({ children, className = "", id }: { children: ReactNode; className?: string; id?: string }) {
   return <section id={id} className={`card ${className}`}>{children}</section>;
 }

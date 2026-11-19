@@ -8,7 +8,7 @@ import { db } from "@/lib/db";
 import { getContent } from "@/content";
 import { BLUEPRINT_AREAS } from "@/content/program";
 import { addCommitment, removeCommitment, updateCommitmentSchedule } from "@/app/actions/participant";
-import { PageHeader, Card, Source, Field, PillarMark } from "@/components/ui";
+import { PageHeader, ChapterOpening, Card, Source, Field, PillarMark } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 import Link from "next/link";
 import { BLUEPRINT_PICKS } from "@/content/options";
@@ -69,7 +69,7 @@ export default async function MyRoadPage({ searchParams }: { searchParams: Promi
 
   return (
     <>
-      <PageHeader eyebrow="Discipline by Design" title={NAMES.controls.name} plain={NAMES.controls.plain}>The system that makes it hard to fail: your routines, your people, your groups and programs, the people you develop. It stays, and it grows.</PageHeader>
+      <ChapterOpening image="/chapters/vehicle-controls.jpg" alt="The driver's view of the wheel, the screen and the controls" title={NAMES.controls.name} plain={NAMES.controls.plain}>The system that makes it hard to fail: your routines, your people, your groups and programs, the people you develop. It stays, and it grows.</ChapterOpening>
       <div className="mb-8"><SystemMap name={u.name} nodes={mapNodes} /></div>
       <FromBook label="From the book">
         {d.intro[0] ? <><p>{d.intro.find((t) => t.startsWith("It's the deliberate construction"))}</p><p className="mt-2">{d.intro.find((t) => t.startsWith("The question isn't"))}</p></> : "The deliberate construction of the routines, relationships, environments, and accountability structures that support sustained development."}

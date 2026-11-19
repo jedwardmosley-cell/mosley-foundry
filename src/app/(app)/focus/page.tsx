@@ -8,7 +8,7 @@ import { activeFocuses } from "@/lib/focusData";
 import { focusTitle, FOCUS_SOURCES, MAX_FOCUSES, type FocusSource } from "@/lib/focus";
 import { fmt } from "@/lib/dates";
 import type { PillarKey } from "@/content/types";
-import { PageHeader, PillarMark } from "@/components/ui";
+import { PageHeader, ChapterOpening, PillarMark } from "@/components/ui";
 
 export const metadata = { title: "The Windshield" };
 
@@ -30,9 +30,9 @@ export default async function FocusPage() {
 
   return (
     <>
-      <PageHeader eyebrow="Discipline by Design" title={NAMES.windshield.name} plain={NAMES.windshield.plain}>
+      <ChapterOpening image="/chapters/road-ahead.jpg" alt="The open road ahead, from behind the wheel" title={NAMES.windshield.name} plain={NAMES.windshield.plain}>
         One or two things to work on, and that&apos;s it. Each one moves you toward who&apos;s behind the wheel.
-      </PageHeader>
+      </ChapterOpening>
 
       {statement && (
         <Link href="/identity" className="mb-6 block rounded-2xl bg-ink/[0.04] px-5 py-4 transition hover:bg-ink/[0.06]">

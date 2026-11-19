@@ -9,7 +9,7 @@ import { aiAvailable, type ToneReading, type ConversationReading } from "@/lib/a
 import { readSelfTalk, prepConversation, practiceConversation, keepToneLine, deleteToneEntry, setToneReadsWriting, setToneAudit } from "@/app/actions/tone";
 
 const fmtDay = (d: Date) => fmt(d, { weekday: "long", month: "short", day: "numeric" });
-import { PageHeader, Card, PillarMark } from "@/components/ui";
+import { PageHeader, ChapterOpening, Card, PillarMark } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 import { DictationHint } from "@/components/Picks";
 import { FORGE_LINES } from "@/content/forgeLines";
@@ -78,13 +78,13 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
 
   return (
     <>
-      <PageHeader eyebrow="FORGE" title={NAMES.tone.name} plain={NAMES.tone.plain}>
+      <ChapterOpening image="/chapters/center-console.jpg" alt="The center console: the climate dials and the shifter" title={NAMES.tone.name} plain={NAMES.tone.plain}>
         How you talk to yourself, and to the people around you, sets the tone before anything else happens. Use it when your own words start to limit you, and before a conversation that matters.
         <span className="mt-4 block border-l-4 border-lane pl-4 text-[15px] text-ink">
           <span className="block font-medium text-heading">Your words are instructions.</span>
           They&apos;re more than a way to say what you think. They tell your brain what to believe, and they set the temperature for everyone who hears them. Say &ldquo;I can&apos;t&rdquo; and your mind goes looking for proof that you can&apos;t. It finds it, and your body follows. Blame someone and they defend instead of fix. This is nothing to play with.
         </span>
-      </PageHeader>
+      </ChapterOpening>
 
       {sp.care && (
         <Card className="mb-6 border-alert/40">
