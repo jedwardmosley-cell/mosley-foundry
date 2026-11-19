@@ -29,11 +29,11 @@
   --font-book: "Alegreya", "Iowan Old Style", Georgia, serif;
 }
 
-/* Dark: the same palette, deepened. Follows the phone or computer setting. */
+/* Dark: the book's black pages. Pure black ground, warm white type, the palette's accents kept. Follows the phone or computer setting. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: 12 15 21;  --card: 20 25 34;  --surface: 26 32 43;  --line: 40 48 62;
-    --ink: 236 231 222;  --ink-soft: 180 186 198;  --ink-mute: 132 141 156;
+    --paper: 0 0 0;  --card: 16 16 17;  --surface: 24 24 26;  --line: 44 44 47;
+    --ink: 238 235 229;  --ink-soft: 184 181 175;  --ink-mute: 138 135 130;
     --navy: 58 90 136;  --navy-deep: 27 42 66;  --heading: 243 238 229;  --link: 176 198 230;
     --lane: 248 204 120;
     --fblue: 58 90 136;
