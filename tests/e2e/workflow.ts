@@ -840,8 +840,8 @@ const submitAndWait = async (page: Page, selector: string) => {
     await dp.goto(`${BASE}/dashboard`);
     const box = dp.locator("section", { hasText: "From your coach" });
     await box.waitFor();
-    assert.ok((await box.innerText()).includes("session with Avery Lin"));
-    assert.ok((await box.innerText()).includes("Agreed"));
+    assert.ok((await box.innerText()).includes("With Avery Lin"));
+    assert.ok((await box.innerText()).includes("You agreed"));
     assert.ok((await box.innerText()).includes("Due"), "the exercise shows with its due date");
     await box.screenshot({ path: `${shots}/09c-from-coach.png` });
     // a client with no coach items sees no box
