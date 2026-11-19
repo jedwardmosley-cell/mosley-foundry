@@ -19,6 +19,7 @@ export async function assignExercise(fd: FormData) {
   const c = await coachFor(d.participantId);
   await assignFor(c, d);
   revalidatePath(`/coach/${d.participantId}`);
+  redirect(`/coach/${d.participantId}?saved=assigned#assignments`);
 }
 
 /** One exercise for one of the coach's own clients. Program exercises fill in their own title and text. */
@@ -38,6 +39,7 @@ export async function scheduleSession(fd: FormData) {
   const c = await coachFor(d.participantId);
   await db.coachingSession.create({ data: { coachId: c.id, participantId: d.participantId, scheduledAt: new Date(d.scheduledAt), agenda: d.agenda } });
   revalidatePath(`/coach/${d.participantId}`);
+  redirect(`/coach/${d.participantId}?saved=booked#sessions`);
 }
 
 export async function saveSessionNotes(fd: FormData) {
@@ -45,6 +47,7 @@ export async function saveSessionNotes(fd: FormData) {
   const c = await coachFor(d.participantId);
   await db.coachingSession.updateMany({ where: { id: d.id, coachId: c.id }, data: { coachNotes: d.coachNotes, commitments: d.commitments } });
   revalidatePath(`/coach/${d.participantId}`);
+  redirect(`/coach/${d.participantId}?saved=notes#sessions`);
 }
 
 /** A coach may record an interpretation only on a priority the participant has already chosen to share. */
@@ -76,11 +79,13 @@ export async function prepareSessionBrief(fd: FormData) {
 /** The coach assistant, step 1: turn the coach's words into a plan to approve. Nothing is done yet. */
 export async function planCoachActions(fd: FormData) {
   const c = await requireUser("COACH");
-  const { instruction } = parse(z.object({ instruction: z.string().trim().min(3).max(4000) }), fd);
+  const { instruction, participantId } = parse(z.object({ instruction: z.string().trim().min(3).max(4000), participantId: z.string().optional() }), fd);
+  if (participantId && !(await isActiveCoachOf(c.id, participantId))) throw new Error("Not your participant.");
   const { planForCoach } = await import("@/lib/coachAssistant");
-  const r = await planForCoach(c, instruction);
-  await audit(c, "coach.assistant_plan", undefined, r.ok ? r.draftId : r.reason);
-  redirect(r.ok ? `/coach?draft=${r.draftId}#assistant` : `/coach?assistant=${r.reason}#assistant`);
+  const r = await planForCoach(c, instruction, participantId);
+  await audit(c, "coach.assistant_plan", participantId, r.ok ? r.draftId : r.reason);
+  const base = participantId ? `/coach/${participantId}` : "/coach";
+  redirect(r.ok ? `${base}?draft=${r.draftId}#assistant` : `${base}?assistant=${r.reason}#assistant`);
 }
 
 /**
@@ -111,14 +116,16 @@ export async function runCoachDraft(fd: FormData) {
   }
   await db.coachDraft.deleteMany({ where: { id: draftId, coachId: c.id } });
   revalidatePath("/coach");
-  redirect(`/coach?done=${done}#assistant`);
+  const back = String(fd.get("back") ?? "");
+  redirect(back && (await isActiveCoachOf(c.id, back)) ? `/coach/${back}?done=${done}#assistant` : `/coach?done=${done}#assistant`);
 }
 
 export async function cancelCoachDraft(fd: FormData) {
   const c = await requireUser("COACH");
   const { draftId } = parse(z.object({ draftId: z.string() }), fd);
   await db.coachDraft.deleteMany({ where: { id: draftId, coachId: c.id } });
-  redirect("/coach#assistant");
+  const back = String(fd.get("back") ?? "");
+  redirect(back && (await isActiveCoachOf(c.id, back)) ? `/coach/${back}#assistant` : "/coach#assistant");
 }
 
 /** After-session wrap-up, step 1: draft from the coach's rough notes. Nothing is saved to the session yet. */
@@ -178,4 +185,46 @@ export async function prepareCohortSession(fd: FormData) {
   await db.cohortBrief.create({ data: { coachId: c.id, cohortId: d.cohortId, segmentKey: pulse.segmentKey, content: JSON.stringify({ ...prep, small: pulse.small, minutes: d.minutes }) } });
   revalidatePath("/coach/cohorts");
   redirect(`/coach/cohorts#cohort-${d.cohortId}`);
+}
+
+/** Change an assignment the coach gave: title, instructions, due date. Only the coach's own, for their own client. */
+export async function updateExercise(fd: FormData) {
+  const d = parse(z.object({ id: z.string(), participantId: z.string(), title: z.string().trim().min(1).max(200), instructions: text(6000), dueOn: z.string().optional() }), fd);
+  const c = await coachFor(d.participantId);
+  await db.assignedExercise.updateMany({
+    where: { id: d.id, coachId: c.id, participantId: d.participantId },
+    data: { title: d.title, instructions: d.instructions, dueOn: d.dueOn ? new Date(d.dueOn + "T12:00:00") : null },
+  });
+  await audit(c, "coach.update_exercise", d.participantId, d.id);
+  revalidatePath(`/coach/${d.participantId}`);
+  redirect(`/coach/${d.participantId}?saved=exercise#assignments`);
+}
+
+/** Take back an assignment. The client's response, if any, goes with it. */
+export async function deleteExercise(fd: FormData) {
+  const d = parse(z.object({ id: z.string(), participantId: z.string() }), fd);
+  const c = await coachFor(d.participantId);
+  await db.assignedExercise.deleteMany({ where: { id: d.id, coachId: c.id, participantId: d.participantId } });
+  await audit(c, "coach.delete_exercise", d.participantId, d.id);
+  revalidatePath(`/coach/${d.participantId}`);
+  redirect(`/coach/${d.participantId}?saved=removed#assignments`);
+}
+
+/** Move a session or change its agenda. */
+export async function updateSession(fd: FormData) {
+  const d = parse(z.object({ id: z.string(), participantId: z.string(), scheduledAt: z.string().min(10), agenda: text(3000) }), fd);
+  const c = await coachFor(d.participantId);
+  await db.coachingSession.updateMany({ where: { id: d.id, coachId: c.id, participantId: d.participantId }, data: { scheduledAt: new Date(d.scheduledAt), agenda: d.agenda } });
+  await audit(c, "coach.update_session", d.participantId, d.id);
+  revalidatePath(`/coach/${d.participantId}`);
+  redirect(`/coach/${d.participantId}?saved=session#sessions`);
+}
+
+export async function deleteSession(fd: FormData) {
+  const d = parse(z.object({ id: z.string(), participantId: z.string() }), fd);
+  const c = await coachFor(d.participantId);
+  await db.coachingSession.deleteMany({ where: { id: d.id, coachId: c.id, participantId: d.participantId } });
+  await audit(c, "coach.delete_session", d.participantId, d.id);
+  revalidatePath(`/coach/${d.participantId}`);
+  redirect(`/coach/${d.participantId}?saved=removed-session#sessions`);
 }

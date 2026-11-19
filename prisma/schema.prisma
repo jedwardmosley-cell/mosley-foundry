@@ -638,3 +638,13 @@ model CohortBrief {
 
   @@index([coachId, cohortId, createdAt])
 }
+
+/// Sign-in tries, kept to slow down password guessing. Holds the email typed and whether it worked; cleared after a day.
+model LoginAttempt {
+  id    String   @id @default(cuid())
+  email String
+  ok    Boolean
+  at    DateTime @default(now())
+
+  @@index([email, at])
+}

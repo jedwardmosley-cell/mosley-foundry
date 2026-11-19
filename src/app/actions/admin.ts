@@ -178,3 +178,19 @@ export async function setUserActive(fd: FormData) {
   await audit(a, active ? "admin.turn_on_account" : "admin.turn_off_account", u.id);
   revalidatePath("/admin/people");
 }
+
+/**
+ * Deletes an account and everything in it, for good. The administrator types the person's email to confirm.
+ * Administrators can't delete themselves or another administrator. Recorded in the audit log by email.
+ */
+export async function deleteAccount(fd: FormData) {
+  const a = await admin();
+  const { userId, confirm } = parse(z.object({ userId: z.string().min(1), confirm: z.string().trim().toLowerCase() }), fd);
+  const u = await manageable(a, userId);
+  if (confirm !== u.email.toLowerCase()) redirect(`/admin/people?deleted=mismatch#u-${u.id}`);
+  await db.session.deleteMany({ where: { userId: u.id } });
+  await db.user.delete({ where: { id: u.id } });
+  await audit(a, "admin.delete_account", undefined, u.email);
+  revalidatePath("/admin/people");
+  redirect("/admin/people?deleted=1");
+}

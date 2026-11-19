@@ -4,8 +4,10 @@ import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { getCoachView, getCoachWork, ForbiddenError, SHARE_SCOPES, type ShareScope } from "@/lib/access";
 import { attentionFlags } from "@/lib/coachSummary";
-import { assignExercise, scheduleSession, saveSessionNotes, recordEqiInterpretation, prepareSessionBrief, draftSessionWrapUp, saveSessionWrapUp, discardSessionWrapUp } from "@/app/actions/coach";
+import { assignExercise, scheduleSession, saveSessionNotes, recordEqiInterpretation, prepareSessionBrief, draftSessionWrapUp, saveSessionWrapUp, discardSessionWrapUp, planCoachActions, updateExercise, deleteExercise, updateSession, deleteSession } from "@/app/actions/coach";
 import { CopyText } from "@/components/CopyText";
+import { AssistantDraft } from "@/components/AssistantDraft";
+import { getDraft } from "@/lib/coachAssistant";
 import { latestBrief, getWrapUp } from "@/lib/coachBrief";
 import { aiAvailable } from "@/lib/ai";
 import { getContent } from "@/content";
@@ -26,7 +28,7 @@ function NotShared({ scope }: { scope: ShareScope }) {
   return <p className="text-sm text-ink-mute">Not shared: {SHARE_SCOPES[scope].toLowerCase()}.</p>;
 }
 
-export default async function CoachParticipant({ params, searchParams }: { params: Promise<{ participantId: string }>; searchParams: Promise<{ brief?: string; wrap?: string; wrapnote?: string; wrapped?: string }> }) {
+export default async function CoachParticipant({ params, searchParams }: { params: Promise<{ participantId: string }>; searchParams: Promise<{ brief?: string; wrap?: string; wrapnote?: string; wrapped?: string; saved?: string; draft?: string; done?: string; assistant?: string; open?: string }> }) {
   const coach = await requireUser("COACH");
   const { participantId } = await params;
   const sp = await searchParams;
@@ -51,6 +53,9 @@ export default async function CoachParticipant({ params, searchParams }: { param
 
   // Exercise menu: workbook and book items by stable reference.
   const menu = exerciseMenu(pack);
+  const draft = sp.draft ? await getDraft(coach.id, sp.draft) : null;
+  const openEx = work.exercises.filter((x) => x.status !== "DONE").length;
+  const nextSession = work.sessions.filter((x) => x.scheduledAt > new Date()).sort((a, b) => +a.scheduledAt - +b.scheduledAt)[0];
   const brief = await latestBrief(coach.id, participantId, v.scopes);
   const wrap = sp.wrap ? await getWrapUp(coach.id, participantId, sp.wrap) : null;
   const lastSession = work.sessions.find((x) => x.scheduledAt <= new Date());
@@ -64,14 +69,39 @@ export default async function CoachParticipant({ params, searchParams }: { param
 
   return (
     <>
-      <PageHeader eyebrow="Participant summary" title={v.participant.name}>
-        Shared with you: {v.scopes.length ? v.scopes.map((x) => SHARE_SCOPES[x as ShareScope].split(" (")[0].split(",")[0]).join(", ") : "nothing yet"}.
-      </PageHeader>
+      {/* Who this is and where they are, in one line. Everything else folds. */}
+      <header className="mb-6">
+        <p className="eyebrow">Your client</p>
+        <h1 className="h1 mt-1">{v.participant.name.replace(/\s*\(Demo\)$/, "")}</h1>
+        <p className="mt-2 font-book italic text-[18px] text-ink-soft">
+          {v.cycle && pos && s.has("PRACTICE") ? `Day ${pos.day} of 30${v.cycle.focus ? `: ${v.cycle.focus}` : ""}` : v.scopes.length ? `Shares ${v.scopes.length} of ${Object.keys(SHARE_SCOPES).length} areas with you` : "Hasn't shared anything with you yet"}
+        </p>
+        {flags.length > 0 && <ul className="mt-3 list-disc pl-5 space-y-0.5">{flags.map((f) => <li key={f} className="text-sm text-alert">{f}</li>)}</ul>}
+      </header>
+      {sp.saved && SAVED_NOTE[sp.saved] && <p role="status" className="notice mb-4">{SAVED_NOTE[sp.saved]}</p>}
 
-      <Card id="prep" className="mb-6 scroll-mt-24">
+      {/* The AI, for this client only: tell it what to do, and nothing happens until you approve. */}
+      <section id="assistant" className="scroll-mt-24 border-t border-line/70 py-5">
+        <h2 className="font-book text-[23px] text-heading">Ask the AI about {first}</h2>
+        <p className="mt-1 text-[15px] text-ink-soft">Say what you want done for {first}: assign an exercise, book a session, change a date. You see the plan before anything happens.</p>
+        {sp.done && <p role="status" className="notice mt-3">{Number(sp.done) === 0 ? "Nothing was done." : `Done: ${sp.done} ${Number(sp.done) === 1 ? "action" : "actions"}.`}</p>}
+        {sp.assistant && ASSIST_NOTE[sp.assistant] && <p role="status" className="notice mt-3">{ASSIST_NOTE[sp.assistant]}</p>}
+        {draft ? <AssistantDraft draft={draft} back={participantId} /> : aiAvailable() ? (
+          <form action={planCoachActions} className="mt-3 space-y-3">
+            <input type="hidden" name="participantId" value={participantId} />
+            <textarea name="instruction" required maxLength={4000} rows={2} className="textarea !min-h-[72px]" aria-label={`What should the AI do for ${first}?`} placeholder={`Assign ${first} the Mirrors road test, due Friday. Book us Tuesday at 10.`} />
+            <Submit className="btn-primary">Plan it</Submit>
+          </form>
+        ) : <p className="mt-3 text-sm text-ink-mute">{BRIEF_NOTE.ai_off}</p>}
+        <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+          <a href={`?open=prep#prep`} className="btn-link">Prepare for the next session</a>
+          <a href={`?open=wrapup#wrapup`} className="btn-link">Wrap up a session</a>
+        </div>
+      </section>
+
+      <Part id="prep" title="Session prep" answer={brief ? `Brief from ${fmt(brief.createdAt, { month: "short", day: "numeric" })}` : "Not prepared yet"} open={!!(brief || sp.brief || sp.open === "prep")}>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 className="h2">Session prep</h2>
             <p className="mt-1 text-[15px] text-ink-soft">A one-page brief before you meet: what happened since last time, patterns worth raising, three questions and an exercise to consider. Built only from what {first} shares with you.</p>
           </div>
           {aiAvailable() && (
@@ -123,10 +153,9 @@ export default async function CoachParticipant({ params, searchParams }: { param
             )}
           </div>
         )}
-      </Card>
+      </Part>
 
-      <Card id="wrapup" className="mb-6 scroll-mt-24">
-        <h2 className="h2">After-session wrap-up</h2>
+      <Part id="wrapup" title="After-session wrap-up" answer={lastSession ? `Last session ${fmt(lastSession.scheduledAt, { month: "short", day: "numeric" })}` : "No past session yet"} open={!!(wrap || sp.wrapped || sp.wrapnote || sp.open === "wrapup")}>
         <p className="mt-1 text-[15px] text-ink-soft">Right after you meet, put down your rough notes. The AI drafts your private notes, the commitments {first} will see, a follow-up message and the next exercise. You edit it before anything is saved.</p>
         {sp.wrapped && <p role="status" className="notice mt-3">Saved to the session. {first} now sees the commitments on their Dashboard.</p>}
         {sp.wrapnote && <p role="status" className="notice mt-3">{sp.wrapnote === "ai_off" ? BRIEF_NOTE.ai_off : BRIEF_NOTE.failed}</p>}
@@ -164,8 +193,98 @@ export default async function CoachParticipant({ params, searchParams }: { param
             </div>
           </form>
         )}
-      </Card>
+      </Part>
 
+      <Part id="assignments" title="Assignments" answer={work.exercises.length ? `${work.exercises.length} assigned, ${openEx} open` : "None yet"} open={["exercise", "assigned", "removed"].includes(sp.saved ?? "")}>
+        {work.exercises.length === 0 && <p className="text-[15px] text-ink-soft">Nothing assigned to {first} yet.</p>}
+        <ul className="divide-y divide-line/60">
+          {work.exercises.map((x) => (
+            <li key={x.id} className="py-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-book text-[19px] leading-snug text-heading">{x.title}</p>
+                  <p className="mt-0.5 text-sm text-ink-mute">{EX_STATUS[x.status] ?? x.status}{x.dueOn ? `, due ${fmt(x.dueOn)}` : ""}</p>
+                </div>
+              </div>
+              {x.response && <p className="mt-2 rounded-xl bg-ink/[0.04] px-3 py-2 text-[15px]"><span className="text-ink-mute">{first}&apos;s response: </span>{x.response}</p>}
+              <details className="mt-2">
+                <summary className="cursor-pointer text-sm text-link">Edit or remove</summary>
+                <form action={updateExercise} className="mt-3 space-y-3">
+                  <input type="hidden" name="id" value={x.id} /><input type="hidden" name="participantId" value={participantId} />
+                  <Field label="Title"><input name="title" required defaultValue={x.title} maxLength={200} className="input" /></Field>
+                  <Field label="Instructions"><textarea name="instructions" defaultValue={x.instructions} className="textarea" /></Field>
+                  <Field label="Due"><input type="date" name="dueOn" defaultValue={x.dueOn ? x.dueOn.toISOString().slice(0, 10) : ""} className="input" /></Field>
+                  <div className="flex flex-wrap gap-3">
+                    <Submit className="btn-primary">Save changes</Submit>
+                    <Submit formAction={deleteExercise} className="btn-quiet !text-alert">Remove this assignment</Submit>
+                  </div>
+                </form>
+              </details>
+            </li>
+          ))}
+        </ul>
+        <details id="new-exercise" className="mt-4 border-t border-line/60 pt-4" open={work.exercises.length === 0}>
+          <summary className="cursor-pointer font-book text-[19px] text-heading">Assign a new exercise</summary>
+          <form action={assignExercise} className="mt-3 space-y-3">
+            <input type="hidden" name="participantId" value={participantId} />
+            <Field label="From the program">
+              <select name="exerciseRef" className="input">
+                <option value="custom">Custom exercise</option>
+                {menu.map((m) => <option key={m.ref} value={m.ref}>{m.title}</option>)}
+              </select>
+            </Field>
+            <Field label="Title" hint="Leave blank to use the program title."><input name="title" className="input" /></Field>
+            <Field label="Instructions" hint="Leave blank to send the program text as written."><textarea name="instructions" className="textarea" /></Field>
+            <Field label="Due"><input type="date" name="dueOn" className="input" /></Field>
+            <Submit className="btn-quiet">Assign</Submit>
+          </form>
+        </details>
+      </Part>
+
+      <Part id="sessions" title="Sessions" answer={nextSession ? `Next: ${fmt(nextSession.scheduledAt, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}` : "None booked"} open={["session", "booked", "notes", "removed-session"].includes(sp.saved ?? "")}>
+        {work.sessions.length === 0 && <p className="text-[15px] text-ink-soft">No sessions with {first} yet.</p>}
+        <ul className="divide-y divide-line/60">
+          {work.sessions.map((ss) => (
+            <li key={ss.id} className="py-3">
+              <p className="font-book text-[19px] text-heading">{fmt(ss.scheduledAt, { weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" })}{ss.scheduledAt > new Date() && <span className="ml-2 align-middle text-[12px] font-bold text-gold">Upcoming</span>}</p>
+              {ss.agenda && <p className="mt-0.5 text-sm text-ink-soft">Agenda: {ss.agenda}</p>}
+              {ss.participantPrep && <p className="mt-2 rounded-xl bg-ink/[0.04] px-3 py-2 text-[15px]"><span className="text-ink-mute">{first}&apos;s prep note: </span>{ss.participantPrep}</p>}
+              <details className="mt-2">
+                <summary className="cursor-pointer text-sm text-link">Notes and commitments</summary>
+                <form action={saveSessionNotes} className="mt-3 grid gap-3 md:grid-cols-2">
+                  <input type="hidden" name="id" value={ss.id} /><input type="hidden" name="participantId" value={participantId} />
+                  <Field label="Agreed commitments" hint={`${first} sees these.`}><textarea name="commitments" defaultValue={ss.commitments} className="textarea !min-h-[80px]" /></Field>
+                  <Field label="Your notes" hint="Private to you."><textarea name="coachNotes" defaultValue={ss.coachNotes} className="textarea !min-h-[80px]" /></Field>
+                  <div className="md:col-span-2"><Submit className="btn-quiet">Save</Submit></div>
+                </form>
+              </details>
+              <details className="mt-1">
+                <summary className="cursor-pointer text-sm text-link">Change or cancel</summary>
+                <form action={updateSession} className="mt-3 space-y-3">
+                  <input type="hidden" name="id" value={ss.id} /><input type="hidden" name="participantId" value={participantId} />
+                  <Field label="When"><input type="datetime-local" name="scheduledAt" required defaultValue={localInput(ss.scheduledAt)} className="input min-w-0 max-w-full" /></Field>
+                  <Field label="Agenda"><textarea name="agenda" defaultValue={ss.agenda} className="textarea !min-h-[64px]" /></Field>
+                  <div className="flex flex-wrap gap-3">
+                    <Submit className="btn-primary">Save changes</Submit>
+                    <Submit formAction={deleteSession} className="btn-quiet !text-alert">Cancel this session</Submit>
+                  </div>
+                </form>
+              </details>
+            </li>
+          ))}
+        </ul>
+        <details id="new-session" className="mt-4 border-t border-line/60 pt-4" open={work.sessions.length === 0}>
+          <summary className="cursor-pointer font-book text-[19px] text-heading">Book a session</summary>
+          <form action={scheduleSession} className="mt-3 space-y-3">
+            <input type="hidden" name="participantId" value={participantId} />
+            <Field label="When"><input type="datetime-local" name="scheduledAt" required className="input" /></Field>
+            <Field label="Agenda"><textarea name="agenda" className="textarea !min-h-[64px]" /></Field>
+            <Submit className="btn-quiet">Schedule</Submit>
+          </form>
+        </details>
+      </Part>
+
+      <Part id="shared" title={`What ${first} shares with you`} answer={v.scopes.length ? v.scopes.map((x) => SHARE_SCOPES[x as ShareScope].split(" (")[0].split(",")[0].split(":")[0]).join(", ") : "Nothing yet"} open={false}>
       <div className="grid gap-5 md:grid-cols-2">
         <Card>
           <p className="eyebrow">Current development focus</p>
@@ -325,58 +444,10 @@ export default async function CoachParticipant({ params, searchParams }: { param
         </Card>
       )}
 
-      <h2 className="h2 mt-10 mb-3">Coaching work</h2>
-      <div className="grid gap-5 md:grid-cols-2">
-        <Card>
-          <h3 className="h3">Assign an exercise</h3>
-          <form action={assignExercise} className="mt-3 space-y-3">
-            <input type="hidden" name="participantId" value={participantId} />
-            <Field label="From the program">
-              <select name="exerciseRef" className="input">
-                <option value="custom">Custom exercise</option>
-                {menu.map((m) => <option key={m.ref} value={m.ref}>{m.title}</option>)}
-              </select>
-            </Field>
-            <Field label="Title" hint="Leave blank to use the program title."><input name="title" className="input" /></Field>
-            <Field label="Instructions" hint="Leave blank to send the program text as written."><textarea name="instructions" className="textarea" /></Field>
-            <Field label="Due"><input type="date" name="dueOn" className="input" /></Field>
-            <Submit className="btn-quiet">Assign</Submit>
-          </form>
-          {work.exercises.length > 0 && (
-            <ul className="mt-5 divide-y divide-line">
-              {work.exercises.map((x) => <li key={x.id} className="py-2 text-[15px]"><span className="font-medium">{x.title}</span><span className="muted text-sm">, {x.status.toLowerCase().replace("_", " ")}</span>{x.response && <p className="text-sm text-ink-soft mt-1">{x.response}</p>}</li>)}
-            </ul>
-          )}
-        </Card>
-        <Card>
-          <h3 className="h3">Schedule a session</h3>
-          <form action={scheduleSession} className="mt-3 space-y-3">
-            <input type="hidden" name="participantId" value={participantId} />
-            <Field label="When"><input type="datetime-local" name="scheduledAt" required className="input" /></Field>
-            <Field label="Agenda"><textarea name="agenda" className="textarea !min-h-[64px]" /></Field>
-            <Submit className="btn-quiet">Schedule</Submit>
-          </form>
-        </Card>
-      </div>
+      </Part>
 
-      {work.sessions.length > 0 && (
-        <div className="mt-5 space-y-4">
-          {work.sessions.map((ss) => (
-            <Card key={ss.id}>
-              <p className="h3">{fmt(ss.scheduledAt, { weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" })}</p>
-              {ss.agenda && <p className="mt-1 text-sm">Agenda: {ss.agenda}</p>}
-              {ss.participantPrep && <div className="mt-3 rounded-xl bg-paper p-3 text-[15px]"><p className="text-xs text-ink-mute">Participant&apos;s prep note</p>{ss.participantPrep}</div>}
-              <form action={saveSessionNotes} className="mt-3 grid gap-3 md:grid-cols-2">
-                <input type="hidden" name="id" value={ss.id} /><input type="hidden" name="participantId" value={participantId} />
-                <Field label="Agreed commitments" hint="Visible to the participant."><textarea name="commitments" defaultValue={ss.commitments} className="textarea !min-h-[80px]" /></Field>
-                <Field label="Coach notes" hint="Private to you."><textarea name="coachNotes" defaultValue={ss.coachNotes} className="textarea !min-h-[80px]" /></Field>
-                <div className="md:col-span-2"><Submit className="btn-quiet">Save</Submit></div>
-              </form>
-            </Card>
-          ))}
-        </div>
-      )}
-      <details className="mt-10">
+      <Part id="account" title="Account" answer={`Reset ${first}'s password, or remove ${first} from your clients`} open={false}>
+      <details>
         <summary className="cursor-pointer text-sm text-ink-mute">Reset {v.participant.name.split(" (")[0]}&apos;s password</summary>
         <div className="mt-3"><ResetPasswordForm participantId={participantId} /></div>
       </details>
@@ -388,6 +459,40 @@ export default async function CoachParticipant({ params, searchParams }: { param
           <Submit className="btn-quiet !text-alert">Remove from my clients</Submit>
         </form>
       </details>
+      </Part>
     </>
+  );
+}
+
+const SAVED_NOTE: Record<string, string> = {
+  exercise: "Assignment saved.", assigned: "Assigned.", removed: "Assignment removed.",
+  session: "Session updated.", booked: "Session booked.", notes: "Notes saved.", "removed-session": "Session cancelled.",
+};
+const ASSIST_NOTE: Record<string, string> = {
+  ai_off: "The AI isn't set up for this app yet.",
+  no_clients: "This client isn't on your list.",
+  failed: "That didn't come through. Try again, or say it a little differently.",
+};
+const EX_STATUS: Record<string, string> = { ASSIGNED: "Not started", DONE: "Done", PARTIAL: "Partly done", NOT_YET: "Not yet" };
+
+/** A date as the value a datetime-local box expects. */
+function localInput(d: Date) {
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+/** One part of the client page. Closed, it says what's in it; open, it's where you work. */
+function Part({ id, title, answer, open, children }: { id: string; title: string; answer: string; open: boolean; children: React.ReactNode }) {
+  return (
+    <details id={id} open={open} className="group/part scroll-mt-24 border-t border-line/70 py-5">
+      <summary className="flex cursor-pointer list-none items-start gap-3">
+        <span className="min-w-0 flex-1">
+          <span className="block font-book text-[23px] leading-tight text-heading">{title}</span>
+          <span className="mt-1 text-[15px] text-ink-soft line-clamp-2 group-open/part:hidden">{answer}</span>
+        </span>
+        <span aria-hidden className="mt-2.5 h-2.5 w-2.5 shrink-0 rotate-45 border-b-[1.6px] border-r-[1.6px] border-ink-mute transition group-open/part:-rotate-[135deg] group-open/part:mt-3.5" />
+      </summary>
+      <div className="pt-4">{children}</div>
+    </details>
   );
 }

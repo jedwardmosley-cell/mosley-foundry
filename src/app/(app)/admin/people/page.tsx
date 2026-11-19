@@ -1,6 +1,6 @@
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { approveUser, declineUser, setUserActive } from "@/app/actions/admin";
+import { approveUser, declineUser, setUserActive, deleteAccount } from "@/app/actions/admin";
 import { fmt } from "@/lib/dates";
 import { PageHeader, Card, Empty } from "@/components/ui";
 
@@ -13,8 +13,9 @@ const STATUS: Record<string, string> = { ACTIVE: "Active", PENDING: "Waiting", D
  * Who can get in. Sign-ups wait here until an administrator approves them.
  * Shows names, emails, roles and status only: no development data of any kind.
  */
-export default async function People() {
+export default async function People({ searchParams }: { searchParams: Promise<{ deleted?: string }> }) {
   const a = await requireUser("ADMIN");
+  const sp = await searchParams;
   const org = a.orgId ?? "__none__";
   const [waiting, people] = await Promise.all([
     db.user.findMany({ where: { status: "PENDING", isDemo: false, OR: [{ orgId: null }, { orgId: org }] }, orderBy: { createdAt: "asc" }, select: { id: true, name: true, email: true, createdAt: true } }),
@@ -32,6 +33,8 @@ export default async function People() {
         Who can sign in. New sign-ups wait here for your approval. Accounts a coach adds, people you enroll, and partners invited by a client come straight in.
       </PageHeader>
 
+      {sp.deleted === "1" && <p role="status" className="notice mb-6">Deleted. The account and everything in it are gone.</p>}
+      {sp.deleted === "mismatch" && <p role="status" className="notice mb-6">Nothing was deleted. Type the person&apos;s email exactly to confirm.</p>}
       <section className="mb-10">
         <h2 className="h2 mb-3">Waiting for approval</h2>
         {waiting.length === 0 ? (
@@ -51,6 +54,7 @@ export default async function People() {
                       <form action={declineUser}><input type="hidden" name="userId" value={u.id} /><button className="btn-quiet !px-5 !py-2 text-sm">Decline</button></form>
                     </div>
                   </div>
+                  <DeleteAccount id={u.id} email={u.email} />
                 </Card>
               </li>
             ))}
@@ -60,13 +64,14 @@ export default async function People() {
 
       <section>
         <h2 className="h2 mb-1">Everyone</h2>
-        <p className="mb-4 text-sm text-ink-soft">Turning an account off signs the person out everywhere and stops them signing in. Nothing they saved is removed, and you can turn it back on.</p>
+        <p className="mb-4 text-sm text-ink-soft">Turning an account off signs the person out everywhere and stops them signing in. Nothing they saved is removed, and you can turn it back on. Deleting removes the account and everything in it for good.</p>
         <div className="card !p-0 divide-y divide-line/60">
           {people.map((u) => {
             const coaches = u.coaching.map((c) => plain(c.coach.name));
             const self = u.id === a.id;
             return (
-              <div key={u.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
+              <div key={u.id} id={`u-${u.id}`} className="scroll-mt-24 px-5 py-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-[15px] font-medium text-heading">{plain(u.name)}{u.isDemo && <span className="ml-2 chip">Demo</span>}</p>
                   <p className="text-sm text-ink-soft break-all">
@@ -86,10 +91,29 @@ export default async function People() {
                   )}
                 </div>
               </div>
+              {!self && u.role !== "ADMIN" && <DeleteAccount id={u.id} email={u.email} />}
+              </div>
             );
           })}
         </div>
       </section>
     </>
+  );
+}
+
+/** Delete for good, behind a fold, confirmed by typing the person's email. */
+function DeleteAccount({ id, email }: { id: string; email: string }) {
+  return (
+    <details className="mt-2">
+      <summary className="cursor-pointer text-sm text-ink-mute">Delete permanently</summary>
+      <form action={deleteAccount} className="mt-2 space-y-2">
+        <input type="hidden" name="userId" value={id} />
+        <p className="text-sm text-ink-soft">This removes the account and everything in it: their statement, check-ins, reflections, journal, people and sessions. It can&apos;t be undone. If you might want it back, turn the account off instead.</p>
+        <label className="block text-sm text-ink-soft">Type <span className="font-medium text-heading break-all">{email}</span> to confirm
+          <input name="confirm" required autoComplete="off" className="input mt-1" aria-label={`Type ${email} to confirm`} />
+        </label>
+        <button className="btn-quiet !py-2 text-sm !text-alert">Delete this account</button>
+      </form>
+    </details>
   );
 }

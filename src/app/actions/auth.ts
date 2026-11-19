@@ -58,9 +58,18 @@ const signInSchema = z.object({ email: z.string().trim().toLowerCase(), password
 
 export async function signIn(_: AuthState, fd: FormData): Promise<AuthState> {
   const { email, password, next } = parse(signInSchema, fd);
+  // Slow down password guessing: after 5 wrong tries in 15 minutes, this email waits 15 minutes.
+  const since = new Date(Date.now() - 15 * 60 * 1000);
+  const fails = await db.loginAttempt.count({ where: { email, ok: false, at: { gte: since } } });
+  if (fails >= 5) return { error: "Too many tries. Wait 15 minutes and try again, or reset your password." };
   const user = await db.user.findUnique({ where: { email } });
   // Same message for unknown email and wrong password.
-  if (!user || !verifyPassword(password, user.passwordHash)) return { error: "That email and password don't match." };
+  if (!user || !verifyPassword(password, user.passwordHash)) {
+    await db.loginAttempt.create({ data: { email, ok: false } });
+    await db.loginAttempt.deleteMany({ where: { at: { lt: new Date(Date.now() - 864e5) } } });
+    return { error: "That email and password don't match." };
+  }
+  await db.loginAttempt.deleteMany({ where: { email } });
   if (user.status === "PENDING") return { error: "Your account is waiting for approval. You'll get an email when it's ready." };
   if (user.status !== "ACTIVE") return { error: "This account isn't active. Contact your program administrator." };
   await createSession(user.id);
