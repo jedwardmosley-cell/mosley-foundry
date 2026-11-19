@@ -74,7 +74,20 @@ export default async function ReflectPage() {
             {book.close && <span className="block mt-2">{book.close}</span>}
           </span>
         )}
-        <span className="block">{weekly ?? "One appointment at the start of the week to decide what matters, and one at the end to look back."}</span>
+        {/* The weekly-planning text is long: its first sentence shows, the rest opens with a tap. */}
+        {(() => {
+          const text = weekly ?? "One appointment at the start of the week to decide what matters, and one at the end to look back.";
+          const cut = text.indexOf(". ");
+          if (cut < 0) return <span className="block">{text}</span>;
+          return (
+            <details className="group">
+              <summary className="cursor-pointer list-none">
+                {text.slice(0, cut + 1)} <span className="text-link group-open:hidden">More</span>
+              </summary>
+              <span className="mt-2 block">{text.slice(cut + 2)}</span>
+            </details>
+          );
+        })()}
       </ChapterOpening>
       {book?.question && (
         <section className="mb-6 border-l-4 border-lane pl-5" aria-label="From the book">
