@@ -14,7 +14,7 @@ import { aiAvailable } from "@/lib/ai";
 import { getContent } from "@/content";
 import type { PathwayKey } from "@/content/program";
 import { fmt } from "@/lib/dates";
-import { PageHeader, Card } from "@/components/ui";
+import { PageHeader, ChapterOpening, Card } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 import { StatementReveal } from "@/components/StatementReveal";
 import { Picks } from "@/components/Picks";
@@ -45,7 +45,7 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
 
   return (
     <>
-      <PageHeader eyebrow="FORGE" title={WHO_TITLE} plain={NAMES.seat.plain}>{WHO_INTRO}</PageHeader>
+      <ChapterOpening image="/chapters/drivers-seat.jpg" alt="Hands on the wheel, driving at night in the rain" title={WHO_TITLE} plain={NAMES.seat.plain}>{WHO_INTRO}</ChapterOpening>
 
       {/* Say exactly what keeps this step open, with a link to each part. */}
       {!saved && gaps.length > 0 && (id || profile?.forgeStatement || profile?.destination) && (

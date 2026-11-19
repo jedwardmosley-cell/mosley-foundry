@@ -7,7 +7,7 @@ import { cyclePosition } from "@/lib/cycle";
 import { WEEK_QUESTIONS, REAL_CHOICES, WORKING_CHOICES, GAP_CHOICES, FIRST_GUESS, weekMessage } from "@/content/weekOne";
 import { ShareSend } from "@/components/ShareSend";
 import { mondayOf, fmt } from "@/lib/dates";
-import { PageHeader, Card, Field, Privacy, Source } from "@/components/ui";
+import { PageHeader, ChapterOpening, Card, Field, Privacy, Source } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 import Link from "next/link";
 import { findClosedDoors, tally } from "@/lib/tone";
@@ -65,7 +65,7 @@ export default async function ReflectPage() {
   const plain = book?.lookBack[0] ? `${book.lookBack[0]}, then look forward` : NAMES.mirrors.plain;
   return (
     <>
-      <PageHeader eyebrow={`Week of ${fmt(weekOf, { month: "long", day: "numeric" })}`} title={NAMES.mirrors.name} plain={plain}>
+      <ChapterOpening kicker={`Week of ${fmt(weekOf, { month: "long", day: "numeric" })}`} image="/chapters/mirror.jpg" alt="The side mirror, with the road behind" title={NAMES.mirrors.name} plain={plain}>
         {book && (book.lookBack.length > 0 || book.glance) && (
           <span className="mb-4 block border-l-4 border-lane pl-4 text-[15px] text-ink">
             {book.lookBack.length > 0 && <span className="block font-medium text-heading">{book.lookBack.map((l) => `${l}.`).join(" ")}</span>}
@@ -75,7 +75,7 @@ export default async function ReflectPage() {
           </span>
         )}
         <span className="block">{weekly ?? "One appointment at the start of the week to decide what matters, and one at the end to look back."}</span>
-      </PageHeader>
+      </ChapterOpening>
       {book?.question && (
         <section className="mb-6 border-l-4 border-lane pl-5" aria-label="From the book">
           <p className="section-label">A question for this week</p>

@@ -7,7 +7,7 @@ import { getContent } from "@/content";
 import { scoresFrom } from "@/lib/forge";
 import { PILLAR_KEYS } from "@/content/types";
 import { fmt } from "@/lib/dates";
-import { PageHeader, PillarMark, Draft, Source } from "@/components/ui";
+import { PageHeader, ChapterOpening, PillarMark, Draft, Source } from "@/components/ui";
 import { AssessmentForm } from "@/components/AssessmentForm";
 import { linesOf } from "@/content/forgeLines";
 
@@ -26,11 +26,11 @@ export default async function AssessmentPage({ searchParams }: { searchParams: P
 
   return (
     <>
-      <PageHeader eyebrow={useEntre ? "FORGE, for entrepreneurs" : "FORGE"} title={NAMES.rules.name} plain={NAMES.rules.plain}>
+      <ChapterOpening image="/chapters/rules-of-the-road.jpg" alt="A highway seen from above, lanes and traffic" title={NAMES.rules.name} plain={NAMES.rules.plain}>
         {useEntre ? entrepreneur!.intro.filter((t) => !/measures five behaviors/i.test(t)).slice(0, 3).map((t) => <p key={t} className="mb-2">{t}</p>) : (
           <p>This is the deep work of FORGE. For each rule, read what you wrote and all five levels, then choose the one that is true of you this past month. Take your time with it.</p>
         )}
-      </PageHeader>
+      </ChapterOpening>
 
       {/* The scores are read against the identity the client claimed, so FORGE links straight through. */}
       {(statement || identity?.role) && (
