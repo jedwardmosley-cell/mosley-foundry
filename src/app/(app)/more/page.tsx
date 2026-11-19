@@ -4,14 +4,14 @@ import { PageHeader } from "@/components/ui";
 
 const GROUPS: [string, [string, string, string][]][] = [
   ["FORGE", [
-    ["/identity", "1. The Driver's Seat", "The FORGE framework, applied to you: your seat, how big a turn, the five rules of one driver, and My statement."],
-    ["/assessment", "2. The Rules of the Road", "Score the five rules. The goal is a 5 on every one."],
+    ["/identity", "The Driver's Seat", "The FORGE framework, applied to you: your seat, how big a turn, the five rules of one driver, and My statement."],
+    ["/assessment", "The Rules of the Road", "Score the five rules. The goal is a 5 on every one."],
     ["/tone", "Set the Tone", "Language with power: what you tell yourself, and how to say it to someone else. Private."],
     ["/glovebox", "The Glove Box", "Your power statements, kept within reach. Sorted by the three Cs: claim, confirm, condemn. Private."],
   ]],
   ["Discipline by Design", [
-    ["/focus", "3. The Windshield", "One or two things to work on, each with a plan for 30 days. That's it."],
-    ["/road", "4. The Vehicle Controls", "What keeps you on course: your routines, your planning time and your people."],
+    ["/focus", "The Windshield", "One or two things to work on, each with a plan for 30 days. That's it."],
+    ["/road", "The Vehicle Controls", "What keeps you on course: your routines, your planning time and your people."],
     ["/season", "Season", "Three rounds of 30 days, about 90 days, and the review at the end."],
     ["/reflect", "The Mirrors", "Look back at your week. Did I do what I said I was going to do?"],
   ]],
