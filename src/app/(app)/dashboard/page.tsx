@@ -55,10 +55,10 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   const thisWeekNeeds = lastWeek?.nextWeek?.trim() ?? "";
   const dueSoon = d.relationships.filter((r) => r.nextCheckIn && daysBetween(new Date(), r.nextCheckIn) <= 2).slice(0, 3);
   const coachItems = [
-    nextSession && { key: "s", href: "/coaching", icon: "clock", text: `${fmt(nextSession.scheduledAt, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}: session with ${nextSession.coach.name.split(" (")[0]}`, side: nextSession.participantPrep ? "" : "Add prep" },
-    ...openExercises.map((x) => ({ key: x.id, href: "/coaching", icon: "pencil", text: x.title, side: x.dueOn ? `Due ${fmt(x.dueOn)}` : "New" })),
-    lastCommitments && { key: "c", href: "/coaching", icon: "check", text: lastCommitments.commitments, side: "Agreed" },
-  ].filter(Boolean) as { key: string; href: string; icon: IconName; text: string; side: string }[];
+    nextSession && { key: "s", href: "/coaching", icon: "clock", kind: "Session", text: `With ${nextSession.coach.name.split(" (")[0]}`, side: fmt(nextSession.scheduledAt, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) },
+    ...openExercises.map((x) => ({ key: x.id, href: "/coaching", icon: "pencil", kind: "Exercise", text: x.title, side: x.dueOn ? `Due ${fmt(x.dueOn)}` : "New" })),
+    lastCommitments && { key: "c", href: "/coaching", icon: "check", kind: "You agreed", text: lastCommitments.commitments, side: fmt(lastCommitments.scheduledAt) },
+  ].filter(Boolean) as { key: string; href: string; icon: IconName; kind: string; text: string; side: string }[];
 
   const head = todayHeadline({ cycle: !!(d.cycle && pos), finished: !!pos?.finished, day: pos?.day ?? 0 });
   // Two focuses: each shows its own day below, so the headline belongs to neither.
@@ -140,40 +140,48 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         )}
       </section>
 
-      {/* The rest of the page: quiet sections between thin rules, the way a chapter keeps going. */}
-      <div className="mt-10 divide-y divide-line/70 border-t border-line/70">
-        <Link href="/identity" className="block py-5 transition hover:text-link">
+      {/* The rest of the page, like the back half of a chapter: the statement as a quote, two readings side by side, then the coach's notes. */}
+      <div className="mt-10 border-t border-line/70">
+        {/* Who's behind the wheel: a quote from the client's own book. */}
+        <Link href="/identity" className="group block py-6">
           <p className="flex items-center justify-between font-book italic text-[16px] text-ink-soft">{d.identity?.role ? `In the driver's seat, as ${withArticle(d.identity.role)}` : "The Driver's Seat"}<Icon name="arrow" className="h-4 w-4 text-ink-mute" /></p>
-          <p className="mt-2 font-book text-[21px] sm:text-[23px] leading-[1.35] text-heading line-clamp-4">{statement || "Claim who you are."}</p>
-          {d.identity?.level === "REINVENT" && d.identity.personaName && <p className="mt-2 text-xs text-ink-mute">Performance identity: <span className="text-ink">{d.identity.personaName}</span></p>}
+          <blockquote className="mt-3 border-l-[3px] border-gold pl-4 font-book text-[21px] sm:text-[23px] leading-[1.35] text-heading line-clamp-4 group-hover:text-link">{statement || "Claim who you are."}</blockquote>
+          {d.identity?.level === "REINVENT" && d.identity.personaName && <p className="mt-2 pl-[19px] text-xs text-ink-mute">Performance identity: <span className="text-ink">{d.identity.personaName}</span></p>}
         </Link>
 
         {thisWeekNeeds && (
-          <Link href="/reflect" className="block py-4 transition hover:text-link">
+          <Link href="/reflect" className="block border-t border-line/70 py-5 transition hover:text-link">
             <p className="font-book italic text-[16px] text-ink-soft">This week needs, from your Mirrors</p>
             <p className="mt-1 font-book text-[19px] leading-snug text-heading">{thisWeekNeeds}</p>
           </Link>
         )}
 
-        <Link href="/network" className="flex items-baseline justify-between gap-4 py-4 transition hover:text-link">
-          <span className="font-book text-[20px] text-heading">People</span>
-          <span className={`text-[14px] ${overdue ? "text-alert" : "text-ink-soft"}`}>{overdue ? `${overdue} overdue` : dueSoon.length ? `${dueSoon.length} due soon` : d.relationships.length ? "All caught up" : "Add someone"}</span>
-        </Link>
-
-        <Link href="/focus" className="flex items-baseline justify-between gap-4 py-4 transition hover:text-link">
-          <span className="font-book text-[20px] text-heading">The Windshield</span>
-          <span className="text-right text-[14px] text-ink-soft">{d.focuses.length === 0 ? "Choose one or two things to work on" : d.focuses.length < MAX_FOCUSES ? "One focus. Room for one more." : "Two focuses. That's the most."}</span>
-        </Link>
+        {/* Two readings side by side, like two dials on the dashboard. */}
+        <div className="grid grid-cols-2 divide-x divide-line/70 border-y border-line/70">
+          <Link href="/network" className="block py-5 pr-4 transition hover:text-link">
+            <p className="font-book italic text-[16px] text-ink-soft">People</p>
+            <p className={`mt-1 font-book text-[22px] leading-tight ${overdue ? "text-alert" : "text-heading"}`}>{overdue ? `${overdue} overdue` : dueSoon.length ? `${dueSoon.length} due soon` : d.relationships.length ? "All caught up" : "Add someone"}</p>
+            <p className="mt-1 text-[13px] text-ink-mute">{d.relationships.length ? `${d.relationships.length} in your corner` : "Nobody named yet"}</p>
+          </Link>
+          <Link href="/focus" className="block py-5 pl-4 transition hover:text-link">
+            <p className="font-book italic text-[16px] text-ink-soft">The Windshield</p>
+            <p className="mt-1 font-book text-[22px] leading-tight text-heading">{d.focuses.length === 0 ? "None yet" : d.focuses.length === 1 ? "1 focus" : `${d.focuses.length} focuses`}</p>
+            <p className="mt-1 text-[13px] text-ink-mute">{d.focuses.length === 0 ? "Choose one or two" : d.focuses.length < MAX_FOCUSES ? "Room for one more" : "That's the most"}</p>
+          </Link>
+        </div>
 
         {coachItems.length > 0 && (
-          <section className="py-4" aria-label="From your coach">
-            <p className="flex items-baseline justify-between"><span className="font-book text-[20px] text-heading">From your coach</span><Link href="/coaching" className="text-sm btn-link">Open</Link></p>
-            <ul className="mt-2">
+          <section className="py-5" aria-label="From your coach">
+            <p className="flex items-baseline justify-between"><span className="font-book italic text-[16px] text-ink-soft">From your coach</span><Link href="/coaching" className="text-sm btn-link">Open</Link></p>
+            <ul className="mt-2 divide-y divide-line/50">
               {coachItems.map((x) => (
                 <li key={x.key}>
-                  <Link href={x.href} className="flex items-baseline gap-3 py-1.5 transition hover:text-link">
-                    <span className="flex-1 text-[15px] line-clamp-1">{x.text}</span>
-                    {x.side && <span className="whitespace-nowrap text-[13px] text-ink-mute">{x.side}</span>}
+                  <Link href={x.href} className="flex items-start gap-4 py-3 transition hover:text-link">
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[12px] font-bold text-gold">{x.kind}</span>
+                      <span className="mt-0.5 block font-book text-[18px] leading-snug text-heading line-clamp-2">{x.text}</span>
+                    </span>
+                    {x.side && <span className="mt-[18px] shrink-0 whitespace-nowrap text-[13px] text-ink-mute">{x.side}</span>}
                   </Link>
                 </li>
               ))}
