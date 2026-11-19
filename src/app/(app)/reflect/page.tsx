@@ -20,6 +20,9 @@ export default async function ReflectPage() {
   const u = await requireUser("PARTICIPANT");
   const { pack } = await getContent();
   const weekOf = mondayOf();
+  // Last week's answer to "What does next week need?", brought back for this week.
+  const lastWeek = await db.weeklyReflection.findUnique({ where: { userId_weekOf: { userId: u.id, weekOf: mondayOf(new Date(Date.now() - 7 * 864e5)) } }, select: { nextWeek: true } });
+  const lastNext = lastWeek?.nextWeek?.trim() ?? "";
   const [current, past, coach, commitments] = await Promise.all([
     db.weeklyReflection.findUnique({ where: { userId_weekOf: { userId: u.id, weekOf } } }),
     db.weeklyReflection.findMany({ where: { userId: u.id, weekOf: { not: weekOf } }, orderBy: { weekOf: "desc" }, take: 12 }),
@@ -141,6 +144,13 @@ export default async function ReflectPage() {
               )}
             </section>
           )}
+          {/* What they said last week this week needs: the line to answer against. */}
+          {lastNext && (
+            <div className="border-l-4 border-lane pl-4">
+              <p className="section-label">Last week, you said this week needs</p>
+              <p className="mt-1 font-book text-[19px] leading-snug text-heading">{lastNext}</p>
+            </div>
+          )}
           <fieldset>
             <legend className="label">Did I do what I said I was going to do?</legend>
             <div className="flex flex-wrap gap-4">
@@ -163,7 +173,7 @@ export default async function ReflectPage() {
               </div>
             </fieldset>
           )}
-          <Field label="What does next week need?" hint="One line is enough."><input name="nextWeek" defaultValue={current?.nextWeek} className="input" maxLength={4000} /></Field>
+          <Field label="What does next week need?" hint="One line. It shows on your Dashboard all next week, and here when you look back."><input name="nextWeek" defaultValue={current?.nextWeek} className="input" maxLength={4000} /></Field>
           <details open={!!(current?.built || current?.avoided)}>
             <summary className="cursor-pointer text-sm text-link">What did I build? What did I avoid? <span className="text-ink-mute">(optional)</span></summary>
             <div className="mt-3 space-y-3">

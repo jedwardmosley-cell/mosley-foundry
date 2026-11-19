@@ -26,8 +26,8 @@ const CADENCES = { DAILY: "Daily", WEEKLY: "Weekly", MONTHLY: "Monthly", QUARTER
 const AREA_ICON: Record<string, IconName> = { ROUTINES: "sun", WEEKLY: "calendar", RELATIONSHIPS: "people", LEARNING: "book", LEADERSHIP: "flag", REVIEW: "repeat" };
 const DAY_CHOICES = DAY_LABELS.map((d) => d.label);
 
-export default async function MyRoadPage({ searchParams }: { searchParams: Promise<{ add?: string }> }) {
-  const { add } = await searchParams;
+export default async function MyRoadPage({ searchParams }: { searchParams: Promise<{ add?: string; open?: string }> }) {
+  const { add, open } = await searchParams;
   const u = await requireUser("PARTICIPANT");
   const { pack } = await getContent();
   const [items, rels] = await Promise.all([
@@ -108,7 +108,6 @@ export default async function MyRoadPage({ searchParams }: { searchParams: Promi
       )}
 
       <SectionHead title="Routines and reviews" sub="What you do on a schedule, so you don't have to decide each time." />
-      <p className="-mt-2 mb-4 text-sm text-ink-soft">Want these on your phone? <Link href="/settings" className="btn-link">Put them on your calendar</Link>.</p>
       <div className="card !p-0 divide-y divide-line/60">
         {BLUEPRINT_AREAS.map((area) => {
           if (area.key === "ACCOUNTABILITY" || PEOPLE_AREAS.includes(area.key)) return null;
@@ -116,12 +115,15 @@ export default async function MyRoadPage({ searchParams }: { searchParams: Promi
           const people: typeof rels = [];
           const text = inv(area.inventory);
           return (
-            <section key={area.key} id={`area-${area.key}`} className="scroll-mt-24 px-5 py-5 sm:px-7">
-              <div className="flex items-center gap-3">
+            // Each area folds on its own, so you work on one at a time. Closed, it shows its name and how many it holds.
+            <section key={area.key} id={`area-${area.key}`} className="scroll-mt-24 px-5 py-4 sm:px-7">
+              <details className="group" open={add === area.key || open === area.key}>
+              <summary className="flex cursor-pointer list-none items-center gap-3">
                 <IconBadge name={AREA_ICON[area.key] ?? "target"} />
                 <h3 className="h3 flex-1 leading-snug">{area.label}</h3>
-                {mine.length + people.length > 0 && <span className="chip">{mine.length + people.length}</span>}
-              </div>
+                <span className="shrink-0 text-[14px] text-ink-mute">{mine.length + people.length === 0 ? "None yet" : mine.length + people.length}</span>
+                <span aria-hidden className="h-2.5 w-2.5 shrink-0 rotate-45 border-b-[1.6px] border-r-[1.6px] border-ink-mute transition group-open:-rotate-[135deg]" />
+              </summary>
               {(mine.length > 0 || people.length > 0) && (
                 <ul className="mt-3 divide-y divide-line/60">
                   {people.map((r) => (
@@ -170,10 +172,12 @@ export default async function MyRoadPage({ searchParams }: { searchParams: Promi
                     <Submit className="btn-quiet">Add</Submit>
                   </form>
                 </details>
+              </details>
             </section>
           );
         })}
       </div>
+      <p className="mt-3 text-sm text-ink-soft">Want these on your phone? <Link href="/settings" className="btn-link">Put them on your calendar</Link>.</p>
       <section className="mt-10">
         <SectionHead title="My people" meta={<span className="chip">{peopleNamed} of {peopleRows.length} named</span>} />
         <Card>
