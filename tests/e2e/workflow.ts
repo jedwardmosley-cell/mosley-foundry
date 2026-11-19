@@ -34,6 +34,8 @@ const login = async (page: Page, email: string, password = "demo-password-1") =>
   await page.fill('input[name="password"]', password);
   await Promise.all([page.waitForURL((u: URL) => !u.pathname.startsWith("/login")), page.click('button:has-text("Sign in")')]);
 };
+/** The Driver's Seat folds the parts already answered. Open each part, the way a person would tap to work on it. */
+const openAll = async (page: Page) => { await page.evaluate(() => document.querySelectorAll("main form > details").forEach((d) => ((d as HTMLDetailsElement).open = true))); };
 /** Rate the five rules on the one-page self-assessment: each rule is a section that opens to its five levels. */
 const rate = async (page: Page, scores: Record<string, number>) => {
   for (const [k, v] of Object.entries(scores)) {
@@ -179,6 +181,9 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal(id.becoming, saved.forgeStatement, "one statement, stored where every screen reads it");
     // the five questions now carry the role; a closed letter shows the line written so far
     // once written, a letter folds and shows its line; open it to work on it again
+    // the five rules fold too once some are written; the part shows how many
+    await page.waitForSelector("details#forge > summary >> text=2 of 5 written");
+    await page.locator("details#forge > summary").click();
     assert.equal(await page.locator("details#f").evaluate((d) => (d as HTMLDetailsElement).open), false, "a written letter folds");
     await page.waitForSelector("details#f > summary >> text=I am a leader my team trusts with bad news");
     await page.locator("details#f > summary").click();
@@ -389,6 +394,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.goto(`${BASE}/dashboard`);
     await page.waitForSelector(`main a:has-text("In the driver's seat, as a manager") >> text=I am a leader my team trusts with bad news.`);
     await page.goto(`${BASE}/identity`);
+    await openAll(page);
     assert.ok(!(await page.content()).includes("Identity shift"), "one activity, one name");
     for (const name of ["Core alignment", "Role transition", "Reinvention"]) await page.locator("label", { hasText: name }).click();
     await page.locator("label", { hasText: "Core alignment" }).click();
@@ -406,6 +412,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal(await page.locator('input[name="behavior"]').count(), 0);
     // identity reinvention, with the folded performance identity
     await page.goto(`${BASE}/identity`);
+    await openAll(page);
     await page.locator("label", { hasText: "Reinvention" }).click();
     await page.locator("summary", { hasText: "Create a performance identity" }).click();
     await page.fill('input[name="personaName"]', "The Closer");
@@ -759,6 +766,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await g.context().clearCookies();
     await login(g, both.email, "carry-password-1");
     await g.goto(`${BASE}/identity`);
+    await openAll(g);
     assert.equal(await g.inputValue('textarea[name="statement"]'), "I am STATEMENT-B.");
     await g.waitForSelector("text=Earlier I am statement:");
     await g.waitForSelector("text=I am OLD-CLAIM-B.");
@@ -868,6 +876,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     const dp: Page = await dc.newPage();
     await login(dp, "dana@demo.bothhands.app");
     await dp.goto(`${BASE}/identity`);
+    await openAll(dp);
     await dp.fill('input[name="role"]', "E2E-ROLE");
     await dp.locator("label", { hasText: "Reinvention" }).click();
     await dp.locator("summary", { hasText: "Create a performance identity" }).click();
