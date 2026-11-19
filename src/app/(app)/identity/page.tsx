@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { saveWhoIAm, removeIdentity, saveIdentityControls } from "@/app/actions/identity";
 import { TONE_LABELS, type ToneSetting } from "@/lib/identityTone";
 import { LEVELS, FIRST_EXAMPLE, PICKS_STATUS, SITUATION_PICKS, type IdentityLevel } from "@/content/identity";
+import { FORGE_LINES } from "@/content/forgeLines";
 import { ROLE_PICKS, WHO_I_AM_STATUS, WHO_TITLE, WHO_INTRO, WHO_HEADINGS, withArticle } from "@/content/whoIAm";
 import { getForgeSource } from "@/content/forgeSource";
 import { identityGaps } from "@/lib/journey";
@@ -42,6 +43,7 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
   const forge = await getForgeSource();
   const gaps = identityGaps(id, profile?.forgeStatement ?? "");
   const rules = Object.fromEntries(pack.pillars.map((p) => [p.key, p.short]));
+  const written = FORGE_LINES.filter((l) => (profile?.[l.field] ?? "").trim()).length;
   const hint = profile?.pathway === "ENTREPRENEURIAL" && entrepreneur ? entrepreneur.forgeStatementPrompt : pack.forgeStatementPrompt;
 
   return (
@@ -61,8 +63,8 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
       {saved && <p role="status" className="mb-4 notice">Saved. Next, <Link href="/assessment" className="btn-link">see where you are</Link>.</p>}
 
       <form action={saveWhoIAm} className="space-y-5">
-        <Card>
-          <label htmlFor="role" className="section-title"><span className="step-n">1</span>{WHO_HEADINGS.role}</label>
+        <Part id="seat" title="Your seat" answer={role ? `As ${withArticle(role)}` : ""}>
+          <label htmlFor="role" className="sr-only">{WHO_HEADINGS.role}</label>
           <div className="flex items-center inputbox">
             <span className="pl-3.5 pr-1.5 py-2.5 text-[15px] text-ink-soft whitespace-nowrap select-none">This is about me as</span>
             <input id="role" name="role" defaultValue={role} maxLength={80} placeholder={withArticle(ROLE_PICKS[pathway][0])} className="flex-1 min-w-0 bg-transparent py-2.5 pr-3 text-[15px] focus:outline-none" />
@@ -73,25 +75,23 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
             <input name="situation" aria-label="Situation" defaultValue={id?.situation} maxLength={1500} className="input mt-2" />
             <Picks list={{ status: PICKS_STATUS, options: SITUATION_PICKS[pathway] }} target="situation" folded="Examples" />
           </details>
-        </Card>
+        </Part>
 
-        <Card>
-          <p id="kind" className="section-title scroll-mt-24"><span className="step-n">2</span>{WHO_HEADINGS.kind}</p>
+        <Part id="kind" title="How big a turn" answer={level && level in LEVELS ? LEVELS[level as IdentityLevel].name : ""}>
           <IdentitySpectrum
             initial={id?.level as IdentityLevel | undefined}
             firstExample={FIRST_EXAMPLE[pathway]}
             persona={{ personaName: id?.personaName, personaQualities: id?.personaQualities, personaStandards: id?.personaStandards, personaSituations: id?.personaSituations, personaCue: id?.personaCue, personaBehaviors: id?.personaBehaviors }}
           />
-        </Card>
+        </Part>
 
-        <Card className="scroll-mt-20" id="forge">
-          <p className="section-title"><span className="step-n">3</span>{WHO_HEADINGS.forge}</p>
+        <Part id="forge" title={WHO_HEADINGS.forge} answer={written === 5 ? "All five written" : written ? `${written} of 5 written` : ""}>
           <FiveSides profile={profile} pathway={pathway} role={role} level={level} ai={ai} teach={forge?.cards ?? {}} rules={rules} opening={forge?.intro} guide={forge?.guide?.rules ?? {}} />
-        </Card>
+        </Part>
 
-        <Card>
-          <MyStatement n={4} statement={statement} earlier={earlier} ai={ai} hint={hint} saved={profile} />
-        </Card>
+        <Part id="statement-part" title="My statement" answer={statement}>
+          <MyStatement bare statement={statement} earlier={earlier} ai={ai} hint={hint} saved={profile} />
+        </Part>
 
         <StatementReveal saved={fiveLines(profile)} />
       </form>
@@ -160,5 +160,24 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
         </form>
       )}
     </>
+  );
+}
+
+/**
+ * One part of the Driver's Seat. Closed, it shows what you've answered; open, it's where you work on it.
+ * A part with no answer yet starts open, so a new client sees what to fill in.
+ */
+function Part({ id, title, answer, children }: { id: string; title: string; answer: string; children: React.ReactNode }) {
+  return (
+    <details id={id} open={!answer} className="group/part scroll-mt-24 border-t border-line/70 py-5">
+      <summary className="flex cursor-pointer list-none items-start gap-3">
+        <span className="min-w-0 flex-1">
+          <span className="block font-book text-[23px] leading-tight text-heading">{title}</span>
+          {answer && <span className="mt-1 text-[15px] text-ink-soft line-clamp-2 group-open/part:hidden">{answer}</span>}
+        </span>
+        <span aria-hidden className="mt-2.5 h-2.5 w-2.5 shrink-0 rotate-45 border-b-[1.6px] border-r-[1.6px] border-ink-mute transition group-open/part:-rotate-[135deg] group-open/part:mt-3.5" />
+      </summary>
+      <div className="pt-4">{children}</div>
+    </details>
   );
 }

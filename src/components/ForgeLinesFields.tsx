@@ -59,15 +59,15 @@ export function FiveSides({ profile, pathway, role, level, ai, teach = {}, rules
         const written = (profile?.[l.field] ?? "").trim();
         // Each letter folds on its own. Open while it's still empty; once written it folds, showing its line. Tap to work on it again.
         return (
-          <details key={l.field} id={l.pillar.toLowerCase()} style={tone} open={!written} className="group scroll-mt-24 border-t border-line/60 py-4">
+          <details key={l.field} id={l.pillar.toLowerCase()} style={tone} open={!written} className="group/letter scroll-mt-24 border-t border-line/60 py-4">
             <summary className="flex cursor-pointer list-none items-start gap-3.5">
               <PillarMark k={l.pillar} />
               <span className="min-w-0 flex-1">
                 <span className="block font-book text-[21px] leading-tight text-heading">{l.label}</span>
                 {rule && <span className="mt-0.5 block font-book text-[16px] italic" style={{ color: "rgb(var(--pc))" }}>{rule}</span>}
-                <span className="mt-1 block text-[14px] text-ink-soft line-clamp-2 group-open:hidden">{written || "Not written yet"}</span>
+                <span className="mt-1 text-[14px] text-ink-soft line-clamp-2 group-open/letter:hidden">{written || "Not written yet"}</span>
               </span>
-              <span aria-hidden className="mt-1.5 h-2.5 w-2.5 shrink-0 rotate-45 border-b-[1.6px] border-r-[1.6px] border-ink-mute transition group-open:-rotate-[135deg] group-open:mt-3" />
+              <span aria-hidden className="mt-1.5 h-2.5 w-2.5 shrink-0 rotate-45 border-b-[1.6px] border-r-[1.6px] border-ink-mute transition group-open/letter:-rotate-[135deg] group-open/letter:mt-3" />
             </summary>
             <div className="pt-3">
             <p className="text-sm text-ink-soft">{l.shapes}</p>
@@ -120,10 +120,10 @@ export function FiveSides({ profile, pathway, role, level, ai, teach = {}, rules
 }
 
 /** My statement: the single identity statement, built from the five. This is what the Dashboard shows. */
-export function MyStatement({ statement, earlier, ai, hint, saved, n }: { statement: string; earlier?: string; ai: boolean; hint?: string; saved?: Saved; n?: number }) {
+export function MyStatement({ statement, earlier, ai, hint, saved, n, bare = false }: { statement: string; earlier?: string; ai: boolean; hint?: string; saved?: Saved; n?: number; /** Inside a fold that already says "My statement". */ bare?: boolean }) {
   return (
     <div>
-      <label htmlFor="statement" className={n ? "section-title" : "label"}>{n ? <span className="step-n">{n}</span> : null}My statement</label>
+      <label htmlFor="statement" className={bare ? "sr-only" : n ? "section-title" : "label"}>{n ? <span className="step-n">{n}</span> : null}My statement</label>
       <p className="text-sm text-ink-soft mb-2">Your five lines, said as one. Start with I am. This is what you see each day.</p>
       {earlier && (
         <p className="mb-2 rounded-2xl bg-field px-4 py-3 text-sm text-ink-soft">Earlier I am statement: <span className="text-ink">{earlier}</span></p>
