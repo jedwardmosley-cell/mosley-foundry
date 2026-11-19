@@ -222,23 +222,8 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
             </Card>
           )}
 
-          {self?.keep && (
-            <Card>
-              <h2 className="h3">A power statement to keep</h2>
-              <form action={keepToneLine} className="mt-3 space-y-3">
-                <input type="hidden" name="entry" value={current.id} />
-                <input name="line" defaultValue={self.keep.text} maxLength={300} className="input" aria-label="Line to keep" />
-                <div className="flex flex-wrap items-center gap-3">
-                  <select name="kind" defaultValue={self.keep.kind} className="input !w-auto" aria-label="Which C">
-                    {(Object.keys(THREE_CS) as C[]).map((k) => <option key={k} value={k}>{THREE_CS[k].name}</option>)}
-                  </select>
-                  <Submit className="btn-quiet">Put it in the Glove Box</Submit>
-                </div>
-                <p className="text-xs text-ink-mute">Change the words until they sound like you.</p>
-                {sp.kept && <p role="status" className="notice">In your Glove Box. <Link href="/glovebox" className="btn-link">Open it</Link></p>}
-              </form>
-            </Card>
-          )}
+          {/* Every reading ends with the offer to keep a line: the client's own library, built as they go. */}
+          <KeepLine entry={current.id} kept={!!sp.kept} text={self?.keep?.text || doorList[0]?.truer || ""} kind={self?.keep?.kind ?? "CONFIRM"} />
 
           {self?.question && (
             <section className="border-l-4 border-lane pl-5" aria-label="Sit with this">
@@ -303,14 +288,53 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
             </form>
           )}
 
+          <KeepLine entry={current.id} kept={!!sp.kept} text={talk?.rewrite || ""} kind="CLAIM" others />
+
           <form action={deleteToneEntry}><input type="hidden" name="id" value={current.id} /><button className="text-sm text-ink-mute hover:text-alert">Delete this entry</button></form>
         </section>
       )}
 
       {/* Self-talk only from here: the count and my lines belong to "With myself". */}
       {mode === "SELF" && (<>
+
+      <section id="keep" className="mt-10 scroll-mt-24">
+        <Link href="/glovebox" className="card block transition hover:bg-ink/[0.03]">
+          <p className="flex items-center justify-between"><span className="h3">The Glove Box</span><span className="text-sm text-link">Open</span></p>
+          <p className="mt-1 text-[15px] text-ink-soft">{lines.length ? `${lines.length} power ${lines.length === 1 ? "statement" : "statements"} kept within reach, sorted by claim, confirm and condemn.` : "Where your power statements go: lines that claim, confirm or condemn, kept within reach. Nothing in it yet."}</p>
+          {lines[0] && <p className="mt-2 font-serif text-[17px] leading-snug text-heading">&ldquo;{lines[0].text}&rdquo;</p>}
+          {sp.kept && !current && <p role="status" className="notice mt-3">In your Glove Box.</p>}
+        </Link>
+      </section>
+      </>)}
+
+      {modeEntries.length > 0 && (
+        <details className="mt-10">
+          <summary className="cursor-pointer text-sm text-link">{mode === "OTHERS" ? "Earlier conversations" : "Earlier entries"} ({modeEntries.length})</summary>
+          <ul className="mt-3 divide-y divide-line/60">
+            {modeEntries.map((e) => {
+              const n = (JSON.parse(e.closedDoor || "[]") as string[]).length;
+              return (
+                <li key={e.id} className="py-2.5">
+                  <Link href={`/tone?entry=${e.id}`} className="block hover:text-link">
+                    <span className="block text-xs text-ink-mute">{fmt(e.createdAt, { month: "short", day: "numeric" })}{e.mode === "OTHERS" ? `, with ${e.who || "someone else"}` : n ? `, ${n} limiting ${n === 1 ? "phrase" : "phrases"}` : ""}</span>
+                    <span className="line-clamp-2 text-[15px]">{e.mode === "OTHERS" ? e.situation : e.text}</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </details>
+      )}
+
+      {mode === "SELF" && (<>
+      {/* Optional, so it sits folded at the bottom. Closed, it shows where it stands. */}
       <section className="mt-10">
-        <h2 className="h2">Three-day language audit</h2>
+        <details className="group/audit border-t border-line/70 pt-5">
+        <summary className="flex cursor-pointer list-none items-baseline gap-3">
+          <h2 className="h3 flex-1">Three-day language audit</h2>
+          <span className="shrink-0 text-[14px] text-ink-mute">{auditState === "running" ? `Day ${auditDay} of 3` : auditState === "done" ? "Done" : "Optional"}</span>
+          <span aria-hidden className="h-2.5 w-2.5 shrink-0 rotate-45 border-b-[1.6px] border-r-[1.6px] border-ink-mute transition group-open/audit:-rotate-[135deg]" />
+        </summary>
         <p className="mt-1 text-[15px] text-ink-soft">For three days, catch every time you say something that shuts a door before you&apos;ve tried, like &ldquo;I can&apos;t&rdquo;, &ldquo;I don&apos;t know&rdquo; or &ldquo;that&apos;s just how I am&rdquo;, and replace it with something that leaves a door open. One slip is noise. Three days is enough to see your pattern, and the phrase at the top is the one to replace first.</p>
         <InTheBook lines={consoleExercise(pack.chapters, "audit")} />
         <Card className="mt-3">
@@ -351,37 +375,31 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
             <Submit className="btn-quiet !py-1.5 text-sm">{profile?.toneReadsWriting ? "Count only what I write here" : "Also count my check-ins and the Mirrors"}</Submit>
           </form>}
         </Card>
-      </section>
-
-      <section id="keep" className="mt-10 scroll-mt-24">
-        <Link href="/glovebox" className="card block transition hover:bg-ink/[0.03]">
-          <p className="flex items-center justify-between"><span className="h3">The Glove Box</span><span className="text-sm text-link">Open</span></p>
-          <p className="mt-1 text-[15px] text-ink-soft">{lines.length ? `${lines.length} power ${lines.length === 1 ? "statement" : "statements"} kept within reach, sorted by claim, confirm and condemn.` : "Where your power statements go: lines that claim, confirm or condemn, kept within reach. Nothing in it yet."}</p>
-          {lines[0] && <p className="mt-2 font-serif text-[17px] leading-snug text-heading">&ldquo;{lines[0].text}&rdquo;</p>}
-          {sp.kept && !current && <p role="status" className="notice mt-3">In your Glove Box.</p>}
-        </Link>
+        </details>
       </section>
       </>)}
-
-      {modeEntries.length > 0 && (
-        <details className="mt-10">
-          <summary className="cursor-pointer text-sm text-link">{mode === "OTHERS" ? "Earlier conversations" : "Earlier entries"} ({modeEntries.length})</summary>
-          <ul className="mt-3 divide-y divide-line/60">
-            {modeEntries.map((e) => {
-              const n = (JSON.parse(e.closedDoor || "[]") as string[]).length;
-              return (
-                <li key={e.id} className="py-2.5">
-                  <Link href={`/tone?entry=${e.id}`} className="block hover:text-link">
-                    <span className="block text-xs text-ink-mute">{fmt(e.createdAt, { month: "short", day: "numeric" })}{e.mode === "OTHERS" ? `, with ${e.who || "someone else"}` : n ? `, ${n} limiting ${n === 1 ? "phrase" : "phrases"}` : ""}</span>
-                    <span className="line-clamp-2 text-[15px]">{e.mode === "OTHERS" ? e.situation : e.text}</span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </details>
-      )}
       <p className="mt-8 text-xs text-ink-mute">Private. Your coach doesn&apos;t see anything here. Set the Tone is a coach, not therapy.</p>
     </>
+  );
+}
+
+/** The offer at the end of a reading: put a line in the Glove Box. Pre-filled when the reading has one; edit until it sounds like you. */
+function KeepLine({ entry, kept, text, kind, others = false }: { entry: string; kept: boolean; text: string; kind: string; others?: boolean }) {
+  return (
+    <Card id="keep-line" className="scroll-mt-24">
+      <h2 className="h3">Put a line in the Glove Box</h2>
+      <p className="mt-1 text-sm text-ink-soft">{others ? "A line from this conversation worth keeping, in your own words." : "A line from this worth keeping. Change the words until they sound like you."}</p>
+      <form action={keepToneLine} className="mt-3 space-y-3">
+        <input type="hidden" name="entry" value={entry} />
+        <input name="line" required defaultValue={text} maxLength={300} className="input" aria-label="Line to keep" placeholder="Write the line you want to keep" />
+        <div className="flex flex-wrap items-center gap-3">
+          <select name="kind" defaultValue={kind} className="input !w-auto" aria-label="Which C">
+            {(Object.keys(THREE_CS) as C[]).map((k) => <option key={k} value={k}>{THREE_CS[k].name}</option>)}
+          </select>
+          <Submit className="btn-quiet">Put it in the Glove Box</Submit>
+        </div>
+        {kept && <p role="status" className="notice">In your Glove Box. <Link href="/glovebox" className="btn-link">Open it</Link></p>}
+      </form>
+    </Card>
   );
 }

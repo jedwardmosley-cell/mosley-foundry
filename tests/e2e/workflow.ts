@@ -450,9 +450,12 @@ const submitAndWait = async (page: Page, selector: string) => {
     // the book's own self-talk questions, when the licensed content is installed
     if (fs.existsSync("src/content/licensed/pack.json")) await page.waitForSelector('section[aria-label="From the book"] p.font-serif');
     // the three-day audit is the client's to start; nothing is counted before then
+    // the audit is optional, folded at the bottom: open it to start
+    await page.locator("summary", { hasText: "Three-day language audit" }).click();
     await page.waitForSelector("button:has-text('Start my three days')");
     await Promise.all([page.waitForLoadState("networkidle"), page.click("button:has-text('Start my three days')")]);
-    await page.waitForSelector("text=Day 1 of 3.");
+    // folded again after saving; closed, it shows where it stands
+    await page.waitForSelector("summary:has-text('Three-day language audit') >> text=Day 1 of 3");
     await page.fill('textarea[name="said"]', "E2E-TONE: I can't run this meeting. That's just how I am.");
     await Promise.all([page.waitForURL(/\/tone\?entry=/), page.click('button:has-text("Rewrite it")')]);
     await page.waitForSelector('h2:text-is("Limited language")');
@@ -460,8 +463,12 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.waitForSelector("text=I'll try.");
     await page.waitForSelector("text=That's how I've handled it so far.");
     await page.waitForSelector("text=Your words are instructions.");
+    // every reading ends with the offer to put a line in the Glove Box, filled in from the reading
+    await page.waitForSelector("#keep-line >> text=Put a line in the Glove Box");
+    assert.equal(await page.inputValue('#keep-line input[name="line"]'), "I'll try.");
     // the three-day audit counts it
     const audit = page.locator("section:has(h2:has-text('Three-day language audit'))");
+    await audit.locator("summary").first().click();
     assert.ok((await audit.innerText()).includes("1 time"));
     // keep a power statement in the Glove Box, sorted by the three Cs
     await Promise.all([page.waitForURL("**/glovebox"), page.click('main a[href="/glovebox"]')]);
@@ -475,6 +482,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.waitForSelector('main a[href="/glovebox"]:has-text("1 power statement kept")');
     // counting check-ins too is the client's choice, off until they turn it on
     assert.equal((await db.profile.findFirstOrThrow({ where: { user: { email } } })).toneReadsWriting, false);
+    await page.locator("summary", { hasText: "Three-day language audit" }).click();
     await Promise.all([page.waitForLoadState("networkidle"), page.click('button:has-text("Also count my check-ins and the Mirrors")')]);
     await page.waitForSelector("text=Also counting your daily check-in notes");
     // distress stops the coaching and points to support
@@ -499,6 +507,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal(saved.who, "E2E-WHO my direct report");
     // conversations don't count toward the self-talk tally
     await page.goto(`${BASE}/tone`);
+    await page.locator("summary", { hasText: "Three-day language audit" }).click();
     assert.ok((await page.locator("section:has(h2:has-text('Three-day language audit'))").innerText()).includes("1 time"));
     // one tap from the round + button
     await page.goto(`${BASE}/companion`);
