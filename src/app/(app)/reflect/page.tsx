@@ -9,6 +9,7 @@ import { ShareSend } from "@/components/ShareSend";
 import { mondayOf, fmt } from "@/lib/dates";
 import { PageHeader, ChapterOpening, Card, Field, Privacy, Source } from "@/components/ui";
 import { Submit } from "@/components/Submit";
+import { Fold } from "@/components/Fold";
 import Link from "next/link";
 import { findClosedDoors, tally } from "@/lib/tone";
 import { mirrorsFromBook } from "@/lib/mirrors";
@@ -80,12 +81,7 @@ export default async function ReflectPage() {
           const cut = text.indexOf(". ");
           if (cut < 0) return <span className="block">{text}</span>;
           return (
-            <details className="group">
-              <summary className="cursor-pointer list-none">
-                {text.slice(0, cut + 1)} <span className="text-link group-open:hidden">More</span>
-              </summary>
-              <span className="mt-2 block">{text.slice(cut + 2)}</span>
-            </details>
+            <Fold lead={text.slice(0, cut + 1)} rest={text.slice(cut + 2)} />
           );
         })()}
       </ChapterOpening>

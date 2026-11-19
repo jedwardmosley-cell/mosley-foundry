@@ -75,20 +75,21 @@ summary { -webkit-tap-highlight-color: transparent; }
 }
 
 @layer components {
-  /* Cards are for things you act on. Flat, a hairline edge, corners a little rounder than a sign. */
-  .card { @apply rounded-2xl p-5 sm:p-7 bg-card; border: 1px solid rgb(var(--line)); }
+  /* Chapter pages: no boxes. A section of the page starts at a thin rule, the way a book breaks a chapter. */
+  .card { @apply py-6 sm:py-7; border-top: 1px solid rgb(var(--line)); }
   /* Labels in sentence case, and only where they tell you something. */
-  .section-label { @apply text-[13px] font-bold text-ink-mute; }
-  .eyebrow { @apply text-[13px] font-bold text-ink-mute; }
-  .h1 { @apply font-sans text-[34px] sm:text-[44px] leading-[1.02] text-heading tracking-[-0.02em] font-extrabold; }
-  .h2 { @apply font-sans text-[22px] sm:text-[26px] leading-tight text-heading tracking-[-0.01em] font-extrabold; }
-  .h3 { @apply font-bold text-heading text-[16px]; }
+  .section-label { @apply font-book italic text-[16px] text-ink-soft; }
+  .eyebrow { @apply font-book italic text-[16px] text-ink-soft; }
+  /* The book's typeface for every heading: titles in capitals like a chapter page, sections in sentence case. */
+  .h1 { @apply font-book text-[30px] sm:text-[36px] leading-[1.05] text-heading uppercase tracking-[0.01em]; }
+  .h2 { @apply font-book text-[24px] sm:text-[27px] leading-tight text-heading; }
+  .h3 { @apply font-book text-[20px] leading-snug text-heading; }
   .muted { @apply text-ink-soft; }
-  .label { @apply block text-[15px] font-bold text-heading mb-2; }
+  .label { @apply block font-book text-[18px] text-heading mb-2; }
   /* Kept for numerals and quote marks: plain green now, no gradient. */
   .gold-text { color: rgb(var(--gold)); }
   .step-n { @apply mr-2.5 font-extrabold text-gold; }
-  .section-title { @apply block font-sans text-[23px] sm:text-[26px] leading-tight text-heading tracking-[-0.015em] mb-4 font-extrabold; }
+  .section-title { @apply block font-book text-[24px] sm:text-[27px] leading-tight text-heading mb-4; }
   .input {
     @apply w-full rounded-[10px] bg-field px-4 py-3 text-[15px] text-ink placeholder:text-ink-mute/80 transition;
     border: 1px solid transparent;
@@ -108,11 +109,11 @@ summary { -webkit-tap-highlight-color: transparent; }
   .quote { @apply font-serif text-ink-soft border-l-4 border-lane pl-4; }
   .source { @apply text-xs text-ink-mute; }
   /* What used to glow is now a plain surface: the hero sits on the ground, the center line carries it. */
-  .glow { background: rgb(var(--card)); border: 1px solid rgb(var(--line)); }
-  .tile { @apply rounded-2xl p-4 bg-card; border: 1px solid rgb(var(--line)); }
+  .glow { border-top: 1px solid rgb(var(--line)); }
+  .tile { @apply py-4; border-top: 1px solid rgb(var(--line)); }
   /* A segmented control: equal choices in one track. */
   .seg { @apply grid gap-1 rounded-xl bg-field p-1; }
-  .seg-opt { @apply block rounded-lg py-3 text-center text-[15px] font-bold text-ink-soft transition; }
+  .seg-opt { @apply block rounded-lg py-2.5 text-center font-book text-[18px] text-ink-soft transition; }
   /* A field with fixed words in front, like "This is about me as". */
   .inputbox { @apply flex rounded-[10px] bg-field transition; border: 1px solid transparent; }
   .inputbox:hover { border-color: rgb(var(--line)); }
