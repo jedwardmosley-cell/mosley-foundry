@@ -69,7 +69,7 @@ export default async function MyRoadPage({ searchParams }: { searchParams: Promi
 
   return (
     <>
-      <ChapterOpening image="/chapters/vehicle-controls.jpg" alt="The driver's view of the wheel, the screen and the controls" title={NAMES.controls.name} plain={NAMES.controls.plain}>The system that makes it hard to fail: your routines, your people, your groups and programs, the people you develop. It stays, and it grows.</ChapterOpening>
+      <ChapterOpening image="/chapters/vehicle-controls.jpg" alt="The wheel, the pedals, the shifter and the dials" title={NAMES.controls.name} plain={NAMES.controls.plain}>The system that makes it hard to fail: your routines, your people, your groups and programs, the people you develop. It stays, and it grows.</ChapterOpening>
       <div className="mb-8"><SystemMap name={u.name} nodes={mapNodes} /></div>
       <FromBook label="From the book">
         {d.intro[0] ? <><p>{d.intro.find((t) => t.startsWith("It's the deliberate construction"))}</p><p className="mt-2">{d.intro.find((t) => t.startsWith("The question isn't"))}</p></> : "The deliberate construction of the routines, relationships, environments, and accountability structures that support sustained development."}
@@ -107,7 +107,7 @@ export default async function MyRoadPage({ searchParams }: { searchParams: Promi
         </figure>
       )}
 
-      <SectionHead title="Routines and reviews" sub="What you do on a schedule, so you don't have to decide each time." />
+      <SectionHead title="My routines" sub="What you do on a schedule, so you don't have to decide each time." />
       <div className="card !p-0 divide-y divide-line/60">
         {BLUEPRINT_AREAS.map((area) => {
           if (area.key === "ACCOUNTABILITY" || PEOPLE_AREAS.includes(area.key)) return null;
