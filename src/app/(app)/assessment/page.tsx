@@ -56,9 +56,14 @@ export default async function AssessmentPage({ searchParams }: { searchParams: P
         <span aria-hidden className="text-ink-mute">›</span>
       </Link>
 
+      {pack.threeNote && !useEntre && <p className="quote mb-6">{pack.threeNote}</p>}
+
+      <AssessmentForm pack={pack} entrepreneur={entrepreneur} useEntre={useEntre} instrument={instrument} next={next === "season" ? "/season" : undefined} lines={linesOf(profile)} role={identity?.role} />
+
+      {/* Earlier readings come after the ratings, to look back on once today's is done. */}
       {past.length > 0 && (
-        <div className="card mb-6">
-          <p className="eyebrow">Previous readings</p>
+        <div className="card mt-10">
+          <p className="section-label">Previous readings</p>
           <ul className="mt-2 divide-y divide-line">
             {past.map((a) => (
               <li key={a.id} className="py-2 flex justify-between">
@@ -69,10 +74,6 @@ export default async function AssessmentPage({ searchParams }: { searchParams: P
           </ul>
         </div>
       )}
-
-      {pack.threeNote && !useEntre && <p className="quote mb-6">{pack.threeNote}</p>}
-
-      <AssessmentForm pack={pack} entrepreneur={entrepreneur} useEntre={useEntre} instrument={instrument} next={next === "season" ? "/season" : undefined} lines={linesOf(profile)} role={identity?.role} />
     </>
   );
 }
