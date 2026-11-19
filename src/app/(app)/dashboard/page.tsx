@@ -90,7 +90,9 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
           <span className="font-book text-[30px] sm:text-[34px] leading-none text-heading">{dayTitle}</span>
           <span className="text-[13px] text-ink-mute">{fmt(new Date(), { weekday: "short", month: "short", day: "numeric" })}</span>
         </p>
-        <div className="mt-4 -mx-4 sm:mx-0 aspect-[16/9] bg-ink/10 bg-cover bg-center grayscale" style={{ backgroundImage: "url(/chapters/road-ahead.jpg)" }} role="img" aria-label="The road ahead, from behind the wheel" />
+        {/* The gauges: the pencil drawing on a light page, the dark version on a dark one. */}
+        <div className="mt-4 -mx-4 sm:mx-0 aspect-[16/9] bg-ink/10 bg-cover bg-center dark:hidden" style={{ backgroundImage: "url(/chapters/dashboard-light.jpg)" }} role="img" aria-label="The gauges on the dashboard" />
+        <div className="mt-4 -mx-4 sm:mx-0 aspect-[16/9] bg-ink/10 bg-cover bg-center hidden dark:block" style={{ backgroundImage: "url(/chapters/dashboard-dark.jpg)" }} role="img" aria-label="The gauges on the dashboard" />
 
         {kickoff ? (
           <div className="mt-6">
