@@ -32,38 +32,45 @@ export function FiveSides({ profile, pathway, role, level, ai, teach = {}, rules
     <div className="space-y-2">
       <div className="pb-4">
         <p className="font-serif text-[22px] sm:text-[24px] leading-snug text-heading">{opening?.line || FORGE_OPENING.line}</p>
-        {/* The reading sits behind one link, so the five questions come first on a phone. */}
+        {/* All the reading about FORGE sits behind one fold, so the five letters come first. */}
         <details className="mt-3 text-sm">
-          <summary className="cursor-pointer text-link font-medium">Read more about FORGE</summary>
-          {opening?.core && <p className="mt-2 text-[16px] leading-relaxed text-ink">{opening.core}</p>}
-          <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">{FORGE_OPENING.text}</p>
-        </details>
-        {opening?.forge && (
-          <details className="mt-3 text-sm">
-            <summary className="cursor-pointer text-link font-medium">Why it&apos;s called FORGE</summary>
-            <p className="mt-2 font-serif text-[17px] leading-[1.55] text-heading">{opening.forge}</p>
-          </details>
-        )}
-        <details className="mt-3 text-sm">
-          <summary className="cursor-pointer text-link font-medium">Is it an identity?</summary>
-          <ol className="mt-2 list-decimal pl-5 space-y-1 text-ink-soft">{IDENTITY_TESTS.map((t) => <li key={t}>{t}</li>)}</ol>
-          <p className="mt-2 text-ink-soft">The behaviors come next, in the Vehicle Controls and your 30 days.</p>
+          <summary className="cursor-pointer text-link font-medium">About FORGE</summary>
+          <div className="mt-3 space-y-4">
+            {opening?.core && <p className="text-[16px] leading-relaxed text-ink">{opening.core}</p>}
+            <p className="text-[15px] leading-relaxed text-ink-soft">{FORGE_OPENING.text}</p>
+            {opening?.forge && (
+              <div>
+                <p className="section-label">Why it&apos;s called FORGE</p>
+                <p className="mt-1 font-book text-[17px] leading-[1.55] text-heading">{opening.forge}</p>
+              </div>
+            )}
+            <div>
+              <p className="section-label">Is it an identity?</p>
+              <ol className="mt-1 list-decimal pl-5 space-y-1 text-ink-soft">{IDENTITY_TESTS.map((t) => <li key={t}>{t}</li>)}</ol>
+              <p className="mt-2 text-ink-soft">The behaviors come next, in the Vehicle Controls and your 30 days.</p>
+            </div>
+          </div>
         </details>
       </div>
       {FORGE_LINES.map((l) => {
         const t = teach[l.pillar];
         const rule = t?.rule || rules[l.pillar] || "";
         const tone = { "--pc": `var(${PILLAR_FILL[l.pillar].cssVar})` } as CSSProperties;
+        const written = (profile?.[l.field] ?? "").trim();
+        // Each letter folds on its own. Open while it's still empty; once written it folds, showing its line. Tap to work on it again.
         return (
-          <section key={l.field} id={l.pillar.toLowerCase()} style={tone} className="scroll-mt-24 border-t border-line/60 pt-6 pb-2">
-            <header className="flex items-start gap-3.5">
+          <details key={l.field} id={l.pillar.toLowerCase()} style={tone} open={!written} className="group scroll-mt-24 border-t border-line/60 py-4">
+            <summary className="flex cursor-pointer list-none items-start gap-3.5">
               <PillarMark k={l.pillar} />
-              <div className="min-w-0">
-                <h3 className="font-sans font-extrabold text-[20px] leading-tight text-heading">{l.label}</h3>
-                {rule && <p className="mt-0.5 font-serif text-[17px] italic" style={{ color: "rgb(var(--pc))" }}>{rule}</p>}
-                <p className="mt-1.5 text-sm text-ink-soft">{l.shapes}</p>
-              </div>
-            </header>
+              <span className="min-w-0 flex-1">
+                <span className="block font-book text-[21px] leading-tight text-heading">{l.label}</span>
+                {rule && <span className="mt-0.5 block font-book text-[16px] italic" style={{ color: "rgb(var(--pc))" }}>{rule}</span>}
+                <span className="mt-1 block text-[14px] text-ink-soft line-clamp-2 group-open:hidden">{written || "Not written yet"}</span>
+              </span>
+              <span aria-hidden className="mt-1.5 h-2.5 w-2.5 shrink-0 rotate-45 border-b-[1.6px] border-r-[1.6px] border-ink-mute transition group-open:-rotate-[135deg] group-open:mt-3" />
+            </summary>
+            <div className="pt-3">
+            <p className="text-sm text-ink-soft">{l.shapes}</p>
 
             {(t?.means || guide[l.pillar]) && (
               <details className="mt-4 rounded-2xl px-4 py-3" style={{ background: "rgb(var(--pc) / 0.06)" }}>
@@ -104,7 +111,8 @@ export function FiveSides({ profile, pathway, role, level, ai, teach = {}, rules
               <Picks list={{ status: IDENTITY_EXAMPLES_STATUS, options: [] }} groups={exampleGroups(l.field, pathway, role, level)} target={l.field} folded="Examples" note={l.hint} alignRight={ai} />
               {ai && <IdentityCoach field={l.field} prefix={l.prefix} corner />}
             </div>
-          </section>
+            </div>
+          </details>
         );
       })}
     </div>

@@ -559,7 +559,8 @@ export async function addEqiToBlueprint(fd: FormData) {
   const detail = `From my feedback: ${e.label}`;
   const exists = await db.commitment.findFirst({ where: { userId: u.id, active: true, title: e.practice, detail } });
   if (!exists) await db.commitment.create({ data: { userId: u.id, area: "ROUTINES", title: e.practice, detail, cadence: "DAILY" } });
-  redirect("/road");
+  // Land on the routines area, opened, so the new routine is in view.
+  redirect("/road?open=ROUTINES#area-ROUTINES");
 }
 
 /** One step to share an EQ-i priority: approves the item and turns on EQ-i sharing for the assigned coach. */

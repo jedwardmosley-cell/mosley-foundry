@@ -16,6 +16,7 @@ import type { PathwayKey } from "@/content/program";
 import { fmt } from "@/lib/dates";
 import { PageHeader, ChapterOpening, Card } from "@/components/ui";
 import { Submit } from "@/components/Submit";
+import { Fold } from "@/components/Fold";
 import { StatementReveal } from "@/components/StatementReveal";
 import { Picks } from "@/components/Picks";
 import { IdentitySpectrum } from "@/components/IdentitySpectrum";
@@ -45,7 +46,7 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
 
   return (
     <>
-      <ChapterOpening image="/chapters/drivers-seat.jpg" alt="Hands on the wheel, driving at night in the rain" title={WHO_TITLE} plain={NAMES.seat.plain}>{WHO_INTRO}</ChapterOpening>
+      <ChapterOpening image="/chapters/drivers-seat.jpg" alt="Hands on the wheel, driving at night in the rain" title={WHO_TITLE} plain={NAMES.seat.plain}><Fold lead={WHO_INTRO.slice(0, WHO_INTRO.indexOf(". ") + 1)} rest={WHO_INTRO.slice(WHO_INTRO.indexOf(". ") + 2)} /></ChapterOpening>
 
       {/* Say exactly what keeps this step open, with a link to each part. */}
       {!saved && gaps.length > 0 && (id || profile?.forgeStatement || profile?.destination) && (

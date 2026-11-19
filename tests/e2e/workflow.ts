@@ -160,6 +160,8 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.locator('button:has-text("manager")').first().click();
     assert.equal(await page.inputValue('input[name="role"]'), "manager");
     await page.locator("label", { hasText: "Core alignment" }).click();
+    // each letter folds: open while still empty, so the five can be written
+    assert.equal(await page.locator("details#f").evaluate((d) => (d as HTMLDetailsElement).open), true, "an empty letter is open");
     await page.fill('textarea[name="destination"]', "a leader my team trusts with bad news");
     await page.fill('textarea[name="lineO"]', "a discerning leader who sees what my team needs");
     // the reveal: with no statement yet, it starts from the five, fills the screen, and Save is there
@@ -175,14 +177,18 @@ const submitAndWait = async (page: Page, selector: string) => {
     const id = await db.identityProfile.findFirstOrThrow({ where: { user: { email } } });
     assert.equal(id.role, "manager");
     assert.equal(id.becoming, saved.forgeStatement, "one statement, stored where every screen reads it");
-    // the five questions now carry the role
+    // the five questions now carry the role; a closed letter shows the line written so far
+    // once written, a letter folds and shows its line; open it to work on it again
+    assert.equal(await page.locator("details#f").evaluate((d) => (d as HTMLDetailsElement).open), false, "a written letter folds");
+    await page.waitForSelector("details#f > summary >> text=I am a leader my team trusts with bad news");
+    await page.locator("details#f > summary").click();
     await page.waitForSelector("text=As a manager, who is the person I'm driving toward?");
     // FORGE is taught on the page: the opening, each rule from the book, and what this means with the research
     await page.waitForSelector("text=You only ever rise to the level of who you believe you are.");
     assert.equal(await page.locator("h1", { hasText: "The Driver's Seat" }).count(), 1);
     await page.waitForSelector("text=Know your destination.");
     assert.equal(await page.locator('summary:has-text("What this means")').count(), 5, "every letter teaches before it asks");
-    const f = page.locator("section#f");
+    const f = page.locator("details#f");
     await f.locator('summary:has-text("What this means")').click();
     await f.locator("text=possible selves").waitFor();
     assert.ok(!(await f.innerText()).includes("Steve Jobs"));
@@ -198,6 +204,9 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.waitForURL("**/road");
     await page.goto(`${BASE}/road`);
     const routines = page.locator("section", { hasText: "Personal commitments and routines" });
+    // each area folds: closed until you open it
+    assert.equal(await routines.locator("details").first().evaluate((d) => (d as HTMLDetailsElement).open), false, "areas start closed");
+    await routines.locator("summary", { hasText: "Personal commitments and routines" }).click();
     await routines.locator("summary", { hasText: "Add to this area" }).click();
     await routines.locator('button:has-text("Journaling")').click(); // quick pick fills the field
     assert.equal(await routines.locator('input[name="title"]').inputValue(), "Journaling");
@@ -208,6 +217,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.waitForSelector("text=Fifteen quiet minutes before email");
     await page.waitForSelector("text=Weekdays, 6:30 am");
     const weekly = page.locator("section", { hasText: "Weekly planning and reflection" });
+    await weekly.locator("summary", { hasText: "Weekly planning and reflection" }).click();
     await weekly.locator("summary", { hasText: "Add to this area" }).click();
     await weekly.locator('input[name="title"]').fill("Plan the week ahead");
     await weekly.locator('select[name="whenDays"]').selectOption("Sunday");
@@ -353,7 +363,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await Promise.all([page.waitForLoadState("networkidle"), add.locator('button:has-text("Add")').click()]);
     await page.waitForSelector("text=Make this a focus");
     assert.equal(await page.locator('button:has-text("Share with")').count(), 0, "no share button without a coach");
-    await Promise.all([page.waitForURL("**/road"), page.click('button:has-text("Add to the Vehicle Controls")')]);
+    await Promise.all([page.waitForURL(/\/road\?open=ROUTINES/), page.click('button:has-text("Add to the Vehicle Controls")')]);
     await page.waitForSelector("text=One breath before I answer");
     // the AI switch turns on for this entry only
     await page.goto(`${BASE}/feedback/${fb.id}`);

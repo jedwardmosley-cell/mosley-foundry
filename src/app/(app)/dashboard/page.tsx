@@ -4,7 +4,8 @@ import { requireUser } from "@/lib/auth";
 import { loadParticipant } from "@/lib/participant";
 import { getContent } from "@/content";
 import { cycleWeeks, cyclePosition } from "@/lib/cycle";
-import { fmt, daysBetween } from "@/lib/dates";
+import { fmt, daysBetween, mondayOf } from "@/lib/dates";
+import { db } from "@/lib/db";
 import { todayHeadline } from "@/lib/todayHeadline";
 import { getJourney, JOURNEY_STEPS } from "@/lib/journey";
 import { withArticle } from "@/content/whoIAm";
@@ -49,6 +50,9 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
 
 
   const statement = d.profile.forgeStatement || d.identity?.becoming || d.profile.destination || "";
+  // What they said in last week's Mirrors this week needs.
+  const lastWeek = await db.weeklyReflection.findUnique({ where: { userId_weekOf: { userId: u.id, weekOf: mondayOf(new Date(Date.now() - 7 * 864e5)) } }, select: { nextWeek: true } });
+  const thisWeekNeeds = lastWeek?.nextWeek?.trim() ?? "";
   const dueSoon = d.relationships.filter((r) => r.nextCheckIn && daysBetween(new Date(), r.nextCheckIn) <= 2).slice(0, 3);
   const coachItems = [
     nextSession && { key: "s", href: "/coaching", icon: "clock", text: `${fmt(nextSession.scheduledAt, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}: session with ${nextSession.coach.name.split(" (")[0]}`, side: nextSession.participantPrep ? "" : "Add prep" },
@@ -143,6 +147,13 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
           <p className="mt-2 font-book text-[21px] sm:text-[23px] leading-[1.35] text-heading line-clamp-4">{statement || "Claim who you are."}</p>
           {d.identity?.level === "REINVENT" && d.identity.personaName && <p className="mt-2 text-xs text-ink-mute">Performance identity: <span className="text-ink">{d.identity.personaName}</span></p>}
         </Link>
+
+        {thisWeekNeeds && (
+          <Link href="/reflect" className="block py-4 transition hover:text-link">
+            <p className="font-book italic text-[16px] text-ink-soft">This week needs, from your Mirrors</p>
+            <p className="mt-1 font-book text-[19px] leading-snug text-heading">{thisWeekNeeds}</p>
+          </Link>
+        )}
 
         <Link href="/network" className="flex items-baseline justify-between gap-4 py-4 transition hover:text-link">
           <span className="font-book text-[20px] text-heading">People</span>
