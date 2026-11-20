@@ -1305,6 +1305,35 @@ const submitAndWait = async (page: Page, selector: string) => {
     await db.coachingSession.delete({ where: { id: s.id } });
   });
 
+  await check("12c. a coach's calendar link: on, read, replaced, off", async () => {
+    const cc = await browser.newContext();
+    const cp: Page = await cc.newPage();
+    await login(cp, "coach@demo.bothhands.app");
+    await cp.goto(`${BASE}/coach`);
+    await cp.click("#calendar > summary");
+    await Promise.all([cp.waitForURL(/calendar=1/), cp.click('#calendar button:has-text("Put it on my calendar")')]);
+    const tokenOf = async () => (await db.user.findUniqueOrThrow({ where: { email: "coach@demo.bothhands.app" } })).calendarToken;
+    // The address stays ?calendar=1 after each click, so wait for the saved link itself to change.
+    const changedFrom = async (was: string | null) => { for (let i = 0; i < 40; i++) { const t = await tokenOf(); if (t !== was) return t; await cp.waitForTimeout(150); } return was; };
+    const first = await tokenOf();
+    assert.ok(first && first.length >= 32);
+    const r = await fetch(`${BASE}/calendar/${first}.ics`);
+    assert.equal(r.status, 200);
+    assert.match(r.headers.get("content-type") ?? "", /text\/calendar/);
+    const body = await r.text();
+    assert.match(body, /SUMMARY:Coaching: Dana Reyes/);
+    assert.ok(!body.includes("E2E agenda"), "no agendas");
+    await cp.click('#calendar button:has-text("Get a new link")');
+    const second = await changedFrom(first);
+    assert.ok(second && second !== first);
+    assert.equal((await fetch(`${BASE}/calendar/${first}.ics`)).status, 404, "the old link stops working");
+    await cp.locator('#calendar button:has-text("Turn off my calendar link")').waitFor();
+    await cp.click('#calendar button:has-text("Turn off my calendar link")');
+    assert.equal(await changedFrom(second), null);
+    assert.equal((await fetch(`${BASE}/calendar/${second}.ics`)).status, 404);
+    await cc.close();
+  });
+
   await check("desktop layout renders", async () => {
     await logout(page);
     const desk = await browser.newPage({ viewport: { width: 1280, height: 900 } });

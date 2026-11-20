@@ -2,7 +2,7 @@ import "server-only";
 import { db } from "./db";
 import { buildCalendar, routineEvent, icsDate, icsByDay, type CalEvent } from "./ics";
 import { addDays } from "./dates";
-import { RELATIONSHIP_ROLES } from "@/content/program";
+import { RELATIONSHIP_ROLES, SEGMENTS } from "@/content/program";
 
 export const CALENDAR_NAME = "Both Hands on the Wheel";
 
@@ -69,4 +69,44 @@ export async function calendarFor(userId: string, appUrl: string, now = new Date
   }
 
   return buildCalendar(CALENDAR_NAME, events, now);
+}
+
+/**
+ * A coach's private calendar: their coaching sessions and the cohort sessions they facilitate.
+ * Names and times only, plus a link back. Never an agenda, notes or anything a client shares.
+ */
+export async function coachCalendarFor(coachId: string, appUrl: string, now = new Date()): Promise<string> {
+  const since = addDays(now, -30);
+  const [sessions, cohortSessions] = await Promise.all([
+    db.coachingSession.findMany({ where: { coachId, scheduledAt: { gte: since } }, select: { id: true, scheduledAt: true, participantId: true, participant: { select: { name: true } } } }),
+    db.trainingSession.findMany({
+      where: { startsAt: { gte: since }, cohort: { members: { some: { userId: coachId, role: "FACILITATOR" } } } },
+      select: { id: true, startsAt: true, segmentKey: true, location: true, cohort: { select: { id: true, name: true } } },
+    }),
+  ]);
+  const events: CalEvent[] = [];
+  for (const s of sessions) {
+    events.push({
+      uid: `coach-session-${s.id}@bothhands`,
+      title: `Coaching: ${s.participant.name.replace(/\s*\((?:demo|Demo)[^)]*\)\s*$/, "").trim()}`,
+      description: "Prep, notes and the wrap-up are on the client's page.",
+      url: `${appUrl}/coach/${s.participantId}#sessions`,
+      start: { utc: s.scheduledAt },
+      minutes: 60,
+      alarm: true,
+    });
+  }
+  for (const t of cohortSessions) {
+    const seg = SEGMENTS.find((x) => x.key === t.segmentKey);
+    events.push({
+      uid: `cohort-session-${t.id}@bothhands`,
+      title: `${t.cohort.name}${seg ? `: ${seg.title}` : ""}`,
+      description: t.location || undefined,
+      url: `${appUrl}/coach/cohorts#cohort-${t.cohort.id}`,
+      start: { utc: t.startsAt },
+      minutes: 120,
+      alarm: true,
+    });
+  }
+  return buildCalendar(`${CALENDAR_NAME}: coaching`, events, now);
 }

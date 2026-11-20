@@ -13,7 +13,9 @@ import { ChapterOpening, Card, PillarMark, Empty } from "@/components/ui";
 import type { PillarKey } from "@/content/types";
 import { AddClientForm } from "@/components/AddClientForm";
 import { Submit } from "@/components/Submit";
-import { planCoachActions } from "@/app/actions/coach";
+import { planCoachActions, setCoachCalendarLink } from "@/app/actions/coach";
+import { CopyLink } from "@/components/CopyLink";
+import { appUrl } from "@/lib/email";
 import { AssistantDraft } from "@/components/AssistantDraft";
 import { getDraft } from "@/lib/coachAssistant";
 import { aiAvailable } from "@/lib/ai";
@@ -26,7 +28,7 @@ const ASSISTANT_NOTE: Record<string, string> = {
 
 export const metadata = { title: "My clients" };
 
-export default async function CoachHome({ searchParams }: { searchParams: Promise<{ draft?: string; assistant?: string; done?: string }> }) {
+export default async function CoachHome({ searchParams }: { searchParams: Promise<{ draft?: string; assistant?: string; done?: string; calendar?: string }> }) {
   const coach = await requireUser("COACH");
   const sp = await searchParams;
   const draft = sp.draft ? await getDraft(coach.id, sp.draft) : null;
@@ -47,6 +49,8 @@ export default async function CoachHome({ searchParams }: { searchParams: Promis
   const plain = (name: string) => name.replace(/\s*\((?:demo|Demo)[^)]*\)\s*$/, "").trim();
   const ai = aiAvailable();
   const zone = await zoneOf(coach);
+  const token = (await db.user.findUnique({ where: { id: coach.id }, select: { calendarToken: true } }))?.calendarToken;
+  const feed = token ? `${appUrl()}/calendar/${token}.ics` : null;
 
   return (
     <>
@@ -116,6 +120,38 @@ export default async function CoachHome({ searchParams }: { searchParams: Promis
         </summary>
         <p className="text-sm text-ink-mute mt-2 mb-4">Enter their name and email. If they are new, the app creates their account and gives you a temporary password to send them. Adding someone shares nothing with you. They choose what you can see.</p>
         <AddClientForm />
+      </details>
+
+      {/* The coach's own calendar link: every coaching and cohort session, kept up to date. */}
+      <details id="calendar" className="group/cal card scroll-mt-24" open={!!sp.calendar}>
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
+          <span className="min-w-0">
+            <span className="block h3">My calendar</span>
+            <span className="mt-0.5 block text-sm text-ink-mute">{feed ? "On. Your sessions are on your calendar." : "Put your sessions on the calendar you already use"}</span>
+          </span>
+          <span aria-hidden className="h-2.5 w-2.5 shrink-0 rotate-45 border-b-[1.6px] border-r-[1.6px] border-ink-mute transition group-open/cal:-rotate-[135deg]" />
+        </summary>
+        <p className="mt-3 text-[15px] text-ink-soft">Every session you book with a client, and every cohort session you facilitate. Book, move or cancel one here and your calendar follows.</p>
+        {feed ? (
+          <>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <a href={feed.replace(/^https?:/, "webcal:")} className="btn-quiet !px-4 !py-2 text-sm">Apple Calendar</a>
+              <a href={`https://calendar.google.com/calendar/render?cid=${encodeURIComponent(feed.replace(/^https?:/, "webcal:"))}`} target="_blank" rel="noopener" className="btn-quiet !px-4 !py-2 text-sm">Google Calendar</a>
+              <a href={`https://outlook.live.com/calendar/0/addfromweb?url=${encodeURIComponent(feed)}&name=${encodeURIComponent("Both Hands on the Wheel: coaching")}`} target="_blank" rel="noopener" className="btn-quiet !px-4 !py-2 text-sm">Outlook</a>
+              <CopyLink url={feed} />
+            </div>
+            <p className="mt-3 text-xs text-ink-mute">
+              This link is private. It shows your clients&apos; names and session times, never agendas, notes or anything they share. Don&apos;t pass it on.
+              Calendar apps check for changes on their own schedule, from a few minutes to about a day.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-4 text-sm">
+              <form action={setCoachCalendarLink}><input type="hidden" name="mode" value="RESET" /><button className="btn-link">Get a new link (the old one stops working)</button></form>
+              <form action={setCoachCalendarLink}><input type="hidden" name="mode" value="OFF" /><button className="text-ink-mute hover:text-alert">Turn off my calendar link</button></form>
+            </div>
+          </>
+        ) : (
+          <form action={setCoachCalendarLink} className="mt-4"><input type="hidden" name="mode" value="ON" /><Submit>Put it on my calendar</Submit></form>
+        )}
       </details>
     </>
   );
