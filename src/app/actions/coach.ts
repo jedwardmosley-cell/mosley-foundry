@@ -236,3 +236,14 @@ export async function deleteSession(fd: FormData) {
   revalidatePath(`/coach/${d.participantId}`);
   redirect(`/coach/${d.participantId}?saved=removed-session#sessions`);
 }
+
+/** Turns on the coach's private calendar link, gives it a new address, or turns it off. */
+export async function setCoachCalendarLink(fd: FormData) {
+  const c = await requireUser("COACH");
+  const { mode } = parse(z.object({ mode: z.enum(["ON", "RESET", "OFF"]) }), fd);
+  const { randomBytes } = await import("node:crypto");
+  await db.user.update({ where: { id: c.id }, data: { calendarToken: mode === "OFF" ? null : randomBytes(24).toString("base64url") } });
+  await audit(c, "coach.calendar_link", c.id, mode);
+  revalidatePath("/coach");
+  redirect("/coach?calendar=1#calendar");
+}

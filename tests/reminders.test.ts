@@ -10,7 +10,7 @@ import { parseDays, parseTime, scheduleOf, isScheduled, daysToText } from "../sr
 import { buildCalendar, fold, esc, routineEvent } from "../src/lib/ics";
 import { reminderDue, reminderEmail, localNow, weeklyDue, weeklyEmail } from "../src/lib/reminders";
 import { weeklyDigestFor } from "../src/lib/weekly";
-import { calendarFor } from "../src/lib/calendarFeed";
+import { calendarFor, coachCalendarFor } from "../src/lib/calendarFeed";
 
 test("schedule: reads days and times from older text entries", () => {
   assert.deepEqual(parseDays("Sunday 7 pm"), [0]);
@@ -114,6 +114,27 @@ test("calendar link: routines, people and sessions; never the journal, plan, ref
   assert.ok(!/PRIVATE DEMO JOURNAL|Coach-private|pushes back|five times out of seven|Private note/i.test(ics.replace(/\r\n /g, "")));
   await db.profile.update({ where: { userId: danaId }, data: { reminderBy: "EMAIL" } });
   assert.ok(!/SUMMARY:Daily check-in/.test(await calendarFor(danaId, "https://app")), "email-only reminders stay off the calendar");
+});
+
+test("coach calendar link: their sessions and cohort sessions, names and times only", async () => {
+  const coach = await db.user.findUniqueOrThrow({ where: { email: "coach@demo.bothhands.app" } });
+  const since = new Date(Date.now() - 30 * 864e5);
+  const mine = await db.coachingSession.findMany({ where: { coachId: coach.id, scheduledAt: { gte: since } }, include: { participant: true } });
+  assert.ok(mine.length > 0, "the demo coach has sessions");
+  const ics = (await coachCalendarFor(coach.id, "https://app")).replace(/\r\n /g, "");
+  assert.match(ics, /X-WR-CALNAME:Both Hands on the Wheel: coaching/);
+  assert.match(ics, /SUMMARY:Coaching: Dana Reyes/);
+  assert.ok(!/SUMMARY:Coaching: [^\r\n]*\(Demo\)/.test(ics), "no (Demo) in client names");
+  assert.match(ics, /URL:https:\/\/app\/coach\//);
+  for (const s of mine) {
+    for (const t of [s.agenda, s.coachNotes, s.commitments, s.participantPrep].filter((x) => x && x.length > 8)) assert.ok(!ics.includes(t.slice(0, 30)), "never an agenda, notes, commitments or the client's prep");
+  }
+  assert.ok(!/PRIVATE DEMO JOURNAL|Coach-private/i.test(ics));
+  const cohortSessions = await db.trainingSession.count({ where: { startsAt: { gte: since }, cohort: { members: { some: { userId: coach.id, role: "FACILITATOR" } } } } });
+  assert.equal((ics.match(/UID:cohort-session-/g) ?? []).length, cohortSessions, "every cohort session they facilitate");
+  // Another coach's sessions never appear.
+  const others = await db.coachingSession.findMany({ where: { coachId: { not: coach.id }, scheduledAt: { gte: since } }, select: { id: true } });
+  for (const o of others) assert.ok(!ics.includes(o.id));
 });
 
 const w = { weeklyOn: true, weeklySlot: "SUN_PM", timezone: "America/New_York", lastWeeklyOn: "" };
