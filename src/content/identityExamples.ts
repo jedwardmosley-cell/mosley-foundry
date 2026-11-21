@@ -19,7 +19,7 @@ export const IDENTITY_TESTS = [
   "Could it go on a to-do list? Then it's a behavior. Rewrite it.",
   "Could you finish it? Then it's a goal. Rewrite it.",
   "Does it lead to many behaviors? Identity does. A behavior leads to one.",
-  "Is it specific because of the change you're making, not because of an action?",
+  "Is it specific to the change you're making? An action doesn't count.",
 ];
 
 /** The author's definitions, used on screen and by the identity coach. */

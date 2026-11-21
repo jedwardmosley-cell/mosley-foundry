@@ -18,7 +18,7 @@ export const FORGE_OPENING = {
   /** About FORGE, in the author's words. */
   about: [
     "Habits don't fall apart from bad planning. They fall apart because the person behind the wheel isn't who they need to be yet. FORGE closes the distance between who you are right now and the person you keep saying you want to become.",
-    "Your destination, your reasons and your road belong to you. Nobody else is driving your trip. But every driver runs on the same five rules: where you're going, what it looks like as you get closer, why the trip matters, the distance between where you are and where you're headed, and the steadiness it takes to stay at the wheel until you get there.",
+    "Your destination, your reasons and your road belong to you. No one else is driving your trip. But every driver runs on the same five rules: where you're going, what it looks like as you get closer, why the trip matters, the distance between where you are and where you're headed, and the calm it takes to stay at the wheel until you get there.",
     "Who you are isn't a goal you check off. It's what steers every decision you make. Research on identity-based motivation by psychologist Daphna Oyserman finds that people stick with actions that feel like \"me\" and drop the ones that don't. Change the driver, and the driving follows.",
   ],
   /** Why it's called FORGE, in the author's words. */
