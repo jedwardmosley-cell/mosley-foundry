@@ -36,18 +36,17 @@ export function FiveSides({ profile, pathway, role, level, ai, teach = {}, rules
         <details className="mt-3 text-sm">
           <summary className="cursor-pointer text-link font-medium">About FORGE</summary>
           <div className="mt-3 space-y-4">
-            {opening?.core && <p className="text-[16px] leading-relaxed text-ink">{opening.core}</p>}
-            <p className="text-[15px] leading-relaxed text-ink-soft">{FORGE_OPENING.text}</p>
-            {opening?.forge && (
-              <div>
-                <p className="section-label">Why it&apos;s called FORGE</p>
-                <p className="mt-1 font-book text-[17px] leading-[1.55] text-heading">{opening.forge}</p>
-              </div>
-            )}
+            {FORGE_OPENING.about.map((t, i) => <p key={i} className={i === 0 ? "text-[16px] leading-relaxed text-ink" : "text-[15px] leading-relaxed text-ink-soft"}>{t}</p>)}
+            <div>
+              <p className="section-label">Why it&apos;s called FORGE</p>
+              <p className="mt-1 font-book text-[17px] leading-[1.55] text-heading">{FORGE_OPENING.why}</p>
+            </div>
             <div>
               <p className="section-label">Is it an identity?</p>
-              <ol className="mt-1 list-decimal pl-5 space-y-1 text-ink-soft">{IDENTITY_TESTS.map((t) => <li key={t}>{t}</li>)}</ol>
-              <p className="mt-2 text-ink-soft">The behaviors come next, in the Vehicle Controls and your 30 days.</p>
+              <p className="mt-1 text-ink-soft">{FORGE_OPENING.checksIntro}</p>
+              <ul className="mt-1 list-disc pl-5 space-y-1 text-ink-soft">{IDENTITY_TESTS.map((t) => <li key={t}>{t}</li>)}</ul>
+              <p className="mt-2 text-ink-soft">{FORGE_OPENING.checksExample}</p>
+              <p className="mt-2 text-ink-soft">{FORGE_OPENING.next}</p>
             </div>
           </div>
         </details>

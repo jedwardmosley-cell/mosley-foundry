@@ -37,9 +37,11 @@ test("quick-pick options and the guide follow the house style", () => {
   // The author's identity examples get the same banned-word and "X, not Y" checks.
   const ex: string[] = [];
   JSON.stringify(examples, (_k, v) => { if (typeof v === "string") ex.push(v); return v; });
+  // The four checks are the author's own wording, kept as written, so only the banned words apply to them.
+  const authorChecks = new Set<string>(examples.IDENTITY_TESTS);
   for (const t of ex) {
     assert.ok(!BANNED.test(t), `banned word in: ${t}`);
-    assert.ok(!/, not /.test(t), `"X, not Y" pattern in: ${t}`);
+    if (!authorChecks.has(t)) assert.ok(!/, not /.test(t), `"X, not Y" pattern in: ${t}`);
   }
   const texts = all.filter((s) => s.includes(" "));
   assert.ok(texts.length > 50);

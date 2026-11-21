@@ -33,7 +33,7 @@ export function reviewSets(): ReviewSet[] {
         { label: "Note under the kinds", items: [KIND_NOTE] },
         { label: "Page title and intro", items: [WHO_TITLE, WHO_INTRO] },
         { label: "Headings", items: Object.values(WHO_HEADINGS) },
-        { label: "FORGE opening", items: [FORGE_OPENING.line, FORGE_OPENING.text] },
+        { label: "FORGE opening", items: [FORGE_OPENING.line, ...FORGE_OPENING.about, FORGE_OPENING.why, FORGE_OPENING.checksIntro, FORGE_OPENING.checksExample, FORGE_OPENING.next] },
       ],
     },
     {
