@@ -8,6 +8,7 @@ import * as tone from "../src/lib/identityTone";
 import { FORGE_LINES } from "../src/content/forgeLines";
 import * as headline from "../src/lib/todayHeadline";
 import * as examples from "../src/content/identityExamples";
+import { FORGE_OPENING } from "../src/content/whoIAm";
 
 const BANNED = /\b(steady|steadi\w*|drift\w*|rhythm\w*|navigat\w*|resonat\w*|lean into|under pressure|accumulat\w*|compound\w*|holds?|held|actually|honestly|genuinely|nobody|everybody)\b/i;
 
@@ -32,6 +33,7 @@ test("quick-pick options and the guide follow the house style", () => {
   walk(identity);
   walk(tone);
   walk(FORGE_LINES);
+  walk(FORGE_OPENING);
   walk(headline.MOOD_LABEL);
   for (const o of [{ cycle: false, finished: false, day: 0 }, { cycle: true, finished: true, day: 30 }, { cycle: true, finished: false, day: 12 }]) walk(headline.todayHeadline(o));
   // The author's identity examples get the same banned-word and "X, not Y" checks.

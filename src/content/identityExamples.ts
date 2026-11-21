@@ -17,9 +17,9 @@ export const IDENTITY_EXAMPLES_STATUS: "draft" | "approved" = "draft";
 /** The author's four tests for an identity statement. */
 export const IDENTITY_TESTS = [
   "Could it go on a to-do list? Then it's a behavior. Rewrite it.",
-  "Could you finish it? Then it's a goal.",
-  "Does it produce many behaviors, or only one? Identity produces many.",
-  "Is it specific because of the shift you are making, and not because of an action?",
+  "Could you finish it? Then it's a goal. Rewrite it.",
+  "Does it lead to many behaviors? Identity does. A behavior leads to one.",
+  "Is it specific to the change you're making? An action doesn't count.",
 ];
 
 /** The author's definitions, used on screen and by the identity coach. */
