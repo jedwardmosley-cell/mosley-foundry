@@ -85,6 +85,11 @@ const submitAndWait = async (page: Page, selector: string) => {
 
 (async () => {
   const browser = await chromium.launch();
+  // A real (non-demo) administrator for work on real accounts. The demo admin only ever touches demo people.
+  const ADMIN = "e2e-admin@example.test";
+  const ADMIN_PW = "e2e-admin-password-1";
+  const demoOrg = (await db.user.findUniqueOrThrow({ where: { email: "admin@demo.bothhands.app" } })).orgId;
+  await db.user.upsert({ where: { email: ADMIN }, create: { email: ADMIN, name: "E2E Admin", role: "ADMIN", isDemo: false, orgId: demoOrg, passwordHash: hashPassword(ADMIN_PW) }, update: { status: "ACTIVE", isDemo: false } });
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
   const page: Page = await ctx.newPage();
   const email = `e2e-${Date.now()}@example.test`;
@@ -105,7 +110,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     // the administrator approves on the People page
     const ac = await browser.newContext();
     const ap: Page = await ac.newPage();
-    await login(ap, "admin@demo.bothhands.app", "demo-password-1");
+    await login(ap, ADMIN, ADMIN_PW);
     await ap.goto(`${BASE}/admin`);
     await ap.waitForSelector("text=waiting for your approval");
     // and a banner at the top of every admin page until it's handled
@@ -1238,7 +1243,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await db.journalEntry.create({ data: { userId: victim.id, body: "E2E-DELETE journal" } });
     const ac = await browser.newContext();
     const ap: Page = await ac.newPage();
-    await login(ap, "admin@demo.bothhands.app");
+    await login(ap, ADMIN, ADMIN_PW);
     await ap.goto(`${BASE}/admin/people`);
     const row = ap.locator(`#u-${victim.id}`);
     await row.locator("summary", { hasText: "Delete permanently" }).click();
@@ -1252,7 +1257,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await Promise.all([ap.waitForURL(/deleted=1/), row2.locator('button:has-text("Delete this account")').click()]);
     assert.equal(await db.user.count({ where: { id: victim.id } }), 0, "deleted");
     assert.equal(await db.journalEntry.count({ where: { userId: victim.id } }), 0, "and everything in it");
-    assert.equal(await ap.locator('#u-' + (await db.user.findUniqueOrThrow({ where: { email: "admin@demo.bothhands.app" } })).id + ' summary:has-text("Delete permanently")').count(), 0, "never your own account");
+    assert.equal(await ap.locator('#u-' + (await db.user.findUniqueOrThrow({ where: { email: ADMIN } })).id + ' summary:has-text("Delete permanently")').count(), 0, "never your own account");
     await ac.close();
     // five wrong passwords in a row, then the sixth try waits even with the right one
     const lc = await browser.newContext();
@@ -1338,7 +1343,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     const shown = `RENEW-E2E-${Date.now() % 100000}`;
     const ac = await browser.newContext();
     const ap: Page = await ac.newPage();
-    await login(ap, "admin@demo.bothhands.app");
+    await login(ap, ADMIN, ADMIN_PW);
     await ap.goto(`${BASE}/admin/codes`);
     await ap.fill('input[name="shown"]', shown);
     await ap.fill('input[name="label"]', "E2E group");
@@ -1409,6 +1414,46 @@ const submitAndWait = async (page: Page, selector: string) => {
     } finally {
       await db.user.update({ where: { id: dana.id }, data: { edition: "BOTH_HANDS" } });
       await c.close();
+    }
+  });
+
+  await check("12f. the demo stays sealed off: demo accounts never see or touch real people", async () => {
+    const real = await db.user.create({ data: { email: `e2e-real-${Date.now()}@example.test`, name: "E2E Real Person", passwordHash: "x", role: "PARTICIPANT", status: "PENDING", profile: { create: {} } } });
+    try {
+      // the demo admin: no real sign-up on People, no waiting banner, no real codes
+      const ac = await browser.newContext();
+      const ap: Page = await ac.newPage();
+      await login(ap, "admin@demo.bothhands.app");
+      await ap.goto(`${BASE}/admin/people`);
+      await ap.locator("main h1").first().waitFor();
+      assert.ok(!(await ap.content()).includes(real.email), "a real sign-up never shows to the demo admin");
+      assert.equal(await ap.locator("main a[href='/admin/people']", { hasText: /waiting/ }).count(), 0, "no banner about real sign-ups");
+      await ap.goto(`${BASE}/admin/codes`);
+      await ap.locator("text=the demo can't see or make them").first().waitFor();
+      assert.equal(await ap.locator('input[name="shown"]').count(), 0, "no form to make a code");
+      await ac.close();
+      // the real admin still sees it
+      const rc = await browser.newContext();
+      const rp: Page = await rc.newPage();
+      await login(rp, ADMIN, ADMIN_PW);
+      await rp.goto(`${BASE}/admin/people`);
+      await rp.locator(`text=${real.email}`).first().waitFor();
+      await rc.close();
+      // the demo coach can't pull a real person in, or make an account at a real address
+      const cc = await browser.newContext();
+      const cp: Page = await cc.newPage();
+      await login(cp, "coach@demo.bothhands.app");
+      await cp.goto(`${BASE}/coach`);
+      await cp.click("#add-client > summary");
+      await cp.fill('input[name="name"]', "Someone Real");
+      await cp.fill('input[name="email"]', "someone.real@gmail.com");
+      await cp.click('button:has-text("Add client")');
+      await cp.locator("text=In the demo, use a made-up address").first().waitFor();
+      assert.equal(await db.user.count({ where: { email: "someone.real@gmail.com" } }), 0, "no account made at a real address");
+      assert.equal((await db.user.findUniqueOrThrow({ where: { id: real.id } })).status, "PENDING", "the real sign-up is untouched");
+      await cc.close();
+    } finally {
+      await db.user.delete({ where: { id: real.id } });
     }
   });
 

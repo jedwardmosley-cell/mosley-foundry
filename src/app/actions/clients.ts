@@ -26,11 +26,15 @@ export async function addClient(_: ClientState, fd: FormData): Promise<ClientSta
   if (!r.success) return { error: r.error.issues[0].message, values };
   const { name, email } = r.data;
   if (email === coach.email) return { error: "That is your own email.", values };
+  // A demo coach works only with made-up people, so a real account can't be pulled in from the demo.
+  const { isDemoAddress, DEMO_ADDRESS_NOTE } = await import("@/lib/demo");
+  if (coach.isDemo && !isDemoAddress(email)) return { error: DEMO_ADDRESS_NOTE, values };
 
   let user = await db.user.findUnique({ where: { email } });
   let temp: { email: string; password: string } | undefined;
   if (user) {
     if (user.role !== "PARTICIPANT") return { error: "That email belongs to a coach or administrator account.", values };
+    if (user.isDemo !== coach.isDemo) return { error: "That person belongs to another organization.", values };
     if (user.orgId && user.orgId !== coach.orgId) return { error: "That person belongs to another organization.", values };
     if (user.status === "DISABLED" || user.status === "DECLINED") return { error: "That account isn't active. Ask your program administrator.", values };
     // A coach adding someone who signed up is the invitation: they come straight in.
@@ -38,7 +42,7 @@ export async function addClient(_: ClientState, fd: FormData): Promise<ClientSta
   } else {
     const password = randomBytes(9).toString("base64url");
     user = await db.user.create({
-      data: { email, name, role: "PARTICIPANT", orgId: coach.orgId, passwordHash: hashPassword(password), mustChangePassword: true, profile: { create: {} } },
+      data: { email, name, role: "PARTICIPANT", orgId: coach.orgId, isDemo: coach.isDemo, passwordHash: hashPassword(password), mustChangePassword: true, profile: { create: {} } },
     });
     temp = { email, password };
   }

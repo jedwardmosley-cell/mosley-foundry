@@ -12,12 +12,21 @@ const MADE: Record<string, string> = {
   "1": "Code made. Hand it out.",
   short: "A code needs at least four letters or numbers.",
   taken: "That code already exists. Pick another.",
+  demo: "The demo can't make or change codes.",
 };
 const STATE: Record<string, string> = { off: "Off", expired: "Ended", full: "Used up" };
 
 export default async function AccessCodes({ searchParams }: { searchParams: Promise<{ made?: string }> }) {
-  await requireUser("ADMIN");
+  const a = await requireUser("ADMIN");
   const sp = await searchParams;
+  // Codes open the real app. The demo admin sees how the page works, never the real codes, and can't make one.
+  if (a.isDemo) {
+    return (
+      <PageHeader eyebrow="Editions" title="Access codes">
+        This is where the administrator makes the codes that open The Road to Renewal, one per church, group or cohort, each with an optional limit and last day. Codes open the real app, so the demo can&apos;t see or make them.
+      </PageHeader>
+    );
+  }
   const codes = await db.accessCode.findMany({ orderBy: { createdAt: "desc" } });
   const counts = await db.user.groupBy({ by: ["edition"], _count: true });
   const renewal = counts.find((c) => c.edition === "RENEWAL")?._count ?? 0;

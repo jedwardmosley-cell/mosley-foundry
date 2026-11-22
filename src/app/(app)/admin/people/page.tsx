@@ -18,9 +18,9 @@ export default async function People({ searchParams }: { searchParams: Promise<{
   const sp = await searchParams;
   const org = a.orgId ?? "__none__";
   const [waiting, people] = await Promise.all([
-    db.user.findMany({ where: { status: "PENDING", isDemo: false, OR: [{ orgId: null }, { orgId: org }] }, orderBy: { createdAt: "asc" }, select: { id: true, name: true, email: true, createdAt: true } }),
+    db.user.findMany({ where: { status: "PENDING", isDemo: a.isDemo, OR: [{ orgId: null }, { orgId: org }] }, orderBy: { createdAt: "asc" }, select: { id: true, name: true, email: true, createdAt: true } }),
     db.user.findMany({
-      where: { status: { not: "PENDING" }, OR: [{ orgId: org }, { orgId: null, status: "DECLINED" }] },
+      where: { status: { not: "PENDING" }, isDemo: a.isDemo, OR: [{ orgId: org }, { orgId: null, status: "DECLINED" }] },
       orderBy: [{ role: "asc" }, { name: "asc" }],
       select: { id: true, name: true, email: true, role: true, status: true, isDemo: true, approvedBy: true, coaching: { where: { active: true }, select: { coach: { select: { name: true } } } } },
     }),
