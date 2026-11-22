@@ -1,3 +1,4 @@
+import { FaithCheckIn } from "@/components/FaithCheckIn";
 import Link from "next/link";
 import { NAMES } from "@/content/names";
 import { requireUser } from "@/lib/auth";
@@ -379,6 +380,7 @@ export default async function TonePage({ searchParams }: { searchParams: Promise
       </section>
       </>)}
       <p className="mt-8 text-xs text-ink-mute">Private. Your coach doesn&apos;t see anything here. Set the Tone is a coach, not therapy.</p>
+      <FaithCheckIn chapter={/center console/i} />
     </>
   );
 }

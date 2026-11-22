@@ -1,3 +1,4 @@
+import { FaithCheckIn } from "@/components/FaithCheckIn";
 import { requireUser } from "@/lib/auth";
 import { NAMES } from "@/content/names";
 import { db } from "@/lib/db";
@@ -197,6 +198,7 @@ export default async function ReflectPage() {
           )}
         </div>
       )}
+      <FaithCheckIn chapter={/mirrors/i} />
     </>
   );
 }

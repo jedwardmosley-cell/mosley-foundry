@@ -1,3 +1,4 @@
+import { FaithCheckIn } from "@/components/FaithCheckIn";
 import Link from "next/link";
 import { NAMES } from "@/content/names";
 import { requireUser } from "@/lib/auth";
@@ -82,6 +83,7 @@ export default async function FocusPage() {
           </ul>
         </section>
       )}
+      <FaithCheckIn chapter={/windshield/i} />
     </>
   );
 }
