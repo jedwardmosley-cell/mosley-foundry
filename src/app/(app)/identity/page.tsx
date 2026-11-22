@@ -56,9 +56,9 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
         <p className="mb-4 rounded-2xl bg-gold-soft px-4 py-3 text-sm text-ink">
           Still open:{" "}
           {gaps.map((g, i) => (
-            <span key={g}>{i > 0 && ", "}<a href={g === "your seat" ? "#role" : g === "how big a turn" ? "#kind" : "#statement"} className="btn-link">{g}</a></span>
+            <span key={g}>{i > 0 && ", "}<a href={g === "your seat" ? "#seat" : g === "how big a turn" ? "#kind" : "#statement-part"} className="btn-link">{g}</a></span>
           ))}
-          . This step is done when all three are saved.
+          . This step is done when your seat, how big a turn and My statement are all saved.
         </p>
       )}
       {saved && <p role="status" className="mb-4 notice">Saved. Next, <Link href="/assessment" className="btn-link">see where you are</Link>.</p>}

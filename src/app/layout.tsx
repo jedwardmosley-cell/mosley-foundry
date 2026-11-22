@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   title: { default: "Both Hands on the Wheel", template: "%s | Both Hands on the Wheel" },
   description: "Lead yourself. Develop others. Build a life by design. A personal leadership and coaching platform by Jason Mosley, Mosley Foundry.",
 };
-export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: [{ media: "(prefers-color-scheme: light)", color: "#F5F1EA" }, { media: "(prefers-color-scheme: dark)", color: "#000000" }] };
+export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: [{ media: "(prefers-color-scheme: light)", color: "#F5F1EA" }, { media: "(prefers-color-scheme: dark)", color: "#000000" }] };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

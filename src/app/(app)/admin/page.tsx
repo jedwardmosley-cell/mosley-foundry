@@ -12,7 +12,7 @@ export const metadata = { title: "Programs" };
 export default async function AdminHome() {
   const a = await requireUser("ADMIN");
   const org = a.orgId ? await db.organization.findUnique({ where: { id: a.orgId } }) : null;
-  const waiting = await db.user.count({ where: { status: "PENDING", isDemo: false, OR: [{ orgId: null }, { orgId: a.orgId ?? "__none__" }] } });
+  const waiting = await db.user.count({ where: { status: "PENDING", isDemo: a.isDemo, OR: [{ orgId: null }, { orgId: a.orgId ?? "__none__" }] } });
   const cohorts = await db.cohort.findMany({ where: { orgId: a.orgId ?? "__none__" }, orderBy: { startDate: "desc" }, include: { _count: { select: { members: true } } } });
   return (
     <>

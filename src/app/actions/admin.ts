@@ -11,6 +11,7 @@ import { randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
 import { audit } from "@/lib/access";
 import { emailAvailable, sendEmail, appUrl } from "@/lib/email";
+import { isDemoAddress, DEMO_ADDRESS_NOTE } from "@/lib/demo";
 
 const admin = () => requireUser("ADMIN");
 
@@ -51,12 +52,14 @@ export async function enroll(fd: FormData): Promise<void> {
   const a = await admin();
   const d = parse(z.object({ cohortId: z.string(), name: z.string().trim().min(1).max(120), email: z.string().trim().toLowerCase().email(), role: z.enum(["PARTICIPANT", "FACILITATOR"]) }), fd);
   await cohortInOrg(d.cohortId, a.orgId);
+  if (a.isDemo && !isDemoAddress(d.email)) throw new Error(DEMO_ADDRESS_NOTE);
   let user = await db.user.findUnique({ where: { email: d.email } });
+  if (user && user.isDemo !== a.isDemo) throw new Error("That person belongs to another organization.");
   let tempPassword: string | null = null;
   if (!user) {
     tempPassword = randomBytes(9).toString("base64url");
     user = await db.user.create({
-      data: { email: d.email, name: d.name, passwordHash: hashPassword(tempPassword), mustChangePassword: true, role: d.role === "FACILITATOR" ? "COACH" : "PARTICIPANT", orgId: a.orgId, profile: { create: { pathway: "LEADING_OTHERS" } } },
+      data: { email: d.email, name: d.name, isDemo: a.isDemo, passwordHash: hashPassword(tempPassword), mustChangePassword: true, role: d.role === "FACILITATOR" ? "COACH" : "PARTICIPANT", orgId: a.orgId, profile: { create: { pathway: "LEADING_OTHERS" } } },
     });
   } else if (user.orgId && user.orgId !== a.orgId) {
     throw new Error("That person belongs to another organization.");
@@ -125,9 +128,11 @@ export async function setAlsoCoach(fd: FormData) {
  * An account the administrator may act on: someone in their organization, or a sign-up that has
  * no organization yet. Never another administrator, and never themselves.
  */
-async function manageable(a: { id: string; orgId: string | null }, userId: string) {
+async function manageable(a: { id: string; orgId: string | null; isDemo: boolean }, userId: string) {
   const u = await db.user.findUnique({ where: { id: userId } });
   if (!u || u.id === a.id || u.role === "ADMIN") throw new Error("Not found");
+  // The demo admin manages demo people only, and a real admin never touches the demo's fictional ones.
+  if (u.isDemo !== a.isDemo) throw new Error("Not found");
   if (u.orgId && u.orgId !== a.orgId) throw new Error("Not found");
   return u;
 }
@@ -198,6 +203,7 @@ export async function deleteAccount(fd: FormData) {
 /** Makes an access code that opens an edition, like The Road to Renewal. */
 export async function createAccessCode(fd: FormData) {
   const a = await admin();
+  if (a.isDemo) redirect("/admin/codes?made=demo"); // codes open the real app, so the demo can't make them
   const { normalizeCode, EDITIONS } = await import("@/lib/edition");
   const d = parse(z.object({
     shown: z.string().trim().min(4).max(40),
@@ -220,6 +226,7 @@ export async function createAccessCode(fd: FormData) {
 /** Turns a code off (nobody new can use it) or back on. People who already used it keep their edition. */
 export async function setAccessCodeActive(fd: FormData) {
   const a = await admin();
+  if (a.isDemo) redirect("/admin/codes?made=demo");
   const d = parse(z.object({ id: z.string(), active: z.enum(["on", "off"]) }), fd);
   await db.accessCode.update({ where: { id: d.id }, data: { active: d.active === "on" } });
   await audit(a, "admin.access_code_" + d.active, undefined, d.id);

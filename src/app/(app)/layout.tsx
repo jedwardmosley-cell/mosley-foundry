@@ -24,7 +24,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // Administrators see new sign-ups at the top of every page until they act on them.
   // Everyone's browser time zone is kept, so session times and reminders are in their own time.
   const zone = await zoneOf(user);
-  const waiting = user.role === "ADMIN" ? await db.user.count({ where: { status: "PENDING", isDemo: false, OR: [{ orgId: null }, { orgId: user.orgId ?? "__none__" }] } }) : 0;
+  const waiting = user.role === "ADMIN" ? await db.user.count({ where: { status: "PENDING", isDemo: user.isDemo, OR: [{ orgId: null }, { orgId: user.orgId ?? "__none__" }] } }) : 0;
   return (
     <Shell user={user} journey={waiting > 0 ? (
       <Link href="/admin/people" className="mb-6 flex items-center justify-between gap-3 border-l-4 border-gold bg-gold-soft px-4 py-3 text-[15px] text-ink transition hover:text-link">
