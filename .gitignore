@@ -10,3 +10,5 @@ prisma/*.db-journal
 # Licensed, proprietary content pack (manuscript + workbook derived). Never commit.
 src/content/licensed/
 test-results/
+
+__pycache__/
