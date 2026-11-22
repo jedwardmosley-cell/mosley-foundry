@@ -23,10 +23,18 @@ export type Chapter = {
   refuel: string[];
   reflect: string[];
   roadTest: string[];
+  /** The Road to Renewal: the chapter's closing verse and prayer. */
+  faithCheckIn?: { verse: string; reference: string; prayer: string[] };
+  /** The Road to Renewal, chapter 9: the Ten Pathways of Promise and their Detours of Destruction. */
+  pathways?: { number: number; name: string; detour: string }[];
 };
 
 export type ContentPack = {
   kind: "licensed" | "public";
+  /** Which edition this book is for. Absent means Both Hands on the Wheel. */
+  edition?: string;
+  /** The Road to Renewal: the FORGE Process, each letter as a posture before God, with its questions. */
+  faith?: { forge: Partial<Record<PillarKey, { name: string; text: string[]; questions: string[] }>> };
   version: number;
   /** "source" = taken from the author's documents. "draft" = placeholder awaiting author review. */
   assessmentStatus: "source" | "draft";

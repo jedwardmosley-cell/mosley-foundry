@@ -9,6 +9,13 @@ export const BOOK = {
   url: "https://a.co/d/00SJkS0r",
 };
 
+/** The book behind each edition. The Renewal link is empty until the author adds one; the nudges then show plain text. */
+export const BOOKS: Record<string, { title: string; author: string; url: string }> = {
+  BOTH_HANDS: BOOK,
+  RENEWAL: { title: "The Road to Renewal", author: "Jason Mosley", url: "" },
+};
+export const bookFor = (edition?: string | null) => BOOKS[edition ?? ""] ?? BOOK;
+
 export const BOOK_NUDGES = {
   /** After a passage from the book. */
   passage: "There's more in the full chapter of",
