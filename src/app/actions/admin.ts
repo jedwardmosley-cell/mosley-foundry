@@ -194,3 +194,35 @@ export async function deleteAccount(fd: FormData) {
   revalidatePath("/admin/people");
   redirect("/admin/people?deleted=1");
 }
+
+/** Makes an access code that opens an edition, like The Road to Renewal. */
+export async function createAccessCode(fd: FormData) {
+  const a = await admin();
+  const { normalizeCode, EDITIONS } = await import("@/lib/edition");
+  const d = parse(z.object({
+    shown: z.string().trim().min(4).max(40),
+    edition: z.enum(Object.keys(EDITIONS).filter((k) => k !== "BOTH_HANDS") as [string, ...string[]]),
+    label: text(200),
+    maxUses: z.string().optional(),
+    expiresOn: z.string().optional(),
+  }), fd);
+  const code = normalizeCode(d.shown);
+  if (code.length < 4) redirect("/admin/codes?made=short");
+  if (await db.accessCode.findUnique({ where: { code } })) redirect("/admin/codes?made=taken");
+  const max = d.maxUses && /^\d+$/.test(d.maxUses) && Number(d.maxUses) > 0 ? Number(d.maxUses) : null;
+  const ends = d.expiresOn && /^\d{4}-\d{2}-\d{2}$/.test(d.expiresOn) ? new Date(`${d.expiresOn}T23:59:59`) : null;
+  await db.accessCode.create({ data: { code, shown: d.shown.toUpperCase(), edition: d.edition, label: d.label, maxUses: max, expiresAt: ends, createdBy: a.name } });
+  await audit(a, "admin.access_code_create", undefined, `${d.edition} ${d.shown.toUpperCase()}`);
+  revalidatePath("/admin/codes");
+  redirect("/admin/codes?made=1");
+}
+
+/** Turns a code off (nobody new can use it) or back on. People who already used it keep their edition. */
+export async function setAccessCodeActive(fd: FormData) {
+  const a = await admin();
+  const d = parse(z.object({ id: z.string(), active: z.enum(["on", "off"]) }), fd);
+  await db.accessCode.update({ where: { id: d.id }, data: { active: d.active === "on" } });
+  await audit(a, "admin.access_code_" + d.active, undefined, d.id);
+  revalidatePath("/admin/codes");
+  redirect("/admin/codes");
+}

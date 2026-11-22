@@ -9,7 +9,7 @@ const COOKIE = "bhow_session";
 const SESSION_DAYS = 14;
 
 export type Role = "PARTICIPANT" | "COACH" | "ADMIN";
-export type CurrentUser = { id: string; email: string; name: string; role: Role; orgId: string | null; isDemo: boolean; alsoCoach: boolean; mustChangePassword: boolean };
+export type CurrentUser = { id: string; email: string; name: string; role: Role; orgId: string | null; isDemo: boolean; alsoCoach: boolean; mustChangePassword: boolean; edition: string };
 
 
 const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
@@ -43,7 +43,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   const u = s.user;
   // Only an active account is signed in. Pending, declined or turned-off accounts get nothing.
   if (u.status !== "ACTIVE") return null;
-  return { id: u.id, email: u.email, name: u.name, role: u.role as Role, orgId: u.orgId, isDemo: u.isDemo, alsoCoach: u.alsoCoach, mustChangePassword: u.mustChangePassword };
+  return { id: u.id, email: u.email, name: u.name, role: u.role as Role, orgId: u.orgId, isDemo: u.isDemo, alsoCoach: u.alsoCoach, mustChangePassword: u.mustChangePassword, edition: u.edition };
 }
 
 /** Use at the top of every page and server action. Redirects when not signed in or wrong role. */

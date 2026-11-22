@@ -15,7 +15,7 @@ import { seasonForNewCycle } from "@/lib/season";
 import { activeFocuses } from "@/lib/focusData";
 import { freeSlot } from "@/lib/focus";
 import type { PillarKey } from "@/content/types";
-import { SHARE_SCOPES } from "@/lib/access";
+import { SHARE_SCOPES, audit } from "@/lib/access";
 import { CHECKIN_TAGS } from "@/content/options";
 
 const participant = () => requireUser("PARTICIPANT");
@@ -667,4 +667,35 @@ export async function startOver(_prev: StartOverState, fd: FormData): Promise<St
   ]);
   revalidatePath("/", "layout");
   redirect("/onboarding");
+}
+
+/**
+ * Opens an edition with an access code. Five wrong codes in 15 minutes and the box waits, so codes can't be guessed.
+ * The code is checked and used up in one step, so two people can't both take the last place on a code.
+ */
+export async function redeemAccessCode(fd: FormData) {
+  const u = await requireUser("PARTICIPANT");
+  const { normalizeCode, codeProblem } = await import("@/lib/edition");
+  const raw = String(fd.get("code") ?? "").slice(0, 64);
+  const back = fd.get("back") === "settings" ? "/settings" : "/onboarding";
+  const code = normalizeCode(raw);
+  const key = `code:${u.id}`;
+  const since = new Date(Date.now() - 15 * 60 * 1000);
+  if ((await db.loginAttempt.count({ where: { email: key, ok: false, at: { gte: since } } })) >= 5) redirect(`${back}?code=wait#renewal`);
+  const row = code ? await db.accessCode.findUnique({ where: { code } }) : null;
+  const problem = codeProblem(row);
+  if (problem || !row) {
+    await db.loginAttempt.create({ data: { email: key, ok: false } });
+    redirect(`${back}?code=${problem ?? "unknown"}#renewal`);
+  }
+  const taken = await db.accessCode.updateMany({
+    where: { id: row.id, active: true, ...(row.maxUses != null ? { uses: { lt: row.maxUses } } : {}) },
+    data: { uses: { increment: 1 } },
+  });
+  if (!taken.count) redirect(`${back}?code=full#renewal`);
+  await db.user.update({ where: { id: u.id }, data: { edition: row.edition } });
+  await db.loginAttempt.deleteMany({ where: { email: key } });
+  await audit(u, "edition.redeem", u.id, `${row.edition} ${row.shown || row.code}`);
+  revalidatePath("/", "layout");
+  redirect(back === "/settings" ? "/settings?code=ok#renewal" : "/onboarding?code=ok#renewal");
 }

@@ -1334,6 +1334,54 @@ const submitAndWait = async (page: Page, selector: string) => {
     await cc.close();
   });
 
+  await check("12d. The Road to Renewal: the admin makes a code, a new client opens it, and the code runs out", async () => {
+    const shown = `RENEW-E2E-${Date.now() % 100000}`;
+    const ac = await browser.newContext();
+    const ap: Page = await ac.newPage();
+    await login(ap, "admin@demo.bothhands.app");
+    await ap.goto(`${BASE}/admin/codes`);
+    await ap.fill('input[name="shown"]', shown);
+    await ap.fill('input[name="label"]', "E2E group");
+    await ap.fill('input[name="maxUses"]', "1");
+    await Promise.all([ap.waitForURL(/made=1/), ap.click('button:has-text("Make the code")')]);
+    await ap.locator(`text=${shown}`).first().waitFor();
+    await ac.close();
+
+    const pw = hashPassword("renewal-password-1");
+    const mk = (n: string) => db.user.create({ data: { email: `e2e-renew-${n}-${Date.now()}@example.test`, name: `Renew ${n} (E2E)`, role: "PARTICIPANT", passwordHash: pw, profile: { create: {} } } });
+    const [first, second] = await Promise.all([mk("a"), mk("b")]);
+
+    const pc = await browser.newContext();
+    const pp: Page = await pc.newPage();
+    await login(pp, first.email, "renewal-password-1");
+    await pp.goto(`${BASE}/onboarding`);
+    await pp.locator("#renewal").waitFor();
+    // a wrong code says so and changes nothing
+    await pp.fill("#renewal input[name=code]", "NOT-A-CODE");
+    await Promise.all([pp.waitForURL(/code=unknown/), pp.click('#renewal button:has-text("Open it")')]);
+    assert.equal((await db.user.findUniqueOrThrow({ where: { id: first.id } })).edition, "BOTH_HANDS");
+    // the real code, typed loosely, opens it
+    await pp.fill("#renewal input[name=code]", shown.toLowerCase().replace(/-/g, " "));
+    await Promise.all([pp.waitForURL(/code=ok/), pp.click('#renewal button:has-text("Open it")')]);
+    assert.equal((await db.user.findUniqueOrThrow({ where: { id: first.id } })).edition, "RENEWAL");
+    await pp.locator("text=You're in The Road to Renewal").first().waitFor();
+    assert.match(await pp.title(), /The Road to Renewal/);
+    assert.ok(await pp.locator(".edition-renewal").count(), "the Renewal colors are on");
+    await pc.close();
+
+    // the code allowed one person, so the next one is turned away
+    const qc = await browser.newContext();
+    const qp: Page = await qc.newPage();
+    await login(qp, second.email, "renewal-password-1");
+    await qp.goto(`${BASE}/onboarding`);
+    await qp.fill("#renewal input[name=code]", shown);
+    await Promise.all([qp.waitForURL(/code=full/), qp.click('#renewal button:has-text("Open it")')]);
+    assert.equal((await db.user.findUniqueOrThrow({ where: { id: second.id } })).edition, "BOTH_HANDS");
+    assert.match(await qp.title(), /Both Hands on the Wheel/);
+    await qc.close();
+    await db.user.deleteMany({ where: { id: { in: [first.id, second.id] } } });
+  });
+
   await check("desktop layout renders", async () => {
     await logout(page);
     const desk = await browser.newPage({ viewport: { width: 1280, height: 900 } });
