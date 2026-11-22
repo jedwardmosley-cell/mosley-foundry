@@ -1,12 +1,20 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { requireUser } from "@/lib/auth";
+import { requireUser, getCurrentUser } from "@/lib/auth";
+import type { Metadata } from "next";
+import { editionOf } from "@/lib/edition";
 import { Shell } from "@/components/Shell";
 import { JourneyBar } from "@/components/JourneyBar";
 import { getJourney, JOURNEY_STEPS } from "@/lib/journey";
 import { TimezoneSync } from "@/components/Timezone";
 import { zoneOf } from "@/lib/userZone";
+
+/** The browser tab carries the edition's name. */
+export async function generateMetadata(): Promise<Metadata> {
+  const name = editionOf((await getCurrentUser())?.edition).name;
+  return { title: { default: name, template: `%s | ${name}` } };
+}
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();

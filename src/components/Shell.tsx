@@ -4,6 +4,7 @@ import type { CurrentUser } from "@/lib/auth";
 import { NavLink } from "./NavLink";
 import { BrandMark } from "./BrandMark";
 import { signOut } from "@/app/actions/auth";
+import { editionOf } from "@/lib/edition";
 
 // Client menu, in journey order. On the phone, the journey bar up top covers the four steps and the Mirrors,
 // so the tab bar holds what it does not: the Dashboard, People, Coach, Set the Tone and More (in `tabOrder`).
@@ -34,14 +35,17 @@ const ADMIN_NAV = [
   { href: "/admin/people", label: "People", mobile: true },
   { href: "/admin/reports", label: "Reports", mobile: true },
   { href: "/admin/content", label: "Content review", tab: "Review" },
+  { href: "/admin/codes", label: "Access codes", tab: "Codes" },
 ];
 
 export function Shell({ user, children, journey }: { user: CurrentUser; children: ReactNode; journey?: ReactNode }) {
+  // The edition sets the name and the colors. Everything else is the same app.
+  const ed = editionOf(user.edition);
   const nav = user.role === "COACH" ? [...COACH_NAV, GUIDE_TAB] : user.role === "ADMIN" ? (user.alsoCoach ? [...ADMIN_NAV, ...COACH_NAV, GUIDE_TAB] : [...ADMIN_NAV, GUIDE_TAB]) : PARTICIPANT_NAV;
   return (
-    <div className="min-h-screen md:flex">
+    <div className={`min-h-screen md:flex ${ed.className}`}>
       <aside className="hidden md:flex md:w-64 md:flex-col md:px-5 md:py-7 md:sticky md:top-0 md:h-screen md:border-r md:border-line/50">
-        <Brand />
+        <Brand name={ed.name} tagline={ed.tagline} />
         <nav className="mt-8 flex-1 space-y-0.5 overflow-y-auto" aria-label="Main">
           {(nav as NavItem[]).filter((n) => n.desktop !== false).map((n, i, all) => (
             <div key={n.href + n.label}>
@@ -55,7 +59,7 @@ export function Shell({ user, children, journey }: { user: CurrentUser; children
 
       <div className="flex-1 min-w-0">
         <header className="md:hidden flex items-center justify-between px-4 py-2.5 sticky top-0 z-20 bg-paper border-b border-line/50">
-          <Brand compact />
+          <Brand compact name={ed.name} tagline={ed.tagline} />
           <AccountMenu user={user} />
         </header>
         {user.isDemo && (
@@ -83,13 +87,13 @@ export function Shell({ user, children, journey }: { user: CurrentUser; children
   );
 }
 
-function Brand({ compact = false }: { compact?: boolean }) {
+function Brand({ compact = false, name, tagline }: { compact?: boolean; name: string; tagline: string }) {
   return (
     <Link href="/" className="flex items-center gap-2.5">
       <BrandMark size={compact ? 26 : 30} className="text-heading shrink-0" />
       <span>
-        <span className="block font-sans font-extrabold text-heading text-[18px] leading-none tracking-[-0.01em]">Both Hands on the Wheel</span>
-        {!compact && <span className="block mt-1.5 text-[13px] text-ink-mute">Mosley Foundry</span>}
+        <span className="block font-sans font-extrabold text-heading text-[18px] leading-none tracking-[-0.01em]">{name}</span>
+        {!compact && <span className="block mt-1.5 text-[13px] text-ink-mute">{tagline}</span>}
       </span>
     </Link>
   );

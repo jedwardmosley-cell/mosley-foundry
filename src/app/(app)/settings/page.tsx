@@ -1,4 +1,5 @@
 import { requireUser } from "@/lib/auth";
+import { RenewalCode } from "@/components/RenewalCode";
 import { db } from "@/lib/db";
 import { saveSettings, setCalendarLink } from "@/app/actions/participant";
 import { appUrl, emailAvailable } from "@/lib/email";
@@ -13,8 +14,9 @@ import { StartOverForm } from "@/components/StartOverForm";
 export const metadata = { title: "Settings" };
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-export default async function SettingsPage() {
+export default async function SettingsPage({ searchParams }: { searchParams: Promise<{ code?: string }> }) {
   const u = await requireUser("PARTICIPANT");
+  const sp = await searchParams;
   const p = await db.profile.findUniqueOrThrow({ where: { userId: u.id } });
   const days = new Set(p.reminderDays.split(",").filter(Boolean));
   const feed = p.calendarToken ? `${appUrl()}/calendar/${p.calendarToken}.ics` : null;
@@ -95,6 +97,7 @@ export default async function SettingsPage() {
         )}
       </Card>
       <div className="mt-6"><StartOverForm /></div>
+      <div className="mt-6"><RenewalCode edition={u.edition} back="settings" note={sp.code} /></div>
     </>
   );
 }

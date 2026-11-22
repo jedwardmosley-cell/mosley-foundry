@@ -128,3 +128,30 @@ summary { -webkit-tap-highlight-color: transparent; }
   /* The center line: the app's one bold device. A dashed yellow lane marking. */
   .centerline { height: 6px; border-radius: 2px; background: repeating-linear-gradient(90deg, rgb(var(--lane)) 0 28px, transparent 28px 44px); }
 }
+
+/*
+ * The Road to Renewal: the cover's colors. Deep teal-black, warm white and sunrise gold.
+ * Set on the app's outer frame for people in that edition; every color below it follows.
+ */
+.edition-renewal {
+  --paper: 248 243 232;  --card: 255 252 245;  --surface: 255 255 255;  --line: 232 222 204;
+  --ink: 24 30 32;  --ink-soft: 70 78 80;  --ink-mute: 92 98 100;
+  --navy: 26 70 76;  --navy-deep: 14 40 44;  --heading: 18 42 46;  --link: 26 86 94;
+  --lane: 232 160 20;
+  --fblue: 26 70 76;
+  --gold: 150 86 0;  --gold-soft: 250 234 200;  --gold-hi: 232 160 20;  --gold-lo: 150 86 0;
+  --glow-a: 232 160 20;  --glow-b: 26 70 76;
+  background: rgb(var(--paper));
+  color: rgb(var(--ink));
+}
+@media (prefers-color-scheme: dark) {
+  .edition-renewal {
+    --paper: 6 12 14;  --card: 15 24 27;  --surface: 22 33 36;  --line: 40 54 58;
+    --ink: 240 234 222;  --ink-soft: 190 184 172;  --ink-mute: 142 138 128;
+    --navy: 40 104 112;  --navy-deep: 20 52 58;  --heading: 250 240 220;  --link: 242 190 90;
+    --lane: 242 176 40;
+    --fblue: 40 104 112;
+    --gold: 242 176 40;  --gold-soft: 58 40 10;  --gold-hi: 250 210 120;  --gold-lo: 220 140 20;
+    --glow-a: 242 176 40;  --glow-b: 40 104 112;
+  }
+}

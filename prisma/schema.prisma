@@ -43,6 +43,7 @@ model User {
   approvedBy         String? // name of the administrator who approved, declined, turned off or turned on the account
   createdAt          DateTime      @default(now())
   timezone           String        @default("") // IANA name from the browser, for coaches and administrators. A client's is on Profile.
+  edition            String        @default("BOTH_HANDS") // enum: BOTH_HANDS | RENEWAL. Which book the app is built on for this person; set by an access code.
   calendarToken      String? // a coach's private calendar link (looked up with findFirst; no unique constraint). A client's is on Profile. Null means off.
 
   sessions                      Session[]
@@ -649,4 +650,19 @@ model LoginAttempt {
   at    DateTime @default(now())
 
   @@index([email, at])
+}
+
+// An access code that opens an edition of the app, like The Road to Renewal. The administrator makes them and hands them out.
+model AccessCode {
+  id        String    @id @default(cuid())
+  code      String    @unique // letters and digits only, upper case, for matching: RENEWGRACE
+  shown     String    @default("") // as the administrator typed it, for handing out: RENEW-GRACE
+  edition   String // enum: RENEWAL
+  label     String    @default("") // who it's for, e.g. "Grace Church, spring group"
+  maxUses   Int? // null means no limit
+  uses      Int       @default(0)
+  expiresAt DateTime?
+  active    Boolean   @default(true)
+  createdBy String    @default("")
+  createdAt DateTime  @default(now())
 }
