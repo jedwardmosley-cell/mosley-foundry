@@ -3,7 +3,7 @@ import type { CSSProperties } from "react";
 import { requireUser } from "@/lib/auth";
 import { getForgeSource } from "@/content/forgeSource";
 import { FORGE_LINES } from "@/content/forgeLines";
-import { BOOK } from "@/content/book";
+import { bookFor } from "@/content/book";
 import type { PillarKey } from "@/content/types";
 import { PageHeader, Empty, PillarMark, PILLAR_FILL } from "@/components/ui";
 import { GuideText } from "@/components/GuideText";
@@ -12,7 +12,8 @@ export const metadata = { title: "Library" };
 
 /** The Library is the author's teaching guide, The FORGE Framework: Five Rules for the Road. */
 export default async function LibraryPage() {
-  await requireUser();
+  const me = await requireUser();
+  const book = bookFor(me.edition);
   const src = await getForgeSource();
   const g = src?.guide;
   if (!g) {
@@ -90,7 +91,7 @@ export default async function LibraryPage() {
       ))}
 
       <p className="mt-12 border-t border-line/60 pt-6 text-[15px] text-ink-soft">
-        The full story behind each rule is in <a href={BOOK.url} target="_blank" rel="noopener noreferrer" className="btn-link">Both Hands on the Wheel</a>.
+        The full story behind each rule is in {book.url ? <a href={book.url} target="_blank" rel="noopener noreferrer" className="btn-link">{book.title}</a> : <span className="italic">{book.title}</span>}.
       </p>
     </article>
   );

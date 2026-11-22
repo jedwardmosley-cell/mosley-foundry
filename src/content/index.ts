@@ -9,8 +9,8 @@ import type { ContentPack, EntrepreneurPack, PillarKey } from "./types";
 
 type Loaded = { pack: ContentPack; entrepreneur: EntrepreneurPack | null };
 // Keyed by the database rows' update times, so an upload at /setup is picked up on the next request
-// in every server bundle (Next.js keeps separate module copies for pages and server actions).
-let cached: { stamp: string; value: Loaded } | null = null;
+// in every server bundle (Next.js keeps separate module copies for pages and server actions). One copy per edition.
+const cached = new Map<string, { stamp: string; value: Loaded }>();
 
 function readFile<T>(file: string): T | null {
   const p = path.join(process.cwd(), "src", "content", "licensed", file);
@@ -36,14 +36,28 @@ async function readDb<T>(key: string): Promise<T | null> {
   }
 }
 
+/** The edition of whoever is signed in, when there is a request to read it from. Anything else gets Both Hands. */
+async function currentEdition(): Promise<string> {
+  try {
+    const { getCurrentUser } = await import("@/lib/auth");
+    return (await getCurrentUser())?.edition ?? "BOTH_HANDS";
+  } catch {
+    return "BOTH_HANDS"; // no request (a script or a test)
+  }
+}
+
 /**
  * Loads the licensed content pack. Order: local files (development), then the
  * database (production, uploaded at /setup), then the public draft fallback.
+ * People in The Road to Renewal get that book (pack-renewal) once it's installed; until then, Both Hands.
  */
-export async function getContent(): Promise<Loaded> {
+export async function getContent(edition?: string): Promise<Loaded> {
+  const ed = edition ?? (await currentEdition());
   const stamp = await dbStamp();
-  if (cached && cached.stamp === stamp) return cached.value;
-  const pack = readFile<ContentPack>("pack.json") ?? (await readDb<ContentPack>("pack"));
+  const hit = cached.get(ed);
+  if (hit && hit.stamp === stamp) return hit.value;
+  const renewal = ed === "RENEWAL" ? (readFile<ContentPack>("pack-renewal.json") ?? (await readDb<ContentPack>("pack-renewal"))) : null;
+  const pack = renewal ?? readFile<ContentPack>("pack.json") ?? (await readDb<ContentPack>("pack"));
   const entrepreneur = readFile<EntrepreneurPack>("entrepreneur.json") ?? (await readDb<EntrepreneurPack>("entrepreneur"));
   // Ed's name and Ed's mentor are cleaned out of the book's text as it loads (the author's request).
   const cleaned = cleanPack(pack ?? publicPack);
@@ -54,12 +68,12 @@ export async function getContent(): Promise<Loaded> {
   if (lessons?.length) cleaned.edsLessons = lessons.map((x) => ({ chapter: x.theme, title: x.title, setup: x.setup, prompts: x.prompts }));
   if (questions?.length) cleaned.jaysJourney = questions.map((x) => ({ title: x.title, setup: x.setup, prompts: x.prompts }));
   const value = { pack: cleaned, entrepreneur: entrepreneur ? cleanEntrepreneur(entrepreneur) : entrepreneur };
-  cached = { stamp, value };
+  cached.set(ed, { stamp, value });
   return value;
 }
 
 export function clearContentCache() {
-  cached = null;
+  cached.clear();
 }
 
 export async function pillar(key: PillarKey) {

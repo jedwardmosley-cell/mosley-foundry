@@ -53,13 +53,14 @@ function looksLikeEntrepreneur(x: unknown): boolean {
 export async function uploadContent(_: SetupState, fd: FormData): Promise<SetupState> {
   if (!tokenOk(fd.get("token"))) return { error: "Setup token is missing or wrong." };
   const done: string[] = [];
-  for (const [field, key, check] of [["pack", "pack", looksLikePack], ["entrepreneur", "entrepreneur", looksLikeEntrepreneur]] as const) {
+  const looksLikeRenewal = (x: unknown) => looksLikePack(x) && (x as { edition?: string }).edition === "RENEWAL";
+  for (const [field, key, check] of [["pack", "pack", looksLikePack], ["entrepreneur", "entrepreneur", looksLikeEntrepreneur], ["renewal", "pack-renewal", looksLikeRenewal]] as const) {
     const f = fd.get(field);
     if (!(f instanceof File) || f.size === 0) continue;
     if (f.size > 2_000_000) return { error: `${f.name} is too large.` };
     let json: unknown;
     try { json = JSON.parse(await f.text()); } catch { return { error: `${f.name} is not valid JSON.` }; }
-    if (!check(json)) return { error: `${f.name} does not look like the ${key === "pack" ? "pack.json" : "entrepreneur.json"} file.` };
+    if (!check(json)) return { error: `${f.name} does not look like the ${key === "pack" ? "pack.json" : key === "pack-renewal" ? "pack-renewal.json" : "entrepreneur.json"} file.` };
     await db.contentPack.upsert({ where: { key }, create: { key, json: JSON.stringify(json) }, update: { json: JSON.stringify(json) } });
     done.push(f.name);
   }

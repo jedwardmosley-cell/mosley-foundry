@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { getForgeSource } from "@/content/forgeSource";
 import { FORGE_LINES } from "@/content/forgeLines";
-import { BOOK } from "@/content/book";
+import { bookFor } from "@/content/book";
 import type { PillarKey } from "@/content/types";
 import { PillarMark } from "@/components/ui";
 import { GuideText } from "@/components/GuideText";
@@ -15,7 +15,8 @@ export const metadata = { title: "FORGE guide" };
  * how it connects, and the Road Test. It ends by pointing to the book.
  */
 export default async function ForgeGuide({ params }: { params: Promise<{ letter: string }> }) {
-  await requireUser("PARTICIPANT", "COACH", "ADMIN");
+  const me = await requireUser("PARTICIPANT", "COACH", "ADMIN");
+  const book = bookFor(me.edition);
   const { letter } = await params;
   const key = letter.toUpperCase() as PillarKey;
   const line = FORGE_LINES.find((l) => l.pillar === key);
@@ -70,7 +71,7 @@ export default async function ForgeGuide({ params }: { params: Promise<{ letter:
       )}
 
       <p className="mt-12 border-t border-line/60 pt-6 text-[15px] text-ink-soft">
-        The full story behind each rule is in <a href={BOOK.url} target="_blank" rel="noopener noreferrer" className="btn-link">Both Hands on the Wheel</a>.
+        The full story behind each rule is in {book.url ? <a href={book.url} target="_blank" rel="noopener noreferrer" className="btn-link">{book.title}</a> : <span className="italic">{book.title}</span>}.
       </p>
     </article>
   );
