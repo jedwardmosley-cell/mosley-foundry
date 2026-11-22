@@ -1,3 +1,4 @@
+import { FaithCheckIn, TenPathways } from "@/components/FaithCheckIn";
 import Link from "next/link";
 import { NAMES } from "@/content/names";
 import { withArticle } from "@/content/whoIAm";
@@ -74,6 +75,8 @@ export default async function AssessmentPage({ searchParams }: { searchParams: P
           </ul>
         </div>
       )}
+      <TenPathways />
+      <FaithCheckIn chapter={/rules of the road/i} />
     </>
   );
 }

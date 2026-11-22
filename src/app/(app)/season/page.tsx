@@ -1,3 +1,4 @@
+import { FaithCheckIn } from "@/components/FaithCheckIn";
 import Link from "next/link";
 import { NAMES } from "@/content/names";
 import { requireUser } from "@/lib/auth";
@@ -145,6 +146,7 @@ export default async function SeasonPage() {
           </ul>
         </Card>
       )}
+      <FaithCheckIn chapter={/wheel alignment/i} />
     </>
   );
 }

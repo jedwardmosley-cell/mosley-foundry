@@ -1,3 +1,4 @@
+import { FaithCheckIn } from "@/components/FaithCheckIn";
 import { DAY_CHOICES as DAY_LABELS, isScheduled, scheduleOf, daysToText } from "@/lib/schedule";
 import { NAMES } from "@/content/names";
 import { requireUser } from "@/lib/auth";
@@ -202,6 +203,7 @@ export default async function MyRoadPage({ searchParams }: { searchParams: Promi
           <Source>Both Hands on the Wheel, Your Design Inventory</Source>
         </FromBook>
       )}
+      <FaithCheckIn chapter={/vehicle controls/i} />
     </>
   );
 }

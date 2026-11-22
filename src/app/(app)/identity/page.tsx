@@ -1,3 +1,4 @@
+import { FaithCheckIn } from "@/components/FaithCheckIn";
 import { fiveLines } from "@/content/forgeLines";
 import { NAMES } from "@/content/names";
 import Link from "next/link";
@@ -86,7 +87,7 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
         </Part>
 
         <Part id="forge" title={WHO_HEADINGS.forge} answer={written === 5 ? "All five written" : written ? `${written} of 5 written` : ""}>
-          <FiveSides profile={profile} pathway={pathway} role={role} level={level} ai={ai} teach={forge?.cards ?? {}} rules={rules} opening={forge?.intro} guide={forge?.guide?.rules ?? {}} />
+          <FiveSides profile={profile} pathway={pathway} role={role} level={level} ai={ai} teach={forge?.cards ?? {}} rules={rules} opening={forge?.intro} guide={forge?.guide?.rules ?? {}} faith={pack.faith?.forge ?? {}} />
         </Part>
 
         <Part id="statement-part" title="My statement" answer={statement}>
@@ -159,6 +160,7 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
           <button className="text-sm text-ink-mute hover:text-ink">Clear who I am (earlier versions are kept)</button>
         </form>
       )}
+      <FaithCheckIn chapter={/driver's seat/i} />
     </>
   );
 }

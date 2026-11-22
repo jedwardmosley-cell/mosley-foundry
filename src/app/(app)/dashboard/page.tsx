@@ -1,3 +1,4 @@
+import { FaithCheckIn } from "@/components/FaithCheckIn";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
@@ -188,7 +189,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         )}
       </div>
 
-      {/* The day, carried at the bottom like a page number. */}
+      <FaithCheckIn chapter={/dashboard/i} />
     </div>
   );
 }

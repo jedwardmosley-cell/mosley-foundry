@@ -21,12 +21,14 @@ type Teach = Partial<Record<PillarKey, Partial<ForgeCard>>>;
  * the book's rule line and the part of identity it shapes. "What this means" opens the teaching
  * from forge-source.md. Then the question, the I am line and one example.
  */
-export function FiveSides({ profile, pathway, role, level, ai, teach = {}, rules = {}, opening, guide = {} }: {
+export function FiveSides({ profile, pathway, role, level, ai, teach = {}, rules = {}, opening, guide = {}, faith = {} }: {
   profile: Saved; pathway: PathwayKey; role: string; level: string; ai: boolean; teach?: Teach; rules?: Partial<Record<PillarKey, string>>;
   /** The author's Core idea and forge passage, from forge-source.md. */
   opening?: { line: string; core: string; forge: string };
   /** The author's teaching guide, per rule. When present, it is What this means. */
   guide?: Partial<Record<PillarKey, { md: string }>>;
+  /** The Road to Renewal: each letter as a posture before God, with its questions. Empty in Both Hands. */
+  faith?: Partial<Record<PillarKey, { name: string; text: string[]; questions: string[] }>>;
 }) {
   return (
     <div className="space-y-2">
@@ -70,6 +72,19 @@ export function FiveSides({ profile, pathway, role, level, ai, teach = {}, rules
             </summary>
             <div className="pt-3">
             <p className="text-sm text-ink-soft">{l.shapes}</p>
+
+            {/* The Road to Renewal: the FORGE Process for this letter, and its three questions before God. */}
+            {!!faith[l.pillar]?.questions.length && (
+              <details className="mt-4 rounded-2xl px-4 py-3" style={{ background: "rgb(var(--pc) / 0.06)" }}>
+                <summary className="cursor-pointer text-[15px] font-medium text-link">Ask yourself before God</summary>
+                <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-ink">
+                  {faith[l.pillar]!.text.map((p) => <p key={p}>{p}</p>)}
+                  <ul className="space-y-1.5">
+                    {faith[l.pillar]!.questions.map((q) => <li key={q} className="flex gap-2.5"><span aria-hidden className="mt-[0.65em] h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: "rgb(var(--pc))" }} />{q}</li>)}
+                  </ul>
+                </div>
+              </details>
+            )}
 
             {(t?.means || guide[l.pillar]) && (
               <details className="mt-4 rounded-2xl px-4 py-3" style={{ background: "rgb(var(--pc) / 0.06)" }}>

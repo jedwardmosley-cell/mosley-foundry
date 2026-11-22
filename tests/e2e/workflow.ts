@@ -1382,6 +1382,36 @@ const submitAndWait = async (page: Page, selector: string) => {
     await db.user.deleteMany({ where: { id: { in: [first.id, second.id] } } });
   });
 
+  await check("12e. Renewal readers get the Faith Check-In, the questions before God and the Ten Pathways; Both Hands readers don't", async () => {
+    const fs = await import("node:fs");
+    if (!fs.existsSync("src/content/licensed/pack-renewal.json")) return; // the Renewal book isn't installed here
+    const dana = await db.user.findUniqueOrThrow({ where: { email: "dana@demo.bothhands.app" } });
+    const c = await browser.newContext();
+    const p: Page = await c.newPage();
+    await login(p, "dana@demo.bothhands.app");
+    try {
+      await db.user.update({ where: { id: dana.id }, data: { edition: "RENEWAL" } });
+      await p.goto(`${BASE}/reflect`);
+      const check = p.locator("section[aria-label='Faith Check-In']");
+      await check.waitFor();
+      await check.locator("summary", { hasText: "Pray it" }).click();
+      await check.locator("text=Amen").first().waitFor();
+      await p.goto(`${BASE}/assessment`);
+      await p.locator("text=The Ten Pathways of Promise").first().waitFor();
+      await p.goto(`${BASE}/identity`);
+      assert.ok(await p.locator("summary", { hasText: "Ask yourself before God" }).count() === 5, "one for each letter");
+      await db.user.update({ where: { id: dana.id }, data: { edition: "BOTH_HANDS" } });
+      await p.goto(`${BASE}/reflect`);
+      await p.locator("main h1").first().waitFor();
+      assert.equal(await p.locator("section[aria-label='Faith Check-In']").count(), 0, "nothing faith-specific in Both Hands");
+      await p.goto(`${BASE}/identity`);
+      assert.equal(await p.locator("summary", { hasText: "Ask yourself before God" }).count(), 0);
+    } finally {
+      await db.user.update({ where: { id: dana.id }, data: { edition: "BOTH_HANDS" } });
+      await c.close();
+    }
+  });
+
   await check("desktop layout renders", async () => {
     await logout(page);
     const desk = await browser.newPage({ viewport: { width: 1280, height: 900 } });
