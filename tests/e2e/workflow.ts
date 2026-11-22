@@ -89,7 +89,7 @@ const submitAndWait = async (page: Page, selector: string) => {
   const ADMIN = "e2e-admin@example.test";
   const ADMIN_PW = "e2e-admin-password-1";
   const demoOrg = (await db.user.findUniqueOrThrow({ where: { email: "admin@demo.bothhands.app" } })).orgId;
-  await db.user.upsert({ where: { email: ADMIN }, create: { email: ADMIN, name: "E2E Admin", role: "ADMIN", isDemo: false, orgId: demoOrg, passwordHash: hashPassword(ADMIN_PW) }, update: { status: "ACTIVE", isDemo: false } });
+  await db.user.upsert({ where: { email: ADMIN }, create: { email: ADMIN, name: "E2E Admin", role: "ADMIN", isDemo: false, orgId: demoOrg, passwordHash: hashPassword(ADMIN_PW) }, update: { status: "ACTIVE", isDemo: false, orgId: demoOrg } }); // the demo org is recreated on every reset
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
   const page: Page = await ctx.newPage();
   const email = `e2e-${Date.now()}@example.test`;

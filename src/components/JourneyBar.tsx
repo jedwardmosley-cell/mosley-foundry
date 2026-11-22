@@ -75,13 +75,16 @@ export function JourneyBar({ steps, done, current, cycle, identityMissing = [], 
     );
   }
 
+  // While setting up, the bar shows only the four setup steps, so "Step 1 of 4" matches what's on screen.
+  // The Mirrors join once setup is done: a weekly look back, not a setup step.
+  const settingUp = !!next && (!cycle || !cycle.finished);
   return (
     <nav aria-label="Your journey" className="mb-5 sm:mb-8">
-      <div aria-hidden className="grid grid-cols-5 gap-1.5 mb-1 text-[12px] sm:text-[13px] font-bold text-gold">
-        <span className="col-span-2">FORGE</span>
-        <span className="col-span-3">Discipline by Design</span>
+      <div aria-hidden className={`grid ${settingUp ? "grid-cols-4" : "grid-cols-5"} gap-1.5 mb-1`}>
+        <span className="col-span-2"><span className="block text-[12px] sm:text-[13px] font-bold text-gold">FORGE</span><span className="block text-[11px] sm:text-[12px] leading-tight text-ink-mute">Part 1: who you are</span></span>
+        <span className={settingUp ? "col-span-2" : "col-span-3"}><span className="block text-[12px] sm:text-[13px] font-bold text-gold">Discipline by Design</span><span className="block text-[11px] sm:text-[12px] leading-tight text-ink-mute">Part 2: the system that keeps you there</span></span>
       </div>
-      <ol className="grid grid-cols-5 gap-1.5">
+      <ol className={`grid ${settingUp ? "grid-cols-4" : "grid-cols-5"} gap-1.5`}>
         {steps.map((s, i) => {
           const isDone = done[s.key];
           const isNext = s.key === current;
@@ -97,14 +100,14 @@ export function JourneyBar({ steps, done, current, cycle, identityMissing = [], 
             </li>
           );
         })}
-        <li>
+        {!settingUp && <li>
           <Link href={MIRRORS.href} aria-current={atMirrors ? "page" : undefined} className="block group min-h-11 pt-2" title={lookedBack ? "Looked back this week" : "Look back at your week"}>
             <span className={`block h-[5px] rounded-full transition ${lookedBack ? "bg-navy" : "bg-ink/[0.08]"} ${atMirrors ? "ring-2 ring-navy/15" : ""}`} />
             <span className={`mt-2 block text-[11px] leading-tight sm:text-xs ${atMirrors ? "text-heading font-semibold" : lookedBack ? "text-ink-soft" : "text-ink-mute"} group-hover:text-link`}>
               {MIRRORS.label}<span className="sr-only">{lookedBack ? ", looked back this week" : ", not yet this week"}</span>
             </span>
           </Link>
-        </li>
+        </li>}
       </ol>
       {line && <p className="mt-1.5 text-[13px] text-ink-soft">{line}</p>}
     </nav>

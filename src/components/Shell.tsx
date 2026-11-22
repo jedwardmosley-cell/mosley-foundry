@@ -58,7 +58,7 @@ export function Shell({ user, children, journey }: { user: CurrentUser; children
       </aside>
 
       <div className="flex-1 min-w-0">
-        <header className="md:hidden flex items-center justify-between px-4 py-2.5 sticky top-0 z-20 bg-paper border-b border-line/50">
+        <header className="md:hidden flex items-center justify-between px-4 pb-2.5 pt-[calc(0.625rem+env(safe-area-inset-top))] sticky top-0 z-20 bg-paper border-b border-line/50">
           <Brand compact name={ed.name} tagline={ed.tagline} />
           <AccountMenu user={user} />
         </header>
@@ -67,11 +67,11 @@ export function Shell({ user, children, journey }: { user: CurrentUser; children
             Demo account. All people and data are fictional.
           </p>
         )}
-        <main className="mx-auto w-full max-w-3xl px-4 sm:px-8 pt-3 sm:pt-10 pb-28 md:pb-14">{journey}<div className="rise">{children}</div></main>
+        <main className="mx-auto w-full max-w-3xl px-4 sm:px-8 pt-3 sm:pt-10 pb-[calc(6.5rem+env(safe-area-inset-bottom))] md:pb-14">{journey}<div className="rise">{children}</div></main>
       </div>
 
-      {/* Phone: a floating, solid menu bar. Clients also get a round button for Help me with this. */}
-      <div className="md:hidden fixed bottom-3 inset-x-3 z-30 flex items-end gap-2">
+      {/* Phone: a solid menu bar along the bottom, clear of the home indicator. Clients also get a round button for Help me with this. */}
+      <div className="md:hidden fixed bottom-0 inset-x-0 z-30 flex items-center gap-2 border-t border-line/60 bg-paper px-3 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
         <nav aria-label="Primary" className="flex-1 min-w-0 flex px-1 rounded-full border border-line/50 bg-card shadow-[0_16px_40px_-14px_rgb(0_0_0/0.35)]">
           {(nav as NavItem[]).filter((n) => n.mobile).sort((a, b) => (a.tabOrder ?? 0) - (b.tabOrder ?? 0)).map((n) => (
             <NavLink key={n.href} href={n.href} variant="tab">{n.tab ?? n.label}</NavLink>
