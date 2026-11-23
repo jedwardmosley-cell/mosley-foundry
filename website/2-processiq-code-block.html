@@ -138,9 +138,10 @@
 @media (max-width: 760px) { #mf .mf-three { grid-template-columns: minmax(0, 1fr); } }
 
 /* Testimonials */
-#mf .mf-quotes { display: grid; grid-template-columns: minmax(0, 1fr); margin-top: 40px; }
-#mf .mf-q { grid-area: 1 / 1; visibility: hidden; opacity: 0; transition: opacity .3s ease, visibility .3s; }
-#mf .mf-q.is-on { visibility: visible; opacity: 1; }
+#mf .mf-quotes { margin-top: 40px; }
+#mf .mf-q { display: none; }
+#mf .mf-q.is-on { display: block; animation: mf-in .3s ease; }
+@keyframes mf-in { from { opacity: 0; } to { opacity: 1; } }
 #mf .mf-q blockquote { font-size: clamp(24px, 2.6vw, 33px); line-height: 1.4; color: var(--ink); max-width: 30em; }
 #mf .mf-q figcaption { margin-top: 22px; font-family: var(--sans); font-weight: 600; font-size: 16px; }
 #mf .mf-q figcaption span { display: block; font-weight: 400; color: var(--slate); }
@@ -213,6 +214,102 @@
 #mf .mf-mocknote { font-family: var(--sans); font-size: 14px; color: var(--brass-deep); }
 @media (max-width: 620px) { #mf .mf-mockform .mf-row { grid-template-columns: minmax(0, 1fr); } }
 
+
+/* v3: pilot homepage */
+#mf .mf-hero h1 { font-size: clamp(36px, 4.6vw, 64px); line-height: 1.06; }
+#mf .mf-hero .mf-lede + .mf-lede { margin-top: 16px; }
+#mf .mf-pull { font-family: var(--sans); font-stretch: 125%; font-weight: 700; font-size: clamp(22px, 2.2vw, 28px); line-height: 1.25; color: var(--navy); margin-top: 32px; padding-left: 18px; border-left: 3px solid var(--brass); max-width: 22em; }
+#mf .mf-examples { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(24px, 4vw, 48px); margin-top: 44px; }
+#mf .mf-ex { border-top: 2px solid var(--brass); padding-top: 20px; }
+#mf .mf-ex-label { font-family: var(--sans); font-weight: 600; font-size: 14px; color: var(--brass-deep); }
+#mf .mf-ex h3 { font-stretch: 125%; font-weight: 700; font-size: clamp(21px, 2vw, 25px); line-height: 1.2; margin-top: 10px; }
+#mf .mf-ex-answer { font-family: var(--sans); font-weight: 600; font-size: 17px; color: var(--ink); margin-top: 10px; }
+#mf .mf-ex > p:not(.mf-ex-label):not(.mf-ex-answer) { font-size: 17px; margin-top: 12px; color: var(--ink); }
+#mf .mf-ex .mf-ex-measure { background: var(--stone); padding: 12px 14px; border-radius: 4px; }
+#mf .mf-ex .mf-ex-note { font-family: var(--sans); font-size: 13px; color: var(--slate) !important; }
+#mf .mf-timeline li { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; padding: 20px 0; border-top: 1px solid var(--line); }
+#mf .mf-timeline li:last-child { border-bottom: 1px solid var(--line); }
+#mf .mf-when { font-family: var(--sans); font-stretch: 125%; font-weight: 700; font-size: 15px; color: var(--brass-deep); padding-top: 2px; }
+#mf .mf-timeline p { color: var(--slate); font-size: 17px; margin-top: 4px; }
+#mf .mf-about p { color: var(--ink); }
+@media (max-width: 760px) { #mf .mf-examples { grid-template-columns: minmax(0, 1fr); } #mf .mf-timeline li { grid-template-columns: minmax(0, 1fr); gap: 4px; } }
+
+
+#mf .mf-ex-steps { margin-top: 14px; border-top: 1px solid var(--line); }
+#mf .mf-ex-steps > div { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+#mf .mf-ex-steps dt { font-family: var(--sans); font-weight: 600; font-size: 15px; color: var(--brass-deep); }
+#mf .mf-ex-steps dd { font-size: 17px; }
+@media (max-width: 560px) { #mf .mf-ex-steps > div { grid-template-columns: minmax(0, 1fr); gap: 2px; } }
+
+
+#mf .mf-how-q { font-family: var(--sans); font-stretch: 125%; font-weight: 700; font-size: clamp(22px, 2.2vw, 28px); line-height: 1.25; color: var(--navy); }
+#mf .mf-how { font-size: clamp(19px, 1.6vw, 21px); line-height: 1.6; margin-top: 16px; max-width: 34em; }
+#mf .mf-how-note { margin-top: 16px; }
+#mf .mf-ex > p:not(.mf-ex-label):not(.mf-ex-note) { font-size: 17px; margin-top: 12px; }
+
+
+#mf .mf-uses { display: grid; gap: 0; border-top: 1px solid var(--line); }
+#mf .mf-uses li { font-size: clamp(19px, 1.7vw, 22px); line-height: 1.4; padding: 18px 0 18px 26px; border-bottom: 1px solid var(--line); position: relative; }
+#mf .mf-uses li::before { content: ""; position: absolute; left: 0; top: 1.15em; width: 12px; height: 2px; background: var(--brass); }
+#mf .mf-builds { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(20px, 3vw, 32px); margin-top: 40px; }
+#mf .mf-build { background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 24px 24px 26px; }
+#mf .mf-build-lead { grid-column: 1 / -1; border-top: 3px solid var(--brass); }
+#mf .mf-build h3 { font-stretch: 125%; font-weight: 700; font-size: clamp(22px, 2.2vw, 28px); margin-top: 8px; }
+#mf .mf-build p:not(.mf-ex-label) { font-size: 17px; margin-top: 10px; max-width: 46em; }
+#mf .mf-build .mf-build-proof { font-family: var(--sans); font-size: 15px; color: var(--slate); background: var(--stone); border-radius: 4px; padding: 12px 14px; }
+@media (max-width: 960px) { #mf .mf-builds { grid-template-columns: repeat(2, minmax(0, 1fr)); } #mf .mf-build-lead { grid-column: 1 / -1; } }
+@media (max-width: 620px) { #mf .mf-builds { grid-template-columns: minmax(0, 1fr); } }
+
+#mf .mf-build .mf-built { font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--brass-deep); margin-top: 14px; }
+
+
+/* v7 flavor */
+#mf .mf-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 26px; }
+#mf .mf-tags li { font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--navy); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; background: var(--paper); }
+#mf .mf-dark { background: var(--navy); color: var(--on-navy); }
+#mf .mf-dark .mf-h2 { color: var(--on-navy); }
+#mf .mf-dark .mf-lede { color: var(--on-navy-soft); }
+#mf .mf-flow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin-top: 44px; position: relative; }
+#mf .mf-flow::before { content: ""; position: absolute; left: 28px; right: 28px; top: 27px; height: 2px; background: linear-gradient(90deg, var(--brass-light), rgba(201,164,106,.25)); }
+#mf .mf-flow li { position: relative; padding-right: 24px; }
+#mf .mf-flow-n { position: relative; display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: var(--brass-light); color: var(--navy); font-family: var(--sans); font-stretch: 125%; font-weight: 800; font-size: 22px; }
+#mf .mf-flow b { display: block; margin-top: 16px; font-family: var(--sans); font-stretch: 125%; font-weight: 700; font-size: 22px; color: var(--on-navy); }
+#mf .mf-flow span:not(.mf-flow-n) { display: block; margin-top: 4px; font-size: 17px; color: var(--on-navy-soft); }
+#mf .mf-dark .mf-builds { margin-top: 52px; }
+#mf .mf-dark .mf-build { border-color: transparent; color: var(--ink); }
+#mf .mf-dark .mf-build-lead { border-top-color: var(--brass-light); }
+@media (max-width: 760px) {
+  #mf .mf-flow { grid-template-columns: minmax(0, 1fr); gap: 22px; }
+  #mf .mf-flow::before { left: 27px; right: auto; top: 28px; bottom: 28px; width: 2px; height: auto; background: linear-gradient(180deg, var(--brass-light), rgba(201,164,106,.25)); }
+  #mf .mf-flow li { display: grid; grid-template-columns: 56px minmax(0, 1fr); column-gap: 16px; padding: 0; }
+  #mf .mf-flow-n { grid-row: span 2; }
+  #mf .mf-flow b { margin-top: 4px; }
+}
+
+#mf .mf-uses2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: clamp(32px, 5vw, 72px); margin-top: 44px; }
+#mf .mf-uses2 li { padding: 22px 0 24px; border-top: 2px solid var(--brass); }
+#mf .mf-uses2 b { display: block; font-family: var(--sans); font-stretch: 125%; font-weight: 700; font-size: clamp(20px, 2vw, 24px); line-height: 1.2; color: var(--navy); }
+#mf .mf-uses2 span { display: block; margin-top: 10px; font-size: 17px; color: var(--ink); }
+#mf .mf-uses-note { margin-top: 28px; }
+@media (max-width: 760px) { #mf .mf-uses2 { grid-template-columns: minmax(0, 1fr); } }
+
+#mf .mf-proof { margin-top: 28px; max-width: 34em; font-size: 16px; line-height: 1.5; color: var(--ink); padding: 12px 16px; border-left: 3px solid var(--brass); background: var(--stone); border-radius: 0 4px 4px 0; }
+#mf .mf-proof b { font-family: var(--sans); font-weight: 700; color: var(--navy); }
+
+#mf .mf-two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(24px, 4vw, 56px); margin-top: 40px; }
+#mf .mf-two > div { background: var(--paper); border-radius: 6px; padding: 24px 24px 26px; border-top: 3px solid var(--brass); }
+#mf .mf-two h3 { font-stretch: 125%; font-weight: 700; font-size: clamp(22px, 2.2vw, 28px); }
+#mf .mf-two p { font-size: 17px; margin-top: 10px; }
+@media (max-width: 760px) { #mf .mf-two { grid-template-columns: minmax(0, 1fr); } }
+
+#mf .mf-list { margin-top: 24px; border-top: 1px solid var(--line); }
+#mf .mf-list li { padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 17px; }
+#mf .mf-off { display: grid; gap: 18px; }
+#mf .mf-off li { font-size: clamp(19px, 1.7vw, 22px); line-height: 1.4; color: var(--ink); }
+#mf .mf-off b { font-family: var(--sans); font-stretch: 125%; font-weight: 700; color: var(--navy); margin-right: 6px; }
+#mf .mf-hero .mf-says { font-family: var(--sans); font-stretch: 125%; font-weight: 700; font-size: clamp(24px, 2.4vw, 31px); line-height: 1.2; color: var(--brass-deep); margin-top: 20px; }
+#mf .mf-hero .mf-says + .mf-lede { margin-top: 18px; }
+
 @media (prefers-reduced-motion: reduce) { #mf *, #mf *::before, #mf *::after { transition: none !important; animation: none !important; } }
 </style>
 <div id="mf">
@@ -221,18 +318,17 @@
     <div class="mf-wrap">
       <a class="mf-logo" href="/">Mosley Foundry</a>
       <nav class="mf-links" aria-label="Sections">
-        <a href="/">Leadership</a>
+        <a href="/">Home</a>
         <a href="#mf-path">How it works</a>
-        <a href="#mf-results">Sample results</a>
-        <a href="/contact">Contact</a>
-        <a class="mf-btn" href="https://calendly.com/jason-mosley-mosleyfoundry/coaching-call" target="_blank" rel="noopener">Ask for a demo</a>
+        <a href="/about">About</a>
+        <a class="mf-btn" href="/contact">Talk to Jason</a>
       </nav>
     </div>
   </header>
 
   <section class="mf-page-hero" id="mf-top">
     <div class="mf-wrap">
-      <p class="mf-small">ProcessIQ, process improvement and automation</p>
+      <p class="mf-small">ProcessIQ, one of the tools I build. Built with Claude Code.</p>
       <h1 style="margin-top:14px">From process map to an action plan people follow.</h1>
       <p class="mf-lede">A web app I built that maps a process, finds delays and waste, identifies what to automate, and tracks whether the improvements last.</p>
       <div class="mf-ctas">
@@ -272,7 +368,7 @@
         <li><span class="mf-ix">4</span><div><h3>Root cause</h3><p>A guided 5 Whys, with every answer backed by evidence.</p></div></li>
         <li><span class="mf-ix">5</span><div><h3>Prioritize</h3><p>Impact versus effort, with owners and dates on every action.</p></div></li>
         <li><span class="mf-ix">6</span><div><h3>Report</h3><p>A one-page summary ready to share with the team.</p></div></li>
-        <li><span class="mf-ix">7</span><div><h3>Track</h3><p>Approved actions move into my AI Adoption Follow-Through Tracker, which checks in every week until the new way of working is routine.</p></div></li>
+        <li><span class="mf-ix">7</span><div><h3>Track</h3><p>Approved actions export straight into my Follow-Through Tracker, which checks in every week until the new way of working is routine.</p></div></li>
       </ol>
     </div>
   </section>
@@ -361,15 +457,16 @@
       <h2 class="mf-h2">Let's find what's slowing your process down.</h2>
       <p class="mf-lede">I'll walk you through the interactive demo, or we can map one of your own processes together and take it all the way to tracked results.</p>
       <div class="mf-ctas"><a class="mf-btn" href="https://calendly.com/jason-mosley-mosleyfoundry/coaching-call" target="_blank" rel="noopener">Ask for a demo</a></div>
-      <p class="mf-small">Prefer to write? <a href="/contact">Send a message</a> or email <a href="mailto:jason.mosley@mosleyfoundry.com">jason.mosley@mosleyfoundry.com</a></p>
+      <p class="mf-small">Prefer to write? <a href="/contact">Talk to Jason</a> or email <a href="mailto:jason.mosley@mosleyfoundry.com">jason.mosley@mosleyfoundry.com</a></p>
     </div>
   </section>
 
   <footer class="mf-foot">
     <div class="mf-wrap">
-      <div><p class="mf-foot-line">Mosley Foundry develops leaders and builds the systems that make their changes last.</p><span>&copy; <span class="mf-year">2026</span> Mosley Foundry, Chicago, IL</span></div>
+      <div><p class="mf-foot-line">Mosley Foundry. Fractional AI adoption for teams that already have the tools.</p><span>&copy; <span class="mf-year">2026</span> Mosley Foundry, Chicago, IL</span></div>
       <nav aria-label="Footer">
-        <a href="/">Leadership development</a>
+        <a href="/">Home</a>
+        <a href="/about">About</a>
         <a href="/contact">Contact</a>
         <a href="https://www.linkedin.com/in/jedwardmosley" target="_blank" rel="noopener">LinkedIn</a>
         <a href="#mf-top">Back to top</a>
