@@ -1,4 +1,4 @@
-<!-- Mosley Foundry homepage. Paste this whole file into one Code Block on the Home page. -->
+<!-- Mosley Foundry homepage. -->
 <style>#mf{width:100vw;position:relative;left:50%;margin-left:-50vw;}</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -214,6 +214,102 @@
 #mf .mf-mocknote { font-family: var(--sans); font-size: 14px; color: var(--brass-deep); }
 @media (max-width: 620px) { #mf .mf-mockform .mf-row { grid-template-columns: minmax(0, 1fr); } }
 
+
+/* v3: pilot homepage */
+#mf .mf-hero h1 { font-size: clamp(36px, 4.6vw, 64px); line-height: 1.06; }
+#mf .mf-hero .mf-lede + .mf-lede { margin-top: 16px; }
+#mf .mf-pull { font-family: var(--sans); font-stretch: 125%; font-weight: 700; font-size: clamp(22px, 2.2vw, 28px); line-height: 1.25; color: var(--navy); margin-top: 32px; padding-left: 18px; border-left: 3px solid var(--brass); max-width: 22em; }
+#mf .mf-examples { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(24px, 4vw, 48px); margin-top: 44px; }
+#mf .mf-ex { border-top: 2px solid var(--brass); padding-top: 20px; }
+#mf .mf-ex-label { font-family: var(--sans); font-weight: 600; font-size: 14px; color: var(--brass-deep); }
+#mf .mf-ex h3 { font-stretch: 125%; font-weight: 700; font-size: clamp(21px, 2vw, 25px); line-height: 1.2; margin-top: 10px; }
+#mf .mf-ex-answer { font-family: var(--sans); font-weight: 600; font-size: 17px; color: var(--ink); margin-top: 10px; }
+#mf .mf-ex > p:not(.mf-ex-label):not(.mf-ex-answer) { font-size: 17px; margin-top: 12px; color: var(--ink); }
+#mf .mf-ex .mf-ex-measure { background: var(--stone); padding: 12px 14px; border-radius: 4px; }
+#mf .mf-ex .mf-ex-note { font-family: var(--sans); font-size: 13px; color: var(--slate) !important; }
+#mf .mf-timeline li { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; padding: 20px 0; border-top: 1px solid var(--line); }
+#mf .mf-timeline li:last-child { border-bottom: 1px solid var(--line); }
+#mf .mf-when { font-family: var(--sans); font-stretch: 125%; font-weight: 700; font-size: 15px; color: var(--brass-deep); padding-top: 2px; }
+#mf .mf-timeline p { color: var(--slate); font-size: 17px; margin-top: 4px; }
+#mf .mf-about p { color: var(--ink); }
+@media (max-width: 760px) { #mf .mf-examples { grid-template-columns: minmax(0, 1fr); } #mf .mf-timeline li { grid-template-columns: minmax(0, 1fr); gap: 4px; } }
+
+
+#mf .mf-ex-steps { margin-top: 14px; border-top: 1px solid var(--line); }
+#mf .mf-ex-steps > div { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+#mf .mf-ex-steps dt { font-family: var(--sans); font-weight: 600; font-size: 15px; color: var(--brass-deep); }
+#mf .mf-ex-steps dd { font-size: 17px; }
+@media (max-width: 560px) { #mf .mf-ex-steps > div { grid-template-columns: minmax(0, 1fr); gap: 2px; } }
+
+
+#mf .mf-how-q { font-family: var(--sans); font-stretch: 125%; font-weight: 700; font-size: clamp(22px, 2.2vw, 28px); line-height: 1.25; color: var(--navy); }
+#mf .mf-how { font-size: clamp(19px, 1.6vw, 21px); line-height: 1.6; margin-top: 16px; max-width: 34em; }
+#mf .mf-how-note { margin-top: 16px; }
+#mf .mf-ex > p:not(.mf-ex-label):not(.mf-ex-note) { font-size: 17px; margin-top: 12px; }
+
+
+#mf .mf-uses { display: grid; gap: 0; border-top: 1px solid var(--line); }
+#mf .mf-uses li { font-size: clamp(19px, 1.7vw, 22px); line-height: 1.4; padding: 18px 0 18px 26px; border-bottom: 1px solid var(--line); position: relative; }
+#mf .mf-uses li::before { content: ""; position: absolute; left: 0; top: 1.15em; width: 12px; height: 2px; background: var(--brass); }
+#mf .mf-builds { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(20px, 3vw, 32px); margin-top: 40px; }
+#mf .mf-build { background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 24px 24px 26px; }
+#mf .mf-build-lead { grid-column: 1 / -1; border-top: 3px solid var(--brass); }
+#mf .mf-build h3 { font-stretch: 125%; font-weight: 700; font-size: clamp(22px, 2.2vw, 28px); margin-top: 8px; }
+#mf .mf-build p:not(.mf-ex-label) { font-size: 17px; margin-top: 10px; max-width: 46em; }
+#mf .mf-build .mf-build-proof { font-family: var(--sans); font-size: 15px; color: var(--slate); background: var(--stone); border-radius: 4px; padding: 12px 14px; }
+@media (max-width: 960px) { #mf .mf-builds { grid-template-columns: repeat(2, minmax(0, 1fr)); } #mf .mf-build-lead { grid-column: 1 / -1; } }
+@media (max-width: 620px) { #mf .mf-builds { grid-template-columns: minmax(0, 1fr); } }
+
+#mf .mf-build .mf-built { font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--brass-deep); margin-top: 14px; }
+
+
+/* v7 flavor */
+#mf .mf-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 26px; }
+#mf .mf-tags li { font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--navy); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; background: var(--paper); }
+#mf .mf-dark { background: var(--navy); color: var(--on-navy); }
+#mf .mf-dark .mf-h2 { color: var(--on-navy); }
+#mf .mf-dark .mf-lede { color: var(--on-navy-soft); }
+#mf .mf-flow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin-top: 44px; position: relative; }
+#mf .mf-flow::before { content: ""; position: absolute; left: 28px; right: 28px; top: 27px; height: 2px; background: linear-gradient(90deg, var(--brass-light), rgba(201,164,106,.25)); }
+#mf .mf-flow li { position: relative; padding-right: 24px; }
+#mf .mf-flow-n { position: relative; display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: var(--brass-light); color: var(--navy); font-family: var(--sans); font-stretch: 125%; font-weight: 800; font-size: 22px; }
+#mf .mf-flow b { display: block; margin-top: 16px; font-family: var(--sans); font-stretch: 125%; font-weight: 700; font-size: 22px; color: var(--on-navy); }
+#mf .mf-flow span:not(.mf-flow-n) { display: block; margin-top: 4px; font-size: 17px; color: var(--on-navy-soft); }
+#mf .mf-dark .mf-builds { margin-top: 52px; }
+#mf .mf-dark .mf-build { border-color: transparent; color: var(--ink); }
+#mf .mf-dark .mf-build-lead { border-top-color: var(--brass-light); }
+@media (max-width: 760px) {
+  #mf .mf-flow { grid-template-columns: minmax(0, 1fr); gap: 22px; }
+  #mf .mf-flow::before { left: 27px; right: auto; top: 28px; bottom: 28px; width: 2px; height: auto; background: linear-gradient(180deg, var(--brass-light), rgba(201,164,106,.25)); }
+  #mf .mf-flow li { display: grid; grid-template-columns: 56px minmax(0, 1fr); column-gap: 16px; padding: 0; }
+  #mf .mf-flow-n { grid-row: span 2; }
+  #mf .mf-flow b { margin-top: 4px; }
+}
+
+#mf .mf-uses2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: clamp(32px, 5vw, 72px); margin-top: 44px; }
+#mf .mf-uses2 li { padding: 22px 0 24px; border-top: 2px solid var(--brass); }
+#mf .mf-uses2 b { display: block; font-family: var(--sans); font-stretch: 125%; font-weight: 700; font-size: clamp(20px, 2vw, 24px); line-height: 1.2; color: var(--navy); }
+#mf .mf-uses2 span { display: block; margin-top: 10px; font-size: 17px; color: var(--ink); }
+#mf .mf-uses-note { margin-top: 28px; }
+@media (max-width: 760px) { #mf .mf-uses2 { grid-template-columns: minmax(0, 1fr); } }
+
+#mf .mf-proof { margin-top: 28px; max-width: 34em; font-size: 16px; line-height: 1.5; color: var(--ink); padding: 12px 16px; border-left: 3px solid var(--brass); background: var(--stone); border-radius: 0 4px 4px 0; }
+#mf .mf-proof b { font-family: var(--sans); font-weight: 700; color: var(--navy); }
+
+#mf .mf-two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(24px, 4vw, 56px); margin-top: 40px; }
+#mf .mf-two > div { background: var(--paper); border-radius: 6px; padding: 24px 24px 26px; border-top: 3px solid var(--brass); }
+#mf .mf-two h3 { font-stretch: 125%; font-weight: 700; font-size: clamp(22px, 2.2vw, 28px); }
+#mf .mf-two p { font-size: 17px; margin-top: 10px; }
+@media (max-width: 760px) { #mf .mf-two { grid-template-columns: minmax(0, 1fr); } }
+
+#mf .mf-list { margin-top: 24px; border-top: 1px solid var(--line); }
+#mf .mf-list li { padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 17px; }
+#mf .mf-off { display: grid; gap: 18px; }
+#mf .mf-off li { font-size: clamp(19px, 1.7vw, 22px); line-height: 1.4; color: var(--ink); }
+#mf .mf-off b { font-family: var(--sans); font-stretch: 125%; font-weight: 700; color: var(--navy); margin-right: 6px; }
+#mf .mf-hero .mf-says { font-family: var(--sans); font-stretch: 125%; font-weight: 700; font-size: clamp(24px, 2.4vw, 31px); line-height: 1.2; color: var(--brass-deep); margin-top: 20px; }
+#mf .mf-hero .mf-says + .mf-lede { margin-top: 18px; }
+
 @media (prefers-reduced-motion: reduce) { #mf *, #mf *::before, #mf *::after { transition: none !important; animation: none !important; } }
 </style>
 <div id="mf">
@@ -222,163 +318,139 @@
     <div class="mf-wrap">
       <a class="mf-logo" href="#mf-top">Mosley Foundry</a>
       <nav class="mf-links" aria-label="Sections">
-        <a href="#mf-series">Leadership Series</a>
-        <a href="#mf-ai">AI for Leaders</a>
-        <a href="/processiq">ProcessIQ</a>
-        <a href="#mf-about">About</a>
-        <a href="/contact">Contact</a>
-        <a class="mf-btn" href="https://calendly.com/jason-mosley-mosleyfoundry/coaching-call" target="_blank" rel="noopener">Schedule a call</a>
+        <a href="#mf-pilot">The pilot</a>
+        <a href="#mf-build">What I build</a>
+        <a href="/about">About</a>
+        <a class="mf-btn" href="/contact">Talk to Jason</a>
       </nav>
     </div>
   </header>
 
   <section class="mf-hero" id="mf-top">
     <div class="mf-hero-text">
-      <h1>Where leaders are forged.</h1>
-      <p class="mf-lede">Foundational leadership skills and practical AI for project managers, supervisors, and frontline managers.</p>
+      <h1>Your team has the AI tools. Nobody's really using them? I can fix that.</h1>
+      <p class="mf-lede">I'm a fractional AI adoption partner. I work between your business and your tech team. I figure out what the work actually needs, turn the process into AI workflows and agents, and lead the change so people use them.</p>
+      <ul class="mf-tags" aria-label="Tools I work with"><li>Microsoft 365</li><li>SharePoint</li><li>Power Automate</li><li>Notion</li><li>Claude Code</li><li>Gemini</li></ul>
       <div class="mf-ctas">
-        <a class="mf-btn" href="https://calendly.com/jason-mosley-mosleyfoundry/coaching-call" target="_blank" rel="noopener">Schedule a call</a>
-        <a class="mf-link" href="#mf-check">Take the 2-minute gut check</a>
+        <a class="mf-btn" href="/contact">Talk to Jason</a>
+        <a class="mf-link" href="#mf-pilot">See the 60-day pilot</a>
       </div>
-      <p class="mf-small mf-byline">Jason Mosley, founder. Based in Chicago.</p>
+      <p class="mf-proof"><b>In production now.</b> ChangePilot, the agent system I built in Microsoft 365, passed 8 of 8 test scenarios. Two people use it on their teams today.</p>
     </div>
     <div class="mf-hero-photo">
       <img src="https://images.squarespace-cdn.com/content/v1/6ae0085634be725153bde62b/a922de5e-6681-43c3-a7d5-b2d9b2c3ae7b/IMG_2970.jpeg?format=1000w" alt="Jason Mosley, founder of Mosley Foundry" width="733" height="1100">
     </div>
   </section>
 
-  <section class="mf-band mf-stone">
-    <div class="mf-wrap mf-record">
-      <h2 class="mf-h2">I build the skills the job assumes you already have.</h2>
-      <p class="mf-sentence">Since 2022, I've coached <span class="mf-n" data-count="48">48</span> small business owners, including some who started with no revenue, and together they've accessed <span class="mf-n" data-count="250" data-prefix="$" data-suffix="K+">$250K+</span> in capital. Before that, I trained <span class="mf-n" data-count="300" data-suffix="+">300+</span> leaders to carry one strategy into 12 hospitals, and grew a six-person leadership pilot at a financial institution <span class="mf-n" data-count="10" data-suffix="x">10x</span>, to more than 60 leaders.</p>
-    </div>
-  </section>
-
-  <section class="mf-band" id="mf-series">
+  <section class="mf-band mf-stone" id="mf-why">
     <div class="mf-wrap">
-      <h2 class="mf-h2">A six-session series for the people who lead the work.</h2>
-      <p class="mf-lede">For supervisors, frontline managers, and project leads. Whether you lead with a title or only with influence, the problems are the same: expectations aren't clear, hard conversations get put off, and change fades after launch.</p>
-      <ol class="mf-series">
-        <li><span class="mf-ix">1</span><div><h3>Leading Others</h3><p>Move from doing the work to multiplying it. Set expectations, delegate with confidence, and keep your relationships with former peers intact.</p></div></li>
-        <li><span class="mf-ix">2</span><div><h3>Knowing Yourself as a Leader</h3><p>Take the EQ-i 2.0, a validated emotional intelligence assessment, and see how your reactions in tough moments shape what your team experiences. Then learn to choose your response.</p></div></li>
-        <li><span class="mf-ix">3</span><div><h3>Hard Conversations</h3><p>Raise issues while they're still small. Know when a situation calls for coaching, performance management, or escalation.</p></div></li>
-        <li><span class="mf-ix">4</span><div><h3>Driving Accountability</h3><p>Turn commitments into named owners and real deadlines. Build follow-through that happens whether or not you're the one checking.</p></div></li>
-        <li><span class="mf-ix">5</span><div><h3>Leading Through Change</h3><p>Lead well when the information is incomplete. Sort what's yours to decide from what needs someone else, and move your team from going through the motions to buying in.</p></div></li>
-        <li><span class="mf-ix">6</span><div><h3>Practical AI for Leaders</h3><p>Hands-on work with AI on the tasks leaders actually handle: emails, schedules, reports, and meeting notes. Then how to bring your team along.</p></div></li>
-      </ol>
-      <div class="mf-ctas"><a class="mf-link" href="https://calendly.com/jason-mosley-mosleyfoundry/coaching-call" target="_blank" rel="noopener">Talk about the series</a></div>
-    </div>
-  </section>
-
-  <section class="mf-band mf-ruled" id="mf-ai">
-    <div class="mf-wrap">
-      <div class="mf-split">
-        <div>
-          <h2 class="mf-h2">The tools are ready. Are your leaders?</h2>
-          <p class="mf-lede">Your company bought the tools. Most of your people still aren't using them. That's a leadership and accountability problem, and it's fixable.</p>
-          <p class="mf-tools">I work with the tools your company already has, including Microsoft Copilot Studio, Claude, Claude Code, Gemini, NotebookLM, and Notion.</p>
-        </div>
-        <ol class="mf-steps">
-          <li><span class="mf-ix">1</span><div><h3>Show them how</h3><p>Hands-on sessions on everyday uses: emails, schedules, reports, meeting notes, and planning.</p></div></li>
-          <li><span class="mf-ix">2</span><div><h3>Equip the managers</h3><p>Give them what they need to lead their teams through the change.</p></div></li>
-          <li><span class="mf-ix">3</span><div><h3>Build what fits</h3><p>Simple AI assistants for your team's real work, like follow-ups, status updates, and tracking.</p></div></li>
-          <li><span class="mf-ix">4</span><div><h3>Track adoption</h3><p>Clear owners and regular follow-up, so use keeps growing after launch day.</p></div></li>
-        </ol>
-      </div>
-    </div>
-  </section>
-
-  <section class="mf-band mf-ruled" id="mf-processiq">
-    <div class="mf-wrap mf-aside">
-      <p>I also build tools. <b>ProcessIQ</b> maps a process, finds the waste, and shows what to automate.</p>
-      <a class="mf-link" href="/processiq">See how ProcessIQ works</a>
-    </div>
-  </section>
-
-  <section class="mf-band mf-stone" id="mf-check">
-    <div class="mf-wrap mf-split mf-split-even">
-      <div>
-        <h2 class="mf-h2">Where should your team start?</h2>
-        <p class="mf-lede">Five quick questions. Pick the answer that sounds most like the last month, and you'll see where to start.</p>
-      </div>
-      <div class="mf-qbox" aria-live="polite">
-        <div class="mf-qbar"><i></i></div>
-        <div class="mf-qstage"></div>
+      <h2 class="mf-h2">Two skills you rarely find in one person</h2>
+      <p class="mf-lede">You can hire a developer who'll build circles around me. You can hire a change manager with 20 years of rollouts. What you rarely get is someone who can sit with the business, design the AI workflow, and then get people to change how they work.</p>
+      <div class="mf-two">
+        <div><h3>The change side</h3><p>Sponsors, managers, and the people who do the work. I find out what's really slowing them down, bring them along, and stay until the new way of working is routine.</p></div>
+        <div><h3>The build side</h3><p>I turn the process into agents and automations on the tools you already have, and I work alongside your IT team. They own the systems. I make sure what gets built fits the work and gets used.</p></div>
       </div>
     </div>
   </section>
 
   <section class="mf-band">
-    <div class="mf-wrap">
-      <h2 class="mf-h2">Heat. Hammer. Temper.</h2>
-      <p class="mf-lede">Every engagement follows the same three steps.</p>
-      <div class="mf-three">
-        <div><span class="mf-tag">Heat</span><h3>Diagnose</h3><p>A 30-minute call about what's broken, why it's happening, and who owns it. No pitch, no deck.</p></div>
-        <div><span class="mf-tag">Hammer</span><h3>Build the skill</h3><p>Sessions shaped to your team, with assessments like EQ-i 2.0 and CCL 360 where they help. People practice in the room on their own work.</p></div>
-        <div><span class="mf-tag">Temper</span><h3>Follow through</h3><p>Named owners, follow-up, and coaching after the sessions end, so the new habits are still in place next quarter.</p></div>
-      </div>
+    <div class="mf-wrap mf-record">
+      <h2 class="mf-h2">I've done both at the same time.</h2>
+      <p class="mf-sentence">At a major financial institution, I directed an engineering team through a full cloud migration and led the workforce adoption side of the same change. Across a <span class="mf-n" data-count="12">12</span>-hospital system, I trained <span class="mf-n" data-count="300" data-suffix="+">300+</span> leaders to run new strategy deployment routines in their own hospitals. I grew a six-person leadership pilot <span class="mf-n" data-count="10" data-suffix="x">10x</span> because people asked for it. And ChangePilot, the agent system I built, passed <span class="mf-n" data-count="8" data-suffix=" of 8">8 of 8</span> test scenarios and is now in production.</p>
     </div>
   </section>
 
-  <section class="mf-band mf-ruled" id="mf-words">
+  <section class="mf-band mf-stone" id="mf-uses">
     <div class="mf-wrap">
-      <h2 class="mf-h2">What leaders say</h2>
-      <div class="mf-quotes">
-        <figure class="mf-q is-on"><blockquote>&ldquo;Jason understands people, but he also understands systems. That's a powerful combination. His strength is turning organizational complexity into clarity and action.&rdquo;</blockquote><figcaption>Healthcare leader<span>Organizational effectiveness</span></figcaption></figure>
-        <figure class="mf-q"><blockquote>&ldquo;His sessions are engaging, practical, and sometimes uncomfortable in exactly the right way. You leave knowing what you need to do next.&rdquo;</blockquote><figcaption>Entrepreneur development<span>Business coaching</span></figcaption></figure>
-        <figure class="mf-q"><blockquote>&ldquo;Jason helped us connect enterprise strategy with the realities of operating across 12 hospitals. Successful transformation required leadership alignment, organizational discipline, and the ability to bring people along.&rdquo;</blockquote><figcaption>Healthcare executive<span>Enterprise transformation</span></figcaption></figure>
-        <figure class="mf-q"><blockquote>&ldquo;Jason has a way of challenging your thinking without telling you what to think. He helps you see where leadership, trust, and accountability intersect.&rdquo;</blockquote><figcaption>NBA Head Coach<span>Executive leadership coaching</span></figcaption></figure>
-        <figure class="mf-q"><blockquote>&ldquo;He doesn't just facilitate a session. He creates an environment where people challenge themselves, have honest conversations, and leave with something they can actually use.&rdquo;</blockquote><figcaption>Manufacturing industry<span>Leadership development program</span></figcaption></figure>
-        <figure class="mf-q"><blockquote>&ldquo;He helped create a leadership development experience that started with a small pilot and expanded to reach more than 60 leaders. It wasn't training for the sake of training. It was about preparing people to lead.&rdquo;</blockquote><figcaption>Financial services leader<span>Leadership development</span></figcaption></figure>
-        <figure class="mf-q"><blockquote>&ldquo;Jason doesn't stop at recommendations. He built the tools and automations that fixed problems we'd worked around for years. Our team got hours back every week, and the savings paid for the work many times over.&rdquo;</blockquote><figcaption>Financial institution<span>Process automation</span></figcaption></figure>
-        <figure class="mf-q"><blockquote>&ldquo;Jason doesn't let teams hide behind buzzwords or complicated presentations. He gets straight to the work. What's broken? Why is it happening? Who owns the solution?&rdquo;</blockquote><figcaption>Manufacturing leader<span>Operational excellence</span></figcaption></figure>
-        <figure class="mf-q"><blockquote>&ldquo;Some facilitators know the material. Others know how to connect with people. Jason does both. His approach makes leadership development feel relevant rather than academic.&rdquo;</blockquote><figcaption>Financial services<span>Talent development</span></figcaption></figure>
-        <figure class="mf-q"><blockquote>&ldquo;He's confident without being rigid, challenging without being intimidating, and entertaining without losing the substance.&rdquo;</blockquote><figcaption>Leadership development partner<span>Enterprise facilitation</span></figcaption></figure>
-      </div>
-      <div class="mf-qnav">
-        <button class="mf-arrowbtn" type="button" data-dir="-1" aria-label="Previous testimonial">&larr;</button>
-        <button class="mf-arrowbtn" type="button" data-dir="1" aria-label="Next testimonial">&rarr;</button>
-        <span class="mf-count">1 of 10</span>
-      </div>
+      <h2 class="mf-h2">Where AI earns its keep</h2>
+      <p class="mf-lede">Your calendar already sends reminders. I build the work it can't do: agents that read across projects, compare what people say against what the plans show, and hand your managers the decisions that need them.</p>
+      <ul class="mf-uses2">
+        <li><b>Portfolio reporting you can defend</b><span>An agent pulls status from every project, flags where the dates and the green-yellow-red color don't agree, and drafts the portfolio report with the sponsor's next questions already answered.</span></li>
+        <li><b>Dependencies that don't surprise you</b><span>Agents read plans and decision logs across the portfolio, catch when one project's slip breaks another's milestone, and route it to the owner before the steering meeting.</span></li>
+        <li><b>Commitments someone actually checks</b><span>What people commit to in meetings lands in a tracker with an owner and a date. A second agent checks later whether anything moved and tells the manager which ones need a conversation.</span></li>
+        <li><b>Rollouts you can see coming</b><span>Before a change goes live, agents compare training, open issues, and early usage by team, and tell you which teams aren't ready yet and why.</span></li>
+      </ul>
+      <p class="mf-small mf-uses-note">Built on the tools you already have, with a person approving anything that changes a record.</p>
     </div>
   </section>
 
-  <section class="mf-band mf-stone" id="mf-about">
-    <div class="mf-wrap mf-split mf-about">
+  <section class="mf-band" id="mf-pilot">
+    <div class="mf-wrap mf-split">
       <div>
-        <h2 class="mf-h2">I'm Jason Mosley.</h2>
-        <p>In second grade I taught my classmates cursive, because I'd already learned it at my last school. I got in trouble for it. It wasn't in the lesson plan that year.</p>
-        <p class="mf-says">They needed it. I had it. So I gave it.</p>
-        <p>I've been doing that my whole life, teaching people a skill before the system says they're ready for it.</p>
-        <p>For more than fifteen years I've helped leaders build the skills their promotions assumed they already had. I've led a multidisciplinary team through a full cloud migration while running the people side of the same change, so I teach what I've had to make work myself. Now I work with supervisors, project leads, and managers, and I stay in the room while they use those skills on real work.</p>
-        <p>My style is structured and direct, with plenty of humor. You'll practice in the room and leave with something you can use right away.</p>
+        <h2 class="mf-h2">The 60-day pilot</h2>
+        <p class="mf-lede">One team, one piece of work that eats their week, and a clear starting point. We build it and we get it used, in the same 60 days.</p>
       </div>
-      <dl class="mf-facts">
-        <div class="mf-fact"><dt>Mosley Foundry</dt><dd>Mosley Foundry develops leaders and builds the systems that make their changes last.</dd></div>
-        <div class="mf-fact"><dt>Credentials</dt><dd>Certified Change Management Professional (CCMP), Microsoft AI Transformation Leader, Lean Six Sigma Green Belt, and EQ-i 2.0 certified.</dd></div>
-        <div class="mf-fact"><dt>Author</dt><dd><em>Both Hands on the Wheel</em>, the book behind my coaching program and app, plus two more books on leadership and change. Next up: <em>The Michigan Left: Leading Change From the Driver's Seat</em>.</dd></div>
-        <div class="mf-fact"><dt>Off the clock</dt><dd>Lifelong martial artist, three-time state champion, and NASM-certified trainer with a passion for health and wellness. Voted best breakdancer in my second-grade class.</dd></div>
-      </dl>
+      <ol class="mf-timeline">
+        <li><span class="mf-when">Week 1</span><div><p>I map the work with the people who do it, and we write down where you're starting: who uses the AI tools today and the number your sponsor cares about.</p></div></li>
+        <li><span class="mf-when">Weeks 2 to 8</span><div><p>I design the workflow and build it with your IT team. Managers use it on real work, and I check in weekly on what's actually getting used and why.</p></div></li>
+        <li><span class="mf-when">Day 60</span><div><p>You see adoption and your sponsor's number next to where you started, and what to roll out next.</p></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="mf-band mf-dark" id="mf-build">
+    <div class="mf-wrap">
+      <h2 class="mf-h2">What I build when the tools aren't enough</h2>
+      <p class="mf-lede">Agents, automations, and project tools that run on what you already have. I build in Microsoft 365, Notion, and Claude Code.</p>
+      <ol class="mf-flow" aria-label="How the tools connect">
+        <li><span class="mf-flow-n">1</span><b>Map it</b><span>ProcessIQ shows where work waits</span></li>
+        <li><span class="mf-flow-n">2</span><b>Automate it</b><span>Agents like ChangePilot handle the follow-up</span></li>
+        <li><span class="mf-flow-n">3</span><b>Follow through</b><span>The Follow-Through Tracker checks in weekly</span></li>
+      </ol>
+      <div class="mf-builds">
+        <article class="mf-build mf-build-lead">
+          <p class="mf-ex-label">Agents</p>
+          <h3>ChangePilot</h3>
+          <p>A management accountability system. Commitments, owners, and deadlines live in SharePoint, and Outlook sends the reminders. Leaders get one summary of open risks. It recommends changes and asks for approval before it touches a record.</p>
+          <p class="mf-build-proof">Tested against 8 scenarios, including a fake executive approval, an attempt to slip it hidden instructions, and conflicting owner and deadline data. It passed all 8, and it's now in production with two people using it on their teams, including a manager who used it to move his tech team to cloud support.</p>
+          <p class="mf-built">Built with Microsoft Copilot Studio, SharePoint, Power Automate, and Outlook</p>
+        </article>
+        <article class="mf-build">
+          <p class="mf-ex-label">Automation</p>
+          <h3>Coaching operations system</h3>
+          <p>A command center that connects bookings, session records, and follow-up drafts. A person reviews before anything goes out.</p>
+          <p class="mf-built">Built with Notion, Calendly, Google Drive, and Gmail</p>
+        </article>
+        <article class="mf-build">
+          <p class="mf-ex-label">Process improvement</p>
+          <h3>ProcessIQ</h3>
+          <p>Maps a workflow from the details your team enters, shows where work waits or changes hands without an owner, and turns the fixes into a plan with owners and dates. Approved actions export straight into the Follow-Through Tracker.</p>
+          <p class="mf-built">Built with Claude Code</p>
+          <p><a class="mf-link" href="/processiq">See ProcessIQ</a></p>
+        </article>
+        <article class="mf-build">
+          <p class="mf-ex-label">Project tools</p>
+          <h3>Follow-Through Tracker</h3>
+          <p>Picks up the actions from ProcessIQ, with owners and measures, and checks in every week until the new way of working is routine.</p>
+          <p class="mf-built">Built with Claude Code</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="mf-band" id="mf-about">
+    <div class="mf-wrap mf-about">
+      <h2 class="mf-h2">Who you'd be working with</h2>
+      <p style="max-width:40em">I'm Jason Mosley. I've spent more than fifteen years in organizational development and change, and now I build AI workflows and agents too.</p>
+      <div class="mf-ctas"><a class="mf-link" href="/about">More about me</a></div>
     </div>
   </section>
 
   <section class="mf-band mf-close" id="mf-contact">
     <div class="mf-wrap">
-      <h2 class="mf-h2">The first call is a diagnostic. No pitch, no deck.</h2>
-      <p class="mf-lede">Thirty minutes on what's going on with your team. You'll leave with a clearer picture, whether we work together or not.</p>
-      <div class="mf-ctas"><a class="mf-btn" href="https://calendly.com/jason-mosley-mosleyfoundry/coaching-call" target="_blank" rel="noopener">Schedule a call</a></div>
-      <p class="mf-small">Prefer to write? <a href="/contact">Send a message</a> or email <a href="mailto:jason.mosley@mosleyfoundry.com">jason.mosley@mosleyfoundry.com</a></p>
+      <h2 class="mf-h2">Ready to try this with one team? Great, I got you covered.</h2>
+      <p class="mf-lede">Tell me which team and what eats their week. We'll set up a 60-day pilot and agree up front on what we'll measure.</p>
+      <div class="mf-ctas"><a class="mf-btn" href="/contact">Talk to Jason</a></div>
+      <p class="mf-small">Or email <a href="mailto:jason.mosley@mosleyfoundry.com">jason.mosley@mosleyfoundry.com</a></p>
     </div>
   </section>
 
   <footer class="mf-foot">
     <div class="mf-wrap">
-      <div><p class="mf-foot-line">Mosley Foundry develops leaders and builds the systems that make their changes last.</p><span>&copy; <span class="mf-year">2026</span> Mosley Foundry, Chicago, IL</span></div>
+      <div><p class="mf-foot-line">Mosley Foundry. Fractional AI adoption for teams that already have the tools.</p><span>&copy; <span class="mf-year">2026</span> Mosley Foundry, Chicago, IL</span></div>
       <nav aria-label="Footer">
-        <a href="https://www.linkedin.com/in/jedwardmosley" target="_blank" rel="noopener">LinkedIn</a>
-        <a href="https://calendly.com/jason-mosley-mosleyfoundry/coaching-call" target="_blank" rel="noopener">Schedule a call</a>
         <a href="/contact">Contact</a>
-        <a href="#mf-top">Back to top</a>
+        <a href="https://www.linkedin.com/in/jedwardmosley" target="_blank" rel="noopener">LinkedIn</a>
       </nav>
     </div>
   </footer>

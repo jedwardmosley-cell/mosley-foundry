@@ -1,0 +1,517 @@
+<!-- About page. -->
+<style>#mf{width:100vw;position:relative;left:50%;margin-left:-50vw;}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+/* Mosley Foundry. Left-aligned on a 1180px grid; white pages, a few stone bands, navy only for the closing call.
+   Color: the brand navy and brass from the coaching app, with paper, stone, ink and slate. Type: Archivo wide for headlines and UI, Source Serif for reading.
+   One bold move: the track record written as a sentence with counting numbers. Everything else stays quiet. */
+#mf {
+  --paper: #ffffff;
+  --stone: #ecebe7;
+  --ink: #1f2733;
+  --navy: #1e2f4a;
+  --navy-deep: #15223a;
+  --brass: #a77b3b;
+  --brass-deep: #7e5b2a;
+  --brass-light: #c9a46a;
+  --slate: #5a6272;
+  --line: #d9d7d1;
+  --navy-line: rgba(255,255,255,.18);
+  --on-navy: #ffffff;
+  --on-navy-soft: #c3c8d3;
+  --sans: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  color-scheme: light;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 19px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+#mf *, #mf *::before, #mf *::after { box-sizing: border-box; }
+#mf h1, #mf h2, #mf h3, #mf p, #mf ul, #mf ol, #mf blockquote, #mf figure, #mf dl, #mf dd { margin: 0; padding: 0; }
+#mf ul, #mf ol { list-style: none; }
+#mf h1, #mf h2, #mf h3, #mf p, #mf li, #mf a, #mf span, #mf blockquote, #mf figcaption, #mf dt, #mf dd, #mf strong, #mf b, #mf em { color: inherit; font-family: inherit; line-height: inherit; }
+#mf img { max-width: 100%; display: block; }
+#mf button { font: inherit; color: inherit; cursor: pointer; }
+#mf a { text-underline-offset: 3px; text-decoration-thickness: 1px; }
+#mf :focus-visible { outline: 3px solid var(--brass); outline-offset: 3px; }
+
+#mf .mf-wrap { max-width: 1180px; margin: 0 auto; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); }
+#mf .mf-band { padding-block: clamp(72px, 9vw, 120px); }
+#mf .mf-stone { background: var(--stone); }
+#mf .mf-ruled > .mf-wrap { position: relative; padding-top: clamp(56px, 7vw, 88px); }
+#mf .mf-ruled > .mf-wrap::before { content: ""; position: absolute; top: 0; left: max(24px, env(safe-area-inset-left, 0px)); right: max(24px, env(safe-area-inset-right, 0px)); height: 1px; background: var(--line); }
+#mf .mf-ruled { padding-top: 0; }
+
+/* Type scale */
+#mf h1, #mf .mf-h2 { font-family: var(--sans); font-stretch: 125%; font-weight: 700; color: var(--navy); text-wrap: balance; }
+#mf h1 { font-size: clamp(42px, 5.6vw, 78px); line-height: 1.02; letter-spacing: -.015em; }
+#mf .mf-h2 { font-size: clamp(30px, 3.4vw, 44px); line-height: 1.1; letter-spacing: -.01em; max-width: 20ch; }
+#mf h3 { font-family: var(--sans); font-weight: 600; font-size: 20px; line-height: 1.3; color: var(--ink); }
+#mf .mf-lede { font-size: clamp(19px, 1.6vw, 22px); line-height: 1.55; color: var(--slate); max-width: 34em; margin-top: 20px; }
+#mf .mf-small { font-family: var(--sans); font-size: 15px; color: var(--slate); }
+
+/* Buttons and links */
+#mf .mf-ctas { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 28px; margin-top: 34px; }
+#mf .mf-btn { display: inline-block; font-family: var(--sans); font-weight: 600; font-size: 16px; line-height: 1; text-decoration: none; padding: 17px 26px; border-radius: 3px; background: var(--navy); color: #fff; transition: background-color .15s ease; }
+#mf .mf-btn:hover { background: var(--navy-deep); }
+#mf .mf-link { font-family: var(--sans); font-weight: 600; font-size: 16px; color: var(--ink); text-decoration: underline; }
+#mf .mf-link:hover { color: var(--brass-deep); }
+
+/* Nav */
+#mf .mf-nav { position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,.96); border-bottom: 1px solid var(--line); }
+#mf .mf-nav .mf-wrap { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 70px; }
+#mf .mf-logo { font-family: var(--sans); font-stretch: 125%; font-weight: 800; font-size: 20px; color: var(--navy); text-decoration: none; white-space: nowrap; }
+#mf .mf-links { display: flex; align-items: center; gap: 26px; }
+#mf .mf-links a { font-family: var(--sans); font-size: 15px; font-weight: 500; color: var(--slate); text-decoration: none; }
+#mf .mf-links a:hover { color: var(--ink); }
+#mf .mf-links .mf-btn { color: #fff; font-size: 14px; padding: 12px 16px; }
+@media (max-width: 900px) { #mf .mf-links a:not(.mf-btn) { display: none; } }
+@media (max-width: 420px) { #mf .mf-logo { font-size: 17px; } #mf .mf-links .mf-btn { padding: 11px 12px; } }
+
+/* Hero: text on the grid, portrait running to the right edge */
+#mf .mf-hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 40%); min-height: 560px; }
+#mf .mf-hero-text { padding-block: clamp(56px, 8vw, 112px); padding-right: clamp(24px, 4vw, 64px); padding-left: max(24px, calc((100vw - 1180px) / 2 + 24px)); align-self: center; }
+#mf .mf-hero-photo { position: relative; min-height: 100%; }
+#mf .mf-hero-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 22%; }
+#mf .mf-hero .mf-lede { color: var(--ink); max-width: 30em; }
+#mf .mf-byline { margin-top: 40px; }
+@media (max-width: 860px) {
+  #mf .mf-hero { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+  #mf .mf-hero-photo { min-height: 0; aspect-ratio: 1 / 1; max-height: 70vh; }
+  #mf .mf-hero-text { padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); padding-block: 48px 56px; }
+}
+
+/* Track record sentence */
+#mf .mf-record { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: clamp(28px, 5vw, 72px); align-items: start; }
+#mf .mf-record .mf-h2 { font-size: clamp(24px, 2.4vw, 30px); max-width: 14ch; }
+#mf .mf-sentence { font-size: clamp(25px, 2.7vw, 36px); line-height: 1.45; color: var(--ink); max-width: 26em; }
+#mf .mf-n { font-family: var(--sans); font-stretch: 125%; font-weight: 700; color: var(--brass); font-variant-numeric: tabular-nums; white-space: nowrap; }
+#mf .mf-record-note { margin-top: 28px; }
+@media (max-width: 860px) { #mf .mf-record { grid-template-columns: minmax(0, 1fr); } }
+
+/* Numbered lists: Leadership Series, steps */
+#mf .mf-series { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: clamp(32px, 5vw, 72px); margin-top: 48px; }
+#mf .mf-series li { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 12px; padding: 24px 0 26px; border-top: 1px solid var(--line); }
+#mf .mf-ix { font-family: var(--sans); font-stretch: 125%; font-weight: 700; font-size: 18px; color: var(--brass-deep); padding-top: 1px; }
+#mf .mf-series p, #mf .mf-steps p { color: var(--slate); font-size: 17px; margin-top: 6px; }
+#mf .mf-steps li { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 12px; padding: 22px 0; border-top: 1px solid var(--line); }
+#mf .mf-steps li:last-child { border-bottom: 1px solid var(--line); }
+@media (max-width: 760px) { #mf .mf-series { grid-template-columns: minmax(0, 1fr); } }
+
+/* Two columns */
+#mf .mf-split { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(32px, 6vw, 88px); align-items: start; }
+#mf .mf-split-even { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+#mf .mf-tools { margin-top: 22px; font-size: 17px; color: var(--slate); max-width: 30em; }
+@media (max-width: 860px) { #mf .mf-split, #mf .mf-split-even { grid-template-columns: minmax(0, 1fr); } }
+
+/* ProcessIQ line */
+#mf .mf-aside { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 16px 40px; }
+#mf .mf-aside p { font-size: clamp(21px, 2vw, 26px); line-height: 1.4; max-width: 30em; }
+#mf .mf-aside b { font-family: var(--sans); font-stretch: 125%; font-weight: 700; }
+
+/* Gut check */
+#mf .mf-qbox { background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: clamp(24px, 4vw, 40px); }
+#mf .mf-qbar { height: 3px; background: var(--stone); margin-bottom: 24px; }
+#mf .mf-qbar i { display: block; height: 100%; width: 20%; background: var(--brass); transition: width .3s ease; }
+#mf .mf-qmeta { font-family: var(--sans); font-size: 14px; color: var(--slate); }
+#mf .mf-qtext { font-family: var(--sans); font-weight: 600; font-size: clamp(22px, 2.2vw, 27px); line-height: 1.25; color: var(--ink); margin-top: 6px; text-wrap: balance; }
+#mf .mf-opts { display: grid; gap: 10px; margin-top: 22px; }
+#mf .mf-opt { text-align: left; font-family: var(--serif); font-size: 18px; line-height: 1.4; background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px; display: flex; gap: 14px; align-items: baseline; transition: border-color .15s ease; }
+#mf .mf-opt:hover { border-color: var(--ink); }
+#mf .mf-opt b { font-family: var(--sans); font-weight: 700; font-size: 14px; color: var(--brass-deep); flex: none; }
+#mf .mf-result h3 { font-family: var(--sans); font-stretch: 125%; font-weight: 700; font-size: clamp(30px, 3.2vw, 40px); line-height: 1.05; color: var(--navy); margin-top: 8px; }
+#mf .mf-result p { color: var(--slate); margin-top: 12px; }
+#mf .mf-reset { background: none; border: 0; padding: 0; font-family: var(--sans); font-size: 15px; color: var(--slate); text-decoration: underline; text-underline-offset: 3px; }
+
+/* Heat, hammer, temper */
+#mf .mf-three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(24px, 4vw, 56px); margin-top: 48px; }
+#mf .mf-three > div { border-top: 2px solid var(--brass); padding-top: 18px; }
+#mf .mf-tag { font-family: var(--sans); font-stretch: 125%; font-weight: 700; font-size: 15px; color: var(--brass-deep); }
+#mf .mf-three h3 { margin-top: 6px; font-size: 24px; }
+#mf .mf-three p { color: var(--slate); font-size: 17px; margin-top: 10px; }
+@media (max-width: 760px) { #mf .mf-three { grid-template-columns: minmax(0, 1fr); } }
+
+/* Testimonials */
+#mf .mf-quotes { margin-top: 40px; }
+#mf .mf-q { display: none; }
+#mf .mf-q.is-on { display: block; animation: mf-in .3s ease; }
+@keyframes mf-in { from { opacity: 0; } to { opacity: 1; } }
+#mf .mf-q blockquote { font-size: clamp(24px, 2.6vw, 33px); line-height: 1.4; color: var(--ink); max-width: 30em; }
+#mf .mf-q figcaption { margin-top: 22px; font-family: var(--sans); font-weight: 600; font-size: 16px; }
+#mf .mf-q figcaption span { display: block; font-weight: 400; color: var(--slate); }
+#mf .mf-qnav { display: flex; align-items: center; gap: 10px; margin-top: 34px; }
+#mf .mf-arrowbtn { width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 50%; background: var(--paper); display: grid; place-items: center; font-family: var(--sans); font-size: 17px; color: var(--ink); }
+#mf .mf-arrowbtn:hover { border-color: var(--ink); }
+#mf .mf-count { font-family: var(--sans); font-size: 15px; color: var(--slate); margin-left: 8px; font-variant-numeric: tabular-nums; }
+
+/* About */
+#mf .mf-about p { margin-top: 18px; max-width: 34em; color: var(--ink); }
+#mf .mf-about .mf-says { font-family: var(--sans); font-stretch: 125%; font-weight: 700; font-size: clamp(24px, 2.4vw, 31px); line-height: 1.2; margin-top: 26px; }
+#mf .mf-facts { border-top: 1px solid var(--line); }
+#mf .mf-fact { padding: 18px 0; border-bottom: 1px solid var(--line); }
+#mf .mf-fact dt { font-family: var(--sans); font-weight: 600; font-size: 15px; color: var(--brass-deep); }
+#mf .mf-fact dd { margin-top: 4px; font-size: 17px; color: var(--ink); }
+
+/* FAQ */
+#mf .mf-faq { margin-top: 36px; max-width: 46em; border-top: 1px solid var(--line); }
+#mf .mf-faq details { border-bottom: 1px solid var(--line); }
+#mf .mf-faq summary { list-style: none; cursor: pointer; padding: 20px 40px 20px 0; position: relative; font-family: var(--sans); font-weight: 600; font-size: 20px; color: var(--ink); }
+#mf .mf-faq summary::-webkit-details-marker { display: none; }
+#mf .mf-faq summary::after { content: "+"; position: absolute; right: 4px; top: 16px; font-size: 26px; font-weight: 400; color: var(--brass-deep); }
+#mf .mf-faq details[open] summary::after { content: "\2212"; }
+#mf .mf-faq details p { color: var(--slate); padding-bottom: 22px; max-width: 38em; }
+
+/* Closing call and footer */
+#mf .mf-close { background: var(--navy); color: var(--on-navy); }
+#mf .mf-close .mf-h2 { color: var(--on-navy); max-width: 18ch; }
+#mf .mf-close .mf-lede { color: var(--on-navy-soft); }
+#mf .mf-close .mf-btn { background: var(--brass-light); color: var(--navy); }
+#mf .mf-close .mf-btn:hover { background: #d8b986; }
+#mf .mf-close .mf-small { color: var(--on-navy-soft); margin-top: 22px; }
+#mf .mf-close .mf-small a { color: var(--on-navy); }
+#mf .mf-close .mf-facts, #mf .mf-close .mf-fact { border-color: var(--navy-line); }
+#mf .mf-close .mf-fact dt { color: var(--brass-light); }
+#mf .mf-close .mf-fact dd, #mf .mf-close .mf-fact dd a { color: var(--on-navy); }
+#mf .mf-foot { background: var(--navy-deep); color: var(--on-navy-soft); border-top: 1px solid var(--navy-line); padding-block: 30px; font-family: var(--sans); font-size: 14px; }
+#mf .mf-foot .mf-wrap { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px 32px; }
+#mf .mf-foot-line { font-size: 16px; font-weight: 600; color: var(--on-navy); margin-bottom: 2px; }
+#mf .mf-foot nav { display: flex; flex-wrap: wrap; gap: 22px; }
+#mf .mf-foot a { text-decoration: none; }
+#mf .mf-foot a:hover { color: var(--on-navy); }
+
+/* ProcessIQ page */
+#mf .mf-page-hero { padding-block: clamp(56px, 8vw, 104px) clamp(48px, 6vw, 80px); }
+#mf .mf-page-hero h1 { max-width: 15ch; }
+#mf .mf-shot { border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: #fff; }
+#mf .mf-shot img { width: 100%; height: auto; }
+#mf .mf-page-hero .mf-shot { margin-top: 56px; }
+#mf .mf-caption { font-family: var(--sans); font-size: 14px; color: var(--slate); margin-top: 12px; }
+#mf .mf-gaps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: clamp(32px, 5vw, 72px); margin-top: 44px; }
+#mf .mf-gaps li { padding: 22px 0 24px; border-top: 1px solid var(--line); }
+#mf .mf-gaps p { color: var(--slate); font-size: 17px; margin-top: 6px; }
+#mf .mf-feats { display: grid; gap: clamp(56px, 8vw, 96px); margin-top: 52px; }
+#mf .mf-feat { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(28px, 5vw, 64px); align-items: center; }
+#mf .mf-feat h3 { font-stretch: 125%; font-weight: 700; font-size: clamp(23px, 2.2vw, 28px); line-height: 1.15; }
+#mf .mf-feat > div > p { color: var(--slate); margin-top: 12px; }
+#mf .mf-points { margin-top: 16px; display: grid; gap: 10px; }
+#mf .mf-points li { font-size: 17px; color: var(--slate); padding-left: 18px; position: relative; }
+#mf .mf-points li::before { content: ""; position: absolute; left: 0; top: .72em; width: 7px; height: 2px; background: var(--brass); }
+#mf .mf-points b { color: var(--ink); font-weight: 600; }
+@media (max-width: 860px) { #mf .mf-gaps, #mf .mf-feat { grid-template-columns: minmax(0, 1fr); } }
+
+/* Contact page */
+#mf .mf-mockform { max-width: 720px; display: grid; gap: 18px; padding-bottom: 80px; }
+#mf .mf-mockform label { display: grid; gap: 8px; font-family: var(--sans); font-size: 15px; font-weight: 600; color: var(--ink); }
+#mf .mf-mockform input, #mf .mf-mockform select, #mf .mf-mockform textarea { font-family: var(--sans); font-size: 16px; font-weight: 400; color: var(--ink); background: #fff; border: 1px solid #c9c6bf; border-radius: 3px; padding: 13px 14px; width: 100%; }
+#mf .mf-mockform .mf-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+#mf .mf-mockform .mf-btn { border: 0; justify-self: start; }
+#mf .mf-mocknote { font-family: var(--sans); font-size: 14px; color: var(--brass-deep); }
+@media (max-width: 620px) { #mf .mf-mockform .mf-row { grid-template-columns: minmax(0, 1fr); } }
+
+
+/* v3: pilot homepage */
+#mf .mf-hero h1 { font-size: clamp(36px, 4.6vw, 64px); line-height: 1.06; }
+#mf .mf-hero .mf-lede + .mf-lede { margin-top: 16px; }
+#mf .mf-pull { font-family: var(--sans); font-stretch: 125%; font-weight: 700; font-size: clamp(22px, 2.2vw, 28px); line-height: 1.25; color: var(--navy); margin-top: 32px; padding-left: 18px; border-left: 3px solid var(--brass); max-width: 22em; }
+#mf .mf-examples { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(24px, 4vw, 48px); margin-top: 44px; }
+#mf .mf-ex { border-top: 2px solid var(--brass); padding-top: 20px; }
+#mf .mf-ex-label { font-family: var(--sans); font-weight: 600; font-size: 14px; color: var(--brass-deep); }
+#mf .mf-ex h3 { font-stretch: 125%; font-weight: 700; font-size: clamp(21px, 2vw, 25px); line-height: 1.2; margin-top: 10px; }
+#mf .mf-ex-answer { font-family: var(--sans); font-weight: 600; font-size: 17px; color: var(--ink); margin-top: 10px; }
+#mf .mf-ex > p:not(.mf-ex-label):not(.mf-ex-answer) { font-size: 17px; margin-top: 12px; color: var(--ink); }
+#mf .mf-ex .mf-ex-measure { background: var(--stone); padding: 12px 14px; border-radius: 4px; }
+#mf .mf-ex .mf-ex-note { font-family: var(--sans); font-size: 13px; color: var(--slate) !important; }
+#mf .mf-timeline li { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; padding: 20px 0; border-top: 1px solid var(--line); }
+#mf .mf-timeline li:last-child { border-bottom: 1px solid var(--line); }
+#mf .mf-when { font-family: var(--sans); font-stretch: 125%; font-weight: 700; font-size: 15px; color: var(--brass-deep); padding-top: 2px; }
+#mf .mf-timeline p { color: var(--slate); font-size: 17px; margin-top: 4px; }
+#mf .mf-about p { color: var(--ink); }
+@media (max-width: 760px) { #mf .mf-examples { grid-template-columns: minmax(0, 1fr); } #mf .mf-timeline li { grid-template-columns: minmax(0, 1fr); gap: 4px; } }
+
+
+#mf .mf-ex-steps { margin-top: 14px; border-top: 1px solid var(--line); }
+#mf .mf-ex-steps > div { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+#mf .mf-ex-steps dt { font-family: var(--sans); font-weight: 600; font-size: 15px; color: var(--brass-deep); }
+#mf .mf-ex-steps dd { font-size: 17px; }
+@media (max-width: 560px) { #mf .mf-ex-steps > div { grid-template-columns: minmax(0, 1fr); gap: 2px; } }
+
+
+#mf .mf-how-q { font-family: var(--sans); font-stretch: 125%; font-weight: 700; font-size: clamp(22px, 2.2vw, 28px); line-height: 1.25; color: var(--navy); }
+#mf .mf-how { font-size: clamp(19px, 1.6vw, 21px); line-height: 1.6; margin-top: 16px; max-width: 34em; }
+#mf .mf-how-note { margin-top: 16px; }
+#mf .mf-ex > p:not(.mf-ex-label):not(.mf-ex-note) { font-size: 17px; margin-top: 12px; }
+
+
+#mf .mf-uses { display: grid; gap: 0; border-top: 1px solid var(--line); }
+#mf .mf-uses li { font-size: clamp(19px, 1.7vw, 22px); line-height: 1.4; padding: 18px 0 18px 26px; border-bottom: 1px solid var(--line); position: relative; }
+#mf .mf-uses li::before { content: ""; position: absolute; left: 0; top: 1.15em; width: 12px; height: 2px; background: var(--brass); }
+#mf .mf-builds { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(20px, 3vw, 32px); margin-top: 40px; }
+#mf .mf-build { background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 24px 24px 26px; }
+#mf .mf-build-lead { grid-column: 1 / -1; border-top: 3px solid var(--brass); }
+#mf .mf-build h3 { font-stretch: 125%; font-weight: 700; font-size: clamp(22px, 2.2vw, 28px); margin-top: 8px; }
+#mf .mf-build p:not(.mf-ex-label) { font-size: 17px; margin-top: 10px; max-width: 46em; }
+#mf .mf-build .mf-build-proof { font-family: var(--sans); font-size: 15px; color: var(--slate); background: var(--stone); border-radius: 4px; padding: 12px 14px; }
+@media (max-width: 960px) { #mf .mf-builds { grid-template-columns: repeat(2, minmax(0, 1fr)); } #mf .mf-build-lead { grid-column: 1 / -1; } }
+@media (max-width: 620px) { #mf .mf-builds { grid-template-columns: minmax(0, 1fr); } }
+
+#mf .mf-build .mf-built { font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--brass-deep); margin-top: 14px; }
+
+
+/* v7 flavor */
+#mf .mf-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 26px; }
+#mf .mf-tags li { font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--navy); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; background: var(--paper); }
+#mf .mf-dark { background: var(--navy); color: var(--on-navy); }
+#mf .mf-dark .mf-h2 { color: var(--on-navy); }
+#mf .mf-dark .mf-lede { color: var(--on-navy-soft); }
+#mf .mf-flow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin-top: 44px; position: relative; }
+#mf .mf-flow::before { content: ""; position: absolute; left: 28px; right: 28px; top: 27px; height: 2px; background: linear-gradient(90deg, var(--brass-light), rgba(201,164,106,.25)); }
+#mf .mf-flow li { position: relative; padding-right: 24px; }
+#mf .mf-flow-n { position: relative; display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: var(--brass-light); color: var(--navy); font-family: var(--sans); font-stretch: 125%; font-weight: 800; font-size: 22px; }
+#mf .mf-flow b { display: block; margin-top: 16px; font-family: var(--sans); font-stretch: 125%; font-weight: 700; font-size: 22px; color: var(--on-navy); }
+#mf .mf-flow span:not(.mf-flow-n) { display: block; margin-top: 4px; font-size: 17px; color: var(--on-navy-soft); }
+#mf .mf-dark .mf-builds { margin-top: 52px; }
+#mf .mf-dark .mf-build { border-color: transparent; color: var(--ink); }
+#mf .mf-dark .mf-build-lead { border-top-color: var(--brass-light); }
+@media (max-width: 760px) {
+  #mf .mf-flow { grid-template-columns: minmax(0, 1fr); gap: 22px; }
+  #mf .mf-flow::before { left: 27px; right: auto; top: 28px; bottom: 28px; width: 2px; height: auto; background: linear-gradient(180deg, var(--brass-light), rgba(201,164,106,.25)); }
+  #mf .mf-flow li { display: grid; grid-template-columns: 56px minmax(0, 1fr); column-gap: 16px; padding: 0; }
+  #mf .mf-flow-n { grid-row: span 2; }
+  #mf .mf-flow b { margin-top: 4px; }
+}
+
+#mf .mf-uses2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: clamp(32px, 5vw, 72px); margin-top: 44px; }
+#mf .mf-uses2 li { padding: 22px 0 24px; border-top: 2px solid var(--brass); }
+#mf .mf-uses2 b { display: block; font-family: var(--sans); font-stretch: 125%; font-weight: 700; font-size: clamp(20px, 2vw, 24px); line-height: 1.2; color: var(--navy); }
+#mf .mf-uses2 span { display: block; margin-top: 10px; font-size: 17px; color: var(--ink); }
+#mf .mf-uses-note { margin-top: 28px; }
+@media (max-width: 760px) { #mf .mf-uses2 { grid-template-columns: minmax(0, 1fr); } }
+
+#mf .mf-proof { margin-top: 28px; max-width: 34em; font-size: 16px; line-height: 1.5; color: var(--ink); padding: 12px 16px; border-left: 3px solid var(--brass); background: var(--stone); border-radius: 0 4px 4px 0; }
+#mf .mf-proof b { font-family: var(--sans); font-weight: 700; color: var(--navy); }
+
+#mf .mf-two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(24px, 4vw, 56px); margin-top: 40px; }
+#mf .mf-two > div { background: var(--paper); border-radius: 6px; padding: 24px 24px 26px; border-top: 3px solid var(--brass); }
+#mf .mf-two h3 { font-stretch: 125%; font-weight: 700; font-size: clamp(22px, 2.2vw, 28px); }
+#mf .mf-two p { font-size: 17px; margin-top: 10px; }
+@media (max-width: 760px) { #mf .mf-two { grid-template-columns: minmax(0, 1fr); } }
+
+#mf .mf-list { margin-top: 24px; border-top: 1px solid var(--line); }
+#mf .mf-list li { padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 17px; }
+#mf .mf-off { display: grid; gap: 18px; }
+#mf .mf-off li { font-size: clamp(19px, 1.7vw, 22px); line-height: 1.4; color: var(--ink); }
+#mf .mf-off b { font-family: var(--sans); font-stretch: 125%; font-weight: 700; color: var(--navy); margin-right: 6px; }
+#mf .mf-hero .mf-says { font-family: var(--sans); font-stretch: 125%; font-weight: 700; font-size: clamp(24px, 2.4vw, 31px); line-height: 1.2; color: var(--brass-deep); margin-top: 20px; }
+#mf .mf-hero .mf-says + .mf-lede { margin-top: 18px; }
+
+@media (prefers-reduced-motion: reduce) { #mf *, #mf *::before, #mf *::after { transition: none !important; animation: none !important; } }
+</style>
+<div id="mf">
+
+  <header class="mf-nav">
+    <div class="mf-wrap">
+      <a class="mf-logo" href="/">Mosley Foundry</a>
+      <nav class="mf-links" aria-label="Sections">
+        <a href="/">Home</a>
+        <a href="#mf-work">The work</a>
+        <a href="#mf-creds">Credentials</a>
+        <a href="#mf-off">Off the clock</a>
+        <a class="mf-btn" href="/contact">Talk to Jason</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="mf-hero" id="mf-top">
+    <div class="mf-hero-text">
+      <h1>I'm Jason Mosley.</h1>
+      <p class="mf-lede">In second grade I taught my classmates cursive, because I'd already learned it at my last school. I got in trouble for it. It wasn't in the lesson plan that year.</p>
+      <p class="mf-says">They needed it. I had it. So I gave it.</p>
+      <p class="mf-lede">I've been doing that my whole life, teaching people a skill before the system says they're ready for it. Today that skill is AI. I help teams use the tools they already have, build what's missing, and lead the change so it actually gets used.</p>
+      <div class="mf-ctas"><a class="mf-btn" href="/contact">Talk to Jason</a></div>
+    </div>
+    <div class="mf-hero-photo">
+      <img src="https://images.squarespace-cdn.com/content/v1/6ae0085634be725153bde62b/a922de5e-6681-43c3-a7d5-b2d9b2c3ae7b/IMG_2970.jpeg?format=1000w" alt="Jason Mosley, founder of Mosley Foundry" width="733" height="1100">
+    </div>
+  </section>
+
+  <section class="mf-band mf-stone" id="mf-work">
+    <div class="mf-wrap">
+      <h2 class="mf-h2">Work I'm proud of</h2>
+      <ul class="mf-uses2">
+        <li><b>Built the tech and led the adoption</b><span>At a major financial institution, I led a 12-person team of engineers, analysts, and risk specialists, directed a full cloud migration, and ran the workforce adoption side of the same change.</span></li>
+        <li><b>One strategy, 12 hospitals</b><span>I helped implement an enterprise operating model across a 12-hospital system and trained more than 300 leaders to run strategy deployment in their own hospitals.</span></li>
+        <li><b>A pilot people asked for</b><span>I started a leadership cohort with six supervisors. It grew to more than 60 current and future leaders and became part of succession and workforce planning.</span></li>
+        <li><b>ChangePilot, in production</b><span>An agent system I built in Microsoft 365. It passed 8 of 8 test scenarios and two people use it on their teams today.</span></li>
+        <li><b>Change curriculum, built to be taught by others</b><span>I wrote a six-module change management curriculum aligned to the ACMP Standard, with facilitator guides, participant workbooks, and train-the-trainer materials.</span></li>
+        <li><b>Process improvement roots</b><span>Before AI, I taught and deployed Lean Six Sigma at Chrysler and Presence Health, mapping real workflows and fixing them with the people who ran them.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="mf-band" id="mf-creds">
+    <div class="mf-wrap mf-split mf-split-even">
+      <div>
+        <h2 class="mf-h2">Credentials</h2>
+        <p class="mf-ex-label" style="margin-top:24px">AI, change, and project delivery</p>
+        <ul class="mf-list" style="margin-top:10px">
+          <li>Project Management Professional (PMP)</li>
+          <li>Certified Change Management Professional (CCMP)</li>
+          <li>Microsoft Certified: AI Transformation Leader</li>
+          <li>Applied GenAI for Business Leaders</li>
+          <li>PMI Certified Professional in Managing AI (PMI-CPMAI), in progress</li>
+          <li>Lean Six Sigma Green Belt</li>
+        </ul>
+        <p class="mf-ex-label" style="margin-top:32px">Leadership facilitation</p>
+        <ul class="mf-list" style="margin-top:10px">
+          <li style="font-size:15px;padding:9px 0">CCL 360 Certified Facilitator</li>
+          <li style="font-size:15px;padding:9px 0">DDI Certified Facilitator</li>
+          <li style="font-size:15px;padding:9px 0">EQ-i 2.0 Certified</li>
+          <li style="font-size:15px;padding:9px 0">Change Style Indicator II</li>
+        </ul>
+      </div>
+      <div>
+        <h2 class="mf-h2">Education and books</h2>
+        <ul class="mf-list">
+          <li>B.A., Organizational Development, DePaul University</li>
+          <li>M.A., Applied Professional Studies, DePaul University</li>
+          <li>Executive Education, Organizational Change and Operations Strategy, Kellogg School of Management</li>
+          <li>Author of <em>Both Hands on the Wheel</em> and two more books on leadership and change</li>
+          <li>Coming next: <em>The Michigan Left: Leading Change From the Driver's Seat</em></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="mf-band mf-stone" id="mf-off">
+    <div class="mf-wrap mf-split">
+      <h2 class="mf-h2">Off the clock</h2>
+      <div>
+        <ul class="mf-off">
+          <li><b>Lifelong martial artist</b><span>and three-time state champion.</span></li>
+          <li><b>NASM-certified trainer</b><span>with a passion for health and wellness.</span></li>
+          <li><b>Voted best breakdancer</b><span>in my second-grade class. Same year as the cursive.</span></li>
+        </ul>
+        <p class="mf-lede" style="margin-top:28px">What I learned on the mat is what I teach teams: you get better by showing up and doing the reps.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="mf-band mf-close">
+    <div class="mf-wrap">
+      <h2 class="mf-h2">Got a team that needs to start using the tools? I can help with that.</h2>
+      <div class="mf-ctas"><a class="mf-btn" href="/contact">Talk to Jason</a></div>
+      <p class="mf-small">Or email <a href="mailto:jason.mosley@mosleyfoundry.com">jason.mosley@mosleyfoundry.com</a></p>
+    </div>
+  </section>
+
+  <footer class="mf-foot">
+    <div class="mf-wrap">
+      <div><p class="mf-foot-line">Mosley Foundry. Fractional AI adoption for teams that already have the tools.</p><span>&copy; <span class="mf-year">2026</span> Mosley Foundry, Chicago, IL</span></div>
+      <nav aria-label="Footer">
+        <a href="/">Home</a>
+        <a href="/contact">Contact</a>
+        <a href="https://www.linkedin.com/in/jedwardmosley" target="_blank" rel="noopener">LinkedIn</a>
+      </nav>
+    </div>
+  </footer>
+</div>
+<script>
+(function () {
+  var root = document.getElementById('mf');
+  if (!root) return;
+  var CAL = 'https://calendly.com/jason-mosley-mosleyfoundry/coaching-call';
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  root.querySelectorAll('.mf-year').forEach(function (y) { y.textContent = new Date().getFullYear(); });
+
+  /* In-page links scroll below the sticky menu */
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('#mf a[href^="#mf-"]');
+    if (!a) return;
+    var t = document.getElementById(a.getAttribute('href').slice(1));
+    if (!t) return;
+    e.preventDefault();
+    var nav = root.querySelector('.mf-nav');
+    var navH = nav ? nav.offsetHeight : 0;
+    window.scrollTo({ top: t.getBoundingClientRect().top + window.pageYOffset - navH + 1, behavior: reduce ? 'auto' : 'smooth' });
+  });
+
+  /* Count-up numbers: they rest at their final values and count up once when first seen */
+  if ('IntersectionObserver' in window && !reduce) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        io.unobserve(e.target);
+        var el = e.target, end = +el.dataset.count, pre = el.dataset.prefix || '', suf = el.dataset.suffix || '', t0 = null;
+        var step = function (ts) {
+          if (!t0) t0 = ts;
+          var k = Math.min((ts - t0) / 1600, 1); k = 1 - Math.pow(1 - k, 3);
+          el.textContent = pre + Math.round(end * k) + suf;
+          if (k < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      });
+    }, { threshold: .8 });
+    document.querySelectorAll('#mf [data-count]').forEach(function (el) { io.observe(el); });
+  }
+
+  /* Testimonials */
+  var qs = root.querySelectorAll('.mf-q');
+  if (!qs.length) return;
+  var cur = 0, cnt = root.querySelector('.mf-count');
+  var show = function (i) {
+    cur = (i + qs.length) % qs.length;
+    qs.forEach(function (q, j) { q.classList.toggle('is-on', j === cur); });
+    cnt.textContent = (cur + 1) + ' of ' + qs.length;
+  };
+  root.querySelectorAll('.mf-arrowbtn').forEach(function (b) { b.addEventListener('click', function () { show(cur + (+b.dataset.dir)); }); });
+  show(0);
+
+  /* Gut check */
+  var Q = [
+    { q: 'When a deadline slips, what usually happened?', a: [['No one clearly owned it', 'AC'], ['Someone saw it coming and said nothing', 'HC'], ['I ended up doing it myself', 'LO'], ['Priorities changed halfway through', 'CH']] },
+    { q: 'The AI tools your company bought are...', a: [['Barely opened', 'AI'], ['Used by a few people, ignored by the rest', 'AI'], ['Met with eye-rolls', 'CH'], ['Working well for us', '']] },
+    { q: 'When things get tense, your team would say you...', a: [['Take over', 'LO'], ['Get short with people', 'KY'], ['Go quiet', 'HC'], ['Stay calm and clear', '']] },
+    { q: 'The conversation you keep putting off is about...', a: [['Someone’s performance', 'HC'], ['Missed commitments', 'AC'], ['A former peer who now reports to me', 'LO'], ['A change people don’t want', 'CH']] },
+    { q: 'What would help most next month?', a: [['Clear owners and deadlines', 'AC'], ['Knowing how I come across', 'KY'], ['Getting people to use the new tools', 'AI'], ['Buy-in on a change', 'CH']] }
+  ];
+  var R = {
+    LO: ['Leading Others', '1', 'You’re still carrying work your team should own. The next step is setting clear expectations and delegating with confidence, so you can multiply the work instead of doing it.'],
+    KY: ['Knowing Yourself as a Leader', '2', 'How you react in tense moments is shaping what your team feels. An EQ-i 2.0 assessment shows you the pattern, and the session helps you choose a different response.'],
+    HC: ['Hard Conversations', '3', 'Issues are waiting too long to get said. The fix is raising them while they’re small, and knowing when a situation calls for coaching, performance management, or escalation.'],
+    AC: ['Driving Accountability', '4', 'Commitments don’t have clear owners yet. Named owners and real deadlines will build follow-through that happens when you’re not checking.'],
+    CH: ['Leading Through Change', '5', 'People are going through the motions. The work is sorting what’s yours to decide and moving the team from compliance to buy-in.'],
+    AI: ['Practical AI for Leaders', '6', 'The tools are there, but the habits aren’t. Hands-on practice with everyday tasks, and managers equipped to lead the change, will get usage growing.']
+  };
+  var stage = root.querySelector('.mf-qstage'), bar = root.querySelector('.mf-qbar i');
+  if (!stage) return;
+  var n = 0, tally = {};
+  var esc = function (s) { return s.replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var renderQ = function () {
+    var it = Q[n];
+    bar.style.width = ((n + 1) / (Q.length + 1) * 100) + '%';
+    stage.innerHTML = '<p class="mf-qmeta">Question ' + (n + 1) + ' of ' + Q.length + '</p><p class="mf-qtext">' + esc(it.q) + '</p><div class="mf-opts">' +
+      it.a.map(function (o, i) { return '<button type="button" class="mf-opt" data-k="' + o[1] + '"><b>' + 'ABCD'[i] + '</b><span>' + esc(o[0]) + '</span></button>'; }).join('') + '</div>';
+  };
+  var renderR = function () {
+    bar.style.width = '100%';
+    var best = 'AC', bs = -1;
+    ['AC', 'HC', 'LO', 'CH', 'AI', 'KY'].forEach(function (k) { if ((tally[k] || 0) > bs) { bs = tally[k] || 0; best = k; } });
+    var r = R[best];
+    stage.innerHTML = '<div class="mf-result"><p class="mf-qmeta">Start with session ' + r[1] + '</p><h3>' + r[0] + '</h3><p>' + r[2] + '</p>' +
+      '<div class="mf-ctas"><a class="mf-btn" href="' + CAL + '" target="_blank" rel="noopener">Talk it through</a><button type="button" class="mf-reset">Take it again</button></div></div>';
+  };
+  stage.addEventListener('click', function (e) {
+    if (e.target.closest('.mf-reset')) { n = 0; tally = {}; renderQ(); return; }
+    var b = e.target.closest('.mf-opt'); if (!b) return;
+    var k = b.dataset.k; if (k) tally[k] = (tally[k] || 0) + 1;
+    n++; if (n < Q.length) renderQ(); else renderR();
+  });
+  renderQ();
+})();
+</script>
