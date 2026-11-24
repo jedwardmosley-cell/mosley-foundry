@@ -24,7 +24,7 @@ const PARTICIPANT_NAV: NavItem[] = [
   { href: "/more", label: "More", group: "Support" },
 ];
 type NavItem = { href: string; label: string; tab?: string; mobile?: boolean; desktop?: boolean; group?: string; tabOrder?: number };
-const GUIDE_TAB = { href: "/guide", label: "Guide", mobile: true };
+const GUIDE_TAB = { href: "/guide", label: "Guide" };
 
 const COACH_NAV = [
   { href: "/coach", label: "My clients", mobile: true },
@@ -35,7 +35,7 @@ const ADMIN_NAV = [
   { href: "/admin/people", label: "People", mobile: true },
   { href: "/admin/reports", label: "Reports", mobile: true },
   { href: "/admin/content", label: "Content review", tab: "Review" },
-  { href: "/admin/codes", label: "Access codes", tab: "Codes" },
+  { href: "/admin/codes", label: "Access codes", tab: "Codes", mobile: true },
 ];
 
 export function Shell({ user, children, journey }: { user: CurrentUser; children: ReactNode; journey?: ReactNode }) {
@@ -72,7 +72,7 @@ export function Shell({ user, children, journey }: { user: CurrentUser; children
 
       {/* Phone: a solid menu bar along the bottom, clear of the home indicator. Clients also get a round button for Help me with this. */}
       <div className="md:hidden fixed bottom-0 inset-x-0 z-30 flex items-center gap-2 border-t border-line/60 bg-paper px-3 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
-        <nav aria-label="Primary" className="flex-1 min-w-0 flex px-1 rounded-full border border-line/50 bg-card shadow-[0_16px_40px_-14px_rgb(0_0_0/0.35)]">
+        <nav aria-label="Primary" className="flex-1 min-w-0 flex overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-1 rounded-full border border-line/50 bg-card shadow-[0_16px_40px_-14px_rgb(0_0_0/0.35)]">
           {(nav as NavItem[]).filter((n) => n.mobile).sort((a, b) => (a.tabOrder ?? 0) - (b.tabOrder ?? 0)).map((n) => (
             <NavLink key={n.href} href={n.href} variant="tab">{n.tab ?? n.label}</NavLink>
           ))}
@@ -108,6 +108,7 @@ function AccountMenu({ user }: { user: CurrentUser }) {
       <summary className="list-none cursor-pointer grid h-9 w-9 place-items-center rounded-full bg-navy/10 text-[13px] font-semibold text-heading" aria-label="Account">{initials(user.name)}</summary>
       <div className="absolute right-0 mt-2 w-52 rounded-2xl bg-card p-2 text-[15px] shadow-[0_20px_44px_-16px_rgb(0_0_0/0.4)] border border-line/50">
         <p className="px-3 pt-1.5 pb-2 text-sm text-ink-mute truncate">{user.name}</p>
+        {user.role !== "PARTICIPANT" && <Link href="/guide" className="block rounded-xl px-3 py-2 hover:bg-ink/[0.05]">Guide</Link>}
         <Link href="/account/password" className="block rounded-xl px-3 py-2 hover:bg-ink/[0.05]">Change password</Link>
         <form action={signOut}><button className="w-full text-left rounded-xl px-3 py-2 hover:bg-ink/[0.05]">Sign out</button></form>
       </div>
