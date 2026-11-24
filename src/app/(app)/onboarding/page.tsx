@@ -31,10 +31,10 @@ export default async function Onboarding({ searchParams }: { searchParams: Promi
         </PageHeader>
         <div className="grid gap-5 sm:grid-cols-2 sm:items-start">
           <section id="both-hands" className="overflow-hidden rounded-2xl border border-line/70 bg-card">
-            <div className="aspect-[16/7] bg-cover bg-center" style={{ backgroundImage: "url(/chapters/drivers-seat.jpg)" }} role="img" aria-label="Both hands on the wheel, driving at night" />
+            <div className="aspect-[16/7] bg-cover bg-[center_75%]" style={{ backgroundImage: "url(/editions/both-hands-road.jpg)" }} role="img" aria-label="Both hands on the wheel, driving toward a city at sunrise" />
             <div className="px-5 py-5 sm:px-7">
               <h2 className="font-book text-[26px] leading-tight text-heading">{b.name}</h2>
-              <p className="mt-1 font-book italic text-[17px] text-ink-soft">FORGE and Discipline by Design</p>
+              <p className="mt-1 font-book italic text-[17px] text-ink-soft">Five Rules for the road ahead</p>
               <p className="mt-3 text-[15px] text-ink-soft">Who you are behind the wheel, and the system that keeps you there.</p>
               <Link href="/onboarding?book=both" className="btn-primary mt-4 inline-block">Start with this book</Link>
             </div>
