@@ -130,7 +130,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.locator("#both-hands h2", { hasText: "Both Hands on the Wheel" }).waitFor();
     await page.locator("#renewal h2", { hasText: "The Road to Renewal" }).waitFor();
     await page.screenshot({ path: `${shots}/01-onboarding.png`, fullPage: true });
-    await Promise.all([page.waitForURL(/book=both/), page.click('a:has-text("Start with this book")')]);
+    await Promise.all([page.waitForURL(/book=both/), page.click('#both-hands button:has-text("Start with this book")')]);
     // a new client goes straight into the guided first session; this run takes the full pages instead
     await Promise.all([page.waitForURL("**/start"), page.locator('form:has(input[value="PERSONAL"]) button').click()]);
     await page.waitForSelector("text=Which seat are you in?");
@@ -721,7 +721,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal(p.destination, "");
     assert.ok(await db.auditEvent.findFirst({ where: { actorId: guided.id, action: "participant.start_over" } }), "logged");
     // the login still works, and the client goes back through the guided session, choosing the book again first
-    await Promise.all([g.waitForURL(/book=both/), g.click('a:has-text("Start with this book")')]);
+    await Promise.all([g.waitForURL(/book=both/), g.click('#both-hands button:has-text("Start with this book")')]);
     await Promise.all([g.waitForURL("**/start"), g.locator('form:has(input[value="PERSONAL"]) button').click()]);
     await g.waitForSelector("text=Which seat are you in?");
     await gc.close();
@@ -1344,52 +1344,40 @@ const submitAndWait = async (page: Page, selector: string) => {
     await cc.close();
   });
 
-  await check("12d. The Road to Renewal: the admin makes a code, a new client opens it, and the code runs out", async () => {
+  await check("12d. The Road to Renewal: a new client chooses it with no code, and can switch books in Settings", async () => {
+    const pw = hashPassword("renewal-password-1");
+    const who = await db.user.create({ data: { email: `e2e-renew-${Date.now()}@example.test`, name: "Renew A (E2E)", role: "PARTICIPANT", passwordHash: pw, profile: { create: {} } } });
+    const pc = await browser.newContext();
+    const pp: Page = await pc.newPage();
+    try {
+      await login(pp, who.email, "renewal-password-1");
+      await pp.goto(`${BASE}/onboarding`);
+      assert.equal(await pp.locator('input[name="code"]').count(), 0, "no code box");
+      await Promise.all([pp.waitForURL(/book=renewal/), pp.click('#renewal button:has-text("Start with this book")')]);
+      assert.equal((await db.user.findUniqueOrThrow({ where: { id: who.id } })).edition, "RENEWAL");
+      await pp.locator("text=You're in The Road to Renewal").first().waitFor();
+      assert.match(await pp.title(), /The Road to Renewal/);
+      assert.ok(await pp.locator(".edition-renewal").count(), "the Renewal colors are on");
+      // switching books in Settings keeps everything; only the book changes
+      await pp.goto(`${BASE}/settings#book`);
+      await Promise.all([pp.waitForURL(/book=1/), pp.click('#book #both-hands button:has-text("Switch to this book")')]);
+      assert.equal((await db.user.findUniqueOrThrow({ where: { id: who.id } })).edition, "BOTH_HANDS");
+      assert.match(await pp.title(), /Both Hands on the Wheel/);
+      await pp.locator("#book #both-hands >> text=Your book").waitFor();
+    } finally {
+      await pc.close();
+      await db.user.delete({ where: { id: who.id } });
+    }
+    // the admin can still make a code for later
     const shown = `RENEW-E2E-${Date.now() % 100000}`;
     const ac = await browser.newContext();
     const ap: Page = await ac.newPage();
     await login(ap, ADMIN, ADMIN_PW);
     await ap.goto(`${BASE}/admin/codes`);
     await ap.fill('input[name="shown"]', shown);
-    await ap.fill('input[name="label"]', "E2E group");
-    await ap.fill('input[name="maxUses"]', "1");
     await Promise.all([ap.waitForURL(/made=1/), ap.click('button:has-text("Make the code")')]);
     await ap.locator(`text=${shown}`).first().waitFor();
     await ac.close();
-
-    const pw = hashPassword("renewal-password-1");
-    const mk = (n: string) => db.user.create({ data: { email: `e2e-renew-${n}-${Date.now()}@example.test`, name: `Renew ${n} (E2E)`, role: "PARTICIPANT", passwordHash: pw, profile: { create: {} } } });
-    const [first, second] = await Promise.all([mk("a"), mk("b")]);
-
-    const pc = await browser.newContext();
-    const pp: Page = await pc.newPage();
-    await login(pp, first.email, "renewal-password-1");
-    await pp.goto(`${BASE}/onboarding`);
-    await pp.locator("#renewal").waitFor();
-    // a wrong code says so and changes nothing
-    await pp.fill("#renewal input[name=code]", "NOT-A-CODE");
-    await Promise.all([pp.waitForURL(/code=unknown/), pp.click('#renewal button:has-text("Open it")')]);
-    assert.equal((await db.user.findUniqueOrThrow({ where: { id: first.id } })).edition, "BOTH_HANDS");
-    // the real code, typed loosely, opens it
-    await pp.fill("#renewal input[name=code]", shown.toLowerCase().replace(/-/g, " "));
-    await Promise.all([pp.waitForURL(/code=ok/), pp.click('#renewal button:has-text("Open it")')]);
-    assert.equal((await db.user.findUniqueOrThrow({ where: { id: first.id } })).edition, "RENEWAL");
-    await pp.locator("text=You're in The Road to Renewal").first().waitFor();
-    assert.match(await pp.title(), /The Road to Renewal/);
-    assert.ok(await pp.locator(".edition-renewal").count(), "the Renewal colors are on");
-    await pc.close();
-
-    // the code allowed one person, so the next one is turned away
-    const qc = await browser.newContext();
-    const qp: Page = await qc.newPage();
-    await login(qp, second.email, "renewal-password-1");
-    await qp.goto(`${BASE}/onboarding`);
-    await qp.fill("#renewal input[name=code]", shown);
-    await Promise.all([qp.waitForURL(/code=full/), qp.click('#renewal button:has-text("Open it")')]);
-    assert.equal((await db.user.findUniqueOrThrow({ where: { id: second.id } })).edition, "BOTH_HANDS");
-    assert.match(await qp.title(), /Both Hands on the Wheel/);
-    await qc.close();
-    await db.user.deleteMany({ where: { id: { in: [first.id, second.id] } } });
   });
 
   await check("12e. Renewal readers get the Faith Check-In, the questions before God and the Ten Pathways; Both Hands readers don't", async () => {

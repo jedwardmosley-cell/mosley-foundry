@@ -33,7 +33,7 @@ export default async function AccessCodes({ searchParams }: { searchParams: Prom
   return (
     <>
       <PageHeader eyebrow="Editions" title="Access codes" plain={`${renewal} ${renewal === 1 ? "person is" : "people are"} in The Road to Renewal`}>
-        A code opens an edition of the app. Someone signs up as usual, taps The Road to Renewal and types the code. Make one code per church, group or cohort, so you can turn one off without touching the others.
+        Codes are not needed right now: anyone can choose The Road to Renewal when they start, or switch books in Settings. This page is kept for later, if you want a group or church to open the book with a code.
       </PageHeader>
       {sp.made && MADE[sp.made] && <p role="status" className="notice mb-4">{MADE[sp.made]}</p>}
 

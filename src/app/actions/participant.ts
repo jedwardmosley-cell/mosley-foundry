@@ -699,3 +699,18 @@ export async function redeemAccessCode(fd: FormData) {
   revalidatePath("/", "layout");
   redirect(back === "/settings" ? "/settings?code=ok#renewal" : "/onboarding?code=ok#renewal");
 }
+
+/**
+ * Chooses the book the app is built on: Both Hands on the Wheel or The Road to Renewal. No code needed.
+ * Switching later keeps everything the person wrote; only the book's text and look change.
+ */
+export async function chooseBook(fd: FormData) {
+  const u = await requireUser("PARTICIPANT");
+  const { book, back } = parse(z.object({ book: z.enum(["BOTH_HANDS", "RENEWAL"]), back: z.enum(["onboarding", "settings"]).default("onboarding") }), fd);
+  if (u.edition !== book) {
+    await db.user.update({ where: { id: u.id }, data: { edition: book } });
+    await audit(u, "edition.choose", u.id, book);
+  }
+  revalidatePath("/", "layout");
+  redirect(back === "settings" ? "/settings?book=1#book" : `/onboarding?book=${book === "RENEWAL" ? "renewal" : "both"}`);
+}
