@@ -1,5 +1,5 @@
 import { requireUser } from "@/lib/auth";
-import { RenewalCode } from "@/components/RenewalCode";
+import { BookSwitch } from "@/components/BookChoice";
 import { db } from "@/lib/db";
 import { saveSettings, setCalendarLink } from "@/app/actions/participant";
 import { appUrl, emailAvailable } from "@/lib/email";
@@ -14,7 +14,7 @@ import { StartOverForm } from "@/components/StartOverForm";
 export const metadata = { title: "Settings" };
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-export default async function SettingsPage({ searchParams }: { searchParams: Promise<{ code?: string }> }) {
+export default async function SettingsPage({ searchParams }: { searchParams: Promise<{ book?: string }> }) {
   const u = await requireUser("PARTICIPANT");
   const sp = await searchParams;
   const p = await db.profile.findUniqueOrThrow({ where: { userId: u.id } });
@@ -97,7 +97,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
         )}
       </Card>
       <div className="mt-6"><StartOverForm /></div>
-      <div className="mt-6"><RenewalCode edition={u.edition} back="settings" note={sp.code} /></div>
+      <div className="mt-10 border-t border-line/70 pt-6"><BookSwitch edition={u.edition} saved={!!sp.book} /></div>
     </>
   );
 }
