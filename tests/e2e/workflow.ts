@@ -126,7 +126,11 @@ const submitAndWait = async (page: Page, selector: string) => {
     await ac.close();
     await login(page, email, "e2e-password-123");
     await page.goto(`${BASE}/onboarding`);
+    // first the book: both are offered, Renewal with its code box
+    await page.locator("#both-hands h2", { hasText: "Both Hands on the Wheel" }).waitFor();
+    await page.locator("#renewal h2", { hasText: "The Road to Renewal" }).waitFor();
     await page.screenshot({ path: `${shots}/01-onboarding.png`, fullPage: true });
+    await Promise.all([page.waitForURL(/book=both/), page.click('a:has-text("Start with this book")')]);
     // a new client goes straight into the guided first session; this run takes the full pages instead
     await Promise.all([page.waitForURL("**/start"), page.locator('form:has(input[value="PERSONAL"]) button').click()]);
     await page.waitForSelector("text=Which seat are you in?");
@@ -564,7 +568,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await Promise.all([g.waitForURL("**/login?requested=1"), g.click('button:has-text("Create account")')]);
     await db.user.update({ where: { email: gEmail }, data: { status: "ACTIVE" } }); // approved (the approval itself is tested in step 1)
     await login(g, gEmail, "e2e-password-123");
-    await g.goto(`${BASE}/onboarding`);
+    await g.goto(`${BASE}/onboarding?book=both`);
     await Promise.all([g.waitForURL("**/start"), g.locator('form:has(input[value="LEADING_OTHERS"]) button').click()]);
     // 1. who I am, part 1: the role and the kind of change
     await g.locator('button:has-text("manager")').first().click();
@@ -716,7 +720,8 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal(p.onboardedAt, null);
     assert.equal(p.destination, "");
     assert.ok(await db.auditEvent.findFirst({ where: { actorId: guided.id, action: "participant.start_over" } }), "logged");
-    // the login still works, and the client goes back through the guided session
+    // the login still works, and the client goes back through the guided session, choosing the book again first
+    await Promise.all([g.waitForURL(/book=both/), g.click('a:has-text("Start with this book")')]);
     await Promise.all([g.waitForURL("**/start"), g.locator('form:has(input[value="PERSONAL"]) button').click()]);
     await g.waitForSelector("text=Which seat are you in?");
     await gc.close();
