@@ -1388,6 +1388,9 @@ const submitAndWait = async (page: Page, selector: string) => {
     const p: Page = await c.newPage();
     await login(p, "dana@demo.bothhands.app");
     try {
+      // the setup checklist says the Renewal book is in
+      await p.goto(`${BASE}/setup`);
+      await p.locator("li", { hasText: "The Road to Renewal book installed" }).locator("text=✓").waitFor();
       await db.user.update({ where: { id: dana.id }, data: { edition: "RENEWAL" } });
       await p.goto(`${BASE}/reflect`);
       const check = p.locator("section[aria-label='Faith Check-In']");

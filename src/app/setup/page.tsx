@@ -23,7 +23,9 @@ export default async function SetupPage() {
   } catch {
     dbOk = false;
   }
-  const content = dbOk ? (await getContent()).pack.kind === "licensed" : false;
+  const content = dbOk ? (await getContent("BOTH_HANDS")).pack.kind === "licensed" : false;
+  // The Road to Renewal's book is its own upload; this line says whether it's in.
+  const renewal = dbOk ? (await getContent("RENEWAL")).pack.edition === "RENEWAL" : false;
   const ai = Boolean(process.env.ANTHROPIC_API_KEY);
 
   return (
@@ -35,6 +37,7 @@ export default async function SetupPage() {
         <Row ok={tokenSet} label="Setup token configured" hint={tokenSet ? undefined : "Add SETUP_TOKEN (16+ characters) in your hosting settings, then redeploy."} />
         <Row ok={hasAdmin} label="Administrator account created" />
         <Row ok={content} label="Licensed content pack installed" hint={content ? undefined : "Until then the app shows a draft placeholder assessment."} />
+        <Row ok={renewal} label="The Road to Renewal book installed" hint={renewal ? undefined : "Upload pack-renewal.json below. Until then, Renewal readers see the Both Hands text."} />
         <Row ok={ai} label="Help me with this key configured" hint={ai ? undefined : "Optional. Add ANTHROPIC_API_KEY to turn on the companion."} />
       </ul>
 
