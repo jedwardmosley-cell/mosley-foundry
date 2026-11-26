@@ -28,7 +28,7 @@ export default async function Onboarding({ searchParams }: { searchParams: Promi
         <PageHeader eyebrow="Getting in the Driver's Seat" title={`Welcome, ${first}. Which book are you working from?`}>
           The app is built on one of two books. Pick yours, then choose your program.
         </PageHeader>
-        <div className="grid gap-5 sm:grid-cols-2 sm:items-start">
+        <div className="grid gap-5 sm:grid-cols-2">
           <BookCard book="BOTH_HANDS" back="onboarding" />
           <BookCard book="RENEWAL" back="onboarding" />
         </div>
