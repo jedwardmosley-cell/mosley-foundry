@@ -3,7 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { widestGap, closest, disagreement, blindSpot, writtenReport, movement, movementNote, middle, joinNames, partnersSplit, partnerMessageWritten, partnerQuestion, PARTNER_WORDS, evidenceHeuristic, shuffled, positionWord, POSITIONS, PRESSURE_TYPES, RULE_ORDER, type RuleResult } from "../src/lib/distance";
 import { DISTANCE_SCENARIOS, SEATS, seatFor } from "../src/content/distanceScenarios";
-import { parseDistanceScenario, parseEvidenceCheck, parseDistanceReport, parsePartnerMessage } from "../src/lib/ai";
+import { parseDistanceScenario, parseEvidenceCheck, parseDistanceReport, parsePartnerMessage, inventsLife } from "../src/lib/ai";
 
 const r = (pillar: RuleResult["pillar"], position: number, pressure: RuleResult["pressure"] = "future_self", evidence: RuleResult["evidence"] = "concrete", partnerRating?: number): RuleResult => ({ pillar, position, pressure, evidence, partnerRating });
 
@@ -206,4 +206,30 @@ test("day 30: movement per rule, as road positions, and moving back said plainly
   assert.equal(movementNote(m[1]), "Same place as last time.");
   const all = m.map(movementNote).join(" ");
   assert.ok(!/\d|%/.test(all) && !STYLE.test(all) && !/[—–]/.test(all));
+});
+
+test("the AI can't invent a life: no kids, spouse or soccer practice they never mentioned", () => {
+  const sc = (scenario: string, opt = "Decide, then say it clearly.") => ({ scenario, options: PRESSURE_TYPES.map((type) => ({ type, text: opt })) });
+  const told = "someone who leads people at work a leader my team trusts with bad news";
+  assert.equal(inventsLife(sc("Your daughter's soccer practice runs late and your boss calls."), told), true);
+  assert.equal(inventsLife(sc("Your top client calls at 4 pm Friday."), told), false);
+  assert.equal(inventsLife(sc("Your client calls at 4 pm.", "Tell your wife you'll be late, then take the call."), told), true, "options count too");
+  // a parent's seat allows their children, but not their ages or their activities
+  assert.equal(inventsLife(sc("Your child calls needing help tonight."), "parent"), false);
+  assert.equal(inventsLife(sc("Your kids' soccer game starts at 5."), "parent"), true);
+  assert.equal(inventsLife(sc("Your teenager is in the car."), "parent"), true);
+  // what they told us is fair to use
+  assert.equal(inventsLife(sc("You're at your son's soccer game when the call comes."), "dad who coaches my son's soccer team"), false);
+});
+
+test("the written situations assume nothing about anyone's family", () => {
+  for (const seat of SEATS.filter((x) => x !== "parent")) {
+    for (const k of RULE_ORDER) {
+      const s = DISTANCE_SCENARIOS[seat][k];
+      const all = [s.scenario, ...Object.values(s.options)].join(" ");
+      assert.ok(!/\b(kids?|child|children|son|daughter|teen\w*|spouse|husband|wife|soccer|school|homework)\b/i.test(all), `${seat} ${k}: ${all}`);
+    }
+  }
+  const parent = RULE_ORDER.map((k) => { const s = DISTANCE_SCENARIOS.parent[k]; return [s.scenario, ...Object.values(s.options)].join(" "); }).join(" ");
+  assert.ok(!/\b(teen\w*|toddler|school|homework|principal|soccer|spouse|husband|wife)\b/i.test(parent), "no ages or partners assumed for a parent");
 });
