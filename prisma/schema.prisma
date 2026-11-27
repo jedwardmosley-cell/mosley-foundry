@@ -671,20 +671,21 @@ model AccessCode {
 // The FORGE distance check ("Where I am"): how close the driver you were this week is to the person in your own line.
 // One run per sitting (at setup, or the day 30 retake). Positions are stored 1 to 5 and never shown as numbers.
 model DistanceRun {
-  id                String         @id @default(cuid())
+  id                String            @id @default(cuid())
   userId            String
-  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  kind              String         @default("SETUP") // enum: SETUP | DAY30
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind              String            @default("SETUP") // enum: SETUP | DAY30
   cycleId           String? // the 30-day focus a day 30 retake closes
   previousRunId     String? // the run a retake is compared with
   assessmentId      String? // the five positions, also kept in the older Assessment format so existing features keep working
-  report            String         @default("") // JSON: the written distance report
-  partnerRelId      String? // the accountability partner asked for their view
-  partnerToken      String?        @unique
-  partnerStatus     String         @default("NONE") // enum: NONE | READY | SENT | ANSWERED
-  partnerMessage    String         @default("")
-  partnerAnsweredAt DateTime?
-  startedAt         DateTime       @default(now())
+  report            String            @default("") // JSON: the written distance report
+  partnerRelId      String? // unused: partners are asked through DistancePartner, up to three per check
+  partnerToken      String?           @unique // unused, see DistancePartner
+  partnerStatus     String            @default("NONE") // unused, see DistancePartner
+  partnerMessage    String            @default("") // unused, see DistancePartner
+  partnerAnsweredAt DateTime? // unused, see DistancePartner
+  partners          DistancePartner[]
+  startedAt         DateTime          @default(now())
   completedAt       DateTime?
   rules             DistanceRule[]
 
@@ -704,8 +705,25 @@ model DistanceRule {
   scenario       String      @default("") // JSON: { scenario, options: [{ type, text }] } in the order shown
   scenarioSource String      @default("") // enum: ai | written
   pressure       String      @default("") // enum: future_self | white_knuckle | avoidance | autopilot
-  partnerRating  Int? // 1 to 4: Rarely, Sometimes, Often, Almost always
-  partnerExample String      @default("")
+  partnerRating  Int? // unused: each partner's answers are kept on DistancePartner
+  partnerExample String      @default("") // unused, see DistancePartner
 
   @@unique([runId, pillar])
+}
+
+// One accountability partner (or mentor) asked for their view of one check. Up to three per check.
+model DistancePartner {
+  id         String      @id @default(cuid())
+  runId      String
+  run        DistanceRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  relId      String // the Relationship they were asked through
+  name       String // their name when asked, so the report still reads right if the relationship is removed
+  token      String      @unique
+  status     String      @default("READY") // enum: READY | SENT | ANSWERED
+  message    String      @default("") // the text message, as the person approved and sent it
+  answers    String      @default("") // JSON: { F: { rating: 1-4, example }, ... }. 1 to 4: Rarely, Sometimes, Often, Almost always
+  createdAt  DateTime    @default(now())
+  answeredAt DateTime?
+
+  @@unique([runId, relId])
 }

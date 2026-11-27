@@ -1,9 +1,9 @@
 /** The distance check ("Where I am"): the scoring rules, the plain proof check, the written situations and the AI readers. */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { widestGap, closest, disagreement, blindSpot, writtenReport, evidenceHeuristic, shuffled, positionWord, POSITIONS, PRESSURE_TYPES, RULE_ORDER, type RuleResult } from "../src/lib/distance";
+import { widestGap, closest, disagreement, blindSpot, writtenReport, middle, joinNames, partnersSplit, partnerMessageWritten, partnerQuestion, PARTNER_WORDS, evidenceHeuristic, shuffled, positionWord, POSITIONS, PRESSURE_TYPES, RULE_ORDER, type RuleResult } from "../src/lib/distance";
 import { DISTANCE_SCENARIOS, SEATS, seatFor } from "../src/content/distanceScenarios";
-import { parseDistanceScenario, parseEvidenceCheck, parseDistanceReport } from "../src/lib/ai";
+import { parseDistanceScenario, parseEvidenceCheck, parseDistanceReport, parsePartnerMessage } from "../src/lib/ai";
 
 const r = (pillar: RuleResult["pillar"], position: number, pressure: RuleResult["pressure"] = "future_self", evidence: RuleResult["evidence"] = "concrete", partnerRating?: number): RuleResult => ({ pillar, position, pressure, evidence, partnerRating });
 
@@ -120,17 +120,18 @@ const named = (rs: RuleResult[], line = "a leader who stays calm when decisions 
 
 test("the written report: four plain sections, no numbers, no labels", () => {
   const rules = named([r("F", 5, "autopilot", "vague"), r("O", 4, "future_self", "concrete"), r("R", 3), r("G", 3, "avoidance"), r("E", 2, "white_knuckle", "missing")]);
-  const rep = writtenReport(rules, null);
+  const rep = writtenReport(rules);
   assert.deepEqual(rep.keys, { closest: "O", widest: "E", disagree: "F", blind: null });
   assert.match(rep.closest, /^Outcome Aware: "a leader who stays calm when decisions get\.\.\."/);
   assert.match(rep.widest_gap, /^Emotionally Anchored\. You placed yourself at Pulling out\./);
   assert.match(rep.widest_gap, /couldn't name a real moment/);
   assert.match(rep.disagreement, /^On Future Focused, you placed yourself at Driving like them, but/);
   assert.equal(rep.partner, "");
-  assert.equal(writtenReport(rules, { name: "Sam", answered: false }).partner, "Waiting on Sam.");
-  const withPartner = named([r("F", 5, "future_self", "concrete", 1), r("O", 3, "future_self", "concrete", 2), r("R", 3), r("G", 3), r("E", 2)]);
-  assert.match(writtenReport(withPartner, { name: "Sam", answered: true }).partner, /^Sam sees Future Focused differently/);
-  const all = [rep, writtenReport(withPartner, { name: "Sam", answered: true })].flatMap((x) => [x.closest, x.widest_gap, x.disagreement, x.partner]).join(" ");
+  assert.equal(writtenReport(rules, [{ name: "Sam", answered: false }]).partner, "Waiting on Sam.");
+  assert.equal(writtenReport(rules, [{ name: "Sam", answered: false }, { name: "Lee", answered: false }]).partner, "Waiting on Sam and Lee.");
+  const withPartner = named([r("F", 5, "future_self", "concrete", 1), r("O", 3, "future_self", "concrete", 2), r("R", 3), r("G", 3), r("E", 2)]).map((x) => ({ ...x, partnerViews: x.partnerRating ? [{ name: "Sam", rating: x.partnerRating, example: "" }] : [] }));
+  assert.match(writtenReport(withPartner, [{ name: "Sam", answered: true }]).partner, /^Sam sees Future Focused differently than you do\. You placed yourself at Driving like them; Sam said rarely\.$/);
+  const all = [rep, writtenReport(withPartner, [{ name: "Sam", answered: true }])].flatMap((x) => [x.closest, x.widest_gap, x.disagreement, x.partner]).join(" ");
   assert.ok(!/\d|%/.test(all), all);
   assert.ok(!/[—–]/.test(all));
   assert.ok(!STYLE.test(all), all);
@@ -138,7 +139,7 @@ test("the written report: four plain sections, no numbers, no labels", () => {
 });
 
 test("a tie on position is explained by the situation", () => {
-  const rep = writtenReport(named([r("F", 2, "white_knuckle"), r("O", 2, "autopilot"), r("R", 4), r("G", 4), r("E", 4)]), null);
+  const rep = writtenReport(named([r("F", 2, "white_knuckle"), r("O", 2, "autopilot"), r("R", 4), r("G", 4), r("E", 4)]));
   assert.equal(rep.keys.widest, "O");
   assert.match(rep.widest_gap, /picked the old way of doing it/);
 });
@@ -151,4 +152,40 @@ test("the AI report is checked before it is shown", () => {
   assert.equal(parseDistanceReport(ok.replace("showed up", "showed up on autopilot")), null, "no type names");
   assert.equal(parseDistanceReport(ok.replace("showed up", "kept its rhythm")), null);
   assert.equal(parseDistanceReport('{"closest":"","widest_gap":"x"}'), null);
+});
+
+test("the message to the partner: short, ends with the link, no lines copied in", () => {
+  const link = "https://app.example/partner/abc123";
+  const lines = ["a leader my team trusts with bad news", "a leader who notices what my team needs"];
+  const ok = '{"message":"Hi Sam, Dana is working on who they\'re becoming and asked for your honest view. It takes about two minutes. {link}"}';
+  assert.equal(parsePartnerMessage(ok, lines, link), `Hi Sam, Dana is working on who they're becoming and asked for your honest view. It takes about two minutes. ${link}`);
+  assert.equal(parsePartnerMessage(ok.replace(" {link}", ""), lines, link), null, "the link has to be there");
+  assert.equal(parsePartnerMessage(ok.replace("Hi Sam,", "Hi Sam, Dana wants to be a leader my team trusts with bad news."), lines, link), null, "no lines in the text");
+  assert.equal(parsePartnerMessage(ok.replace("Hi Sam,", "Hi Sam, " + "word ".repeat(60)), lines, link), null, "under sixty words");
+  const written = partnerMessageWritten("Dana", "Sam", link);
+  assert.ok(written.endsWith(link));
+  assert.ok(!/[—–]/.test(written) && !STYLE.test(written));
+  assert.equal(partnerQuestion("Dana"), "How often does Dana look like this person?");
+  assert.deepEqual(PARTNER_WORDS, ["Rarely", "Sometimes", "Often", "Almost always"]);
+});
+
+test("several partners: the middle answer, who is still out, and where they disagree with each other", () => {
+  assert.equal(middle([]), null);
+  assert.equal(middle([3]), 3);
+  assert.equal(middle([1, 2]), 1.5);
+  assert.equal(middle([4, 1, 2]), 2, "one generous view doesn't decide it");
+  assert.equal(joinNames(["Jamie", "Sam", "Lee"]), "Jamie, Sam and Lee");
+  const views = (pairs: [string, number][]) => pairs.map(([name, rating]) => ({ name, rating, example: "" }));
+  const base = named([r("F", 5), r("O", 3), r("R", 3), r("G", 3), r("E", 2)]);
+  const asked = base.map((x) => {
+    const v = { F: views([["Jamie", 1], ["Sam", 2]]), O: views([["Jamie", 3], ["Sam", 3]]), R: views([["Jamie", 3], ["Sam", 1]]), G: views([["Jamie", 2], ["Sam", 2]]), E: views([["Jamie", 2], ["Sam", 3]]) }[x.pillar];
+    return { ...x, partnerViews: v, partnerRating: middle(v.map((y) => y.rating)) };
+  });
+  const rep = writtenReport(asked, [{ name: "Jamie", answered: true }, { name: "Sam", answered: true }, { name: "Lee", answered: false }]);
+  assert.equal(rep.keys.blind, "F");
+  assert.match(rep.partner, /^Jamie and Sam see Future Focused differently than you do\. You placed yourself at Driving like them; Jamie said rarely and Sam said sometimes\./);
+  assert.match(rep.partner, /On Reason Rooted, Jamie said often and Sam said rarely, so they don't see it the same way\./);
+  assert.match(rep.partner, /Still waiting on Lee\.$/);
+  assert.ok(!/\d|%/.test(rep.partner) && !STYLE.test(rep.partner));
+  assert.equal(partnersSplit(views([["Jamie", 2], ["Sam", 3]])), false);
 });

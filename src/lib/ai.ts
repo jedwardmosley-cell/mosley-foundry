@@ -11,7 +11,7 @@ import { EXAMPLE_PEOPLE, FOUR_THINGS, IDENTITY_TESTS, peopleFor } from "@/conten
 import { KIND_GUIDANCE, KIND_RULE, asRole, withArticle } from "@/content/whoIAm";
 import type { IdentityLevel } from "@/content/identity";
 import type { PathwayKey } from "@/content/program";
-import { EVIDENCE_NOTE_FALLBACK, partnerWord, positionWord, reportKeys, type DistanceReport, type ReportRule } from "@/lib/distance";
+import { EVIDENCE_NOTE_FALLBACK, joinNames, partnerWord, positionWord, reportKeys, type DistanceReport, type ReportPartner, type ReportRule } from "@/lib/distance";
 import type { PillarKey } from "@/content/types";
 
 export const AI_MODEL = "claude-opus-5-5";
@@ -931,9 +931,9 @@ export function parseEvidenceCheck(raw: string, position: number): { evidence: "
 }
 
 /** The distance report: four short sections, written from the per-rule results and the rules the app worked out. */
-export async function distanceReportAI(rules: ReportRule[], partner: { name: string; answered: boolean } | null): Promise<Omit<DistanceReport, "keys" | "source"> | null> {
+export async function distanceReportAI(rules: ReportRule[], partners: ReportPartner[] = []): Promise<Omit<DistanceReport, "keys" | "source"> | null> {
   const keys = reportKeys(rules);
-  const p = partner?.name || "your partner";
+  const p = partners.length ? joinNames(partners.map((x) => x.name)) : "your partner";
   const system = `You write a short distance report for a coaching app. The person measured how close they are to their own future self across five rules: Future Focused, Outcome Aware, Reason Rooted, Growth Oriented, Emotionally Anchored.
 
 Inputs, per rule: identity line, road position (as words, not numbers), evidence result, pressure type chosen, partner rating (may be missing). Also: which rule the app computed as closest, widest gap, disagreement, and blind spot.
@@ -954,13 +954,13 @@ Return JSON only:
 {"closest": "...", "widest_gap": "...", "disagreement": "...", "partner": "..."}`;
   const name = (k: PillarKey | null) => rules.find((r) => r.pillar === k)?.name ?? "none";
   const user = [
-    ...rules.map((r) => `${r.name}: line "${r.line}"; road position: ${positionWord(r.position)}; evidence: ${r.evidence || "missing"}; pressure type: ${r.pressure || "none"}; partner rating: ${partnerWord(r.partnerRating) || "missing"}`),
+    ...rules.map((r) => `${r.name}: line "${r.line}"; road position: ${positionWord(r.position)}; evidence: ${r.evidence || "missing"}; pressure type: ${r.pressure || "none"}; partner rating: ${r.partnerViews?.length ? r.partnerViews.map((v) => `${v.name}: ${partnerWord(v.rating)}`).join(", ") : "missing"}`),
     "",
     `Closest: ${name(keys.closest)}. Widest gap: ${name(keys.widest)}. Disagreement: ${name(keys.disagree)}. Blind spot: ${name(keys.blind)}.`,
-    partner ? (partner.answered ? `Partner: ${partner.name}, answered.` : `Partner: ${partner.name}, not answered yet.`) : "No partner was asked.",
+    partners.length ? `Partners asked: ${partners.map((x) => `${x.name} (${x.answered ? "answered" : "not answered yet"})`).join(", ")}.` : "No partner was asked.",
   ].join("\n");
   const raw = await askTone([system], user);
-  return raw ? parseDistanceReport(raw, !!partner) : null;
+  return raw ? parseDistanceReport(raw, partners.length > 0) : null;
 }
 
 /** Reads the report JSON and checks it: the first two sections are there, and nothing shows a number or an option type. */
@@ -975,6 +975,41 @@ export function parseDistanceReport(raw: string, hasPartner = false): Omit<Dista
     const all = Object.values(out).join(" ");
     if (/\d|%/.test(all) || /\brhythm/i.test(all) || /white.?knuckle|autopilot|future_self|\bavoidance\b/i.test(all)) return null;
     return out;
+  } catch {
+    return null;
+  }
+}
+
+/** The text message to the accountability partner. The link goes in where the prompt puts {link}. */
+export async function partnerMessageAI(i: { name: string; partnerName: string; lines: string[]; link: string }): Promise<string | null> {
+  const system = `You write a short text message from a coaching app to someone's accountability partner.
+
+Inputs:
+- person's first name: ${i.name}
+- partner's first name: ${i.partnerName}
+- the five identity lines: ${i.lines.map((l) => `"${l}"`).join("; ")}
+
+Write a message under 60 words that:
+- says ${i.name} is working on who they're becoming and asked ${i.partnerName} for an honest view
+- says it takes about two minutes
+- ends with the link placeholder {link}
+
+Plain and friendly. No em dashes. Don't include the lines in the text message itself; they appear on the linked page.
+
+Return JSON only: {"message": "..."}`;
+  const raw = await askTone([system], "Write the message now.");
+  return raw ? parsePartnerMessage(raw, i.lines, i.link) : null;
+}
+
+/** Checks the message: short, ends with the link, and none of the lines copied into it. */
+export function parsePartnerMessage(raw: string, lines: string[], link: string): string | null {
+  const m = raw.match(/\{[\s\S]*\}/);
+  if (!m) return null;
+  try {
+    const t = plainPunctuation(String(JSON.parse(m[0]).message ?? "")).replace(/\s+/g, " ").trim();
+    if (!t.endsWith("{link}") || t.split(/\s+/).length > 60 || /\brhythm/i.test(t)) return null;
+    if (lines.some((l) => l.trim().length > 20 && t.toLowerCase().includes(l.trim().toLowerCase()))) return null;
+    return t.replace("{link}", link);
   } catch {
     return null;
   }

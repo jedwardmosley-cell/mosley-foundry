@@ -7,9 +7,10 @@ import { parse, pillarKey, score } from "@/lib/validation";
 import { FORGE_LINES } from "@/content/forgeLines";
 import type { PillarKey } from "@/content/types";
 import { getContent } from "@/content";
-import { RULE_ORDER, PROOF_QUESTION, RULE_TARGET, EVIDENCE_NOTE_FALLBACK, evidenceHeuristic, shuffled, PRESSURE_TYPES, writtenReport, type DistanceReport, type ReportRule, type Evidence, type Pressure } from "@/lib/distance";
+import { RULE_ORDER, PROOF_QUESTION, RULE_TARGET, EVIDENCE_NOTE_FALLBACK, evidenceHeuristic, shuffled, PRESSURE_TYPES } from "@/lib/distance";
+import { aiAllowedFor, writeReport } from "@/lib/distanceReport";
 import { DISTANCE_SCENARIOS, seatFor } from "@/content/distanceScenarios";
-import { aiAvailable, distanceScenarioAI, evidenceCheckAI, distanceReportAI } from "@/lib/ai";
+import { distanceScenarioAI, evidenceCheckAI } from "@/lib/ai";
 
 const participant = () => requireUser("PARTICIPANT");
 const base = (runId: string) => `/assessment/check/${runId}`;
@@ -18,20 +19,12 @@ const q = (fd: FormData) => (fromStart(fd) ? "&from=start" : "");
 
 /** The person's own run, with its rules, or nothing. */
 async function myRun(userId: string, runId: string) {
-  const run = await db.distanceRun.findFirst({ where: { id: runId, userId }, include: { rules: true } });
+  const run = await db.distanceRun.findFirst({ where: { id: runId, userId }, include: { rules: true, partners: true } });
   if (!run) throw new Error("Not found");
   return run;
 }
 
-/** The AI is used only when it's set up, the person allows it, and they allow their identity to go to it. */
-async function aiAllowed(userId: string) {
-  if (!aiAvailable()) return false;
-  const [p, id] = await Promise.all([
-    db.profile.findUnique({ where: { userId }, select: { aiEnabled: true } }),
-    db.identityProfile.findUnique({ where: { userId }, select: { aiUse: true } }),
-  ]);
-  return p?.aiEnabled !== false && id?.aiUse !== false;
-}
+const aiAllowed = aiAllowedFor;
 
 /**
  * Starts the check, or picks up an unfinished one. Every rule needs its line first:
@@ -166,27 +159,7 @@ async function finishRun(userId: string, runId: string) {
   const pos = (k: PillarKey) => run.rules.find((r) => r.pillar === k)?.position ?? 1;
   const [a, report] = await Promise.all([
     db.assessment.create({ data: { userId, instrument: "FORGE_DISTANCE", f: pos("F"), o: pos("O"), r: pos("R"), g: pos("G"), e: pos("E") } }),
-    writeReport(userId, run),
+    writeReport(run),
   ]);
   await db.distanceRun.update({ where: { id: runId }, data: { completedAt: new Date(), assessmentId: a.id, report: JSON.stringify(report) } });
-}
-
-/**
- * The distance report. The app works out which rule each section points at; the AI writes the words.
- * If the AI isn't allowed, fails, or its answer doesn't pass the checks, the written report is used.
- */
-async function writeReport(userId: string, run: Awaited<ReturnType<typeof myRun>>): Promise<DistanceReport> {
-  const { pack } = await getContent();
-  const rules: ReportRule[] = RULE_ORDER.map((k) => {
-    const r = run.rules.find((x) => x.pillar === k);
-    return {
-      pillar: k, name: pack.pillars.find((p) => p.key === k)?.name ?? k, line: r?.line ?? "",
-      position: r?.position ?? 1, evidence: (r?.evidence ?? "") as Evidence | "", pressure: (r?.pressure ?? "") as Pressure | "", partnerRating: r?.partnerRating ?? null,
-    };
-  });
-  const partner = null; // asked for in the partner view, which comes next
-  const written = writtenReport(rules, partner);
-  if (!(await aiAllowed(userId))) return written;
-  const ai = await distanceReportAI(rules, partner).catch(() => null);
-  return ai ? { ...ai, keys: written.keys, source: "ai" } : written;
 }
