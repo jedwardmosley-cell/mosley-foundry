@@ -16,7 +16,7 @@ function authorized(req: Request) {
 }
 
 /**
- * Sends the daily check-in reminders and weekly plan emails that are due. A scheduler calls this every 15 minutes
+ * Sends the daily check-in reminders and weekly plan emails that are due. A scheduler calls this every 30 minutes
  * (.github/workflows/reminders.yml) with the CRON_SECRET. Safe to call more often: each client gets at most one a day.
  */
 async function run(req: Request) {

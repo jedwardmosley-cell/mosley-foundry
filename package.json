@@ -2,6 +2,7 @@
   "name": "both-hands-on-the-wheel",
   "version": "0.1.0",
   "private": true,
+  "license": "UNLICENSED",
   "description": "Both Hands on the Wheel: personal leadership and coaching platform (Mosley Foundry)",
   "scripts": {
     "dev": "next dev",
