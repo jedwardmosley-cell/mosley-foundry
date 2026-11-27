@@ -19,7 +19,7 @@ const q = (fd: FormData) => (fromStart(fd) ? "&from=start" : "");
 
 /** The person's own run, with its rules, or nothing. */
 async function myRun(userId: string, runId: string) {
-  const run = await db.distanceRun.findFirst({ where: { id: runId, userId }, include: { rules: true } });
+  const run = await db.distanceRun.findFirst({ where: { id: runId, userId }, include: { rules: true, partners: true } });
   if (!run) throw new Error("Not found");
   return run;
 }

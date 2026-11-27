@@ -112,7 +112,31 @@ export type DistanceReport = {
   source: "ai" | "written";
 };
 
-export type ReportRule = RuleResult & { name: string; line: string };
+/** One partner's answer for one rule. */
+export type PartnerView = { name: string; rating: number; example: string };
+export type ReportRule = RuleResult & { name: string; line: string; partnerViews?: PartnerView[] };
+/** The partners asked about this check: their first names, and whether each has answered. */
+export type ReportPartner = { name: string; answered: boolean };
+
+/** "Jamie", "Jamie and Sam", "Jamie, Sam and Lee". */
+export function joinNames(names: string[]) {
+  return names.length <= 1 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+}
+
+/** The middle answer, so one harsh or generous view doesn't decide the blind spot alone. Two answers meet halfway. */
+export function middle(nums: number[]): number | null {
+  if (!nums.length) return null;
+  const a = [...nums].sort((x, y) => x - y);
+  const m = Math.floor(a.length / 2);
+  return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2;
+}
+
+/** Partners who clearly see a rule differently from each other: two or more steps apart, like Rarely and Often. */
+export function partnersSplit(views: PartnerView[] | undefined) {
+  if (!views || views.length < 2) return false;
+  const r = views.map((v) => v.rating);
+  return Math.max(...r) - Math.min(...r) >= 2;
+}
 
 /** A few words of their line, to quote back to them. */
 export function fewWords(line: string, n = 8) {
@@ -129,7 +153,7 @@ export function reportKeys(rules: RuleResult[]): DistanceReport["keys"] {
  * The written report, used when the AI isn't available or its answer doesn't pass the checks.
  * Plain and honest, no numbers, no praise.
  */
-export function writtenReport(rules: ReportRule[], partner: { name: string; answered: boolean } | null): DistanceReport {
+export function writtenReport(rules: ReportRule[], partners: ReportPartner[] = []): DistanceReport {
   const keys = reportKeys(rules);
   const by = (k: PillarKey | null) => rules.find((r) => r.pillar === k);
   const c = by(keys.closest), w = by(keys.widest), d = by(keys.disagree), b = by(keys.blind);
@@ -169,10 +193,19 @@ export function writtenReport(rules: ReportRule[], partner: { name: string; answ
   }
 
   let partnerText = "";
-  if (partner) {
-    if (!partner.answered) partnerText = `Waiting on ${partner.name}.`;
-    else if (b) partnerText = `${partner.name} sees ${b.name} differently than you do. You placed yourself at ${positionWord(b.position)}; they said ${partnerWord(b.partnerRating).toLowerCase()}.`;
-    else partnerText = `${partner.name} sees you about the way you see yourself.`;
+  if (partners.length) {
+    const answered = partners.filter((p) => p.answered).map((p) => p.name);
+    const waiting = partners.filter((p) => !p.answered).map((p) => p.name);
+    const parts: string[] = [];
+    if (answered.length) {
+      const said = (r: ReportRule) => joinNames((r.partnerViews ?? []).map((v) => `${v.name} said ${partnerWord(v.rating).toLowerCase()}`));
+      if (b) parts.push(`${joinNames(answered)} ${answered.length > 1 ? "see" : "sees"} ${b.name} differently than you do. You placed yourself at ${positionWord(b.position)}; ${said(b)}.`);
+      else parts.push(`${joinNames(answered)} ${answered.length > 1 ? "see" : "sees"} you about the way you see yourself.`);
+      const split = rules.find((r) => r.pillar !== b?.pillar && partnersSplit(r.partnerViews));
+      if (split) parts.push(`On ${split.name}, ${said(split)}, so they don't see it the same way.`);
+    }
+    if (waiting.length) parts.push(answered.length ? `Still waiting on ${joinNames(waiting)}.` : `Waiting on ${joinNames(waiting)}.`);
+    partnerText = parts.join(" ");
   }
   return { closest: closestText, widest_gap: widestText, disagreement: disagreeText, partner: partnerText, keys, source: "written" };
 }

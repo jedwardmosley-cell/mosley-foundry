@@ -14,19 +14,20 @@ export const metadata = { title: "An honest view", robots: { index: false, follo
 export default async function PartnerView({ params, searchParams }: { params: Promise<{ token: string }>; searchParams: Promise<{ thanks?: string }> }) {
   const { token } = await params;
   const sp = await searchParams;
-  const run = await db.distanceRun.findUnique({
-    where: { partnerToken: token },
-    select: { partnerStatus: true, partnerRelId: true, user: { select: { name: true, edition: true } }, rules: { select: { pillar: true, line: true } } },
+  const ask = await db.distancePartner.findUnique({
+    where: { token },
+    select: { status: true, run: { select: { user: { select: { name: true, edition: true } }, rules: { select: { pillar: true, line: true } } } } },
   });
+  const run = ask?.run;
   const book = editionOf(run?.user.edition);
   const name = firstName(run?.user.name ?? "");
-  const open = run?.partnerStatus === "SENT";
+  const open = ask?.status === "SENT";
 
   return (
     <main className={`${book.className} min-h-screen bg-paper px-4 py-10`}>
       <div className="mx-auto max-w-xl">
         <p className="eyebrow">{book.name}</p>
-        {sp.thanks || run?.partnerStatus === "ANSWERED" ? (
+        {sp.thanks || ask?.status === "ANSWERED" ? (
           <>
             <h1 className="mt-2 font-book text-[30px] leading-tight text-heading">Thank you. Your answers are in.</h1>
             <p className="mt-3 text-[16px] text-ink-soft">{name ? `${name} will see them in the app.` : "They'll see them in the app."} You can close this page.</p>

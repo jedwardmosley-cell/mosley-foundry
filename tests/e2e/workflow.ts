@@ -315,59 +315,94 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.screenshot({ path: `${shots}/05-network.png`, fullPage: true });
   });
 
-  await check("5b. partner view: one message, approved first, answered from a link with no account", async () => {
+  await check("5b. partner view: up to three people, each message approved first, answered from a link with no account", async () => {
     const me = await db.user.findUniqueOrThrow({ where: { email } });
     const run = await db.distanceRun.findFirstOrThrow({ where: { userId: me.id, completedAt: { not: null } } });
+    for (const [name, role] of [["Sam Ortiz", "ACCOUNTABILITY_PARTNER"], ["Lee Park", "MENTOR"], ["Kim Ito", "ACCOUNTABILITY_PARTNER"]]) {
+      await db.relationship.create({ data: { ownerId: me.id, name, role } });
+    }
     await page.addInitScript(() => { (navigator as unknown as { share: (d: { text: string }) => Promise<void> }).share = async () => {}; });
     await page.goto(`${BASE}/assessment/check/${run.id}/done`);
+    const ready = (who: string) => page.locator("#partner li", { hasText: `exactly what ${who} will get` });
+    const send = async (who: string, message?: string) => {
+      if (message !== undefined) await ready(who).locator("textarea").fill(message);
+      await ready(who).locator('button:has-text("Send by text or email")').click();
+    };
+    const linkFor = async (who: string) => (await db.distancePartner.findFirstOrThrow({ where: { runId: run.id, name: { startsWith: who } } })).token;
+
+    // Jamie: the person sees exactly what goes out, and the page it opens, before anything is sent
     await page.click('button:has-text("Ask Jamie")');
-    // the person sees exactly what goes out, and the page it opens, before anything is sent
-    await page.locator("text=Here's exactly what Jamie will get").waitFor();
-    const message = await page.inputValue("#partner-message");
-    const ready = await db.distanceRun.findUniqueOrThrow({ where: { id: run.id } });
-    assert.equal(ready.partnerStatus, "READY");
-    assert.ok(message.includes(`/partner/${ready.partnerToken}`), "the link is in the message");
+    await ready("Jamie").waitFor();
+    const message = await ready("Jamie").locator("textarea").inputValue();
+    const jamie = await linkFor("Jamie");
+    assert.ok(message.includes(`/partner/${jamie}`), "the link is in the message");
     assert.ok(!/[\u2014\u2013]/.test(message));
-    await page.locator("text=They see nothing else").waitFor();
+    await ready("Jamie").locator("text=Jamie sees nothing else").waitFor();
     // the link doesn't work until it's sent
     const partner = await (await browser.newContext()).newPage();
-    await partner.goto(`${BASE}/partner/${ready.partnerToken}`);
+    await partner.goto(`${BASE}/partner/${jamie}`);
     await partner.locator("text=This link isn't active").waitFor();
     // the link can't be taken out of the message
-    await page.fill("#partner-message", "Hi Jamie, can you help?");
-    await page.click('button:has-text("Send by text or email")');
+    await send("Jamie", "Hi Jamie, can you help?");
     await page.locator("text=Keep the link in the message").waitFor();
-    await page.fill("#partner-message", message);
-    await page.click('button:has-text("Send by text or email")');
-    await page.locator("text=Waiting on Jamie").first().waitFor();
-    assert.equal((await db.distanceRun.findUniqueOrThrow({ where: { id: run.id } })).partnerStatus, "SENT");
-    // the partner: the five lines, one question each, and nothing about the person's own answers
-    await partner.goto(`${BASE}/partner/${ready.partnerToken}`);
-    await partner.locator("h1", { hasText: "asked for your honest view" }).waitFor();
+    await send("Jamie", message);
+    await page.locator("text=Jamie: waiting on their answers").waitFor();
+    await page.locator("section[data-report]", { hasText: "Waiting on Jamie." }).waitFor();
+
+    // Sam too, and Lee makes three: nobody else can be asked
+    await page.click('button:has-text("Ask Sam")');
+    await send("Sam");
+    await page.locator("text=Sam: waiting on their answers").waitFor();
+    await page.locator("section[data-report]", { hasText: "Waiting on Jamie and Sam." }).waitFor();
+    await page.click('button:has-text("Ask Lee")');
+    await ready("Lee").waitFor();
+    assert.equal(await page.locator('button:has-text("Ask Kim")').count(), 0, "three at most");
+    // Lee isn't sent after all: Kim can be asked again
+    await ready("Lee").locator('button:has-text("Don\'t ask Lee")').click();
+    await page.locator('button:has-text("Ask Kim")').waitFor();
+    assert.equal(await db.distancePartner.count({ where: { runId: run.id } }), 2);
+
+    // Jamie answers: the five lines, one question each, and nothing about the person's own answers
+    const answer = async (token: string, picks: Record<string, string>, example?: [string, string]) => {
+      await partner.goto(`${BASE}/partner/${token}`);
+      await partner.locator("h1", { hasText: "asked for your honest view" }).waitFor();
+      for (const [k, w] of Object.entries(picks)) await partner.locator(`fieldset:has(input[name="${k}"]) label`, { hasText: new RegExp(`^${w}$`) }).click();
+      if (example) {
+        await partner.locator(`fieldset:has(input[name="${example[0]}"]) summary`).click();
+        await partner.fill(`textarea[name="ex${example[0]}"]`, example[1]);
+      }
+    };
+    await answer(jamie, { F: "Rarely", O: "Often", R: "Often", G: "Sometimes", E: "Sometimes" }, ["E", "At the budget meeting they stayed calm when the VP pushed."]);
     await partner.locator(`text=${LINES.destination}`).first().waitFor();
     assert.equal(await partner.locator("text=How often does").count(), 5);
-    const seen = await partner.locator("main").innerText();
-    assert.ok(!/Driving like them|Closing the distance|Widest gap|On Tuesday/.test(seen), "the partner sees only the lines");
-    for (const [k, w] of [["F", "Rarely"], ["O", "Often"], ["R", "Often"], ["G", "Sometimes"], ["E", "Sometimes"]] as const) {
-      await partner.locator(`fieldset:has(input[name="${k}"]) label`, { hasText: w }).click();
-    }
-    await partner.locator('fieldset:has(input[name="E"]) summary').click();
-    await partner.fill('textarea[name="exE"]', "At the budget meeting they stayed calm when the VP pushed.");
+    assert.ok(!/Driving like them|Closing the distance|Widest gap|On Tuesday|Sam/.test(await partner.locator("main").innerText()), "the partner sees only the lines");
     await partner.screenshot({ path: `${shots}/05b-partner.png`, fullPage: true });
     await Promise.all([partner.waitForURL(/thanks=1/), partner.click('button:has-text("Send my answers")')]);
     await partner.locator("text=Your answers are in").waitFor();
     // the link can't be answered twice
-    await partner.goto(`${BASE}/partner/${ready.partnerToken}`);
+    await partner.goto(`${BASE}/partner/${jamie}`);
     assert.equal(await partner.locator('button:has-text("Send my answers")').count(), 0);
-    await partner.context().close();
-    // the report is written again: the blind spot is where Jamie sees it most differently
     await page.reload();
     await page.locator("h2", { hasText: "What Jamie sees" }).waitFor();
+    await page.locator("section[data-report]", { hasText: "Still waiting on Sam." }).waitFor();
+
+    // Sam answers, and sees Reason Rooted very differently from Jamie
+    await answer(await linkFor("Sam"), { F: "Sometimes", O: "Often", R: "Rarely", G: "Sometimes", E: "Often" });
+    await Promise.all([partner.waitForURL(/thanks=1/), partner.click('button:has-text("Send my answers")')]);
+    await partner.context().close();
+
+    // the report is written again: the blind spot comes from the middle answer, and the split between them is named
+    await page.reload();
+    await page.locator("h2", { hasText: "What Jamie and Sam see" }).waitFor();
     await page.locator("text=Jamie said: Rarely").waitFor();
+    await page.locator("text=Sam said: Sometimes").first().waitFor();
     await page.locator("text=At the budget meeting they stayed calm").waitFor();
     const report = JSON.parse((await db.distanceRun.findUniqueOrThrow({ where: { id: run.id } })).report);
     assert.equal(report.keys.blind, "F");
-    assert.ok(!/\d|%/.test((await page.locator("section[data-report]").allInnerTexts()).join(" ")), "no numbers");
+    const shown = (await page.locator("section[data-report]").allInnerTexts()).join(" ");
+    assert.ok(/don't see it the same way/.test(shown), shown);
+    assert.ok(!/\d|%/.test(shown), "no numbers");
+    assert.ok(!/waiting/i.test(shown), "nobody left to wait on");
   });
 
   await check("6. start a 30-day development cycle: week 1 setup, then who finds out", async () => {
