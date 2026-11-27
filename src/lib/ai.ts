@@ -865,8 +865,30 @@ Rules:
 
 Return JSON only:
 {"scenario": "...", "options": [{"type": "autopilot", "text": "..."}, {"type": "white_knuckle", "text": "..."}, {"type": "avoidance", "text": "..."}, {"type": "future_self", "text": "..."}]}`;
-  const raw = await askTone([system], "Write the scenario now.");
-  return raw ? parseDistanceScenario(raw, i.line) : null;
+  // Kept apart from the author's prompt above, which stays as written: the AI only knows what the person told it.
+  const guard = `Use only what the inputs say about this person. Don't invent facts about their life: no children, spouse, family, ages, sports, school, hobbies or weekend plans unless the seat or their own words mention them. If the seat is a parent, don't assume how old their children are. When the inputs don't say, set the scenario in their working day or in a moment anyone could face.`;
+  const raw = await askTone([system, guard], "Write the scenario now.");
+  const made = raw ? parseDistanceScenario(raw, i.line) : null;
+  // If it brought in a life detail they never mentioned, the written situation for their seat is used instead.
+  return made && !inventsLife(made, [i.seat, i.line, i.oldResponse, i.feeling, i.hard].join(" ")) ? made : null;
+}
+
+/** Family and home details the AI must not assume. "Partner" is left out: in a coaching app it's usually a business or accountability partner. */
+const LIFE_WORDS = /\b(kids?|child|children|son|sons|daughters?|toddlers?|bab(y|ies)|teen(ager)?s?|spouse|husband|wife|family|soccer|baseball|football|softball|basketball|hockey|recital|homework|school|bedtime|pta|carpool)\b/gi;
+
+/** True when the situation names a life detail (children, spouse, a kid's game) that isn't anywhere in what the person told us. */
+export function inventsLife(s: DistanceScenario, told: string) {
+  const t = told.toLowerCase();
+  const found = [s.scenario, ...s.options.map((o) => o.text)].join(" ").match(LIFE_WORDS) ?? [];
+  const root = (w: string) => w.toLowerCase().replace(/(ren|s|ies)$/, "").replace(/^kid$/, "kid").replace(/^teenager$/, "teen");
+  const family = /\b(parent|mom|dad|mother|father|kids?|child|children|son|daughter|family|spouse|husband|wife|grand)/.test(t);
+  return found.some((w) => {
+    const r = root(w);
+    if (t.includes(r)) return false;
+    // A parent's seat allows their children and family, but nothing about ages or activities.
+    if (family && /^(kid|child|son|daughter|family)/.test(r)) return false;
+    return true;
+  });
 }
 
 /** Reads the scenario JSON and checks it: one option of each type, each short, no banned words, no copy of their line. */

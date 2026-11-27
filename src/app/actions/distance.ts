@@ -130,11 +130,14 @@ async function ensureScenario(userId: string, runId: string, pillar: PillarKey, 
   // Their own words from the focus questions, from this rule's focus when there is one, otherwise their latest.
   const own = cycles.find((c) => c.pillar === pillar && (c.oldResponse || c.feeling)) ?? cycles.find((c) => c.oldResponse || c.feeling);
   const seat = identity?.role?.trim() || "";
+  // No seat named: the program tells the AI the kind of setting, without making up a life for them.
+  const pathway = (await db.profile.findUnique({ where: { userId }, select: { pathway: true } }))?.pathway;
+  const setting = pathway === "LEADING_OTHERS" ? "someone who leads people at work" : pathway === "ENTREPRENEURIAL" ? "someone who runs their own business" : "someone working on how they lead their own life and work";
   const ruleName = pack.pillars.find((p) => p.key === pillar)?.name ?? pillar;
   let made: { scenario: string; options: { type: string; text: string }[] } | null = null;
   let source = "written";
   if (useAi) {
-    made = await distanceScenarioAI({ seat: seat || "their own life", ruleName, ruleLetter: pillar, line: rule.line, oldResponse: own?.oldResponse ?? "", feeling: own?.feeling ?? "", hard: own?.gap ?? "", target: RULE_TARGET[pillar] }).catch(() => null);
+    made = await distanceScenarioAI({ seat: seat || setting, ruleName, ruleLetter: pillar, line: rule.line, oldResponse: own?.oldResponse ?? "", feeling: own?.feeling ?? "", hard: own?.gap ?? "", target: RULE_TARGET[pillar] }).catch(() => null);
     if (made) source = "ai";
   }
   if (!made) {
