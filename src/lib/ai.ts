@@ -979,3 +979,38 @@ export function parseDistanceReport(raw: string, hasPartner = false): Omit<Dista
     return null;
   }
 }
+
+/** The text message to the accountability partner. The link goes in where the prompt puts {link}. */
+export async function partnerMessageAI(i: { name: string; partnerName: string; lines: string[]; link: string }): Promise<string | null> {
+  const system = `You write a short text message from a coaching app to someone's accountability partner.
+
+Inputs:
+- person's first name: ${i.name}
+- partner's first name: ${i.partnerName}
+- the five identity lines: ${i.lines.map((l) => `"${l}"`).join("; ")}
+
+Write a message under 60 words that:
+- says ${i.name} is working on who they're becoming and asked ${i.partnerName} for an honest view
+- says it takes about two minutes
+- ends with the link placeholder {link}
+
+Plain and friendly. No em dashes. Don't include the lines in the text message itself; they appear on the linked page.
+
+Return JSON only: {"message": "..."}`;
+  const raw = await askTone([system], "Write the message now.");
+  return raw ? parsePartnerMessage(raw, i.lines, i.link) : null;
+}
+
+/** Checks the message: short, ends with the link, and none of the lines copied into it. */
+export function parsePartnerMessage(raw: string, lines: string[], link: string): string | null {
+  const m = raw.match(/\{[\s\S]*\}/);
+  if (!m) return null;
+  try {
+    const t = plainPunctuation(String(JSON.parse(m[0]).message ?? "")).replace(/\s+/g, " ").trim();
+    if (!t.endsWith("{link}") || t.split(/\s+/).length > 60 || /\brhythm/i.test(t)) return null;
+    if (lines.some((l) => l.trim().length > 20 && t.toLowerCase().includes(l.trim().toLowerCase()))) return null;
+    return t.replace("{link}", link);
+  } catch {
+    return null;
+  }
+}

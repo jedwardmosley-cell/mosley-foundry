@@ -1,9 +1,9 @@
 /** The distance check ("Where I am"): the scoring rules, the plain proof check, the written situations and the AI readers. */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { widestGap, closest, disagreement, blindSpot, writtenReport, evidenceHeuristic, shuffled, positionWord, POSITIONS, PRESSURE_TYPES, RULE_ORDER, type RuleResult } from "../src/lib/distance";
+import { widestGap, closest, disagreement, blindSpot, writtenReport, partnerMessageWritten, partnerQuestion, PARTNER_WORDS, evidenceHeuristic, shuffled, positionWord, POSITIONS, PRESSURE_TYPES, RULE_ORDER, type RuleResult } from "../src/lib/distance";
 import { DISTANCE_SCENARIOS, SEATS, seatFor } from "../src/content/distanceScenarios";
-import { parseDistanceScenario, parseEvidenceCheck, parseDistanceReport } from "../src/lib/ai";
+import { parseDistanceScenario, parseEvidenceCheck, parseDistanceReport, parsePartnerMessage } from "../src/lib/ai";
 
 const r = (pillar: RuleResult["pillar"], position: number, pressure: RuleResult["pressure"] = "future_self", evidence: RuleResult["evidence"] = "concrete", partnerRating?: number): RuleResult => ({ pillar, position, pressure, evidence, partnerRating });
 
@@ -151,4 +151,19 @@ test("the AI report is checked before it is shown", () => {
   assert.equal(parseDistanceReport(ok.replace("showed up", "showed up on autopilot")), null, "no type names");
   assert.equal(parseDistanceReport(ok.replace("showed up", "kept its rhythm")), null);
   assert.equal(parseDistanceReport('{"closest":"","widest_gap":"x"}'), null);
+});
+
+test("the message to the partner: short, ends with the link, no lines copied in", () => {
+  const link = "https://app.example/partner/abc123";
+  const lines = ["a leader my team trusts with bad news", "a leader who notices what my team needs"];
+  const ok = '{"message":"Hi Sam, Dana is working on who they\'re becoming and asked for your honest view. It takes about two minutes. {link}"}';
+  assert.equal(parsePartnerMessage(ok, lines, link), `Hi Sam, Dana is working on who they're becoming and asked for your honest view. It takes about two minutes. ${link}`);
+  assert.equal(parsePartnerMessage(ok.replace(" {link}", ""), lines, link), null, "the link has to be there");
+  assert.equal(parsePartnerMessage(ok.replace("Hi Sam,", "Hi Sam, Dana wants to be a leader my team trusts with bad news."), lines, link), null, "no lines in the text");
+  assert.equal(parsePartnerMessage(ok.replace("Hi Sam,", "Hi Sam, " + "word ".repeat(60)), lines, link), null, "under sixty words");
+  const written = partnerMessageWritten("Dana", "Sam", link);
+  assert.ok(written.endsWith(link));
+  assert.ok(!/[—–]/.test(written) && !STYLE.test(written));
+  assert.equal(partnerQuestion("Dana"), "How often does Dana look like this person?");
+  assert.deepEqual(PARTNER_WORDS, ["Rarely", "Sometimes", "Often", "Almost always"]);
 });

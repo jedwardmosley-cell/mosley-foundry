@@ -187,3 +187,10 @@ export function readReport(raw: string | null | undefined): DistanceReport | nul
     return null;
   }
 }
+
+/** The written text message to the partner, when the AI isn't used. */
+export const partnerMessageWritten = (name: string, partnerName: string, link: string) =>
+  `Hi ${partnerName}, ${name} is working on who they're becoming and asked you for an honest view. It takes about two minutes: ${link}`;
+
+/** The one question the partner answers for each line. */
+export const partnerQuestion = (name: string) => `How often does ${name} look like this person?`;
