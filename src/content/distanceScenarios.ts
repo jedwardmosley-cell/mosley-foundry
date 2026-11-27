@@ -7,7 +7,7 @@
 import type { PillarKey } from "./types";
 import type { Pressure } from "@/lib/distance";
 
-export const DISTANCE_SCENARIOS_STATUS: "draft" | "approved" = "draft";
+export const DISTANCE_SCENARIOS_STATUS: "draft" | "approved" = "approved";
 
 export type Written = { scenario: string; options: Record<Pressure, string> };
 type Row = [scenario: string, autopilot: string, whiteKnuckle: string, avoidance: string, futureSelf: string];
