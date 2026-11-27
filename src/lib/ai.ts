@@ -11,6 +11,7 @@ import { EXAMPLE_PEOPLE, FOUR_THINGS, IDENTITY_TESTS, peopleFor } from "@/conten
 import { KIND_GUIDANCE, KIND_RULE, asRole, withArticle } from "@/content/whoIAm";
 import type { IdentityLevel } from "@/content/identity";
 import type { PathwayKey } from "@/content/program";
+import { EVIDENCE_NOTE_FALLBACK } from "@/lib/distance";
 
 export const AI_MODEL = "claude-opus-5-5";
 export const aiAvailable = () => Boolean(process.env.ANTHROPIC_API_KEY);
@@ -824,6 +825,105 @@ export function parseCohortPrep(raw: string): CohortPrep | null {
       .filter((x: { part: string }) => x.part);
     const c = { working: list(j.working, 3), stuck: list(j.stuck, 3), plan, questions: list(j.questions, 3) };
     return c.plan.length || c.questions.length ? c : null;
+  } catch {
+    return null;
+  }
+}
+
+// ---------- The distance check ("Where I am"): the author's prompts, word for word ----------
+
+export type DistanceScenario = { scenario: string; options: { type: "autopilot" | "white_knuckle" | "avoidance" | "future_self"; text: string }[] };
+const SCENARIO_TYPES = ["autopilot", "white_knuckle", "avoidance", "future_self"] as const;
+
+export async function distanceScenarioAI(i: { seat: string; ruleName: string; ruleLetter: string; line: string; oldResponse: string; feeling: string; hard: string; target: string }): Promise<DistanceScenario | null> {
+  const system = `You write one short pressure scenario for a coaching app called Both Hands on the Wheel. The person is measuring how close they are to their future self.
+
+Inputs:
+- seat: ${i.seat}
+- rule: ${i.ruleName} (${i.ruleLetter})
+- their line for this rule: "${i.line}"
+- what they usually do (may be empty): "${i.oldResponse}"
+- what they feel in that moment (may be empty): "${i.feeling}"
+- what makes it hard (may be empty): "${i.hard}"
+- rule target: ${i.target}
+
+Write:
+1. A scenario of 2 or 3 sentences, in second person, specific to their seat and their real life. Include a concrete detail (a time, a person, a stake) and a deadline or pressure. It must test this rule's target.
+2. Four options, one of each type:
+   - autopilot: their old response. If "what they usually do" is given and fits, use it in plain words.
+   - white_knuckle: the right-looking move while the old fear or habit still drives.
+   - avoidance: stalling, ignoring, or letting it pass.
+   - future_self: how the person in their line would handle it. Describe how they decide, not a perfect outcome.
+
+Rules:
+- Each option is one sentence, under 20 words, written as an action ("Say yes that afternoon...").
+- All four options must sound reasonable. No option should be obviously wrong or obviously right.
+- Use plain, direct language. No em dashes. Never use the word "rhythm."
+- Do not repeat their identity line word for word in any option.
+- Do not mention FORGE, rules, or option types.
+
+Return JSON only:
+{"scenario": "...", "options": [{"type": "autopilot", "text": "..."}, {"type": "white_knuckle", "text": "..."}, {"type": "avoidance", "text": "..."}, {"type": "future_self", "text": "..."}]}`;
+  const raw = await askTone([system], "Write the scenario now.");
+  return raw ? parseDistanceScenario(raw, i.line) : null;
+}
+
+/** Reads the scenario JSON and checks it: one option of each type, each short, no banned words, no copy of their line. */
+export function parseDistanceScenario(raw: string, line = ""): DistanceScenario | null {
+  const m = raw.match(/\{[\s\S]*\}/);
+  if (!m) return null;
+  try {
+    const j = JSON.parse(m[0]);
+    const clean = (v: unknown) => plainPunctuation(String(v ?? "")).replace(/\s+/g, " ").trim();
+    const scenario = clean(j.scenario).slice(0, 600);
+    const options = (Array.isArray(j.options) ? j.options : []).map((o: { type?: unknown; text?: unknown }) => ({ type: String(o?.type ?? ""), text: clean(o?.text).slice(0, 200) }));
+    const types = new Set(options.map((o: { type: string }) => o.type));
+    if (!scenario || options.length !== 4 || SCENARIO_TYPES.some((t) => !types.has(t))) return null;
+    const all = [scenario, ...options.map((o: { text: string }) => o.text)].join(" ");
+    if (/\brhythm/i.test(all) || /\bFORGE\b/.test(all) || /white.?knuckle|autopilot|future.?self/i.test(options.map((o: { text: string }) => o.text).join(" "))) return null;
+    if (options.some((o: { text: string }) => !o.text || o.text.split(/\s+/).length > 24)) return null;
+    if (line.trim().length > 20 && options.some((o: { text: string }) => o.text.toLowerCase().includes(line.trim().toLowerCase()))) return null;
+    return { scenario, options: options as DistanceScenario["options"] };
+  } catch {
+    return null;
+  }
+}
+
+export async function evidenceCheckAI(i: { line: string; question: string; answer: string; position: number }): Promise<{ evidence: "concrete" | "vague" | "missing"; note: string } | null> {
+  const system = `You check whether a coaching app user gave a concrete example.
+
+Inputs:
+- their line: "${i.line}"
+- the question they answered: "${i.question}"
+- their answer: "${i.answer}"
+- the road position they chose (1 to 5): ${i.position}
+
+Decide:
+- "concrete": a specific moment with at least one real detail (when, who, or what happened)
+- "vague": general statements ("I usually stay calm," "I try my best")
+- "missing": empty, off topic, or "I don't know"
+
+If the result is vague or missing AND position is 4 or 5, write a short note in plain, warm, direct language, under 30 words, that points out they placed themselves close but couldn't name a moment, and invites them to add one or move their position. Don't lecture. No em dashes.
+
+Otherwise, note is empty.
+
+Return JSON only:
+{"evidence": "concrete" | "vague" | "missing", "note": "..."}`;
+  const raw = await askTone([system], "Check the answer now.");
+  return raw ? parseEvidenceCheck(raw, i.position) : null;
+}
+
+/** Reads the evidence JSON. A note only comes back for a close position (4 or 5) with thin proof. */
+export function parseEvidenceCheck(raw: string, position: number): { evidence: "concrete" | "vague" | "missing"; note: string } | null {
+  const m = raw.match(/\{[\s\S]*\}/);
+  if (!m) return null;
+  try {
+    const j = JSON.parse(m[0]);
+    const evidence = String(j.evidence ?? "");
+    if (!["concrete", "vague", "missing"].includes(evidence)) return null;
+    const thin = evidence !== "concrete" && position >= 4;
+    const note = thin ? plainPunctuation(String(j.note ?? "")).trim().slice(0, 300) || EVIDENCE_NOTE_FALLBACK : "";
+    return { evidence: evidence as "concrete" | "vague" | "missing", note };
   } catch {
     return null;
   }

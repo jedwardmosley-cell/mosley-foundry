@@ -25,9 +25,11 @@ import { IdentitySpectrum } from "@/components/IdentitySpectrum";
 
 export const metadata = { title: "The Driver's Seat" };
 
-export default async function IdentityPage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
+export default async function IdentityPage({ searchParams }: { searchParams: Promise<{ saved?: string; missingLines?: string }> }) {
   const u = await requireUser("PARTICIPANT");
-  const { saved } = await searchParams;
+  const { saved, missingLines } = await searchParams;
+  // Sent here from Where I am: every rule needs its line before it can be measured.
+  const needLines = (missingLines ?? "").split("").filter((c) => "FORGE".includes(c));
   const [profile, id, history] = await Promise.all([
     db.profile.findUnique({ where: { userId: u.id } }),
     db.identityProfile.findUnique({ where: { userId: u.id } }),
@@ -61,6 +63,7 @@ export default async function IdentityPage({ searchParams }: { searchParams: Pro
           . This step is done when your seat, how big a turn and My statement are all saved.
         </p>
       )}
+      {needLines.length > 0 && <p role="status" className="mb-4 notice">Where I am measures you against your own lines. Write your {needLines.join(", ")} {needLines.length === 1 ? "line" : "lines"} first, then come back.</p>}
       {saved && <p role="status" className="mb-4 notice">Saved. Next, <Link href="/assessment" className="btn-link">see where you are</Link>.</p>}
 
       <form action={saveWhoIAm} className="space-y-5">

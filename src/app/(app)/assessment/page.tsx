@@ -9,13 +9,12 @@ import { scoresFrom } from "@/lib/forge";
 import { PILLAR_KEYS } from "@/content/types";
 import { fmt } from "@/lib/dates";
 import { PageHeader, ChapterOpening, PillarMark, Draft, Source } from "@/components/ui";
-import { AssessmentForm } from "@/components/AssessmentForm";
-import { linesOf } from "@/content/forgeLines";
+import { DistanceStart } from "@/components/DistanceStart";
+import { positionWord } from "@/lib/distance";
 
 export const metadata = { title: "The Rules of the Road" };
 
-export default async function AssessmentPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
-  const { next } = await searchParams;
+export default async function AssessmentPage() {
   const u = await requireUser("PARTICIPANT");
   const { pack, entrepreneur } = await getContent();
   const profile = await db.profile.findUnique({ where: { userId: u.id } });
@@ -23,22 +22,21 @@ export default async function AssessmentPage({ searchParams }: { searchParams: P
   const statement = profile?.forgeStatement || identity?.becoming || "";
   const past = await db.assessment.findMany({ where: { userId: u.id, isSecondOpinion: false }, orderBy: { completedAt: "desc" } });
   const useEntre = profile?.pathway === "ENTREPRENEURIAL" && !!entrepreneur;
-  const instrument = pack.assessmentStatus === "draft" ? "FORGE_DRAFT" : useEntre ? "FORGE_ENTREPRENEUR" : "FORGE_PERSONAL";
 
   return (
     <>
       <ChapterOpening image="/chapters/rules-of-the-road.jpg" alt="A highway seen from above, lanes and traffic" title={NAMES.rules.name} plain={NAMES.rules.plain}>
         {useEntre ? entrepreneur!.intro.filter((t) => !/measures five behaviors/i.test(t)).slice(0, 3).map((t) => <p key={t} className="mb-2">{t}</p>) : (
-          <p>This is the deep work of FORGE. For each rule, read what you wrote and all five levels, then choose the one that is true of you this past month. Take your time with it.</p>
+          <p>This measures you against your own future self: the five lines you wrote in the Driver&apos;s Seat. For each rule, you&apos;ll say where you are on the road, name a real moment from this week, and choose what you&apos;d do in one situation. It takes about fifteen minutes.</p>
         )}
       </ChapterOpening>
 
       {/* The scores are read against the identity the client claimed, so FORGE links straight through. */}
       {(statement || identity?.role) && (
         <Link href="/identity" className="glow mb-6 block rounded-[22px] p-5 sm:p-6">
-          <p className="section-label">{identity?.role ? `Rate yourself as ${withArticle(identity.role)}` : "Rate yourself against who you claimed"}</p>
+          <p className="section-label">{identity?.role ? `Measured as ${withArticle(identity.role)}` : "Measured against who you claimed"}</p>
           {statement && <p className="mt-2 font-serif text-[18px] leading-snug text-heading line-clamp-3">{statement}</p>}
-          <p className="mt-3 text-sm text-ink-soft">Score each rule as the person you described. The lowest one is where your focus goes next.</p>
+          <p className="mt-3 text-sm text-ink-soft">How close is the driver you were this week to the person you described?</p>
         </Link>
       )}
 
@@ -59,7 +57,7 @@ export default async function AssessmentPage({ searchParams }: { searchParams: P
 
       {pack.threeNote && !useEntre && <p className="quote mb-6">{pack.threeNote}</p>}
 
-      <AssessmentForm pack={pack} entrepreneur={entrepreneur} useEntre={useEntre} instrument={instrument} next={next === "season" ? "/season" : undefined} lines={linesOf(profile)} role={identity?.role} />
+      <DistanceStart userId={u.id} />
 
       {/* Earlier readings come after the ratings, to look back on once today's is done. */}
       {past.length > 0 && (
@@ -69,7 +67,7 @@ export default async function AssessmentPage({ searchParams }: { searchParams: P
             {past.map((a) => (
               <li key={a.id} className="py-2 flex justify-between">
                 <Link href={`/assessment/${a.id}`} className="btn-link">{fmt(a.completedAt, { month: "short", day: "numeric", year: "numeric" })}</Link>
-                <span className="muted text-sm">{(() => { const sc = scoresFrom(a); return PILLAR_KEYS.map((k) => `${k} ${sc[k]}`).join(", "); })()}</span>
+                <span className="muted text-sm">{(() => { const sc = scoresFrom(a); return PILLAR_KEYS.map((k) => `${k}: ${positionWord(sc[k])}`).join(", "); })()}</span>
               </li>
             ))}
           </ul>
