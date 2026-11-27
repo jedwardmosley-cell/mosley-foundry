@@ -26,7 +26,7 @@ export function CycleFocusFields({ pillars, initial, initialTitle = "", initialF
             </label>
           ))}
         </div>
-        <p className="mt-2 text-xs text-ink-mute">Any rule works. The goal is a 5 on every one.</p>
+        <p className="mt-2 text-xs text-ink-mute">Any rule works. The goal is driving like the person in every one of your lines.</p>
       </fieldset>
       <div>
         <label htmlFor="title" className="label">My focus, in a few words</label>

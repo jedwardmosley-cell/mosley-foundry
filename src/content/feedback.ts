@@ -21,8 +21,8 @@ export const FEEDBACK_COPY = {
   shareCoach: "Share this with my coach",
   allowAi: "Let Help me with this use my summary",
   aiNote: "Help me with this reads your summary only. It never opens the file.",
-  notSameMeasure: "This is your own reading of your feedback. It isn't the same measure as your FORGE scores.",
-  publisherNote: "CCL 360 assessments are published by the Center for Creative Leadership, and EQ-i 2.0 by MHS. This app doesn't read, score or interpret those reports. FORGE self-ratings and those assessments measure different things, so one can't stand in for the other.",
+  notSameMeasure: "This is your own reading of your feedback. It isn't the same measure as Where I am.",
+  publisherNote: "CCL 360 assessments are published by the Center for Creative Leadership, and EQ-i 2.0 by MHS. This app doesn't read, score or interpret those reports. Where I am and those assessments measure different things, so one can't stand in for the other.",
 };
 
 /** 4 MB: under the hosting limit for one upload. */

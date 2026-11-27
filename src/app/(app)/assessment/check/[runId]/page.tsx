@@ -36,7 +36,9 @@ export default async function DistanceCheck({ params, searchParams }: { params: 
   // Each check needs the one before it: no proof without a position, no pressure test without the proof step.
   if (step !== "road" && rule.position == null) redirect(`/assessment/check/${run.id}?rule=${k}&step=road${fromQ}`);
   const { pack } = await getContent();
-  const name = pack.pillars.find((p) => p.key === k)?.name ?? k;
+  const pillar = pack.pillars.find((p) => p.key === k);
+  const name = pillar?.name ?? k;
+  const anchors = [...(pillar?.anchors ?? [])].filter((a) => a.score >= 1 && a.score <= 5).sort((a, b) => a.score - b.score).slice(0, 5);
   const tone = { "--pc": `var(${PILLAR_FILL[k].cssVar})` } as CSSProperties;
   const ruleIndex = RULE_ORDER.indexOf(k);
   const stepIndex = STEPS.indexOf(step);
@@ -88,6 +90,20 @@ export default async function DistanceCheck({ params, searchParams }: { params: 
               ))}
             </ol>
           </fieldset>
+          {/* The book's own level descriptions, kept to one side. Matched to the road by order, shown without numbers. */}
+          {anchors.length > 0 && (
+            <details className="mt-5 rounded-xl border border-line/70 bg-card px-4 py-3">
+              <summary className="cursor-pointer text-sm font-medium text-heading">What each position means, from the book</summary>
+              <dl className="mt-3 space-y-3">
+                {anchors.map((a, i) => (
+                  <div key={a.score}>
+                    <dt className="text-[14px] font-semibold text-heading">{POSITIONS[i]}{a.level ? <span className="font-normal text-ink-mute">, {a.level}</span> : null}</dt>
+                    <dd className="mt-0.5 text-[14px] leading-relaxed text-ink-soft">{a.text}</dd>
+                  </div>
+                ))}
+              </dl>
+            </details>
+          )}
           <div className="mt-6 flex items-center gap-4">
             <Submit className="btn-primary">Next</Submit>
             {back && <Link href={back} className="text-sm btn-link">Back</Link>}

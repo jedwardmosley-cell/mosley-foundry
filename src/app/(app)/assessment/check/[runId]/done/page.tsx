@@ -7,11 +7,13 @@ import { getContent } from "@/content";
 import type { PillarKey } from "@/content/types";
 import { PILLAR_FILL, PillarMark, PageHeader } from "@/components/ui";
 import { Submit } from "@/components/Submit";
+import { FEEDBACK_COPY } from "@/content/feedback";
+import { fmt } from "@/lib/dates";
 import { setPriority } from "@/app/actions/participant";
 import { PartnerSend } from "@/components/PartnerSend";
 import { askPartner, cancelPartner } from "@/app/actions/partner";
 import { ASKABLE_ROLES, MAX_PARTNERS, firstName, reportPartners, reportRules } from "@/lib/distanceReport";
-import { PARTNER_WORDS, joinNames, partnerQuestion, partnerWord, positionWord, readReport, writtenReport } from "@/lib/distance";
+import { PARTNER_WORDS, joinNames, movement, movementNote, partnerQuestion, partnerWord, positionWord, readReport, writtenReport } from "@/lib/distance";
 
 export const metadata = { title: "Where I am" };
 
@@ -41,6 +43,12 @@ export default async function DistanceDone({ params, searchParams }: { params: P
   const answeredNames = asked.filter((p) => p.status === "ANSWERED").map((p) => firstName(p.name));
   const me = firstName(u.name);
   const fromStart = sp.from === "start";
+  // My feedback, if they tagged it to rules: their own reading, shown beside this one, never as a score.
+  const fb = await db.feedback.findFirst({ where: { userId: u.id, NOT: { pillars: "[]" } }, orderBy: [{ takenOn: "desc" }, { createdAt: "desc" }], select: { id: true, title: true, takenOn: true, pillars: true } });
+  const fbPillars = fb ? (JSON.parse(fb.pillars) as PillarKey[]) : [];
+  // A retake: how each rule moved since the last check, as road positions.
+  const moves = run.previousRunId ? movement(await db.distanceRule.findMany({ where: { runId: run.previousRunId } }), run.rules) : [];
+  const back = run.returnTo === "/season" ? { href: "/season", label: "Back to the season" } : run.returnTo.startsWith("/cycle") ? { href: run.returnTo, label: "Back to finish your 30 days" } : null;
   const sections = [
     { title: "Closest to the future you", text: report.closest, k: report.keys.closest },
     { title: "Widest gap", text: report.widest_gap, k: report.keys.widest },
@@ -53,6 +61,26 @@ export default async function DistanceDone({ params, searchParams }: { params: P
       <PageHeader eyebrow="Where I am" title="Here's where you are on the road">
         Measured against your own five lines: the person you said you&apos;re becoming.
       </PageHeader>
+
+      {back && <p className="-mt-2 mb-5"><Link href={back.href} className="btn-primary">{back.label}</Link></p>}
+
+      {moves.length > 0 && (
+        <section className="mb-6" aria-labelledby="moved">
+          <h2 id="moved" className="section-label">Since last time</h2>
+          <ul className="mt-2 divide-y divide-line/60 border-y border-line/60">
+            {moves.map((m) => (
+              <li key={m.pillar} data-move={m.pillar} className="flex items-start gap-3.5 py-3.5">
+                <PillarMark k={m.pillar} size="sm" />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm text-ink-mute">{nameOf(m.pillar)}</span>
+                  <span className="block text-[17px] text-heading">{m.from === m.to ? m.to : <>{m.from} <span aria-label="to">→</span> {m.to}</>}</span>
+                  <span className="mt-0.5 block text-[14px] text-ink-soft">{movementNote(m)}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <div className="space-y-3">
         {sections.map((s) => (
@@ -84,7 +112,7 @@ export default async function DistanceDone({ params, searchParams }: { params: P
       <section id="partner" className="mt-6 rounded-2xl border border-line/70 bg-card px-5 py-5">
         <h2 className="text-[17px] font-semibold text-heading">How someone else sees it</h2>
         {!asked.length && (
-          <p className="mt-2 text-[15px] text-ink-soft">Ask your accountability partner, or up to {MAX_PARTNERS} people, for an honest view. Each one sees your five lines and answers one question for each: how often you look like that person. You&apos;ll see each message before it goes.</p>
+          <p className="mt-2 text-[15px] text-ink-soft">Ask your accountability partner, or up to three people, for an honest view. Each one sees your five lines and answers one question for each: how often you look like that person. You&apos;ll see each message before it goes.</p>
         )}
         {asked.length > 0 && (
           <ul className="mt-3 space-y-4">
@@ -163,8 +191,16 @@ export default async function DistanceDone({ params, searchParams }: { params: P
         ))}
       </ol>
 
+      {fb && fbPillars.length > 0 && (
+        <Link href={`/feedback/${fb.id}`} className="card mt-6 block hover:border-navy/40">
+          <p className="eyebrow">From my feedback</p>
+          <h2 className="h3 mt-1 flex flex-wrap items-center gap-2">{fbPillars.map((k) => <PillarMark key={k} k={k} size="sm" />)} My feedback points to {fbPillars.map((k) => nameOf(k)).join(" and ")}</h2>
+          <p className="mt-2 text-[15px] text-ink-soft">{fb.title}{fb.takenOn ? `, ${fmt(fb.takenOn, { month: "long", year: "numeric" })}` : ""}. {FEEDBACK_COPY.notSameMeasure}</p>
+        </Link>
+      )}
+
       <div className="mt-6">
-        {fromStart ? <Link href="/start?step=3" className="btn-quiet">Continue setup</Link> : <Link href="/assessment" className="text-sm btn-link">Back to the Rules of the Road</Link>}
+        {fromStart ? <Link href="/start?step=3" className="btn-quiet">Continue setup</Link> : back ? <Link href={back.href} className="btn-quiet">{back.label}</Link> : <Link href="/assessment" className="text-sm btn-link">Back to the Rules of the Road</Link>}
       </div>
     </>
   );

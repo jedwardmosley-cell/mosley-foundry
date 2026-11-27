@@ -164,7 +164,7 @@ export default async function CyclePage({ searchParams }: { searchParams: Promis
                   </details>
                   <div className="flex flex-wrap gap-3">
                     <Submit>Finish these 30 days</Submit>
-                    <Link href="/assessment" className="btn-quiet">Re-take the assessment first</Link>
+                    <Link href={`/assessment?retake=${cycle.id}`} className="btn-quiet">Take Where I am again first</Link>
                   </div>
                 </form>
               </div>

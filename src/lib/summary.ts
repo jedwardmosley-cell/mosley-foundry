@@ -1,4 +1,5 @@
 import "server-only";
+import { positionWord } from "@/lib/distance";
 import { FORGE_LINES } from "@/content/forgeLines";
 import { getContent } from "@/content";
 import { PATHWAYS, RELATIONSHIP_ROLES, BLUEPRINT_AREAS, DAY30_DECISIONS } from "@/content/program";
@@ -31,12 +32,12 @@ export async function developmentSummary(userId: string, name: string) {
     if (d.identity.personaName) L.push(`**Performance identity:** ${d.identity.personaName}`);
   }
   if (d.assessments.length) {
-    L.push("", "## FORGE self-assessments", "", "| Date | F | O | R | G | E |", "|---|---|---|---|---|---|");
+    L.push("", "## Where I am", "", "| Date | F | O | R | G | E |", "|---|---|---|---|---|---|");
     for (const a of d.assessments) {
       const s = scoresFrom(a);
-      L.push(`| ${fmt(a.completedAt, { month: "short", day: "numeric", year: "numeric" })} | ${s.F} | ${s.O} | ${s.R} | ${s.G} | ${s.E} |`);
+      L.push(`| ${fmt(a.completedAt, { month: "short", day: "numeric", year: "numeric" })} | ${positionWord(s.F)} | ${positionWord(s.O)} | ${positionWord(s.R)} | ${positionWord(s.G)} | ${positionWord(s.E)} |`);
     }
-    L.push("", "_These are self-ratings for personal development. They have not been validated as a psychometric measure._");
+    L.push("", "_Your own place on the road for each rule, measured against your own lines. FORGE is a development tool, not a validated psychometric measure._");
   }
   if (d.goals.length) {
     L.push("", "## FORGE plan");

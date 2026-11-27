@@ -10,9 +10,9 @@ import type { ContentPack } from "./types";
  */
 const draftAnchors = (low: string, mid: string, high: string) => [
   { score: 1, level: "Not Yet (draft)", text: low },
-  { score: 2, level: "Developing (draft)", text: "Between 1 and 3." },
+  { score: 2, level: "Developing (draft)", text: "Between Not Yet and Operating." },
   { score: 3, level: "Operating (draft)", text: mid },
-  { score: 4, level: "Integrated (draft)", text: "Between 3 and 5." },
+  { score: 4, level: "Integrated (draft)", text: "Between Operating and Leading." },
   { score: 5, level: "Leading (draft)", text: high },
 ];
 

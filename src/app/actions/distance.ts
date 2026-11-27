@@ -41,12 +41,20 @@ export async function startDistance(fd: FormData) {
     // In the kickoff they go back to the five lines inside the kickoff; elsewhere, to Who I am.
     redirect(fromStart(fd) ? `/start?step=1&part=2&missingLines=${letters}` : `/identity?missingLines=${letters}#forge`);
   }
-  const open = await db.distanceRun.findFirst({ where: { userId: u.id, completedAt: null, kind }, orderBy: { startedAt: "desc" }, include: { rules: true } });
-  if (open) redirect(`${base(open.id)}?${resumeAt(open.rules)}${q(fd)}`);
+  const next = String(fd.get("next") ?? "");
+  const asked = next === "/season" || /^\/cycle\?id=[a-z0-9]{10,40}$/.test(next) ? next : "";
+  const cycle = asked.startsWith("/cycle") ? await db.developmentCycle.findFirst({ where: { id: asked.split("=")[1], userId: u.id }, select: { id: true } }) : null;
+  const returnTo = asked.startsWith("/cycle") && !cycle ? "" : asked;
+  const open = await db.distanceRun.findFirst({ where: { userId: u.id, completedAt: null }, orderBy: { startedAt: "desc" }, include: { rules: true } });
+  if (open) {
+    if (returnTo) await db.distanceRun.update({ where: { id: open.id }, data: { returnTo, cycleId: cycle?.id ?? open.cycleId } });
+    redirect(`${base(open.id)}?${resumeAt(open.rules)}${q(fd)}`);
+  }
+  // Any check after the first is a retake: fresh situations, and the results show how far each rule moved.
   const previous = await db.distanceRun.findFirst({ where: { userId: u.id, completedAt: { not: null } }, orderBy: { completedAt: "desc" }, select: { id: true } });
   const run = await db.distanceRun.create({
     data: {
-      userId: u.id, kind, cycleId, previousRunId: kind === "DAY30" ? previous?.id ?? null : null,
+      userId: u.id, kind: previous || returnTo ? "DAY30" : kind, cycleId: cycle?.id ?? cycleId, previousRunId: previous?.id ?? null, returnTo,
       rules: { create: FORGE_LINES.map((l) => ({ pillar: l.pillar, line: String(profile?.[l.field] ?? "").trim() })) },
     },
   });

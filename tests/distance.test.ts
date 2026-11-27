@@ -1,7 +1,7 @@
 /** The distance check ("Where I am"): the scoring rules, the plain proof check, the written situations and the AI readers. */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { widestGap, closest, disagreement, blindSpot, writtenReport, middle, joinNames, partnersSplit, partnerMessageWritten, partnerQuestion, PARTNER_WORDS, evidenceHeuristic, shuffled, positionWord, POSITIONS, PRESSURE_TYPES, RULE_ORDER, type RuleResult } from "../src/lib/distance";
+import { widestGap, closest, disagreement, blindSpot, writtenReport, movement, movementNote, middle, joinNames, partnersSplit, partnerMessageWritten, partnerQuestion, PARTNER_WORDS, evidenceHeuristic, shuffled, positionWord, POSITIONS, PRESSURE_TYPES, RULE_ORDER, type RuleResult } from "../src/lib/distance";
 import { DISTANCE_SCENARIOS, SEATS, seatFor } from "../src/content/distanceScenarios";
 import { parseDistanceScenario, parseEvidenceCheck, parseDistanceReport, parsePartnerMessage } from "../src/lib/ai";
 
@@ -188,4 +188,22 @@ test("several partners: the middle answer, who is still out, and where they disa
   assert.match(rep.partner, /Still waiting on Lee\.$/);
   assert.ok(!/\d|%/.test(rep.partner) && !STYLE.test(rep.partner));
   assert.equal(partnersSplit(views([["Jamie", 2], ["Sam", 3]])), false);
+});
+
+test("day 30: movement per rule, as road positions, and moving back said plainly", () => {
+  const before = [{ pillar: "F", position: 4, pressure: "autopilot" }, { pillar: "O", position: 3, pressure: "future_self" }, { pillar: "R", position: 4, pressure: "avoidance" }, { pillar: "G", position: 2, pressure: "" }, { pillar: "E", position: 2, pressure: "white_knuckle" }];
+  const now = [{ pillar: "F", position: 5, pressure: "future_self" }, { pillar: "O", position: 3, pressure: "future_self" }, { pillar: "R", position: 3, pressure: "autopilot" }, { pillar: "G", position: 2, pressure: "avoidance" }, { pillar: "E", position: 4, pressure: "white_knuckle" }];
+  const m = movement(before, now);
+  assert.deepEqual(m.map((x) => [x.pillar, x.from, x.to, x.road, x.pressure]), [
+    ["F", "Closing the distance", "Driving like them", "closer", "closer"],
+    ["O", "On the road", "On the road", "same", "same"],
+    ["R", "Closing the distance", "On the road", "back", "back"],
+    ["G", "Pulling out", "Pulling out", "same", ""],
+    ["E", "Pulling out", "Closing the distance", "closer", "same"],
+  ]);
+  assert.equal(movementNote(m[0]), "You moved closer. Your answer to the situation moved toward the person in your line.");
+  assert.equal(movementNote(m[2]), "This one moved back since last time. Your answer to the situation moved away from the person in your line.");
+  assert.equal(movementNote(m[1]), "Same place as last time.");
+  const all = m.map(movementNote).join(" ");
+  assert.ok(!/\d|%/.test(all) && !STYLE.test(all) && !/[—–]/.test(all));
 });

@@ -24,7 +24,7 @@ export const CLIENT_GUIDE: GuideSection[] = [
     intro: "Everything in the app follows one path in two parts. FORGE is who is behind the wheel. Discipline by Design is how you drive. The bar at the top of each screen shows the four steps.",
     steps: [
       "The Driver's Seat (FORGE). Name the seat you're in and how big a turn this is, work through the five rules of FORGE, and say it as My statement.",
-      "The Rules of the Road (FORGE). Score the five rules to see how close you are today. The goal is a 5 on every one.",
+      "The Rules of the Road (FORGE). Where I am measures how close the driver you were this week is to the person in your own five lines.",
       "The Windshield (Discipline by Design). Choose one or two things to work on, each for 30 days, and set each one up with five short questions and who finds out.",
       "The Vehicle Controls (Discipline by Design). Add one routine that builds your focus into your week.",
     ],
@@ -142,7 +142,7 @@ export const CLIENT_GUIDE: GuideSection[] = [
       "Think it through helps you look at a decision, a habit, or something in your way.",
       "Practice a hard conversation lets you rehearse with a realistic partner and then get feedback.",
       "Prepare for coaching helps you get ready for your next session.",
-      "It knows your goals, your FORGE scores and your current cycle. It cannot read your private journal.",
+      "It knows your goals, where you are on the road and your current cycle. It cannot read your private journal.",
       "Your coach and your organization cannot see these conversations. They are deleted after 90 days, and you can change that in Settings.",
     ],
     note: "It is an AI. It is not a therapist and it does not diagnose. If something serious is going on, talk to your coach or a professional.",
@@ -192,7 +192,7 @@ export const COACH_GUIDE: GuideSection[] = [
     title: "What you can and cannot see",
     steps: [
       "A new client shows 0 of 8 areas shared. Ask them to open Sharing and turn on what they want you to see.",
-      "Each area has its own switch: goals, FORGE scores, practice, reflections, the Vehicle Controls, people, what I'm working on from my feedback, My feedback, the Driver's Seat, and My 30-day plan.",
+      "Each area has its own switch: goals, Where I am, practice, reflections, the Vehicle Controls, people, what I'm working on from my feedback, My feedback, the Driver's Seat, and My 30-day plan.",
       "You see a written reflection only when the client marks that entry as shared.",
       "You cannot see a client's private journal or their AI conversations.",
       "The client page flags items for your attention, such as no check-ins this week or an overdue check-in with a mentor.",

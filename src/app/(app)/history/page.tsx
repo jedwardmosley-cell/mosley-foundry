@@ -1,4 +1,6 @@
 import { requireUser } from "@/lib/auth";
+import Link from "next/link";
+import { positionWord } from "@/lib/distance";
 import { loadParticipant } from "@/lib/participant";
 import { db } from "@/lib/db";
 import { getContent } from "@/content";
@@ -34,23 +36,18 @@ export default async function HistoryPage() {
       {d.assessments.length > 0 && (
         <Card>
           <p className="eyebrow">FORGE readings</p>
-          <div className="mt-3 overflow-x-auto">
-            <table className="w-full text-[15px]">
-              <thead><tr className="text-left text-ink-mute text-xs"><th className="py-2 font-medium">Date</th>{PILLAR_KEYS.map((k) => <th key={k} className="font-medium text-center">{k}</th>)}</tr></thead>
-              <tbody>
-                {d.assessments.map((a, i) => {
-                  const s = scoresFrom(a);
-                  const prev = i > 0 ? scoresFrom(d.assessments[i - 1]) : null;
-                  return (
-                    <tr key={a.id} className="border-t border-line">
-                      <td className="py-2">{fmt(a.completedAt, { month: "short", day: "numeric", year: "numeric" })}</td>
-                      {PILLAR_KEYS.map((k) => <td key={k} className="text-center">{s[k]}{prev && s[k] !== prev[k] && <span className={`ml-1 text-xs ${s[k] > prev[k] ? "text-link" : "text-alert"}`}>{s[k] > prev[k] ? "+" : ""}{s[k] - prev[k]}</span>}</td>)}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          {/* Each reading as road positions, in words. Never numbers. */}
+          <ul className="mt-3 divide-y divide-line">
+            {d.assessments.map((a) => {
+              const s = scoresFrom(a);
+              return (
+                <li key={a.id} className="py-2.5">
+                  <Link href={`/assessment/${a.id}`} className="btn-link text-[15px]">{fmt(a.completedAt, { month: "short", day: "numeric", year: "numeric" })}</Link>
+                  <p className="mt-0.5 text-sm text-ink-soft">{PILLAR_KEYS.map((k) => `${k}: ${positionWord(s[k])}`).join(", ")}</p>
+                </li>
+              );
+            })}
+          </ul>
         </Card>
       )}
 

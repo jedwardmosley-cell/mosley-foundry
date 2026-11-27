@@ -48,49 +48,7 @@ export async function saveStatement(fd: FormData) {
   if (fromStart(fd)) redirect("/start?step=2");
 }
 
-// ---------- FORGE assessment ----------
-
-const assessmentSchema = z.object({
-  instrument: z.enum(["FORGE_PERSONAL", "FORGE_ENTREPRENEUR", "FORGE_DRAFT"]),
-  F: score, O: score, R: score, G: score, E: score,
-  reflF: text(), reflO: text(), reflR: text(), reflG: text(), reflE: text(),
-});
-
-export async function saveAssessment(fd: FormData) {
-  const u = await participant();
-  const d = parse(assessmentSchema, fd);
-  const a = await db.assessment.create({
-    data: {
-      userId: u.id, instrument: d.instrument,
-      f: d.F, o: d.O, r: d.R, g: d.G, e: d.E,
-      reflections: JSON.stringify({ F: d.reflF, O: d.reflO, R: d.reflR, G: d.reflG, E: d.reflE }),
-    },
-  });
-  if (fd.get("next") === "/season") redirect("/season");
-  // In the kickoff, the short result shows on the kickoff itself. "scored" gives it its own address, so it opens at the top.
-  if (fromStart(fd)) redirect("/start?step=2&scored=1");
-  redirect(`/assessment/${a.id}`);
-}
-
-const reviseSchema = z.object({
-  id: z.string(),
-  F: score, O: score, R: score, G: score, E: score,
-});
-
-/** "Update my ratings" from the profile: the new scores are kept beside the first ones. */
-export async function reviseAssessment(fd: FormData) {
-  const u = await participant();
-  const d = parse(reviseSchema, fd);
-  const n = await db.assessment.updateMany({
-    where: { id: d.id, userId: u.id },
-    data: { revisedF: d.F, revisedO: d.O, revisedR: d.R, revisedG: d.G, revisedE: d.E },
-  });
-  if (!n.count) throw new Error("Not found");
-  revalidatePath(`/assessment/${d.id}`);
-  revalidatePath("/dashboard");
-  if (fromStart(fd)) redirect("/start?step=2&scored=1");
-  redirect(`/assessment/${d.id}?updated=1`);
-}
+// ---------- FORGE: choosing the rule to work on (the check itself is in actions/distance.ts) ----------
 
 export async function setPriority(fd: FormData) {
   const u = await participant();
