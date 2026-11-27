@@ -203,12 +203,24 @@ const submitAndWait = async (page: Page, selector: string) => {
     assessmentUrl = `${BASE}/assessment/${a.id}`;
     // the next checks write the lines through the Driver's Seat, so clear them again
     await db.profile.update({ where: { userId: me.id }, data: { destination: "", lineO: "", why: "", lineG: "", lineE: "" } });
-    await page.goto(assessmentUrl);
+    // the report: closest, widest gap and where the answers disagree, with no numbers
+    const report = JSON.parse((await db.distanceRun.findUniqueOrThrow({ where: { id: run.id } })).report);
+    assert.equal(report.keys.widest, "E");
+    assert.equal(report.keys.disagree, "F", "placed close with no real moment");
+    await page.locator("h2", { hasText: "Closest to the future you" }).waitFor();
+    await page.locator("h2", { hasText: "Widest gap" }).waitFor();
+    await page.locator("h2", { hasText: "Where your answers disagree" }).waitFor();
+    assert.equal(await page.locator("h2", { hasText: "What your partner sees" }).count(), 0, "no partner asked yet");
+    const shown = (await page.locator("section[data-report]").allInnerTexts()).join(" ");
+    assert.ok(!/\d|%/.test(shown), `no numbers in the report: ${shown}`);
+    assert.ok(!/autopilot|white.?knuckle|future.?self/i.test(shown), "no option labels in the report");
+    await page.locator("text=Your widest gap is Emotionally Anchored").waitFor();
+    await page.screenshot({ path: `${shots}/03-profile.png`, fullPage: true });
   });
 
   await check("3. identify a development priority", async () => {
-    // Choosing a focus from the results leads to My focus, starting from the lowest score.
-    await Promise.all([page.waitForURL(/\/cycle\/new\?pillar=E$/), page.click('button:has-text("choose my focus")')]);
+    // "Make it my focus" carries the widest gap into choosing a focus.
+    await Promise.all([page.waitForURL(/\/cycle\/new\?pillar=E$/), page.click('button:has-text("Make it my focus")')]);
     // the old plan address now opens Who I am: one activity
     await Promise.all([page.waitForURL("**/identity"), page.goto(`${BASE}/plan`)]);
     const p = await db.profile.findFirst({ where: { user: { email } } });
@@ -636,7 +648,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await runDistance(g, { F: 4, O: 3, R: 4, G: 3, E: 2 }, /\/done\?from=start/);
     await g.waitForSelector("text=Here's where you are on the road");
     assert.equal(await g.locator("text=/ 25").count(), 0, "no total");
-    await Promise.all([g.waitForURL("**/start?step=3"), g.click('a:has-text("Continue setup")')]);
+    await Promise.all([g.waitForURL("**/start?step=3"), g.click('button:has-text("Make it my focus")')]);
     // 3. my focus: named right here (no seat, season or start date), then five questions, the plan, who finds out
     assert.equal(await g.locator('input[name="season"][type="checkbox"]').count(), 0, "no season in the kickoff");
     // the phone's share sheet, stubbed, and loaded with a full page load so it is in place for week 1 setup

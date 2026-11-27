@@ -1,9 +1,9 @@
 /** The distance check ("Where I am"): the scoring rules, the plain proof check, the written situations and the AI readers. */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { widestGap, closest, disagreement, blindSpot, evidenceHeuristic, shuffled, positionWord, POSITIONS, PRESSURE_TYPES, RULE_ORDER, type RuleResult } from "../src/lib/distance";
+import { widestGap, closest, disagreement, blindSpot, writtenReport, evidenceHeuristic, shuffled, positionWord, POSITIONS, PRESSURE_TYPES, RULE_ORDER, type RuleResult } from "../src/lib/distance";
 import { DISTANCE_SCENARIOS, SEATS, seatFor } from "../src/content/distanceScenarios";
-import { parseDistanceScenario, parseEvidenceCheck } from "../src/lib/ai";
+import { parseDistanceScenario, parseEvidenceCheck, parseDistanceReport } from "../src/lib/ai";
 
 const r = (pillar: RuleResult["pillar"], position: number, pressure: RuleResult["pressure"] = "future_self", evidence: RuleResult["evidence"] = "concrete", partnerRating?: number): RuleResult => ({ pillar, position, pressure, evidence, partnerRating });
 
@@ -114,4 +114,41 @@ test("the AI proof check: a note only for a close position with thin proof", () 
   assert.equal(parseEvidenceCheck('{"evidence":"vague","note":"You placed yourself close. Add a moment."}', 4)!.note, "You placed yourself close. Add a moment.");
   assert.ok(parseEvidenceCheck('{"evidence":"missing","note":""}', 5)!.note.length > 0, "an empty note falls back to the written one");
   assert.equal(parseEvidenceCheck('{"evidence":"maybe"}', 5), null);
+});
+
+const named = (rs: RuleResult[], line = "a leader who stays calm when decisions get challenged") => rs.map((x) => ({ ...x, name: { F: "Future Focused", O: "Outcome Aware", R: "Reason Rooted", G: "Growth Oriented", E: "Emotionally Anchored" }[x.pillar], line }));
+
+test("the written report: four plain sections, no numbers, no labels", () => {
+  const rules = named([r("F", 5, "autopilot", "vague"), r("O", 4, "future_self", "concrete"), r("R", 3), r("G", 3, "avoidance"), r("E", 2, "white_knuckle", "missing")]);
+  const rep = writtenReport(rules, null);
+  assert.deepEqual(rep.keys, { closest: "O", widest: "E", disagree: "F", blind: null });
+  assert.match(rep.closest, /^Outcome Aware: "a leader who stays calm when decisions get\.\.\."/);
+  assert.match(rep.widest_gap, /^Emotionally Anchored\. You placed yourself at Pulling out\./);
+  assert.match(rep.widest_gap, /couldn't name a real moment/);
+  assert.match(rep.disagreement, /^On Future Focused, you placed yourself at Driving like them, but/);
+  assert.equal(rep.partner, "");
+  assert.equal(writtenReport(rules, { name: "Sam", answered: false }).partner, "Waiting on Sam.");
+  const withPartner = named([r("F", 5, "future_self", "concrete", 1), r("O", 3, "future_self", "concrete", 2), r("R", 3), r("G", 3), r("E", 2)]);
+  assert.match(writtenReport(withPartner, { name: "Sam", answered: true }).partner, /^Sam sees Future Focused differently/);
+  const all = [rep, writtenReport(withPartner, { name: "Sam", answered: true })].flatMap((x) => [x.closest, x.widest_gap, x.disagreement, x.partner]).join(" ");
+  assert.ok(!/\d|%/.test(all), all);
+  assert.ok(!/[—–]/.test(all));
+  assert.ok(!STYLE.test(all), all);
+  assert.ok(!/autopilot|white.?knuckle|future.?self|avoidance/i.test(all), all);
+});
+
+test("a tie on position is explained by the situation", () => {
+  const rep = writtenReport(named([r("F", 2, "white_knuckle"), r("O", 2, "autopilot"), r("R", 4), r("G", 4), r("E", 4)]), null);
+  assert.equal(rep.keys.widest, "O");
+  assert.match(rep.widest_gap, /picked the old way of doing it/);
+});
+
+test("the AI report is checked before it is shown", () => {
+  const ok = '{"closest":"Outcome Aware: your line about noticing your team showed up.","widest_gap":"Emotionally Anchored. You put yourself near the start.","disagreement":"","partner":"Waiting on Sam."}';
+  assert.equal(parseDistanceReport(ok, false)!.partner, "", "no partner asked, no partner section");
+  assert.equal(parseDistanceReport(ok, true)!.partner, "Waiting on Sam.");
+  assert.equal(parseDistanceReport(ok.replace("near the start", "at 2 out of 5")), null, "no numbers");
+  assert.equal(parseDistanceReport(ok.replace("showed up", "showed up on autopilot")), null, "no type names");
+  assert.equal(parseDistanceReport(ok.replace("showed up", "kept its rhythm")), null);
+  assert.equal(parseDistanceReport('{"closest":"","widest_gap":"x"}'), null);
 });

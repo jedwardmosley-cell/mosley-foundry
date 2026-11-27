@@ -7,9 +7,9 @@ import { parse, pillarKey, score } from "@/lib/validation";
 import { FORGE_LINES } from "@/content/forgeLines";
 import type { PillarKey } from "@/content/types";
 import { getContent } from "@/content";
-import { RULE_ORDER, PROOF_QUESTION, RULE_TARGET, EVIDENCE_NOTE_FALLBACK, evidenceHeuristic, shuffled, PRESSURE_TYPES } from "@/lib/distance";
+import { RULE_ORDER, PROOF_QUESTION, RULE_TARGET, EVIDENCE_NOTE_FALLBACK, evidenceHeuristic, shuffled, PRESSURE_TYPES, writtenReport, type DistanceReport, type ReportRule, type Evidence, type Pressure } from "@/lib/distance";
 import { DISTANCE_SCENARIOS, seatFor } from "@/content/distanceScenarios";
-import { aiAvailable, distanceScenarioAI, evidenceCheckAI } from "@/lib/ai";
+import { aiAvailable, distanceScenarioAI, evidenceCheckAI, distanceReportAI } from "@/lib/ai";
 
 const participant = () => requireUser("PARTICIPANT");
 const base = (runId: string) => `/assessment/check/${runId}`;
@@ -164,6 +164,29 @@ async function finishRun(userId: string, runId: string) {
   const run = await myRun(userId, runId);
   if (run.completedAt) return;
   const pos = (k: PillarKey) => run.rules.find((r) => r.pillar === k)?.position ?? 1;
-  const a = await db.assessment.create({ data: { userId, instrument: "FORGE_DISTANCE", f: pos("F"), o: pos("O"), r: pos("R"), g: pos("G"), e: pos("E") } });
-  await db.distanceRun.update({ where: { id: runId }, data: { completedAt: new Date(), assessmentId: a.id } });
+  const [a, report] = await Promise.all([
+    db.assessment.create({ data: { userId, instrument: "FORGE_DISTANCE", f: pos("F"), o: pos("O"), r: pos("R"), g: pos("G"), e: pos("E") } }),
+    writeReport(userId, run),
+  ]);
+  await db.distanceRun.update({ where: { id: runId }, data: { completedAt: new Date(), assessmentId: a.id, report: JSON.stringify(report) } });
+}
+
+/**
+ * The distance report. The app works out which rule each section points at; the AI writes the words.
+ * If the AI isn't allowed, fails, or its answer doesn't pass the checks, the written report is used.
+ */
+async function writeReport(userId: string, run: Awaited<ReturnType<typeof myRun>>): Promise<DistanceReport> {
+  const { pack } = await getContent();
+  const rules: ReportRule[] = RULE_ORDER.map((k) => {
+    const r = run.rules.find((x) => x.pillar === k);
+    return {
+      pillar: k, name: pack.pillars.find((p) => p.key === k)?.name ?? k, line: r?.line ?? "",
+      position: r?.position ?? 1, evidence: (r?.evidence ?? "") as Evidence | "", pressure: (r?.pressure ?? "") as Pressure | "", partnerRating: r?.partnerRating ?? null,
+    };
+  });
+  const partner = null; // asked for in the partner view, which comes next
+  const written = writtenReport(rules, partner);
+  if (!(await aiAllowed(userId))) return written;
+  const ai = await distanceReportAI(rules, partner).catch(() => null);
+  return ai ? { ...ai, keys: written.keys, source: "ai" } : written;
 }

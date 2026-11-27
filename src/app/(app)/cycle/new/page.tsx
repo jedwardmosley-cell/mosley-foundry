@@ -15,6 +15,7 @@ import Link from "next/link";
 import { activeSeason, nextMonth } from "@/lib/season";
 import { SEASON_LENGTH } from "@/content/program";
 import type { PillarKey } from "@/content/types";
+import { widestGapFor } from "@/lib/distanceData";
 
 export const metadata = { title: "The Windshield" };
 
@@ -36,7 +37,9 @@ export default async function NewCycle({ searchParams }: { searchParams: Promise
     db.assessment.findFirst({ where: { userId: u.id, isSecondOpinion: false }, orderBy: { completedAt: "desc" } }),
   ]);
   const full = active.length >= MAX_FOCUSES;
-  const startPillar = fromLink ?? lowestRule(assessment, full ? [] : active.map((c) => c.pillar)) ?? ((profile?.priorityPillar ?? "F") as PillarKey);
+  // From the distance check, its widest gap comes first, unless that rule is already a focus.
+  const wide = await widestGapFor(assessment?.id);
+  const startPillar = fromLink ?? (wide && (full || !active.some((c) => c.pillar === wide)) ? wide : null) ?? lowestRule(assessment, full ? [] : active.map((c) => c.pillar)) ?? ((profile?.priorityPillar ?? "F") as PillarKey);
   const source = ["FEEDBACK", "COACH"].includes(sp.source ?? "") ? sp.source! : "";
   return (
     <>

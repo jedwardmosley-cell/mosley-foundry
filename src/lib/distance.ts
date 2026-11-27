@@ -97,3 +97,93 @@ export function shuffled<T>(items: T[], rand: () => number = Math.random): T[] {
   }
   return a;
 }
+
+/** The partner's answer, in words. Stored 1 to 4. */
+export const PARTNER_WORDS = ["Rarely", "Sometimes", "Often", "Almost always"] as const;
+export const partnerWord = (n: number | null | undefined) => (n && n >= 1 && n <= 4 ? PARTNER_WORDS[n - 1] : "");
+
+/** The distance report: four short sections, plus which rule each one points at. Never any numbers. */
+export type DistanceReport = {
+  closest: string;
+  widest_gap: string;
+  disagreement: string;
+  partner: string;
+  keys: { closest: PillarKey | null; widest: PillarKey | null; disagree: PillarKey | null; blind: PillarKey | null };
+  source: "ai" | "written";
+};
+
+export type ReportRule = RuleResult & { name: string; line: string };
+
+/** A few words of their line, to quote back to them. */
+export function fewWords(line: string, n = 8) {
+  const w = line.trim().replace(/[.!?]+$/, "").split(/\s+/);
+  return w.length > n ? `${w.slice(0, n).join(" ")}...` : w.join(" ");
+}
+
+/** The rule each section points at, worked out the same way every time. */
+export function reportKeys(rules: RuleResult[]): DistanceReport["keys"] {
+  return { closest: closest(rules), widest: widestGap(rules), disagree: disagreement(rules), blind: blindSpot(rules) };
+}
+
+/**
+ * The written report, used when the AI isn't available or its answer doesn't pass the checks.
+ * Plain and honest, no numbers, no praise.
+ */
+export function writtenReport(rules: ReportRule[], partner: { name: string; answered: boolean } | null): DistanceReport {
+  const keys = reportKeys(rules);
+  const by = (k: PillarKey | null) => rules.find((r) => r.pillar === k);
+  const c = by(keys.closest), w = by(keys.widest), d = by(keys.disagree), b = by(keys.blind);
+  const agrees = (r: ReportRule) => r.pressure === "future_self" && r.evidence === "concrete";
+
+  const quote = (line: string) => { const q = fewWords(line); return q.endsWith("...") ? `"${q}"` : `"${q}."`; };
+  const closestText = c
+    ? agrees(c)
+      ? `${c.name}: ${quote(c.line)} Where you placed yourself, the moment you named and the choice you made all point the same way.`
+      : `${c.name}: ${quote(c.line)} This is where you placed yourself closest, at ${positionWord(c.position)}.`
+    : "";
+
+  let widestText = "";
+  if (w) {
+    const lowest = Math.min(...rules.map((r) => r.position));
+    const tiedLow = rules.filter((r) => r.position === lowest).length > 1;
+    const why = !tiedLow || w.pressure === "future_self"
+      ? `You placed yourself at ${positionWord(w.position)}.`
+      : w.pressure === "autopilot"
+        ? `You placed yourself at ${positionWord(w.position)}, and in the situation you picked the old way of doing it.`
+        : w.pressure === "avoidance"
+          ? `You placed yourself at ${positionWord(w.position)}, and in the situation you picked the way that steps around it.`
+          : `You placed yourself at ${positionWord(w.position)}, and in the situation you picked the way that gets through on willpower alone.`;
+    widestText = `${w.name}. ${why}${w.evidence !== "concrete" ? " You couldn't name a real moment here yet." : ""}`;
+  }
+
+  let disagreeText = "";
+  if (d) {
+    const thin = d.evidence === "vague" || d.evidence === "missing";
+    const off = d.pressure !== "" && d.pressure !== "future_self";
+    const but = off && thin
+      ? "the choice you made in the situation pointed somewhere else, and you couldn't name a real moment yet"
+      : off
+        ? "the choice you made in the situation pointed somewhere else"
+        : "you couldn't name a real moment to back it up";
+    disagreeText = `On ${d.name}, you placed yourself at ${positionWord(d.position)}, but ${but}.`;
+  }
+
+  let partnerText = "";
+  if (partner) {
+    if (!partner.answered) partnerText = `Waiting on ${partner.name}.`;
+    else if (b) partnerText = `${partner.name} sees ${b.name} differently than you do. You placed yourself at ${positionWord(b.position)}; they said ${partnerWord(b.partnerRating).toLowerCase()}.`;
+    else partnerText = `${partner.name} sees you about the way you see yourself.`;
+  }
+  return { closest: closestText, widest_gap: widestText, disagreement: disagreeText, partner: partnerText, keys, source: "written" };
+}
+
+/** Reads a stored report, or nothing. */
+export function readReport(raw: string | null | undefined): DistanceReport | null {
+  if (!raw) return null;
+  try {
+    const j = JSON.parse(raw);
+    return j && typeof j.widest_gap === "string" ? (j as DistanceReport) : null;
+  } catch {
+    return null;
+  }
+}

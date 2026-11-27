@@ -17,6 +17,7 @@ import { StatementReveal } from "@/components/StatementReveal";
 import { Picks } from "@/components/Picks";
 import { FiveSides, MyStatement } from "@/components/ForgeLinesFields";
 import { DistanceStart } from "@/components/DistanceStart";
+import { widestGapFor } from "@/lib/distanceData";
 import { LEVELS, IDENTITY_LEVELS, type IdentityLevel } from "@/content/identity";
 import { ROLE_PICKS, WHO_I_AM_STATUS, KIND_NOTE, WHO_TITLE, WHO_HEADINGS, withArticle } from "@/content/whoIAm";
 import { BLUEPRINT_PICKS } from "@/content/options";
@@ -39,7 +40,7 @@ const STEP_COPY = [
  * It reuses the same saves as the full pages, so nothing here is stored twice.
  * A coach can also walk a client through it live.
  */
-export default async function StartPage({ searchParams }: { searchParams: Promise<{ step?: string; part?: string; edit?: string; missingLines?: string }> }) {
+export default async function StartPage({ searchParams }: { searchParams: Promise<{ step?: string; part?: string; edit?: string; missingLines?: string; pillar?: string }> }) {
   const u = await requireUser("PARTICIPANT");
   const sp = await searchParams;
   const needLines = (sp.missingLines ?? "").split("").filter((c) => "FORGE".includes(c));
@@ -87,7 +88,9 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
   const instrument = pack.assessmentStatus === "draft" ? "FORGE_DRAFT" : useEntre ? "FORGE_ENTREPRENEUR" : "FORGE_PERSONAL";
   const scores = assessment ? pillarScores(assessment) : ({ F: 0, O: 0, R: 0, G: 0, E: 0 } as Record<PillarKey, number>);
   // Focus ideas start from the lowest score. Nothing is labeled a weakness.
-  const lowest = (assessment ? (["F", "O", "R", "G", "E"] as PillarKey[]).reduce((a, k) => (scores[k] < scores[a] ? k : a), "F" as PillarKey) : (priority?.key as PillarKey | undefined)) ?? "F";
+  // From the distance check: the rule they tapped "Make it my focus" on, otherwise its widest gap.
+  const picked = ["F", "O", "R", "G", "E"].includes(sp.pillar ?? "") ? (sp.pillar as PillarKey) : null;
+  const lowest = picked ?? (await widestGapFor(assessment?.id)) ?? (assessment ? (["F", "O", "R", "G", "E"] as PillarKey[]).reduce((a, k) => (scores[k] < scores[a] ? k : a), "F" as PillarKey) : (priority?.key as PillarKey | undefined)) ?? "F";
   const template = pack.thirtyDayPlan.length ? PATHWAYS[pathway].cycleTemplate : "NIRS_30";
   const copy = STEP_COPY[step - 1];
   const next = `/start?step=${step + 1}`;
