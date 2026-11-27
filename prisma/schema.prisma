@@ -47,6 +47,7 @@ model User {
   calendarToken      String? // a coach's private calendar link (looked up with findFirst; no unique constraint). A client's is on Profile. Null means off.
 
   sessions                      Session[]
+  distanceRuns                  DistanceRun[]
   profile                       Profile?
   assessments                   Assessment[]
   goals                         DevelopmentGoal[]
@@ -665,4 +666,46 @@ model AccessCode {
   active    Boolean   @default(true)
   createdBy String    @default("")
   createdAt DateTime  @default(now())
+}
+
+// The FORGE distance check ("Where I am"): how close the driver you were this week is to the person in your own line.
+// One run per sitting (at setup, or the day 30 retake). Positions are stored 1 to 5 and never shown as numbers.
+model DistanceRun {
+  id                String         @id @default(cuid())
+  userId            String
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind              String         @default("SETUP") // enum: SETUP | DAY30
+  cycleId           String? // the 30-day focus a day 30 retake closes
+  previousRunId     String? // the run a retake is compared with
+  assessmentId      String? // the five positions, also kept in the older Assessment format so existing features keep working
+  report            String         @default("") // JSON: the written distance report
+  partnerRelId      String? // the accountability partner asked for their view
+  partnerToken      String?        @unique
+  partnerStatus     String         @default("NONE") // enum: NONE | READY | SENT | ANSWERED
+  partnerMessage    String         @default("")
+  partnerAnsweredAt DateTime?
+  startedAt         DateTime       @default(now())
+  completedAt       DateTime?
+  rules             DistanceRule[]
+
+  @@index([userId, startedAt])
+}
+
+model DistanceRule {
+  id             String      @id @default(cuid())
+  runId          String
+  run            DistanceRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  pillar         String // enum: F | O | R | G | E
+  line           String // their line for this rule, as it was when they took the check
+  position       Int? // 1 to 5: Still parked, Pulling out, On the road, Closing the distance, Driving like them
+  proof          String      @default("")
+  evidence       String      @default("") // enum: concrete | vague | missing
+  evidenceNote   String      @default("")
+  scenario       String      @default("") // JSON: { scenario, options: [{ type, text }] } in the order shown
+  scenarioSource String      @default("") // enum: ai | written
+  pressure       String      @default("") // enum: future_self | white_knuckle | avoidance | autopilot
+  partnerRating  Int? // 1 to 4: Rarely, Sometimes, Often, Almost always
+  partnerExample String      @default("")
+
+  @@unique([runId, pillar])
 }

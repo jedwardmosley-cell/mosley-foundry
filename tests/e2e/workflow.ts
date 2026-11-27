@@ -39,12 +39,24 @@ const openAll = async (page: Page) => { await page.evaluate(() => document.query
 /** A coach's client page folds each part. Open them all, the way a coach would tap to look. */
 const openParts = async (page: Page) => { await page.waitForLoadState("networkidle"); await page.evaluate(() => document.querySelectorAll("main details[id]").forEach((d) => ((d as HTMLDetailsElement).open = true))); };
 /** Rate the five rules on the one-page self-assessment: each rule is a section that opens to its five levels. */
-const rate = async (page: Page, scores: Record<string, number>) => {
-  for (const [k, v] of Object.entries(scores)) {
-    await page.locator(`details[data-rule="${k}"]`).evaluate((d) => { (d as HTMLDetailsElement).open = true; });
-    await page.locator(`input[name="${k}"][value="${v}"]`).check({ force: true });
+/** Walks the distance check: a road position, a real moment and the first option, for each rule in turn. */
+const runDistance = async (page: Page, positions: Record<string, number>, done: RegExp | string = /\/assessment\/check\/[a-z0-9]+\/done/) => {
+  for (const k of ["F", "O", "R", "G", "E"]) {
+    await page.locator("p.section-label", { hasText: `My ${k} line` }).waitFor();
+    await pickRoad(page, positions[k]);
+    await Promise.all([page.waitForURL(/step=proof/), page.click('button:has-text("Next")')]);
+    await page.fill('textarea[name="proof"]', `On Tuesday at the 9 am meeting I asked a question first (${k}).`);
+    await Promise.all([page.waitForURL(/step=pressure/), page.click('button:has-text("Next")')]);
+    await page.locator('input[name="option"]').first().check();
+    await Promise.all([k === "E" ? page.waitForURL(done) : page.waitForURL(/step=road/), page.click(k === "E" ? 'button:has-text("Finish")' : 'button:has-text("Next rule")')]);
   }
 };
+const ROAD = ["Still parked", "Pulling out", "On the road", "Closing the distance", "Driving like them"];
+const pickRoad = async (page: Page, n: number) => {
+  await page.locator("label", { hasText: ROAD[n - 1] }).click();
+  assert.ok(await page.locator(`input[name="position"][value="${n}"]`).isChecked(), `road position ${n} picked`);
+};
+const LINES = { destination: "a leader my team trusts with bad news", lineO: "a leader who notices what my team needs", why: "a leader who remembers why the people matter", lineG: "a leader who lets go of having every answer", lineE: "a leader who stays calm when decisions get challenged" };
 const logout = async (page: Page) => {
   await page.context().clearCookies();
 };
@@ -138,32 +150,60 @@ const submitAndWait = async (page: Page, selector: string) => {
   });
 
   let assessmentUrl = "";
-  await check("2. complete a FORGE assessment", async () => {
-    await page.waitForSelector('nav[aria-label="Your journey"] >> text=Step 1 of 4');
-    // one page: all five rules, each with the client's own line and all five levels in full
-    assert.equal(await page.locator('input[type="radio"][name="E"]').count(), 5, "all five levels show up front");
-    assert.equal(await page.locator("text=What I wrote").count(), 5, "each rule shows what the client wrote");
-    const scores: Record<string, number> = { F: 4, O: 3, R: 4, G: 3, E: 2 };
-    await rate(page, scores);
-    await page.waitForTimeout(500); // picking a level closes the rule; tap it again to add a reflection
-    await page.locator('details[data-rule="E"] > summary').click();
-    await page.locator("fieldset", { hasText: "Emotionally Anchored" }).locator("summary", { hasText: "Add a reflection" }).click();
-    await page.fill('textarea[name="reflE"]', "When my numbers get questioned in front of my boss, I get sharp.");
+  await check("2. where I am: measured against their own five lines, one rule at a time", async () => {
+    await page.locator("text=measures you against your own future self").first().waitFor();
+    // with no lines yet, the check sends them to write them first
+    await Promise.all([page.waitForURL(/\/identity\?missingLines=FORGE/), page.click('button:has-text("Start: where am I?")')]);
+    await page.locator("text=Where I am measures you against your own lines").waitFor();
+    const me = await db.user.findUniqueOrThrow({ where: { email } });
+    await db.profile.update({ where: { userId: me.id }, data: LINES });
+    await page.goto(`${BASE}/assessment`);
+    await Promise.all([page.waitForURL(/\/assessment\/check\/[a-z0-9]+\?rule=F&step=road/), page.click('button:has-text("Start: where am I?")')]);
+    // check 1: their line on top, five road positions as words, no numbers
+    await page.locator("text=a leader my team trusts with bad news").first().waitFor();
+    for (const w of ["Still parked", "Pulling out", "On the road", "Closing the distance", "Driving like them"]) await page.locator(`text=${w}`).first().waitFor();
+    assert.ok(!/\b[1-5]\s*(of 5|\/\s*5)\b/.test(await page.locator("main").innerText()), "no numbers on the road");
     await page.screenshot({ path: `${shots}/02-assessment.png`, fullPage: false });
-    await Promise.all([page.waitForURL(/\/assessment\/[a-z0-9]+$/), page.click('button:has-text("See my profile")')]);
-    assert.ok(!/in the wild/i.test(await page.locator("main").innerText()), "FORGE in the Wild is retired");
-    assessmentUrl = page.url();
-    await page.waitForSelector("text=The goal is a 5 on every rule");
-    assert.equal(await page.locator("text=/ 25").count(), 0, "no total, no grade");
-    assert.equal(await page.locator("text=Full behavioral anchor tables").count(), 0, "no second rating page");
-    // update the ratings from the profile, on the same one-page form
-    await Promise.all([page.waitForURL(/\?edit=1$/), page.click('a:has-text("Update my ratings")')]);
-    assert.ok(await page.locator('input[name="E"][value="2"]').isChecked(), "the form opens with the current ratings");
-    await Promise.all([page.waitForURL(/\?updated=1$/), page.click('button:has-text("Save my ratings")')]);
-    await page.waitForSelector("text=Your ratings are updated");
-    await page.waitForSelector("text=My updated ratings");
+    // check 2: a close position with no real moment gets a note, and nothing is blocked
+    await pickRoad(page, 5);
+    await Promise.all([page.waitForURL(/step=proof/), page.click('button:has-text("Next")')]);
+    await page.fill('textarea[name="proof"]', "I try my best most days.");
+    await Promise.all([page.waitForURL(/look=1/), page.click('button:has-text("Next")')]);
+    await page.locator("text=couldn't name a real moment").waitFor();
+    await Promise.all([page.waitForURL(/step=pressure/), page.click('button:has-text("Keep it and go on")')]);
+    // check 3: one situation and four options, no type labels
+    assert.equal(await page.locator('input[name="option"]').count(), 4);
+    assert.ok(!/autopilot|white.?knuckle|avoidance|future.?self/i.test(await page.locator("main").innerText()), "no option labels");
+    await page.locator('input[name="option"]').nth(1).check();
+    await Promise.all([page.waitForURL(/rule=O&step=road/), page.click('button:has-text("Next rule")')]);
+    const rest = async () => {
+      for (const [k, pos] of [["O", 3], ["R", 4], ["G", 3], ["E", 2]] as const) {
+        await pickRoad(page, pos);
+        await Promise.all([page.waitForURL(/step=proof/), page.click('button:has-text("Next")')]);
+        await page.fill('textarea[name="proof"]', `On Tuesday at the 9 am meeting I asked a question first (${k}).`);
+        await Promise.all([page.waitForURL(/step=pressure/), page.click('button:has-text("Next")')]);
+        await page.locator('input[name="option"]').first().check();
+        await Promise.all([k === "E" ? page.waitForURL(/\/done/) : page.waitForURL(/step=road/), page.click(k === "E" ? 'button:has-text("Finish")' : 'button:has-text("Next rule")')]);
+      }
+    };
+    await rest();
+    // the end: positions as words, and the five positions kept for the rest of the app
+    await page.locator("text=Here's where you are on the road").waitFor();
+    await page.locator("text=Driving like them").first().waitFor();
+    const run = await db.distanceRun.findFirstOrThrow({ where: { userId: me.id }, include: { rules: true } });
+    assert.ok(run.completedAt && run.assessmentId);
+    const f = run.rules.find((r) => r.pillar === "F")!;
+    assert.equal(f.position, 5);
+    assert.equal(f.evidence, "vague");
+    assert.ok(f.scenarioSource === "written" || f.scenarioSource === "ai");
+    assert.equal(run.rules.find((r) => r.pillar === "E")!.evidence, "concrete");
+    const a = await db.assessment.findUniqueOrThrow({ where: { id: run.assessmentId! } });
+    assert.deepEqual([a.f, a.o, a.r, a.g, a.e], [5, 3, 4, 3, 2]);
+    assert.equal(a.instrument, "FORGE_DISTANCE");
+    assessmentUrl = `${BASE}/assessment/${a.id}`;
+    // the next checks write the lines through the Driver's Seat, so clear them again
+    await db.profile.update({ where: { userId: me.id }, data: { destination: "", lineO: "", why: "", lineG: "", lineE: "" } });
     await page.goto(assessmentUrl);
-    await page.screenshot({ path: `${shots}/03-profile.png`, fullPage: true });
   });
 
   await check("3. identify a development priority", async () => {
@@ -213,7 +253,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.ok(!(await f.innerText()).includes("Steve Jobs"));
     // the assessment reads the scores against the identity the client claimed
     await page.goto(`${BASE}/assessment`);
-    await page.waitForSelector("text=Rate yourself as a manager");
+    await page.waitForSelector("text=Measured as a manager");
     await page.goto(`${BASE}/identity`);
   });
 
@@ -587,11 +627,16 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.ok((await g.inputValue('textarea[name="statement"]')).startsWith("I am "), "the statement starts from the five lines");
     await saveThroughReveal(g, "**/start?step=2", "Save and continue");
     // 2. where I am: the self-assessment is inside the kickoff; the client never leaves it
-    await rate(g, { F: 4, O: 3, R: 4, G: 3, E: 2 });
-    await Promise.all([g.waitForURL("**/start?step=2&scored=1"), g.click('button:has-text("See my profile")')]);
-    await g.waitForSelector("text=The goal is a 5 on every one");
+    // only F was written, so the check sends them back to the five lines, inside the kickoff
+    await Promise.all([g.waitForURL(/\/start\?step=1&part=2&missingLines=ORGE/), g.click('button:has-text("Start: where am I?")')]);
+    await g.locator("text=Where I am measures you against your own lines").waitFor();
+    await db.profile.update({ where: { userId: (await db.user.findUniqueOrThrow({ where: { email: gEmail } })).id }, data: { lineO: LINES.lineO, why: LINES.why, lineG: LINES.lineG, lineE: LINES.lineE } });
+    await g.goto(`${BASE}/start?step=2`);
+    await Promise.all([g.waitForURL(/\/assessment\/check\/[a-z0-9]+\?rule=F&step=road&from=start/), g.click('button:has-text("Start: where am I?")')]);
+    await runDistance(g, { F: 4, O: 3, R: 4, G: 3, E: 2 }, /\/done\?from=start/);
+    await g.waitForSelector("text=Here's where you are on the road");
     assert.equal(await g.locator("text=/ 25").count(), 0, "no total");
-    await Promise.all([g.waitForURL("**/start?step=3"), g.click('a:has-text("Next: choose your focus")')]);
+    await Promise.all([g.waitForURL("**/start?step=3"), g.click('a:has-text("Continue setup")')]);
     // 3. my focus: named right here (no seat, season or start date), then five questions, the plan, who finds out
     assert.equal(await g.locator('input[name="season"][type="checkbox"]').count(), 0, "no season in the kickoff");
     // the phone's share sheet, stubbed, and loaded with a full page load so it is in place for week 1 setup
@@ -907,7 +952,6 @@ const submitAndWait = async (page: Page, selector: string) => {
     const dp: Page = await dc.newPage();
     await login(dp, "dana@demo.bothhands.app");
     await dp.goto(`${BASE}/identity`);
-    await dp.waitForSelector("text=Step 1 of 4");
     assert.ok((await dp.locator('nav[aria-label="Your journey"]').innerText()).includes("your seat"), "the journey bar names what is missing");
     await dp.click('button:has-text("Save who I am")');
     await dp.waitForSelector("text=Name the seat you're in (step 1).");

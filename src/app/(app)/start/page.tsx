@@ -8,8 +8,6 @@ import { aiAvailable } from "@/lib/ai";
 import { getJourney, JOURNEY_STEPS } from "@/lib/journey";
 import { saveWhoIAm } from "@/app/actions/identity";
 import { addCommitment, addRelationship, makeAccountabilityPartner, startCycle } from "@/app/actions/participant";
-import { AssessmentForm } from "@/components/AssessmentForm";
-import { ForgeReadout } from "@/components/ForgeReadout";
 import { linesOf } from "@/content/forgeLines";
 import { CycleFocusFields } from "@/components/CycleFocusFields";
 import { pillarScores } from "@/lib/focus";
@@ -18,6 +16,7 @@ import { Submit } from "@/components/Submit";
 import { StatementReveal } from "@/components/StatementReveal";
 import { Picks } from "@/components/Picks";
 import { FiveSides, MyStatement } from "@/components/ForgeLinesFields";
+import { DistanceStart } from "@/components/DistanceStart";
 import { LEVELS, IDENTITY_LEVELS, type IdentityLevel } from "@/content/identity";
 import { ROLE_PICKS, WHO_I_AM_STATUS, KIND_NOTE, WHO_TITLE, WHO_HEADINGS, withArticle } from "@/content/whoIAm";
 import { BLUEPRINT_PICKS } from "@/content/options";
@@ -40,9 +39,10 @@ const STEP_COPY = [
  * It reuses the same saves as the full pages, so nothing here is stored twice.
  * A coach can also walk a client through it live.
  */
-export default async function StartPage({ searchParams }: { searchParams: Promise<{ step?: string; part?: string; edit?: string }> }) {
+export default async function StartPage({ searchParams }: { searchParams: Promise<{ step?: string; part?: string; edit?: string; missingLines?: string }> }) {
   const u = await requireUser("PARTICIPANT");
   const sp = await searchParams;
+  const needLines = (sp.missingLines ?? "").split("").filter((c) => "FORGE".includes(c));
   const journey = await getJourney(u.id);
   const firstOpen = JOURNEY_STEPS.findIndex((s) => !journey.done[s.key]);
   const asked = Number(sp.step);
@@ -145,7 +145,9 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
         <Card>
           <form action={saveWhoIAm} className="space-y-6">
             <input type="hidden" name="next" value="/start?step=1&part=3" />
-            <p className="text-sm text-ink-soft">Start with F. If you get stuck, save what you have and finish the rest later.</p>
+            {needLines.length > 0
+              ? <p role="status" className="notice">Where I am measures you against your own lines. Write your {needLines.join(", ")} line{needLines.length > 1 ? "s" : ""} first, then come back.</p>
+              : <p className="text-sm text-ink-soft">Start with F. If you get stuck, save what you have and finish the rest later.</p>}
             <FiveSides profile={profile} pathway={pathway} role={role} level={identity?.level ?? ""} ai={ai} opening={forge?.intro} guide={forge?.guide?.rules ?? {}} teach={forge?.cards ?? {}} rules={Object.fromEntries(pack.pillars.map((p) => [p.key, p.short]))} faith={pack.faith?.forge ?? {}} />
             <Submit>Save and continue</Submit>
           </form>
@@ -165,22 +167,10 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
 
       {step === 2 && (
         <Card>
-          {!assessment || sp.edit ? (
-            <>
-              <p className="mb-5 text-[15px]">{assessment ? "Read each level again and choose the one that is true of you now." : "This is the deep work of FORGE. For each rule, read what you wrote and all five levels, then choose the one that is true of you this past month. Take your time with it."}</p>
-              <AssessmentForm pack={pack} entrepreneur={entrepreneur} useEntre={useEntre} instrument={instrument} next="/start" lines={linesOf(profile)} role={role} defaults={assessment ? scores : undefined} reviseId={assessment?.id} />
-            </>
-          ) : (
-            <>
-              <p className="eyebrow">My FORGE profile</p>
-              <div className="mt-4"><ForgeReadout pack={pack} scores={scores} lines={linesOf(profile)} /></div>
-              <p className="mt-4 text-sm text-ink-soft">The goal is a 5 on every one. It&apos;s a pursuit that doesn&apos;t end.</p>
-              <div className="mt-5 flex flex-wrap items-center gap-4">
-                <Link href={next} className="btn-primary inline-flex">{nextLabel}</Link>
-                <Link href="/start?step=2&edit=1" className="text-sm btn-link">Update my ratings</Link>
-              </div>
-            </>
-          )}
+          {/* Where I am: measured against their own five lines, one rule at a time. */}
+          <p className="mb-5 text-[15px]">This measures you against your own future self: the five lines you just wrote. For each rule, you&apos;ll say where you are on the road, name a real moment from this week, and choose what you&apos;d do in one situation. It takes about fifteen minutes.</p>
+          <DistanceStart userId={u.id} from="start" />
+          {assessment && <Link href={next} className="btn-quiet mt-5 inline-flex">{nextLabel}</Link>}
         </Card>
       )}
 
