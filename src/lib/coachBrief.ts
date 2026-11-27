@@ -1,4 +1,5 @@
 import "server-only";
+import { positionWord } from "@/lib/distance";
 import { db } from "./db";
 import type { CurrentUser } from "./auth";
 import { getCoachView, getCoachWork } from "./access";
@@ -50,7 +51,7 @@ export function briefContext(v: View, work: Work, pack: Awaited<ReturnType<typeo
   }
   if (v.assessment) {
     const s = scoresFrom(v.assessment);
-    L.push(`Latest FORGE self-ratings (${day(v.assessment.completedAt)}): F ${s.F}, O ${s.O}, R ${s.R}, G ${s.G}, E ${s.E}`);
+    L.push(`Latest Where I am check, their own road positions against their own lines (${day(v.assessment.completedAt)}): F ${positionWord(s.F)}, O ${positionWord(s.O)}, R ${positionWord(s.R)}, G ${positionWord(s.G)}, E ${positionWord(s.E)}`);
   }
   if (v.cycle) {
     const pos = cyclePosition(v.cycle.startDate);

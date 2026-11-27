@@ -1,4 +1,5 @@
 import { FaithCheckIn } from "@/components/FaithCheckIn";
+import { positionWord } from "@/lib/distance";
 import Link from "next/link";
 import { NAMES } from "@/content/names";
 import { requireUser } from "@/lib/auth";
@@ -16,7 +17,7 @@ import type { PillarKey } from "@/content/types";
 
 export const metadata = { title: "My season" };
 
-/** The season review: three months side by side, scores then and now, and the client's call on what comes next. */
+/** The season review: three months side by side, road positions then and now, and the client's call on what comes next. */
 export default async function SeasonPage() {
   const u = await requireUser("PARTICIPANT");
   const { pack } = await getContent();
@@ -76,20 +77,21 @@ export default async function SeasonPage() {
       </Card>
 
       <Card className="mt-5">
-        <p className="eyebrow">FORGE scores</p>
+        <p className="eyebrow">Where I am</p>
         {before && now ? (
-          <ul className="mt-3 grid grid-cols-5 gap-2 text-center">
+          <ul className="mt-3 divide-y divide-line">
             {(Object.keys(before) as PillarKey[]).map((k) => (
-              <li key={k} className="rounded-xl bg-paper py-2">
+              <li key={k} className="flex items-center gap-3 py-2">
                 <PillarMark k={k} size="sm" />
-                <p className="mt-1 text-sm"><span className="text-ink-mute">{before[k]}</span> → <span className="font-semibold">{now[k]}</span></p>
+                <span className="flex-1 text-sm text-ink-soft">{name(k)}</span>
+                <span className="text-sm text-right">{before[k] === now[k] ? <span className="font-medium">{positionWord(now[k])}</span> : <><span className="text-ink-mute">{positionWord(before[k])}</span> → <span className="font-medium">{positionWord(now[k])}</span></>}</span>
               </li>
             ))}
           </ul>
         ) : (
           <div className="mt-2">
-            <p className="text-[15px]">{before ? "See how far you've come. Score the five rules again, then come back here." : "Score the five rules to see where you are now."}</p>
-            <Link href="/assessment?next=season" className="btn-quiet mt-3 inline-flex">Take the self-assessment</Link>
+            <p className="text-[15px]">{before ? "See how far you've come. Take Where I am again, then come back here." : "Take Where I am to see where you are now."}</p>
+            <Link href="/assessment?next=season" className="btn-quiet mt-3 inline-flex">Take Where I am</Link>
           </div>
         )}
       </Card>

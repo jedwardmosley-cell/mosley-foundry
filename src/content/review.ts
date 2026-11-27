@@ -12,6 +12,8 @@ import { GUIDE_STATUS, CLIENT_GUIDE } from "./guide";
 import { SEGMENTS, NIRS_WEEKS, DAY30_DECISIONS, SEASON_DECISIONS } from "./program";
 import { todayHeadline } from "@/lib/todayHeadline";
 import { FEEDBACK_STATUS, FEEDBACK_SOURCES, FEEDBACK_COPY } from "./feedback";
+import { DISTANCE_SCENARIOS, DISTANCE_SCENARIOS_STATUS, SEATS } from "./distanceScenarios";
+import { POSITIONS, PROOF_QUESTION, EVIDENCE_NOTE_FALLBACK, PARTNER_WORDS, partnerQuestion, partnerMessageWritten } from "@/lib/distance";
 import { WEEK_ONE_STATUS, SETUP_STEPS, WHO_FINDS_OUT, WEEK_QUESTIONS, AI_FEELING_NOTE, buildPlan, shareMessage, menteeMessage, weekMessage, dayThirtyMessage } from "./weekOne";
 
 export type ReviewGroup = { label: string; items: string[] };
@@ -25,6 +27,20 @@ const anyDraft = (r: Record<string, OptionList>) => Object.values(r).some((v) =>
 
 export function reviewSets(): ReviewSet[] {
   return [
+    {
+      key: "distance", title: "Where I am: the questions and the written situations", where: "The Rules of the Road, the distance check", file: "src/content/distanceScenarios.ts", draft: DISTANCE_SCENARIOS_STATUS === "draft",
+      groups: [
+        { label: "Road positions", items: [...POSITIONS] },
+        { label: "Prove it: one question per rule", items: Object.entries(PROOF_QUESTION).map(([k, q]) => `${k}: ${q}`) },
+        { label: "Note when a close position has no real moment (used when the AI isn't)", items: [EVIDENCE_NOTE_FALLBACK] },
+        { label: "Partner view", items: [partnerQuestion("[Name]"), PARTNER_WORDS.join(", "), partnerMessageWritten("[Name]", "[Partner]", "[link]")] },
+        // Used when the AI can't write a situation from the person's own words. The type labels are for the author only; people never see them.
+        ...SEATS.flatMap((seat) => (["F", "O", "R", "G", "E"] as const).map((k) => {
+          const w = DISTANCE_SCENARIOS[seat][k];
+          return { label: `Situation, ${seat}, ${PILLAR_NAME[k]}`, items: [w.scenario, `Old way: ${w.options.autopilot}`, `Willpower alone: ${w.options.white_knuckle}`, `Stepping around it: ${w.options.avoidance}`, `The person in their line: ${w.options.future_self}`] };
+        })),
+      ],
+    },
     {
       key: "who", title: "The Driver's Seat: seats, kinds of change and the FORGE opening", where: "The Driver's Seat, steps 1 to 3", file: "src/content/whoIAm.ts", draft: WHO_I_AM_STATUS === "draft",
       groups: [

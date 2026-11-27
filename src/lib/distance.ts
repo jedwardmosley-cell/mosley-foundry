@@ -227,3 +227,29 @@ export const partnerMessageWritten = (name: string, partnerName: string, link: s
 
 /** The one question the partner answers for each line. */
 export const partnerQuestion = (name: string) => `How often does ${name} look like this person?`;
+
+/** One rule, then and now: the road position each time, and which way the answer to the situation moved. */
+export type Movement = { pillar: PillarKey; from: string; to: string; road: "closer" | "same" | "back"; pressure: "closer" | "same" | "back" | "" };
+
+/**
+ * How each rule moved since the last check. Positions as words. A situation answer counts as closer when it moved
+ * toward how the person in their line would handle it (old way, then stepping around it, then willpower alone, then their line).
+ */
+export function movement(before: { pillar: string; position: number | null; pressure: string }[], now: { pillar: string; position: number | null; pressure: string }[]): Movement[] {
+  const dir = (a: number, b: number) => (b > a ? "closer" : b < a ? "back" : "same");
+  return RULE_ORDER.flatMap((k) => {
+    const a = before.find((r) => r.pillar === k), b = now.find((r) => r.pillar === k);
+    if (!a?.position || !b?.position) return [];
+    const pa = a.pressure as Pressure | "", pb = b.pressure as Pressure | "";
+    return [{ pillar: k, from: positionWord(a.position), to: positionWord(b.position), road: dir(a.position, b.position), pressure: pa && pb ? dir(PRESSURE_RANK[pa], PRESSURE_RANK[pb]) : "" }];
+  });
+}
+
+/** One plain sentence for a rule's movement. Moving back is said plainly, without judgment. */
+export function movementNote(m: Movement) {
+  const road = m.road === "closer" ? "You moved closer." : m.road === "back" ? "This one moved back since last time." : "Same place as last time.";
+  const pressure = m.pressure === "closer" ? " Your answer to the situation moved toward the person in your line."
+    : m.pressure === "back" ? " Your answer to the situation moved away from the person in your line."
+      : "";
+  return road + pressure;
+}

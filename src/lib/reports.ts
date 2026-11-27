@@ -1,4 +1,5 @@
 import "server-only";
+import { POSITIONS } from "@/lib/distance";
 import { db } from "./db";
 import { SEGMENTS } from "@/content/program";
 import { addDays, ymd } from "./dates";
@@ -79,9 +80,11 @@ export async function cohortPulse(cohortId: string, now = new Date()) {
   const latest = new Map<string, (typeof assessments)[number]>();
   for (const a of assessments) if (!latest.has(a.userId)) latest.set(a.userId, a);
   if (latest.size >= MIN_GROUP) {
-    const avg = (k: "f" | "o" | "r" | "g" | "e", rk: "revisedF" | "revisedO" | "revisedR" | "revisedG" | "revisedE") =>
-      ([...latest.values()].reduce((s, a) => s + (a[rk] ?? a[k]), 0) / latest.size).toFixed(1);
-    lines.push(`Average FORGE self-ratings (1 to 5, self-rated): F ${avg("f", "revisedF")}, O ${avg("o", "revisedO")}, R ${avg("r", "revisedR")}, G ${avg("g", "revisedG")}, E ${avg("e", "revisedE")}`);
+    // Counts per road position, never averages: positions are words, and a mean of words means nothing.
+    const at = (a: (typeof assessments)[number], k: "f" | "o" | "r" | "g" | "e", rk: "revisedF" | "revisedO" | "revisedR" | "revisedG" | "revisedE") => a[rk] ?? a[k];
+    const keys = [["F", "f", "revisedF"], ["O", "o", "revisedO"], ["R", "r", "revisedR"], ["G", "g", "revisedG"], ["E", "e", "revisedE"]] as const;
+    const per = keys.map(([K, k, rk]) => `${K}: ${POSITIONS.map((w, i) => [w, [...latest.values()].filter((a) => at(a, k, rk) === i + 1).length] as const).filter(([, n]) => n).map(([w, n]) => `${w} ${n}`).join(", ")}`);
+    lines.push(`Where I am, latest check per person (their own road positions, not a validated measure). People at each position: ${per.join("; ")}`);
   }
   const prev = r.bySegment.filter((s) => s.startsAt && s.startsAt <= now).at(-1);
   if (prev?.pct != null) lines.push(`Attendance at the last session: ${prev.pct}%`);

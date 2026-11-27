@@ -8,7 +8,7 @@ import { positionWord, RULE_ORDER } from "@/lib/distance";
  * Start the distance check, or pick it up where it was left. Used on the Rules of the Road and in setup.
  * After a finished check, it shows where they were on the road for each rule and offers a fresh one.
  */
-export async function DistanceStart({ userId, from }: { userId: string; from?: "start" }) {
+export async function DistanceStart({ userId, from, next }: { userId: string; from?: "start"; next?: string }) {
   const [open, last] = await Promise.all([
     db.distanceRun.findFirst({ where: { userId, completedAt: null }, orderBy: { startedAt: "desc" }, include: { rules: { select: { position: true } } } }),
     db.distanceRun.findFirst({ where: { userId, completedAt: { not: null } }, orderBy: { completedAt: "desc" }, include: { rules: { select: { pillar: true, position: true } } } }),
@@ -27,7 +27,9 @@ export async function DistanceStart({ userId, from }: { userId: string; from?: "
       )}
       <form action={startDistance}>
         {from && <input type="hidden" name="from" value={from} />}
+        {next && <input type="hidden" name="next" value={next} />}
         <Submit className="btn-primary">{begun ? "Pick up where I left off" : last ? "Take it again" : "Start: where am I?"}</Submit>
+        {last && !begun && <p className="mt-2 text-sm text-ink-mute">With fresh situations. At the end you&apos;ll see how each rule moved.</p>}
       </form>
     </section>
   );

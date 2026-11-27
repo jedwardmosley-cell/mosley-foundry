@@ -14,8 +14,12 @@ import { positionWord } from "@/lib/distance";
 
 export const metadata = { title: "The Rules of the Road" };
 
-export default async function AssessmentPage() {
+export default async function AssessmentPage({ searchParams }: { searchParams: Promise<{ next?: string; retake?: string }> }) {
   const u = await requireUser("PARTICIPANT");
+  const sp = await searchParams;
+  // Sent here to take it again at day 30, from a focus or from the season: the results come back there.
+  const retakeFor = sp.retake ? await db.developmentCycle.findFirst({ where: { id: sp.retake, userId: u.id }, select: { id: true } }) : null;
+  const next = retakeFor ? `/cycle?id=${retakeFor.id}` : sp.next === "season" ? "/season" : undefined;
   const { pack, entrepreneur } = await getContent();
   const profile = await db.profile.findUnique({ where: { userId: u.id } });
   const identity = await db.identityProfile.findUnique({ where: { userId: u.id }, select: { role: true, becoming: true } });
@@ -57,7 +61,8 @@ export default async function AssessmentPage() {
 
       {pack.threeNote && !useEntre && <p className="quote mb-6">{pack.threeNote}</p>}
 
-      <DistanceStart userId={u.id} />
+      {next && <p role="status" className="notice mb-4">{next === "/season" ? "Take it again to see how far you've come this season. The results will take you back to the season." : "Day 30: take it again before you finish. The results will take you back to finish your 30 days."}</p>}
+      <DistanceStart userId={u.id} next={next} />
 
       {/* Earlier readings come after the ratings, to look back on once today's is done. */}
       {past.length > 0 && (

@@ -25,7 +25,7 @@ export const TONE_LIMITS = [
   "- Never insult the participant, mock them, or question their worth. Never encourage self-punishment or anything harmful.",
   "- Never present psychological speculation as established science.",
   "- A performance identity is a practice tool the participant chose to prepare for demanding situations. Treat it as a way to prepare. It is still them, and it is never a separate personality.",
-  "- The identity level is the participant's own choice. Never assign a level, never suggest one level is better than another, and never tie it to their FORGE scores.",
+  "- The identity level is the participant's own choice. Never assign a level, never suggest one level is better than another, and never tie it to their FORGE road positions.",
   "- A bigger shift calls for more deliberate preparation, practice and accountability. It does not call for more aggressive language.",
 ].join("\n");
 

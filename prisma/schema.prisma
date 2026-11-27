@@ -677,6 +677,7 @@ model DistanceRun {
   kind              String            @default("SETUP") // enum: SETUP | DAY30
   cycleId           String? // the 30-day focus a day 30 retake closes
   previousRunId     String? // the run a retake is compared with
+  returnTo          String            @default("") // where the results page sends them back to: "/season" or a 30-day focus
   assessmentId      String? // the five positions, also kept in the older Assessment format so existing features keep working
   report            String            @default("") // JSON: the written distance report
   partnerRelId      String? // unused: partners are asked through DistancePartner, up to three per check

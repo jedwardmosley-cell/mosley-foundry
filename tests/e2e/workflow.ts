@@ -51,6 +51,7 @@ const runDistance = async (page: Page, positions: Record<string, number>, done: 
     await Promise.all([k === "E" ? page.waitForURL(done) : page.waitForURL(/step=road/), page.click(k === "E" ? 'button:has-text("Finish")' : 'button:has-text("Next rule")')]);
   }
 };
+const RULE_ORDER_E2E = ["F", "O", "R", "G", "E"];
 const ROAD = ["Still parked", "Pulling out", "On the road", "Closing the distance", "Driving like them"];
 const pickRoad = async (page: Page, n: number) => {
   await page.locator("label", { hasText: ROAD[n - 1] }).click();
@@ -378,7 +379,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.ok(!/Driving like them|Closing the distance|Widest gap|On Tuesday|Sam/.test(await partner.locator("main").innerText()), "the partner sees only the lines");
     await partner.screenshot({ path: `${shots}/05b-partner.png`, fullPage: true });
     await Promise.all([partner.waitForURL(/thanks=1/), partner.click('button:has-text("Send my answers")')]);
-    await partner.locator("text=Your answers are in").waitFor();
+    await partner.locator("h1", { hasText: "Your answers are in" }).first().waitFor();
     // the link can't be answered twice
     await partner.goto(`${BASE}/partner/${jamie}`);
     assert.equal(await partner.locator('button:has-text("Send my answers")').count(), 0);
@@ -542,7 +543,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     const a = await db.assessment.findFirstOrThrow({ where: { user: { email } }, orderBy: { completedAt: "desc" } });
     await page.goto(`${BASE}/assessment/${a.id}`);
     await page.waitForSelector("text=My feedback points to Emotionally Anchored");
-    await page.waitForSelector("text=It isn't the same measure as your FORGE scores.");
+    await page.waitForSelector("text=It isn't the same measure as Where I am.");
   });
 
   await check("7e. Who I am: three equal kinds, one statement on Today, behavior on My road, history kept", async () => {
@@ -823,12 +824,31 @@ const submitAndWait = async (page: Page, selector: string) => {
     // the review: month rows, then close the season
     await g.goto(`${BASE}/season`);
     await g.waitForSelector("text=Month 2: Emotionally Anchored");
-    await g.waitForSelector("text=Take the self-assessment");
+    await g.waitForSelector("text=Take Where I am");
     await g.waitForSelector("text=The review opens when month 2 ends.");
     assert.equal(await g.locator('input[name="decision"][value="KEEP_GOING"]').count(), 0, "no closing the season mid-month");
     // jump month 2 to its day 30, then end the season there
     await db.developmentCycle.update({ where: { id: cycles[1].id }, data: { startDate: new Date(Date.now() - 29 * 86400000) } });
     await g.goto(`${BASE}/cycle`);
+    // day 30: take Where I am again first, with fresh situations, and see how each rule moved
+    await Promise.all([g.waitForURL(`**/assessment?retake=${cycles[1].id}`), g.click('a:has-text("Take Where I am again first")')]);
+    await g.locator("text=Day 30: take it again before you finish").waitFor();
+    const first = await db.distanceRun.findFirstOrThrow({ where: { userId: guided.id, completedAt: { not: null } }, include: { rules: true } });
+    await Promise.all([g.waitForURL(/\/assessment\/check\/[a-z0-9]+\?rule=F&step=road/), g.click('button:has-text("Take it again")')]);
+    await runDistance(g, { F: 5, O: 3, R: 4, G: 3, E: 4 });
+    const retake = await db.distanceRun.findFirstOrThrow({ where: { userId: guided.id, completedAt: { not: null } }, orderBy: { completedAt: "desc" }, include: { rules: true } });
+    assert.equal(retake.kind, "DAY30");
+    assert.equal(retake.previousRunId, first.id);
+    assert.equal(retake.returnTo, `/cycle?id=${cycles[1].id}`);
+    const scenario = (r: typeof first, k: string) => r.rules.find((x) => x.pillar === k)!.scenario;
+    assert.ok(RULE_ORDER_E2E.every((k) => scenario(retake, k)), "every rule had a situation");
+    await g.locator("text=Since last time").waitFor();
+    assert.match(await g.locator('[data-move="E"]').innerText(), /Pulling out\s*→\s*On the road|Pulling out\s*→\s*Closing the distance/);
+    await g.locator('[data-move="E"] >> text=You moved closer.').waitFor();
+    await g.locator('[data-move="O"] >> text=Same place as last time.').waitFor();
+    assert.ok(!/\d/.test(await g.locator("section[aria-labelledby=moved]").innerText()), "movement in words, no numbers");
+    await g.screenshot({ path: `${shots}/1d-retake.png`, fullPage: true });
+    await Promise.all([g.waitForURL(`**/cycle?id=${cycles[1].id}`), g.locator('a:has-text("Back to finish your 30 days")').first().click()]);
     await g.locator('input[name="decision"][value="END_SEASON"]').check();
     await Promise.all([g.waitForURL("**/season"), g.click('button:has-text("Finish these 30 days")')]);
     await g.locator('input[name="decision"][value="KEEP_GOING"]').check();
@@ -963,12 +983,12 @@ const submitAndWait = async (page: Page, selector: string) => {
   const dana = await db.user.findUniqueOrThrow({ where: { email: "dana@demo.bothhands.app" } });
   const lena = await db.user.findUniqueOrThrow({ where: { email: "lena@demo.bothhands.app" } });
 
-  await check("9. share selected information (FORGE scores) with the assigned coach", async () => {
+  await check("9. share selected information (Where I am) with the assigned coach", async () => {
     await logout(page);
     await login(page, "dana@demo.bothhands.app");
     await page.goto(`${BASE}/sharing`);
-    await submitAndWait(page, 'button[aria-label="Share: FORGE scores"]');
-    await page.waitForSelector('button[aria-label="Stop sharing: FORGE scores"]');
+    await submitAndWait(page, 'button[aria-label="Share: Where I am"]');
+    await page.waitForSelector('button[aria-label="Stop sharing: Where I am"]');
     await page.screenshot({ path: `${shots}/08-sharing.png`, fullPage: true });
   });
 
@@ -977,8 +997,8 @@ const submitAndWait = async (page: Page, selector: string) => {
     await login(page, "coach@demo.bothhands.app");
     await page.goto(`${BASE}/coach/${dana.id}`);
     await openParts(page);
-    await page.waitForSelector("text=FORGE reading");
-    await page.waitForSelector("text=Self-rated");
+    await page.locator("p.eyebrow", { hasText: "Where I am" }).first().waitFor();
+    await page.waitForSelector("text=Self-placed against their own lines");
     assert.equal(await page.locator("text=/ 25").count(), 0, "the coach sees no total either");
     await page.waitForSelector("text=The question bought me five seconds");
     await page.waitForSelector("text=Impulse control when challenged in meetings");

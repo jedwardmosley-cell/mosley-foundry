@@ -16,7 +16,7 @@ import { canCoach } from "./roles";
  */
 export const SHARE_SCOPES = {
   GOALS: "Goals, my five I am lines and My statement",
-  ASSESSMENT: "FORGE scores",
+  ASSESSMENT: "Where I am",
   PRACTICE: "Practice completion (Done / Partial / Not yet) and cycle progress",
   REFLECTIONS: "Reflections I mark as shared",
   BLUEPRINT: "The Vehicle Controls: my routines, commitments and people areas (Discipline by Design)",

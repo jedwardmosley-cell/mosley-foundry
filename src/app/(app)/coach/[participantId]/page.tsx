@@ -1,4 +1,5 @@
 import { FORGE_LINES } from "@/content/forgeLines";
+import { positionWord } from "@/lib/distance";
 import { withArticle } from "@/content/whoIAm";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
@@ -21,7 +22,7 @@ import { zoneOf } from "@/lib/userZone";
 import { TimezoneField } from "@/components/Timezone";
 import type { PillarKey } from "@/content/types";
 import { PILLAR_KEYS } from "@/content/types";
-import { PageHeader, Card, PillarMark, Gauge, Field , PILLAR_FILL } from "@/components/ui";
+import { PageHeader, Card, PillarMark, Field, PILLAR_FILL } from "@/components/ui";
 import { Submit } from "@/components/Submit";
 import { removeClient } from "@/app/actions/clients";
 import { ResetPasswordForm } from "@/components/ResetPasswordForm";
@@ -349,11 +350,11 @@ export default async function CoachParticipant({ params, searchParams }: { param
 
       <div className="grid gap-5 md:grid-cols-2 mt-5">
         <Card>
-          <p className="eyebrow">FORGE reading</p>
+          <p className="eyebrow">Where I am</p>
           {s.has("ASSESSMENT") ? (scores ? (
             <ul className="mt-3 space-y-2">
-              {PILLAR_KEYS.map((k) => <li key={k} className="flex items-center gap-3"><PillarMark k={k} size="sm" /><span className="flex-1 text-sm">{pack.pillars.find((p) => p.key === k)?.name}</span><Gauge value={scores[k]} label={k} /><span className="w-4 text-right">{scores[k]}</span></li>)}
-              <li className="text-sm muted pt-1">Self-rated {fmt(v.assessment!.completedAt)}</li>
+              {PILLAR_KEYS.map((k) => <li key={k} className="flex items-center gap-3"><PillarMark k={k} size="sm" /><span className="flex-1 text-sm">{pack.pillars.find((p) => p.key === k)?.name}</span><span className="text-sm font-medium text-heading">{positionWord(scores[k])}</span></li>)}
+              <li className="text-sm muted pt-1">Self-placed against their own lines, {fmt(v.assessment!.completedAt)}</li>
             </ul>
           ) : <p className="mt-2 muted text-sm">No assessment yet.</p>) : <div className="mt-3"><NotShared scope="ASSESSMENT" /></div>}
         </Card>
