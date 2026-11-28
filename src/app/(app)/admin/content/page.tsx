@@ -20,7 +20,7 @@ export default async function ContentReview() {
       : [{ label: "Not installed", items: ["Upload forge-source.md at /setup to see the cards here."] }],
   };
   const bookSet: ReviewSet = {
-    key: "forgebook", title: "FORGE opening and the book's sources", where: "The Driver's Seat, the five rules of one driver", file: "forge-source.md (uploaded at /setup)", draft: src?.draft ?? true,
+    key: "forgebook", title: "FORGE opening and the book's sources", where: "The Driver's Seat, the Rules of the Road", file: "forge-source.md (uploaded at /setup)", draft: src?.draft ?? true,
     groups: src ? [
       { label: "Core idea", items: [src.intro.line, src.intro.core] },
       { label: "The forge", items: [src.intro.forge] },
