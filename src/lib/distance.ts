@@ -6,8 +6,8 @@ import type { PillarKey } from "@/content/types";
 
 export const RULE_ORDER: PillarKey[] = ["F", "O", "R", "G", "E"];
 
-/** The five road positions, as people see them. Index 0 is position 1. */
-export const POSITIONS = ["Still parked", "Pulling out", "On the road", "Closing the distance", "Driving like them"] as const;
+/** How often they were the person in their line this week, as people see it. Index 0 is position 1. Words, never numbers. */
+export const POSITIONS = ["Not yet", "Starting", "Sometimes", "Most of the time", "Consistently"] as const;
 export const positionWord = (p: number | null | undefined) => (p && p >= 1 && p <= 5 ? POSITIONS[p - 1] : "");
 
 /** Check 2: one proof question per rule. */
@@ -57,7 +57,7 @@ export function closest(rules: RuleResult[]): PillarKey | null {
   return [...from].sort((a, b) => b.position - a.position || pr(b.pressure) - pr(a.pressure) || er(b.evidence) - er(a.evidence) || RULE_ORDER.indexOf(a.pillar) - RULE_ORDER.indexOf(b.pillar))[0].pillar;
 }
 
-/** Where answers disagree: placed close (4 or 5) but the pressure test wasn't the future self, or the proof was thin. */
+/** Where answers disagree: said "most of the time" or "consistently" but the pressure test wasn't the future self, or the proof was thin. */
 export function disagreesAt(r: RuleResult) {
   return r.position >= 4 && ((r.pressure !== "" && r.pressure !== "future_self") || r.evidence === "vague" || r.evidence === "missing");
 }
@@ -86,7 +86,7 @@ export function evidenceHeuristic(answer: string): Evidence {
   return when.test(t) || story.test(t) ? "concrete" : "vague";
 }
 
-export const EVIDENCE_NOTE_FALLBACK = "You placed yourself close, but you couldn't name a real moment yet. Add one, or move your position to where this week put you.";
+export const EVIDENCE_NOTE_FALLBACK = "You said this is often true, but you couldn't name a real moment yet. Add one, or change your answer to fit this week.";
 
 /** Shuffles the four options for display. The order is stored, so a reload shows the same order. */
 export function shuffled<T>(items: T[], rand: () => number = Math.random): T[] {
@@ -159,11 +159,12 @@ export function writtenReport(rules: ReportRule[], partners: ReportPartner[] = [
   const c = by(keys.closest), w = by(keys.widest), d = by(keys.disagree), b = by(keys.blind);
   const agrees = (r: ReportRule) => r.pressure === "future_self" && r.evidence === "concrete";
 
+  const q = (p: number) => `"${positionWord(p).toLowerCase()}"`;
   const quote = (line: string) => { const q = fewWords(line); return q.endsWith("...") ? `"${q}"` : `"${q}."`; };
   const closestText = c
     ? agrees(c)
-      ? `${c.name}: ${quote(c.line)} Where you placed yourself, the moment you named and the choice you made all point the same way.`
-      : `${c.name}: ${quote(c.line)} This is where you placed yourself closest, at ${positionWord(c.position)}.`
+      ? `${c.name}: ${quote(c.line)} Your answer, the moment you named and the choice you made all point the same way.`
+      : `${c.name}: ${quote(c.line)} This is where you said you're closest: ${q(c.position)}.`
     : "";
 
   let widestText = "";
@@ -171,12 +172,12 @@ export function writtenReport(rules: ReportRule[], partners: ReportPartner[] = [
     const lowest = Math.min(...rules.map((r) => r.position));
     const tiedLow = rules.filter((r) => r.position === lowest).length > 1;
     const why = !tiedLow || w.pressure === "future_self"
-      ? `You placed yourself at ${positionWord(w.position)}.`
+      ? `You said ${q(w.position)}.`
       : w.pressure === "autopilot"
-        ? `You placed yourself at ${positionWord(w.position)}, and in the situation you picked the old way of doing it.`
+        ? `You said ${q(w.position)}, and in the situation you picked the old way of doing it.`
         : w.pressure === "avoidance"
-          ? `You placed yourself at ${positionWord(w.position)}, and in the situation you picked the way that steps around it.`
-          : `You placed yourself at ${positionWord(w.position)}, and in the situation you picked the way that gets through on willpower alone.`;
+          ? `You said ${q(w.position)}, and in the situation you picked the way that steps around it.`
+          : `You said ${q(w.position)}, and in the situation you picked the way that gets through on willpower alone.`;
     widestText = `${w.name}. ${why}${w.evidence !== "concrete" ? " You couldn't name a real moment here yet." : ""}`;
   }
 
@@ -189,7 +190,7 @@ export function writtenReport(rules: ReportRule[], partners: ReportPartner[] = [
       : off
         ? "the choice you made in the situation pointed somewhere else"
         : "you couldn't name a real moment to back it up";
-    disagreeText = `On ${d.name}, you placed yourself at ${positionWord(d.position)}, but ${but}.`;
+    disagreeText = `On ${d.name}, you said ${q(d.position)}, but ${but}.`;
   }
 
   let partnerText = "";
@@ -199,7 +200,7 @@ export function writtenReport(rules: ReportRule[], partners: ReportPartner[] = [
     const parts: string[] = [];
     if (answered.length) {
       const said = (r: ReportRule) => joinNames((r.partnerViews ?? []).map((v) => `${v.name} said ${partnerWord(v.rating).toLowerCase()}`));
-      if (b) parts.push(`${joinNames(answered)} ${answered.length > 1 ? "see" : "sees"} ${b.name} differently than you do. You placed yourself at ${positionWord(b.position)}; ${said(b)}.`);
+      if (b) parts.push(`${joinNames(answered)} ${answered.length > 1 ? "see" : "sees"} ${b.name} differently than you do. You said ${q(b.position)}; ${said(b)}.`);
       else parts.push(`${joinNames(answered)} ${answered.length > 1 ? "see" : "sees"} you about the way you see yourself.`);
       const split = rules.find((r) => r.pillar !== b?.pillar && partnersSplit(r.partnerViews));
       if (split) parts.push(`On ${split.name}, ${said(split)}, so they don't see it the same way.`);
@@ -228,7 +229,7 @@ export const partnerMessageWritten = (name: string, partnerName: string, link: s
 /** The one question the partner answers for each line. */
 export const partnerQuestion = (name: string) => `How often does ${name} look like this person?`;
 
-/** One rule, then and now: the road position each time, and which way the answer to the situation moved. */
+/** One rule, then and now: their answer each time, and which way the answer to the situation moved. */
 export type Movement = { pillar: PillarKey; from: string; to: string; road: "closer" | "same" | "back"; pressure: "closer" | "same" | "back" | "" };
 
 /**
@@ -247,7 +248,7 @@ export function movement(before: { pillar: string; position: number | null; pres
 
 /** One plain sentence for a rule's movement. Moving back is said plainly, without judgment. */
 export function movementNote(m: Movement) {
-  const road = m.road === "closer" ? "You moved closer." : m.road === "back" ? "This one moved back since last time." : "Same place as last time.";
+  const road = m.road === "closer" ? "Closer than last time." : m.road === "back" ? "This one moved back since last time." : "Same as last time.";
   const pressure = m.pressure === "closer" ? " Your answer to the situation moved toward the person in your line."
     : m.pressure === "back" ? " Your answer to the situation moved away from the person in your line."
       : "";

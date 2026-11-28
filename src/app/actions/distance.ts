@@ -72,7 +72,7 @@ function resumeAt(rules: { pillar: string; position: number | null; proof: strin
   return "rule=E&step=pressure";
 }
 
-/** Check 1: where you are on the road. */
+/** Check 1: how often they were the person in their line this week. */
 export async function saveRoad(fd: FormData) {
   const u = await participant();
   const d = parse(z.object({ runId: z.string(), pillar: pillarKey, position: score }), fd);

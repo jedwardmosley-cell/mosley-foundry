@@ -9,8 +9,8 @@ const r = (pillar: RuleResult["pillar"], position: number, pressure: RuleResult[
 
 test("positions are words, never numbers", () => {
   assert.equal(POSITIONS.length, 5);
-  assert.equal(positionWord(1), "Still parked");
-  assert.equal(positionWord(5), "Driving like them");
+  assert.equal(positionWord(1), "Not yet");
+  assert.equal(positionWord(5), "Consistently");
   assert.equal(positionWord(0), "");
   assert.equal(positionWord(null), "");
 });
@@ -123,14 +123,14 @@ test("the written report: four plain sections, no numbers, no labels", () => {
   const rep = writtenReport(rules);
   assert.deepEqual(rep.keys, { closest: "O", widest: "E", disagree: "F", blind: null });
   assert.match(rep.closest, /^Outcome Aware: "a leader who stays calm when decisions get\.\.\."/);
-  assert.match(rep.widest_gap, /^Emotionally Anchored\. You placed yourself at Pulling out\./);
+  assert.match(rep.widest_gap, /^Emotionally Anchored\. You said "starting"\./);
   assert.match(rep.widest_gap, /couldn't name a real moment/);
-  assert.match(rep.disagreement, /^On Future Focused, you placed yourself at Driving like them, but/);
+  assert.match(rep.disagreement, /^On Future Focused, you said "consistently", but/);
   assert.equal(rep.partner, "");
   assert.equal(writtenReport(rules, [{ name: "Sam", answered: false }]).partner, "Waiting on Sam.");
   assert.equal(writtenReport(rules, [{ name: "Sam", answered: false }, { name: "Lee", answered: false }]).partner, "Waiting on Sam and Lee.");
   const withPartner = named([r("F", 5, "future_self", "concrete", 1), r("O", 3, "future_self", "concrete", 2), r("R", 3), r("G", 3), r("E", 2)]).map((x) => ({ ...x, partnerViews: x.partnerRating ? [{ name: "Sam", rating: x.partnerRating, example: "" }] : [] }));
-  assert.match(writtenReport(withPartner, [{ name: "Sam", answered: true }]).partner, /^Sam sees Future Focused differently than you do\. You placed yourself at Driving like them; Sam said rarely\.$/);
+  assert.match(writtenReport(withPartner, [{ name: "Sam", answered: true }]).partner, /^Sam sees Future Focused differently than you do\. You said "consistently"; Sam said rarely\.$/);
   const all = [rep, writtenReport(withPartner, [{ name: "Sam", answered: true }])].flatMap((x) => [x.closest, x.widest_gap, x.disagreement, x.partner]).join(" ");
   assert.ok(!/\d|%/.test(all), all);
   assert.ok(!/[—–]/.test(all));
@@ -183,7 +183,7 @@ test("several partners: the middle answer, who is still out, and where they disa
   });
   const rep = writtenReport(asked, [{ name: "Jamie", answered: true }, { name: "Sam", answered: true }, { name: "Lee", answered: false }]);
   assert.equal(rep.keys.blind, "F");
-  assert.match(rep.partner, /^Jamie and Sam see Future Focused differently than you do\. You placed yourself at Driving like them; Jamie said rarely and Sam said sometimes\./);
+  assert.match(rep.partner, /^Jamie and Sam see Future Focused differently than you do\. You said "consistently"; Jamie said rarely and Sam said sometimes\./);
   assert.match(rep.partner, /On Reason Rooted, Jamie said often and Sam said rarely, so they don't see it the same way\./);
   assert.match(rep.partner, /Still waiting on Lee\.$/);
   assert.ok(!/\d|%/.test(rep.partner) && !STYLE.test(rep.partner));
@@ -195,15 +195,15 @@ test("day 30: movement per rule, as road positions, and moving back said plainly
   const now = [{ pillar: "F", position: 5, pressure: "future_self" }, { pillar: "O", position: 3, pressure: "future_self" }, { pillar: "R", position: 3, pressure: "autopilot" }, { pillar: "G", position: 2, pressure: "avoidance" }, { pillar: "E", position: 4, pressure: "white_knuckle" }];
   const m = movement(before, now);
   assert.deepEqual(m.map((x) => [x.pillar, x.from, x.to, x.road, x.pressure]), [
-    ["F", "Closing the distance", "Driving like them", "closer", "closer"],
-    ["O", "On the road", "On the road", "same", "same"],
-    ["R", "Closing the distance", "On the road", "back", "back"],
-    ["G", "Pulling out", "Pulling out", "same", ""],
-    ["E", "Pulling out", "Closing the distance", "closer", "same"],
+    ["F", "Most of the time", "Consistently", "closer", "closer"],
+    ["O", "Sometimes", "Sometimes", "same", "same"],
+    ["R", "Most of the time", "Sometimes", "back", "back"],
+    ["G", "Starting", "Starting", "same", ""],
+    ["E", "Starting", "Most of the time", "closer", "same"],
   ]);
-  assert.equal(movementNote(m[0]), "You moved closer. Your answer to the situation moved toward the person in your line.");
+  assert.equal(movementNote(m[0]), "Closer than last time. Your answer to the situation moved toward the person in your line.");
   assert.equal(movementNote(m[2]), "This one moved back since last time. Your answer to the situation moved away from the person in your line.");
-  assert.equal(movementNote(m[1]), "Same place as last time.");
+  assert.equal(movementNote(m[1]), "Same as last time.");
   const all = m.map(movementNote).join(" ");
   assert.ok(!/\d|%/.test(all) && !STYLE.test(all) && !/[—–]/.test(all));
 });

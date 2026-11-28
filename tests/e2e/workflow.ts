@@ -52,7 +52,7 @@ const runDistance = async (page: Page, positions: Record<string, number>, done: 
   }
 };
 const RULE_ORDER_E2E = ["F", "O", "R", "G", "E"];
-const ROAD = ["Still parked", "Pulling out", "On the road", "Closing the distance", "Driving like them"];
+const ROAD = ["Not yet", "Starting", "Sometimes", "Most of the time", "Consistently"];
 const pickRoad = async (page: Page, n: number) => {
   await page.locator("label", { hasText: ROAD[n - 1] }).click();
   assert.ok(await page.locator(`input[name="position"][value="${n}"]`).isChecked(), `road position ${n} picked`);
@@ -162,7 +162,8 @@ const submitAndWait = async (page: Page, selector: string) => {
     await Promise.all([page.waitForURL(/\/assessment\/check\/[a-z0-9]+\?rule=F&step=road/), page.click('button:has-text("Start: where am I?")')]);
     // check 1: their line on top, five road positions as words, no numbers
     await page.locator("text=a leader my team trusts with bad news").first().waitFor();
-    for (const w of ["Still parked", "Pulling out", "On the road", "Closing the distance", "Driving like them"]) await page.locator(`text=${w}`).first().waitFor();
+    for (const w of ROAD) await page.locator("label", { hasText: w }).first().waitFor();
+    await page.locator("text=How often were you this person this week?").waitFor();
     assert.ok(!/\b[1-5]\s*(of 5|\/\s*5)\b/.test(await page.locator("main").innerText()), "no numbers on the road");
     await page.screenshot({ path: `${shots}/02-assessment.png`, fullPage: false });
     // check 2: a close position with no real moment gets a note, and nothing is blocked
@@ -189,8 +190,8 @@ const submitAndWait = async (page: Page, selector: string) => {
     };
     await rest();
     // the end: positions as words, and the five positions kept for the rest of the app
-    await page.locator("text=Here's where you are on the road").waitFor();
-    await page.locator("text=Driving like them").first().waitFor();
+    await page.locator("h1", { hasText: "How often you were this person" }).waitFor();
+    await page.locator('[data-rule="F"]', { hasText: "Consistently" }).waitFor();
     const run = await db.distanceRun.findFirstOrThrow({ where: { userId: me.id }, include: { rules: true } });
     assert.ok(run.completedAt && run.assessmentId);
     const f = run.rules.find((r) => r.pillar === "F")!;
@@ -208,11 +209,11 @@ const submitAndWait = async (page: Page, selector: string) => {
     const report = JSON.parse((await db.distanceRun.findUniqueOrThrow({ where: { id: run.id } })).report);
     assert.equal(report.keys.widest, "E");
     assert.equal(report.keys.disagree, "F", "placed close with no real moment");
-    await page.locator("h2", { hasText: "Closest to the future you" }).waitFor();
-    await page.locator("h2", { hasText: "Widest gap" }).waitFor();
-    await page.locator("h2", { hasText: "Where your answers disagree" }).waitFor();
-    assert.equal(await page.locator("h2", { hasText: "What your partner sees" }).count(), 0, "no partner asked yet");
-    const shown = (await page.locator("section[data-report]").allInnerTexts()).join(" ");
+    await page.locator("[data-report] h3", { hasText: "Closest to the future you" }).waitFor();
+    await page.locator("[data-report] h3", { hasText: "Widest gap" }).waitFor();
+    await page.locator("[data-report] h3", { hasText: "Where your answers disagree" }).waitFor();
+    assert.equal(await page.locator("[data-report] h3", { hasText: "What your partner sees" }).count(), 0, "no partner asked yet");
+    const shown = (await page.locator("[data-report]").allInnerTexts()).join(" ");
     assert.ok(!/\d|%/.test(shown), `no numbers in the report: ${shown}`);
     assert.ok(!/autopilot|white.?knuckle|future.?self/i.test(shown), "no option labels in the report");
     await page.locator("text=Your widest gap is Emotionally Anchored").waitFor();
@@ -348,13 +349,13 @@ const submitAndWait = async (page: Page, selector: string) => {
     await page.locator("text=Keep the link in the message").waitFor();
     await send("Jamie", message);
     await page.locator("text=Jamie: waiting on their answers").waitFor();
-    await page.locator("section[data-report]", { hasText: "Waiting on Jamie." }).waitFor();
+    await page.locator("[data-report]", { hasText: "Waiting on Jamie." }).waitFor();
 
     // Sam too, and Lee makes three: nobody else can be asked
     await page.click('button:has-text("Ask Sam")');
     await send("Sam");
     await page.locator("text=Sam: waiting on their answers").waitFor();
-    await page.locator("section[data-report]", { hasText: "Waiting on Jamie and Sam." }).waitFor();
+    await page.locator("[data-report]", { hasText: "Waiting on Jamie and Sam." }).waitFor();
     await page.click('button:has-text("Ask Lee")');
     await ready("Lee").waitFor();
     assert.equal(await page.locator('button:has-text("Ask Kim")').count(), 0, "three at most");
@@ -376,7 +377,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await answer(jamie, { F: "Rarely", O: "Often", R: "Often", G: "Sometimes", E: "Sometimes" }, ["E", "At the budget meeting they stayed calm when the VP pushed."]);
     await partner.locator(`text=${LINES.destination}`).first().waitFor();
     assert.equal(await partner.locator("text=How often does").count(), 5);
-    assert.ok(!/Driving like them|Closing the distance|Widest gap|On Tuesday|Sam/.test(await partner.locator("main").innerText()), "the partner sees only the lines");
+    assert.ok(!/Consistently|Most of the time|Widest gap|On Tuesday|Sam/.test(await partner.locator("main").innerText()), "the partner sees only the lines");
     await partner.screenshot({ path: `${shots}/05b-partner.png`, fullPage: true });
     await Promise.all([partner.waitForURL(/thanks=1/), partner.click('button:has-text("Send my answers")')]);
     await partner.locator("h1", { hasText: "Your answers are in" }).first().waitFor();
@@ -384,8 +385,8 @@ const submitAndWait = async (page: Page, selector: string) => {
     await partner.goto(`${BASE}/partner/${jamie}`);
     assert.equal(await partner.locator('button:has-text("Send my answers")').count(), 0);
     await page.reload();
-    await page.locator("h2", { hasText: "What Jamie sees" }).waitFor();
-    await page.locator("section[data-report]", { hasText: "Still waiting on Sam." }).waitFor();
+    await page.locator("[data-report] h3", { hasText: "What Jamie sees" }).waitFor();
+    await page.locator("[data-report]", { hasText: "Still waiting on Sam." }).waitFor();
 
     // Sam answers, and sees Reason Rooted very differently from Jamie
     await answer(await linkFor("Sam"), { F: "Sometimes", O: "Often", R: "Rarely", G: "Sometimes", E: "Often" });
@@ -394,13 +395,13 @@ const submitAndWait = async (page: Page, selector: string) => {
 
     // the report is written again: the blind spot comes from the middle answer, and the split between them is named
     await page.reload();
-    await page.locator("h2", { hasText: "What Jamie and Sam see" }).waitFor();
+    await page.locator("[data-report] h3", { hasText: "What Jamie and Sam see" }).waitFor();
     await page.locator("text=Jamie said: Rarely").waitFor();
     await page.locator("text=Sam said: Sometimes").first().waitFor();
     await page.locator("text=At the budget meeting they stayed calm").waitFor();
     const report = JSON.parse((await db.distanceRun.findUniqueOrThrow({ where: { id: run.id } })).report);
     assert.equal(report.keys.blind, "F");
-    const shown = (await page.locator("section[data-report]").allInnerTexts()).join(" ");
+    const shown = (await page.locator("[data-report]").allInnerTexts()).join(" ");
     assert.ok(/don't see it the same way/.test(shown), shown);
     assert.ok(!/\d|%/.test(shown), "no numbers");
     assert.ok(!/waiting/i.test(shown), "nobody left to wait on");
@@ -737,7 +738,7 @@ const submitAndWait = async (page: Page, selector: string) => {
     await g.goto(`${BASE}/start?step=2`);
     await Promise.all([g.waitForURL(/\/assessment\/check\/[a-z0-9]+\?rule=F&step=road&from=start/), g.click('button:has-text("Start: where am I?")')]);
     await runDistance(g, { F: 4, O: 3, R: 4, G: 3, E: 2 }, /\/done\?from=start/);
-    await g.waitForSelector("text=Here's where you are on the road");
+    await g.locator("h1", { hasText: "How often you were this person" }).waitFor();
     assert.equal(await g.locator("text=/ 25").count(), 0, "no total");
     await Promise.all([g.waitForURL("**/start?step=3"), g.click('button:has-text("Make it my focus")')]);
     // 3. my focus: named right here (no seat, season or start date), then five questions, the plan, who finds out
@@ -842,11 +843,9 @@ const submitAndWait = async (page: Page, selector: string) => {
     assert.equal(retake.returnTo, `/cycle?id=${cycles[1].id}`);
     const scenario = (r: typeof first, k: string) => r.rules.find((x) => x.pillar === k)!.scenario;
     assert.ok(RULE_ORDER_E2E.every((k) => scenario(retake, k)), "every rule had a situation");
-    await g.locator("text=Since last time").waitFor();
-    assert.match(await g.locator('[data-move="E"]').innerText(), /Pulling out\s*→\s*On the road|Pulling out\s*→\s*Closing the distance/);
-    await g.locator('[data-move="E"] >> text=You moved closer.').waitFor();
-    await g.locator('[data-move="O"] >> text=Same place as last time.').waitFor();
-    assert.ok(!/\d/.test(await g.locator("section[aria-labelledby=moved]").innerText()), "movement in words, no numbers");
+    assert.match(await g.locator('[data-move="E"]').innerText(), /^Last time: Starting\. Closer than last time\./);
+    assert.match(await g.locator('[data-move="O"]').innerText(), /^Same as last time\./);
+    assert.ok(!/\d/.test(await g.locator("section[aria-labelledby=lines]").innerText()), "answers and changes in words, no numbers");
     await g.screenshot({ path: `${shots}/1d-retake.png`, fullPage: true });
     await Promise.all([g.waitForURL(`**/cycle?id=${cycles[1].id}`), g.locator('a:has-text("Back to finish your 30 days")').first().click()]);
     await g.locator('input[name="decision"][value="END_SEASON"]').check();

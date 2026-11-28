@@ -171,7 +171,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
       {step === 2 && (
         <Card>
           {/* Where I am: measured against their own five lines, one rule at a time. */}
-          <p className="mb-5 text-[15px]">This measures you against your own future self: the five lines you just wrote. For each rule, you&apos;ll say where you are on the road, name a real moment from this week, and choose what you&apos;d do in one situation. It takes about fifteen minutes.</p>
+          <p className="mb-5 text-[15px]">This measures you against your own future self: the five lines you just wrote. For each rule, you&apos;ll say how often you were that person this week, name a real moment from this week, and choose what you&apos;d do in one situation. It takes about fifteen minutes.</p>
           <DistanceStart userId={u.id} from="start" />
           {assessment && <Link href={next} className="btn-quiet mt-5 inline-flex">{nextLabel}</Link>}
         </Card>

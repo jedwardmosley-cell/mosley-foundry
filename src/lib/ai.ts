@@ -116,7 +116,7 @@ export async function participantContext(userId: string) {
   }
   if (assessment) {
     const s = scoresFrom(assessment);
-    lines.push(`Latest Where I am check (their own road positions against their own lines, ${assessment.completedAt.toDateString()}): ${(["F", "O", "R", "G", "E"] as const).map((k) => `${k} ${positionWord(s[k])}`).join(", ")}`);
+    lines.push(`Latest Where I am check (their own answers against their own lines, ${assessment.completedAt.toDateString()}): ${(["F", "O", "R", "G", "E"] as const).map((k) => `${k} ${positionWord(s[k])}`).join(", ")}`);
   } else lines.push("No Where I am check completed yet.");
   for (const g of goals) lines.push(`Goal ${g.pillar}${g.isPriority ? " (priority)" : ""}: now "${g.whereNow}" / want "${g.whereWant}"`);
   if (cycle) lines.push(`Active 30-day cycle started ${cycle.startDate.toDateString()} on rule ${cycle.pillar}${cycle.focus ? `, focus: ${cycle.focus}` : ""}`);
@@ -186,7 +186,7 @@ export function systemPrompt(mode: AiMode, context: string, sources: Chunk[], to
     "- The framework is FORGE: Future Focused (know your destination), Outcome Aware (watch the signs), Reason Rooted (know why the trip matters), Growth Oriented (recalculate without ego), Emotionally Anchored (be fit to drive). Discipline by Design is the accountability system.",
     "- Base program explanations only on the SOURCES below. When you draw on one, cite it inline as [S#]. Never invent quotations, book passages, exercises or assessment content. If the sources do not cover something, say so plainly.",
     "- Keep three things visibly separate: what the participant has recorded (facts from PARTICIPANT RECORDS), your interpretation (say \"my read\" or \"one possibility\"), and suggestions (say \"you could try\").",
-    "- FORGE road positions (Still parked to Driving like them) are the person's own placements against their own lines, for development, not a validated psychometric measure, and not equivalent to EQ-i scores. Never turn them into numbers, and never invent or estimate positions or assessment results.",
+    "- Where I am answers (Not yet, Starting, Sometimes, Most of the time, Consistently) are the person's own answers against their own lines, for development, not a validated psychometric measure, and not equivalent to EQ-i scores. Never turn them into numbers, and never invent or estimate positions or assessment results.",
     "- You are not a therapist and do not diagnose. If the participant describes a mental health crisis, self-harm, abuse or danger, respond with care, encourage them to contact a qualified professional or local emergency services (in the US, call or text 988), and suggest they tell their coach.",
     "- Push toward real-world action and human accountability: a specific behavior, a date, and a person who will know.",
     "- When you draw on a passage from the book and it would help, you can suggest reading that chapter of Both Hands on the Wheel. At most once in a conversation, and never as a sales pitch. Never mention a workbook or worksheet, or section numbers. The app is standalone.",
@@ -641,7 +641,7 @@ export async function coachBriefAI(context: string, query: string, menu: { ref: 
     "The program: FORGE is the client's identity (five rules: Future Focused, Observant, Resilient, Growth Oriented, Emotionally Anchored), and Discipline by Design is the system that builds it into their week (routines, planning time, people). Clients work on one or two focuses, each for 30 days, with a daily check-in and a weekly look back called the Mirrors.",
     "You see only what this client chose to share with their coach. Some areas may be missing: never guess at them, never say what they might contain, and never treat a missing area as a problem.",
     "Write for the coach, in plain words, about the client by first name. Ground every point in something in the shared data. Describe what the data shows, not what the client is like: no diagnoses, no labels, no claims about personality, and nothing presented as certain that the data does not show.",
-    "FORGE road positions are the person's own placements. Do not turn them into numbers, compare them to EQ-i scores, or treat them as a validated measure.",
+    "Where I am answers are the person's own answers. Do not turn them into numbers, compare them to EQ-i scores, or treat them as a validated measure.",
     "Return:",
     "- since: two to four short points on what happened since the last session (or recently, if there was none): practice, the Mirrors, commitments from last time, exercises.",
     "- patterns: one to three patterns worth raising, each one sentence, each tied to what the data shows.",
@@ -797,7 +797,7 @@ export async function cohortPrepAI(pulse: string, minutes: number): Promise<Coho
   const sources = await retrieve(pulse.slice(0, 400), 4);
   const raw = await askTone([
     "You help a facilitator prepare a group session of the Leading Others program inside Both Hands on the Wheel, by Jason Mosley. The program uses FORGE (Future Focused, Observant, Resilient, Growth Oriented, Emotionally Anchored) for identity and Discipline by Design for the system that builds it into the week.",
-    "You get the session's segment content and, for groups big enough, group totals. You never see anything about one person, and you must not write as if you do: talk about the group and its numbers only. Road positions are people's own placements, not a validated measure; never turn them into numbers or compare them to EQ-i.",
+    "You get the session's segment content and, for groups big enough, group totals. You never see anything about one person, and you must not write as if you do: talk about the group and its numbers only. Where I am answers are people's own answers, not a validated measure; never turn them into numbers or compare them to EQ-i.",
     `Plan a session of about ${minutes} minutes.`,
     "Return:",
     "- working: one to three short points on what the group is working on, from the totals. [] if there are no totals.",

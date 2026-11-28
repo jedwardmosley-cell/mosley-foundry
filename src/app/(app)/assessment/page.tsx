@@ -31,7 +31,7 @@ export default async function AssessmentPage({ searchParams }: { searchParams: P
     <>
       <ChapterOpening image="/chapters/rules-of-the-road.jpg" alt="A highway seen from above, lanes and traffic" title={NAMES.rules.name} plain={NAMES.rules.plain}>
         {useEntre ? entrepreneur!.intro.filter((t) => !/measures five behaviors/i.test(t)).slice(0, 3).map((t) => <p key={t} className="mb-2">{t}</p>) : (
-          <p>This measures you against your own future self: the five lines you wrote in the Driver&apos;s Seat. For each rule, you&apos;ll say where you are on the road, name a real moment from this week, and choose what you&apos;d do in one situation. It takes about fifteen minutes.</p>
+          <p>This measures you against your own future self: the five lines you wrote in the Driver&apos;s Seat. For each rule, you&apos;ll say how often you were that person this week, name a real moment from this week, and choose what you&apos;d do in one situation. It takes about fifteen minutes.</p>
         )}
       </ChapterOpening>
 

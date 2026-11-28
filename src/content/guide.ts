@@ -37,7 +37,7 @@ export const CLIENT_GUIDE: GuideSection[] = [
     intro: "After you pick your pathway, the app walks you through the four steps one screen at a time. Your coach can also go through it with you.",
     steps: [
       "The Driver's Seat, in three short parts: your seat and how big a turn, then the five rules of FORGE, then My statement. Start with F. You can finish the rest during your first week.",
-      "Take the self-assessment to see where you are on each rule.",
+      "Take Where I am to see how often you are the person in each of your lines.",
       "Choose your focus, answer five short questions about it, and say who finds out.",
       "Add one routine that builds your focus into your week.",
     ],
@@ -142,7 +142,7 @@ export const CLIENT_GUIDE: GuideSection[] = [
       "Think it through helps you look at a decision, a habit, or something in your way.",
       "Practice a hard conversation lets you rehearse with a realistic partner and then get feedback.",
       "Prepare for coaching helps you get ready for your next session.",
-      "It knows your goals, where you are on the road and your current cycle. It cannot read your private journal.",
+      "It knows your goals, your Where I am answers and your current cycle. It cannot read your private journal.",
       "Your coach and your organization cannot see these conversations. They are deleted after 90 days, and you can change that in Settings.",
     ],
     note: "It is an AI. It is not a therapist and it does not diagnose. If something serious is going on, talk to your coach or a professional.",

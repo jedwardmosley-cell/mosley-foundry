@@ -18,7 +18,7 @@ type Step = (typeof STEPS)[number];
 
 /**
  * The distance check, one rule at a time (F, O, R, G, E), three checks per rule:
- * where you are on the road, prove it, and the pressure test. The person's own line is at the top of every screen.
+ * how often they were that person this week, a real moment, and one situation. The person's own line is at the top of every screen.
  */
 export default async function DistanceCheck({ params, searchParams }: { params: Promise<{ runId: string }>; searchParams: Promise<{ rule?: string; step?: string; look?: string; from?: string }> }) {
   const u = await requireUser("PARTICIPANT");
@@ -63,7 +63,7 @@ export default async function DistanceCheck({ params, searchParams }: { params: 
             </li>
           ))}
         </ol>
-        <p className="mt-3 text-[13px] text-ink-mute">{name}: {step === "road" ? "where you are on the road" : step === "proof" ? "prove it" : "pressure test"}</p>
+        <p className="mt-3 text-[13px] text-ink-mute">{name}: {step === "road" ? "how often" : step === "proof" ? "a real moment" : "one situation"}</p>
       </nav>
 
       <div className="mb-6 rounded-2xl px-4 py-3.5" style={{ background: "rgb(var(--pc) / 0.08)" }}>
@@ -74,26 +74,23 @@ export default async function DistanceCheck({ params, searchParams }: { params: 
       {step === "road" && (
         <form action={saveRoad}>
           {hidden}
-          <h1 className="font-book text-[28px] leading-[1.15] text-heading text-balance">How close is the driver you were this week to this person?</h1>
+          <h1 className="font-book text-[28px] leading-[1.15] text-heading text-balance">How often were you this person this week?</h1>
           <fieldset className="mt-6">
-            <legend className="sr-only">Where you are on the road</legend>
-            {/* The road: five stops from parked to driving like them. Words only, never numbers. */}
-            <ol className="relative ml-3 border-l-[3px] border-dashed border-ink/20 pl-6">
+            <legend className="sr-only">How often</legend>
+            {/* Five plain answers, from not yet to consistently. Words only, never numbers. */}
+            <div className="space-y-2">
               {POSITIONS.map((label, i) => (
-                <li key={label} className="relative py-1.5">
-                  <label className="group flex cursor-pointer items-center gap-3">
-                    <input type="radio" name="position" value={i + 1} required defaultChecked={rule.position === i + 1} className="peer sr-only" />
-                    <span aria-hidden className="absolute -left-[33px] h-4 w-4 rounded-full border-2 border-ink/25 bg-paper transition peer-checked:border-[rgb(var(--pc))] peer-checked:bg-[rgb(var(--pc))] peer-focus-visible:ring-4 peer-focus-visible:ring-navy/20" />
-                    <span className="flex-1 rounded-xl border border-line/70 bg-card px-4 py-3 text-[17px] text-ink-soft transition group-hover:border-ink/25 peer-checked:border-[rgb(var(--pc))] peer-checked:text-heading peer-checked:font-medium">{label}</span>
-                  </label>
-                </li>
+                <label key={label} className="flex cursor-pointer items-center gap-3 rounded-xl border border-line/70 bg-card px-4 py-3 transition hover:border-ink/25 has-[:checked]:border-[rgb(var(--pc))] has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-navy/20">
+                  <input type="radio" name="position" value={i + 1} required defaultChecked={rule.position === i + 1} className="h-4 w-4 shrink-0 accent-[rgb(var(--pc))]" />
+                  <span className="text-[17px] text-ink">{label}</span>
+                </label>
               ))}
-            </ol>
+            </div>
           </fieldset>
           {/* The book's own level descriptions, kept to one side. Matched to the road by order, shown without numbers. */}
           {anchors.length > 0 && (
             <details className="mt-5 rounded-xl border border-line/70 bg-card px-4 py-3">
-              <summary className="cursor-pointer text-sm font-medium text-heading">What each position means, from the book</summary>
+              <summary className="cursor-pointer text-sm font-medium text-heading">What each answer means, from the book</summary>
               <dl className="mt-3 space-y-3">
                 {anchors.map((a, i) => (
                   <div key={a.score}>

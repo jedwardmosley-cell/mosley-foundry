@@ -18,8 +18,8 @@ import { PARTNER_WORDS, joinNames, movement, movementNote, partnerQuestion, part
 export const metadata = { title: "Where I am" };
 
 /**
- * The distance report: closest to the future you, the widest gap, where the answers disagree, and (once a partner answers)
- * what they see. Then each rule's place on the road, in words, and one tap to make the widest gap the 30-day focus.
+ * The results: each of the five lines with their answer (in words), what changed since last time and what partners said;
+ * then what stands out, one tap to make the widest gap the 30-day focus, and asking partners.
  */
 export default async function DistanceDone({ params, searchParams }: { params: Promise<{ runId: string }>; searchParams: Promise<{ from?: string }> }) {
   const u = await requireUser("PARTICIPANT");
@@ -46,7 +46,7 @@ export default async function DistanceDone({ params, searchParams }: { params: P
   // My feedback, if they tagged it to rules: their own reading, shown beside this one, never as a score.
   const fb = await db.feedback.findFirst({ where: { userId: u.id, NOT: { pillars: "[]" } }, orderBy: [{ takenOn: "desc" }, { createdAt: "desc" }], select: { id: true, title: true, takenOn: true, pillars: true } });
   const fbPillars = fb ? (JSON.parse(fb.pillars) as PillarKey[]) : [];
-  // A retake: how each rule moved since the last check, as road positions.
+  // A retake: how each answer changed since the last check.
   const moves = run.previousRunId ? movement(await db.distanceRule.findMany({ where: { runId: run.previousRunId } }), run.rules) : [];
   const back = run.returnTo === "/season" ? { href: "/season", label: "Back to the season" } : run.returnTo.startsWith("/cycle") ? { href: run.returnTo, label: "Back to finish your 30 days" } : null;
   const sections = [
@@ -56,47 +56,62 @@ export default async function DistanceDone({ params, searchParams }: { params: P
     { title: answeredNames.length ? `What ${joinNames(answeredNames)} ${answeredNames.length > 1 ? "see" : "sees"}` : asked.length > 1 ? "Your partners' view" : "Your partner's view", text: report.partner, k: report.keys.blind },
   ].filter((s) => s.text);
 
+  const moveOf = (k: string) => moves.find((m) => m.pillar === k);
+
   return (
     <>
-      <PageHeader eyebrow="Where I am" title="Here's where you are on the road">
-        Measured against your own five lines: the person you said you&apos;re becoming.
+      <PageHeader eyebrow={`Where I am, ${fmt(run.completedAt!, { month: "long", day: "numeric" })}`} title="How often you were this person">
+        Each answer is measured against your own line.
       </PageHeader>
 
       {back && <p className="-mt-2 mb-5"><Link href={back.href} className="btn-primary">{back.label}</Link></p>}
 
-      {moves.length > 0 && (
-        <section className="mb-6" aria-labelledby="moved">
-          <h2 id="moved" className="section-label">Since last time</h2>
-          <ul className="mt-2 divide-y divide-line/60 border-y border-line/60">
-            {moves.map((m) => (
-              <li key={m.pillar} data-move={m.pillar} className="flex items-start gap-3.5 py-3.5">
-                <PillarMark k={m.pillar} size="sm" />
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm text-ink-mute">{nameOf(m.pillar)}</span>
-                  <span className="block text-[17px] text-heading">{m.from === m.to ? m.to : <>{m.from} <span aria-label="to">→</span> {m.to}</>}</span>
-                  <span className="mt-0.5 block text-[14px] text-ink-soft">{movementNote(m)}</span>
-                </span>
+      {/* The five lines first: each line, their answer, what changed since last time, and what partners said. */}
+      <section aria-labelledby="lines">
+        <h2 id="lines" className="section-label">Your five lines</h2>
+        <ol className="mt-2 divide-y divide-line/60 border-y border-line/60">
+          {rules.map((r) => {
+            const m = moveOf(r.pillar);
+            return (
+              <li key={r.pillar} data-rule={r.pillar} className="flex items-start gap-3.5 py-4">
+                <PillarMark k={r.pillar} size="sm" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                    <span className="text-[13px] text-ink-mute">{r.name}</span>
+                    <span className="flex items-center gap-2 text-[15px] font-medium text-heading"><Dots n={r.position} k={r.pillar} />{positionWord(r.position)}</span>
+                  </div>
+                  <p className="mt-1 text-[16px] leading-snug text-ink">{r.line}</p>
+                  {m && m.from !== m.to && <p data-move={r.pillar} className="mt-1.5 text-[14px] text-ink-soft">Last time: {m.from}. {movementNote(m)}</p>}
+                  {m && m.from === m.to && <p data-move={r.pillar} className="mt-1.5 text-[14px] text-ink-soft">{movementNote(m)}</p>}
+                  {(r.partnerViews ?? []).map((v) => (
+                    <p key={v.name} className="mt-1.5 text-[14px] text-ink">
+                      {v.name} said: {partnerWord(v.rating)}
+                      {v.example && <span className="block italic text-ink-soft">&ldquo;{v.example}&rdquo;</span>}
+                    </p>
+                  ))}
+                </div>
               </li>
-            ))}
-          </ul>
+            );
+          })}
+        </ol>
+      </section>
+
+      {/* What stands out: the report, in one place. */}
+      {sections.length > 0 && (
+        <section aria-labelledby="stands-out" className="mt-8 rounded-2xl border border-line/70 bg-card px-5 py-1">
+          <h2 id="stands-out" className="sr-only">What stands out</h2>
+          {sections.map((s) => (
+            <div key={s.title} data-report className="border-t border-line/60 py-4 first:border-0">
+              <h3 className="flex items-center gap-2 text-[14px] font-semibold text-heading">{s.k && <PillarMark k={s.k} size="sm" />}{s.title}</h3>
+              <p className="mt-1.5 text-[15px] leading-relaxed text-ink">{s.text}</p>
+            </div>
+          ))}
         </section>
       )}
 
-      <div className="space-y-3">
-        {sections.map((s) => (
-          <section key={s.title} data-report className="rounded-2xl border border-line/70 bg-card px-5 py-4" style={s.k ? ({ "--pc": `var(${PILLAR_FILL[s.k as PillarKey].cssVar})` } as CSSProperties) : undefined}>
-            <h2 className="flex items-center gap-2.5 text-[15px] font-semibold text-heading">
-              {s.k && <PillarMark k={s.k} size="sm" />}
-              {s.title}
-            </h2>
-            <p className="mt-2 text-[16px] leading-relaxed text-ink">{s.text}</p>
-          </section>
-        ))}
-      </div>
-
       {wide && (
         <section className="mt-6 rounded-2xl px-5 py-5" style={{ "--pc": `var(${PILLAR_FILL[wide].cssVar})`, background: "rgb(var(--pc) / 0.1)" } as CSSProperties}>
-          <p className="font-book text-[22px] leading-snug text-heading">Your widest gap is {nameOf(wide)}. Want to make it your 30-day focus?</p>
+          <p className="font-book text-[21px] leading-snug text-heading">Your widest gap is {nameOf(wide)}. Want to make it your 30-day focus?</p>
           <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3">
             <form action={setPriority}>
               <input type="hidden" name="pillar" value={wide} />
@@ -132,7 +147,7 @@ export default async function DistanceDone({ params, searchParams }: { params: P
                           <ul className="mt-2 list-disc space-y-0.5 pl-5">{rules.map((r) => <li key={r.pillar}>{r.line}</li>)}</ul>
                         </div>
                       </details>
-                      <p className="mt-3 text-[14px] text-ink-soft">{pn} sees nothing else: not where you placed yourself, your answers, this report, or what anyone else said.</p>
+                      <p className="mt-3 text-[14px] text-ink-soft">{pn} sees nothing else: not your answers, this report, or what anyone else said.</p>
                       <form action={cancelPartner} className="mt-3">
                         <input type="hidden" name="partnerId" value={p.id} />
                         {fromStart && <input type="hidden" name="from" value="start" />}
@@ -149,7 +164,7 @@ export default async function DistanceDone({ params, searchParams }: { params: P
                       </details>
                     </>
                   )}
-                  {p.status === "ANSWERED" && <p className="text-[15px] text-ink"><span className="font-medium">{pn}:</span> answered. What they said is next to each rule below.</p>}
+                  {p.status === "ANSWERED" && <p className="text-[15px] text-ink"><span className="font-medium">{pn}:</span> answered. What they said is under each line above.</p>}
                 </li>
               );
             })}
@@ -171,26 +186,6 @@ export default async function DistanceDone({ params, searchParams }: { params: P
         )}
       </section>
 
-      <h2 className="section-label mt-8">Each rule on the road</h2>
-      <ol className="mt-2 divide-y divide-line/60 border-y border-line/60">
-        {rules.map((r) => (
-          <li key={r.pillar} className="flex items-start gap-3.5 py-4">
-            <PillarMark k={r.pillar} />
-            <span className="min-w-0 flex-1">
-              <span className="block text-sm text-ink-mute">{r.name}</span>
-              <span className="block font-book text-[21px] leading-tight text-heading">{positionWord(r.position)}</span>
-              <span className="mt-1 block text-[14px] text-ink-soft line-clamp-2">{r.line}</span>
-              {(r.partnerViews ?? []).map((v) => (
-                <span key={v.name} className="mt-1.5 block text-[14px] text-ink">
-                  {v.name} said: {partnerWord(v.rating)}
-                  {v.example && <span className="block italic text-ink-soft">&ldquo;{v.example}&rdquo;</span>}
-                </span>
-              ))}
-            </span>
-          </li>
-        ))}
-      </ol>
-
       {fb && fbPillars.length > 0 && (
         <Link href={`/feedback/${fb.id}`} className="card mt-6 block hover:border-navy/40">
           <p className="eyebrow">From my feedback</p>
@@ -203,5 +198,14 @@ export default async function DistanceDone({ params, searchParams }: { params: P
         {fromStart ? <Link href="/start?step=3" className="btn-quiet">Continue setup</Link> : back ? <Link href={back.href} className="btn-quiet">{back.label}</Link> : <Link href="/assessment" className="text-sm btn-link">Back to the Rules of the Road</Link>}
       </div>
     </>
+  );
+}
+
+/** Five small dots, filled up to their answer. A quick read down the list; the word beside it says it. */
+function Dots({ n, k }: { n: number; k: PillarKey }) {
+  return (
+    <span aria-hidden className="flex gap-[3px]" style={{ "--pc": `var(${PILLAR_FILL[k].cssVar})` } as CSSProperties}>
+      {[1, 2, 3, 4, 5].map((i) => <span key={i} className="h-[7px] w-[7px] rounded-full" style={{ background: i <= n ? "rgb(var(--pc))" : "rgb(var(--pc) / 0.18)" }} />)}
+    </span>
   );
 }

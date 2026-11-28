@@ -17,7 +17,7 @@ import type { PillarKey } from "@/content/types";
 
 export const metadata = { title: "My season" };
 
-/** The season review: three months side by side, road positions then and now, and the client's call on what comes next. */
+/** The season review: three months side by side, answers then and now, and the client's call on what comes next. */
 export default async function SeasonPage() {
   const u = await requireUser("PARTICIPANT");
   const { pack } = await getContent();
