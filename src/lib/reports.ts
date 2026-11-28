@@ -84,7 +84,7 @@ export async function cohortPulse(cohortId: string, now = new Date()) {
     const at = (a: (typeof assessments)[number], k: "f" | "o" | "r" | "g" | "e", rk: "revisedF" | "revisedO" | "revisedR" | "revisedG" | "revisedE") => a[rk] ?? a[k];
     const keys = [["F", "f", "revisedF"], ["O", "o", "revisedO"], ["R", "r", "revisedR"], ["G", "g", "revisedG"], ["E", "e", "revisedE"]] as const;
     const per = keys.map(([K, k, rk]) => `${K}: ${POSITIONS.map((w, i) => [w, [...latest.values()].filter((a) => at(a, k, rk) === i + 1).length] as const).filter(([, n]) => n).map(([w, n]) => `${w} ${n}`).join(", ")}`);
-    lines.push(`Where I am, latest check per person (their own road positions, not a validated measure). People at each position: ${per.join("; ")}`);
+    lines.push(`Where I am, latest check per person (their own answers, not a validated measure). People at each answer: ${per.join("; ")}`);
   }
   const prev = r.bySegment.filter((s) => s.startsAt && s.startsAt <= now).at(-1);
   if (prev?.pct != null) lines.push(`Attendance at the last session: ${prev.pct}%`);

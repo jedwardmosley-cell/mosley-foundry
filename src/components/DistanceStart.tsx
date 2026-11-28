@@ -6,7 +6,7 @@ import { positionWord, RULE_ORDER } from "@/lib/distance";
 
 /**
  * Start the distance check, or pick it up where it was left. Used on the Rules of the Road and in setup.
- * After a finished check, it shows where they were on the road for each rule and offers a fresh one.
+ * After a finished check, it shows their answer for each rule and offers a fresh one.
  */
 export async function DistanceStart({ userId, from, next }: { userId: string; from?: "start"; next?: string }) {
   const [open, last] = await Promise.all([

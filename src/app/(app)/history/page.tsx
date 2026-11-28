@@ -36,7 +36,7 @@ export default async function HistoryPage() {
       {d.assessments.length > 0 && (
         <Card>
           <p className="eyebrow">FORGE readings</p>
-          {/* Each reading as road positions, in words. Never numbers. */}
+          {/* Each reading in words. Never numbers. */}
           <ul className="mt-3 divide-y divide-line">
             {d.assessments.map((a) => {
               const s = scoresFrom(a);

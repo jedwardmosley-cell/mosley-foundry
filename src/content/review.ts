@@ -30,7 +30,7 @@ export function reviewSets(): ReviewSet[] {
     {
       key: "distance", title: "Where I am: the questions and the written situations", where: "The Rules of the Road, the distance check", file: "src/content/distanceScenarios.ts", draft: DISTANCE_SCENARIOS_STATUS === "draft",
       groups: [
-        { label: "Road positions", items: [...POSITIONS] },
+        { label: "The five answers", items: [...POSITIONS] },
         { label: "Prove it: one question per rule", items: Object.entries(PROOF_QUESTION).map(([k, q]) => `${k}: ${q}`) },
         { label: "Note when a close position has no real moment (used when the AI isn't)", items: [EVIDENCE_NOTE_FALLBACK] },
         { label: "Partner view", items: [partnerQuestion("[Name]"), PARTNER_WORDS.join(", "), partnerMessageWritten("[Name]", "[Partner]", "[link]")] },

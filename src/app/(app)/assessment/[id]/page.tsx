@@ -14,7 +14,7 @@ export const metadata = { title: "Where I was" };
 
 /**
  * An earlier reading. One from the distance check opens its own results. One from the older self-rating shows
- * each rule as the matching road position, in words, never as a number.
+ * each rule as the matching answer, in words, never as a number.
  */
 export default async function AssessmentResult({ params }: { params: Promise<{ id: string }> }) {
   const u = await requireUser("PARTICIPANT");
@@ -30,7 +30,7 @@ export default async function AssessmentResult({ params }: { params: Promise<{ i
   return (
     <>
       <PageHeader eyebrow={fmt(a.completedAt, { month: "long", day: "numeric", year: "numeric" })} title="Where I was">
-        From the older self-rating, shown as the matching place on the road.
+        From the older self-rating, shown in the words used now.
       </PageHeader>
       <ol className="divide-y divide-line/60 border-y border-line/60">
         {PILLAR_KEYS.map((k) => (
