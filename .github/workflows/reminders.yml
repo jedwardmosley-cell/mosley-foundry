@@ -1,5 +1,7 @@
-# Sends the daily check-in reminder emails. Every 15 minutes it asks the app which reminders are due;
-# the app sends at most one per client per day, at the time each client chose in Settings.
+# Sends the daily check-in reminder emails. Every 30 minutes it asks the app which reminders are due;
+# the app sends at most one per client per day, within half an hour of the time each client chose in Settings.
+# Every 30 minutes keeps a private repository inside GitHub's free 2,000 Actions minutes a month
+# (about 1,440 used). The app accepts a reminder up to three hours late, so a delayed run still sends it.
 # Needs, under the repository's Settings > Secrets and variables > Actions:
 #   secret   CRON_SECRET  (the same value as CRON_SECRET in Vercel)
 #   variable APP_URL      (for example https://mosley-foundry.vercel.app)
@@ -7,7 +9,7 @@
 name: Check-in reminders
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "*/30 * * * *"
   workflow_dispatch:
 permissions: {}
 jobs:
